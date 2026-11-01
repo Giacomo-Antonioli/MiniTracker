@@ -130,7 +130,7 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
       )}
       {selected &&
         (selected.id.startsWith('lib/') ? (
-          <SchemeView key={selected.id} scheme={selected} onOpen={setSelectedId} onClose={() => setSelectedId(null)} />
+          <SchemeView key={selected.id} scheme={selected} onOpen={setSelectedId} onClose={() => setSelectedId(null)} onOpenUnit={onOpenUnit} />
         ) : (
           <SchemeEditor key={selected.id} scheme={selected} onOpen={setSelectedId} onClose={() => setSelectedId(null)} onOpenUnit={onOpenUnit} />
         ))}

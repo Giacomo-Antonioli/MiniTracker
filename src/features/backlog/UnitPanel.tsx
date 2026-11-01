@@ -8,6 +8,8 @@ import { PhotoGallery } from '../photos/PhotoGallery'
 import { PhotoThumb } from '../photos/PhotoThumb'
 import { PhotoViewer } from '../photos/PhotoViewer'
 import { SchemeCardLink } from '../schemes/SchemeCardLink'
+import { ORIGIN_LABEL } from '../schemes/origin'
+import { schemesForUnit } from '../../domain/schemes/match'
 import { unitTag } from '../../domain/photos/naming'
 import { MoveDialog } from './MoveDialog'
 
@@ -27,8 +29,9 @@ interface Props {
 
 export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage, onOpenDatasheet, onOpenScheme }: Props) {
   const page = variant === 'page'
-  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, paints, loadPaints } = useStore()
-  const scheme = unit.schemeId ? schemes.find((s) => s.id === unit.schemeId) : undefined
+  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, library, loadLibrary, paints, loadPaints } = useStore()
+  const allSchemes = [...schemes, ...library]
+  const scheme = unit.schemeId ? allSchemes.find((s) => s.id === unit.schemeId) : undefined
   const photos = allPhotos[unit.id] ?? []
   const [viewing, setViewing] = useState<string | null>(null)
   const datasheet = unit.datasheetId ? catalogue?.datasheets.find((d) => d.id === unit.datasheetId) : undefined
@@ -47,6 +50,10 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
     void loadEvents(unit.id)
     void loadPhotos(unit.id)
   }, [unit.id, loadEvents, loadPhotos])
+
+  useEffect(() => {
+    void loadLibrary()
+  }, [loadLibrary])
 
   useEffect(() => {
     if (scheme && !paints.length) void loadPaints()
@@ -138,11 +145,11 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
             onChange={(e) => void saveUnit({ ...unit, schemeId: e.target.value || undefined, updatedAt: new Date().toISOString() })}
           >
             <option value="">No scheme</option>
-            {[...schemes]
-              .sort((a, b) => Number(b.factionName === unit.factionName) - Number(a.factionName === unit.factionName) || a.name.localeCompare(b.name))
-              .map((s) => (
-                <option key={s.id} value={s.id}>{s.name}{s.factionName ? ` · ${s.factionName}` : ''}</option>
-              ))}
+            {schemesForUnit(allSchemes, unit, datasheet).map((g) => (
+              <optgroup key={g.origin} label={ORIGIN_LABEL[g.origin]}>
+                {g.schemes.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </optgroup>
+            ))}
           </select>
         </div>
         {scheme ? (
@@ -157,7 +164,9 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
             </ol>
           </>
         ) : (
-          <p className="text-sm text-muted">{schemes.length ? 'No scheme yet: pick one above.' : 'No schemes yet. Create one in Schemes.'}</p>
+          <p className="text-sm text-muted">
+            {unit.schemeId ? 'The linked scheme is no longer available.' : schemesForUnit(allSchemes, unit, datasheet).length ? 'No scheme yet: pick one above.' : 'No schemes for this unit yet.'}
+          </p>
         )}
       </section>
 

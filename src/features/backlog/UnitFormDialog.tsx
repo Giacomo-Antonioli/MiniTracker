@@ -5,6 +5,8 @@ import { factionLabel, searchDatasheets } from '../../domain/catalogue/search'
 import type { Datasheet } from '../../domain/catalogue/types'
 import { createUnit } from '../../domain/collection/ownedUnit'
 import type { Lifecycle, Link, OwnedUnit } from '../../domain/collection/types'
+import { schemesForUnit } from '../../domain/schemes/match'
+import { ORIGIN_LABEL } from '../schemes/origin'
 import { Combobox, type ComboOption } from '../../ui/Combobox'
 import { Dialog } from '../../ui/Dialog'
 import { InfoTip } from '../../ui/InfoTip'
@@ -37,7 +39,8 @@ export function UnitFormDialog({
   /** Start a new unit from a catalogue datasheet (e.g. "Add to collection"). */
   preset?: { datasheet: Datasheet; factionId?: string }
 }) {
-  const { pipeline, saveUnit, catalogue, schemes, schemeDefaults } = useStore()
+  const { pipeline, saveUnit, catalogue, schemes: mySchemes, library, schemeDefaults } = useStore()
+  const schemes = [...mySchemes, ...library]
   const presetFaction = preset && catalogue ? (preset.factionId && preset.datasheet.factionIds.includes(preset.factionId) ? preset.factionId : preset.datasheet.factionIds[0]) : undefined
   const [name, setName] = useState(unit?.customName ?? preset?.datasheet.name ?? '')
   const [faction, setFaction] = useState(unit?.factionName ?? (presetFaction ? catalogue!.factions.find((f) => f.id === presetFaction)?.name ?? '' : ''))
@@ -226,15 +229,20 @@ export function UnitFormDialog({
             }}
           >
             <option value="">None</option>
-            {[...schemes]
-              .sort((a, b) => Number(b.factionName === faction.trim()) - Number(a.factionName === faction.trim()) || a.name.localeCompare(b.name))
-              .map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                  {s.factionName ? ` · ${s.factionName}` : ''}
-                  {schemeDefaults[s.factionName ?? ''] === s.id ? ' ⭐' : ''}
-                </option>
-              ))}
+            {schemesForUnit(
+              schemes,
+              { ...(unit ?? createUnit({ customName: name || 'unit', groups: [] }, { now: '', newId: () => '' })), customName: name, factionName: faction.trim() || undefined, schemeId: effectiveScheme },
+              datasheet,
+            ).map((g) => (
+              <optgroup key={g.origin} label={ORIGIN_LABEL[g.origin]}>
+                {g.schemes.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                    {schemeDefaults[s.factionName ?? ''] === s.id ? ' ⭐' : ''}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
           </select>
         </label>
 
