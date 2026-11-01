@@ -457,18 +457,19 @@ export const useStore = create<State>((set, get) => ({
 
   recipeLinks: [],
 
+  // Update memory first, then save: overlapping calls (field blur + create) then build on each other.
   async rememberLink(link) {
     const others = get().recipeLinks.filter((l) => l.url !== link.url)
     const prev = get().recipeLinks.find((l) => l.url === link.url)
-    const links = [{ ...prev, ...link, addedAt: prev?.addedAt ?? new Date().toISOString() }, ...others]
-    await settingsRepo.setValue('recipeLinks', links)
-    set({ recipeLinks: links })
+    const merged = { ...prev, ...link, addedAt: prev?.addedAt ?? new Date().toISOString() }
+    if (prev?.schemeId && !link.schemeId) merged.schemeId = prev.schemeId
+    set({ recipeLinks: [merged, ...others] })
+    await settingsRepo.setValue('recipeLinks', get().recipeLinks)
   },
 
   async forgetLink(url) {
-    const links = get().recipeLinks.filter((l) => l.url !== url)
-    await settingsRepo.setValue('recipeLinks', links)
-    set({ recipeLinks: links })
+    set({ recipeLinks: get().recipeLinks.filter((l) => l.url !== url) })
+    await settingsRepo.setValue('recipeLinks', get().recipeLinks)
   },
 
   async importSchemes(text) {
