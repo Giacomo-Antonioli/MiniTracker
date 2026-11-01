@@ -2,9 +2,9 @@ import { create } from 'zustand'
 import { exportBackupZip, importBackupFile } from '../data/backup'
 import { MiniTrackerDb } from '../data/db'
 import { convert } from '../data/catalogue/convert'
-import { CURRENT_EDITION, downloadDataFiles, latestCommit } from '../data/catalogue/fetch'
+import { CURRENT_EDITION, downloadDataFiles, editionOfRepo, latestCommit } from '../data/catalogue/fetch'
 import { extensionOf, makeDisplayCopy } from '../data/photos/compress'
-import { DexieCatalogueRepository, DexieEventRepository, DexiePaintRepository, DexiePhotoRepository, DexieSchemeRepository, DexieSettingsRepository, DexieUnitRepository } from '../data/repositories/dexie'
+import { DexieCatalogueRepository, DexieEventRepository, DexieListRepository, DexiePaintRepository, DexiePhotoRepository, DexieSchemeRepository, DexieSettingsRepository, DexieUnitRepository } from '../data/repositories/dexie'
 import { parseSchemeFile } from '../domain/schemes/scheme'
 import type { PaintScheme } from '../domain/schemes/types'
 import { photoFileName } from '../domain/photos/naming'
@@ -12,6 +12,7 @@ import type { Photo, PhotoOwner } from '../domain/photos/types'
 import { inventoryFromCsv } from '../domain/paints/csv'
 import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Catalogue } from '../domain/catalogue/types'
+import type { ArmyList, EditionKey } from '../domain/lists/types'
 import type { BacklogFilter } from '../domain/collection/backlog'
 import { DEFAULT_PIPELINES, type PipelineKey } from '../domain/pipelines'
 import { DEFAULT_PIPELINE, moveModels, type MoveOptions } from '../domain/collection/pipeline'
@@ -27,6 +28,12 @@ const catalogueRepo = new DexieCatalogueRepository(db)
 const paintRepo = new DexiePaintRepository(db)
 const photoRepo = new DexiePhotoRepository(db)
 const schemeRepo = new DexieSchemeRepository(db)
+const listRepo = new DexieListRepository(db)
+
+/** Installed catalogue of an edition (by its BSData repo); undefined when that edition is not installed. */
+export function catalogueFor(catalogues: Catalogue[], edition: EditionKey): Catalogue | undefined {
+  return catalogues.find((c) => editionOfRepo(c.source.repo)?.key === edition)
+}
 
 /** Bundled community/official schemes (scraped facts + credit), loaded on demand. */
 async function loadLibraryFile(): Promise<{ schemes: PaintScheme[]; paints: PaintDef[] }> {
@@ -152,6 +159,10 @@ interface State {
   importBackup(file: Blob): Promise<{ units: number; photos: number; exportedAt: string }>
   /** Free space by deleting photo originals. Returns bytes freed. */
   dropOriginals(): Promise<number>
+  /** Army lists, most recently changed first. */
+  lists: ArmyList[]
+  saveList(l: ArmyList): Promise<void>
+  deleteList(id: string): Promise<void>
 }
 
 /** Save a catalogue and keep the in-memory list in sync; the first one installed becomes active. */
@@ -249,7 +260,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue] = await Promise.all([
+    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
@@ -260,6 +271,7 @@ export const useStore = create<State>((set, get) => ({
       settingsRepo.getValue<Record<string, string>>('schemeDefaults', {}),
       settingsRepo.getValue<State['recipeLinks']>('recipeLinks', []),
       settingsRepo.getValue<string | null>('activeCatalogue', null),
+      listRepo.list(),
     ])
     const catalogue = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
     set({
@@ -272,6 +284,7 @@ export const useStore = create<State>((set, get) => ({
       schemes,
       schemeDefaults,
       recipeLinks,
+      lists,
       ready: true,
     })
     if (get().paints.length) await get().loadPaints()
@@ -334,7 +347,7 @@ export const useStore = create<State>((set, get) => ({
     delete events[id]
     const photos = { ...get().photos }
     delete photos[id]
-    set({ units: await unitsRepo.list(), events, photos })
+    set({ units: await unitsRepo.list(), events, photos, lists: await listRepo.list() })
   },
 
   async loadEvents(unitId) {
@@ -522,6 +535,19 @@ export const useStore = create<State>((set, get) => ({
     set({ events: {}, photos: {} })
     await get().load()
     return { units: b.data.units.length, photos: b.data.photos?.length ?? 0, exportedAt: b.exportedAt }
+  },
+
+  lists: [],
+
+  // Memory first so quick edits (typing, clicking +) build on each other, then save.
+  async saveList(l) {
+    set({ lists: [l, ...get().lists.filter((x) => x.id !== l.id)] })
+    await listRepo.save(l)
+  },
+
+  async deleteList(id) {
+    set({ lists: get().lists.filter((x) => x.id !== id) })
+    await listRepo.delete(id)
   },
 
   async dropOriginals() {

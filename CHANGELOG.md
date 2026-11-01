@@ -6,6 +6,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ### Added
 - 10th and 11th edition catalogues, selectable: Settings → Catalogue data has a card per edition (download, update check, remove, "Use this edition"); both can be installed. The parser reads BSData's new JSON format (11th edition) as well as XML. New downloads default to 11th edition. The daily BSData check covers both (#58).
+- Army lists: edition, battle size (Combat Patrol, Incursion, Strike Force, Onslaught), editable points limit, planned/playable; points and owned / partly owned / missing are worked out from the catalogue and your collection; lists are in backups (#51).
+- Rule checks per edition from BSData: points limit, unit copies (with Incursion limits), at least one Character, unit sizes, one Character Warlord, Epic Heroes once; Combat Patrol checks points only. Lists that break rules can still be saved (#56). Download your catalogue again to enable checks.
+- Armies page: all lists with complete / missing models and rules OK / issues flags, with filters; builder with legal units of the list's faction grouped by role, a "Not owned" switch (off: only units you own), Legends switch, Warlord star, model counts, leader attachment, ownership per unit and a clickable issues panel. The first unit sets the faction (#52).
 
 ## [0.3.0] - 2026-11-02
 
