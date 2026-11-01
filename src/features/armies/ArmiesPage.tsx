@@ -5,6 +5,7 @@ import { addFromCollection } from '../../domain/lists/collection'
 import { createList } from '../../domain/lists/list'
 import { battleSizes } from '../../domain/lists/rules'
 import type { EditionKey } from '../../domain/lists/types'
+import { ImportForm } from './ImportForm'
 import { summarise } from './summary'
 
 type Filter = 'all' | 'complete' | 'incomplete' | 'issues'
@@ -13,6 +14,7 @@ export function ArmiesPage({ onOpenList, onOpenSettings }: { onOpenList: (id: st
   const { lists, catalogues, units } = useStore()
   const [filter, setFilter] = useState<Filter>('all')
   const [creating, setCreating] = useState(false)
+  const [importing, setImporting] = useState(false)
 
   const rows = useMemo(
     () => lists.map((l) => ({ l, s: summarise(l, catalogueFor(catalogues, l.edition), units) })),
@@ -36,10 +38,14 @@ export function ArmiesPage({ onOpenList, onOpenSettings }: { onOpenList: (id: st
     <div className="grid max-w-4xl gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="font-display text-2xl text-accent">Armies</h1>
-        <button className="btn btn-primary" onClick={() => setCreating(true)}>+ New list</button>
+        <div className="flex gap-2">
+          <button className="btn" onClick={() => setImporting(true)}>⬆ Import</button>
+          <button className="btn btn-primary" onClick={() => setCreating(true)}>+ New list</button>
+        </div>
       </header>
 
       {creating && <NewListForm onCancel={() => setCreating(false)} onCreated={onOpenList} />}
+      {importing && <ImportForm onCancel={() => setImporting(false)} onOpen={onOpenList} />}
 
       {lists.length > 0 && (
         <div className="flex flex-wrap gap-1" role="group" aria-label="Filter lists">
@@ -58,7 +64,7 @@ export function ArmiesPage({ onOpenList, onOpenSettings }: { onOpenList: (id: st
         </div>
       )}
 
-      {lists.length === 0 && !creating && <p className="text-muted">No army lists yet. Start one with “+ New list”.</p>}
+      {lists.length === 0 && !creating && !importing && <p className="text-muted">No army lists yet. Start one with “+ New list”.</p>}
 
       <ul className="grid gap-2" aria-label="Army lists">
         {shown.map(({ l, s }) => (
