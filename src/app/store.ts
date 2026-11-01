@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { exportBackupZip, importBackupFile } from '../data/backup'
 import { MiniTrackerDb } from '../data/db'
 import { convert } from '../data/catalogue/convert'
-import { BSDATA_40K, downloadDataFiles, latestCommit } from '../data/catalogue/fetch'
+import { CURRENT_EDITION, downloadDataFiles, latestCommit } from '../data/catalogue/fetch'
 import { extensionOf, makeDisplayCopy } from '../data/photos/compress'
 import { DexieCatalogueRepository, DexieEventRepository, DexiePaintRepository, DexiePhotoRepository, DexieSchemeRepository, DexieSettingsRepository, DexieUnitRepository } from '../data/repositories/dexie'
 import { parseSchemeFile } from '../domain/schemes/scheme'
@@ -45,6 +45,8 @@ export interface CatalogueJob {
   done: number
   total: number
   error?: string
+  /** Repo being downloaded (so the right edition card shows progress). */
+  repo?: string
 }
 
 export const THEMES = { grimdark: 'Grimdark', forum2005: 'Forum 2005' } as const
@@ -78,7 +80,11 @@ interface State {
   pipeline: Pipeline
   /** History per unit id, loaded on demand. */
   events: Record<string, StatusEvent[]>
+  /** The active catalogue (edition) used by the picker, browser, rules and lists. */
   catalogue: Catalogue | null
+  /** Every installed catalogue (e.g. 10th and 11th edition). */
+  catalogues: Catalogue[]
+  setActiveCatalogue(gameId: string): Promise<void>
   catalogueJob: CatalogueJob
   /** All editable pipelines; `pipeline` above is the same as pipelines.painting. */
   pipelines: Record<PipelineKey, Pipeline>
@@ -98,13 +104,13 @@ interface State {
   /** Import an inventory CSV; returns what happened. */
   importPaintCsv(text: string): Promise<{ imported: number; created: number; skipped: { line: number; reason: string }[] }>
   load(): Promise<void>
-  /** Download the latest BSData files and convert them on this device. */
-  downloadCatalogue(): Promise<void>
-  /** Latest BSData commit, to compare with the installed one. */
-  latestCatalogueCommit(): Promise<string>
+  /** Download the latest BSData files of a repo (default: current edition) and convert them on this device. */
+  downloadCatalogue(repo?: string): Promise<void>
+  /** Latest BSData commit of a repo, to compare with the installed one. */
+  latestCatalogueCommit(repo: string): Promise<string>
   /** Convert .gst/.cat files picked from disk (fallback when GitHub is unreachable). */
   importCatalogueFiles(files: File[]): Promise<void>
-  removeCatalogue(): Promise<void>
+  removeCatalogue(gameId: string): Promise<void>
   saveUnit(unit: OwnedUnit): Promise<void>
   deleteUnit(id: string): Promise<void>
   loadEvents(unitId: string): Promise<void>
@@ -148,13 +154,29 @@ interface State {
   dropOriginals(): Promise<number>
 }
 
+/** Save a catalogue and keep the in-memory list in sync; the first one installed becomes active. */
+async function installCatalogue(c: Catalogue) {
+  await catalogueRepo.save(c)
+  const { catalogues, catalogue } = useStore.getState()
+  const next = [...catalogues.filter((x) => x.gameId !== c.gameId), c]
+  const active = !catalogue || catalogue.gameId === c.gameId ? c : catalogue
+  useStore.setState({ catalogues: next, catalogue: active })
+  await settingsRepo.setValue('activeCatalogue', active.gameId)
+}
+
 export const useStore = create<State>((set, get) => ({
   ready: false,
   units: [],
   pipeline: DEFAULT_PIPELINE,
   events: {},
   catalogue: null,
-  catalogueJob: { phase: 'idle', done: 0, total: 0 },
+  catalogues: [],
+  catalogueJob: { phase: 'idle', done: 0, total: 0, repo: undefined },
+
+  async setActiveCatalogue(gameId) {
+    await settingsRepo.setValue('activeCatalogue', gameId)
+    set({ catalogue: get().catalogues.find((c) => c.gameId === gameId) ?? null })
+  },
   pipelines: DEFAULT_PIPELINES,
   theme: readTheme(),
   ruleDisplay: readRuleDisplay(),
@@ -227,22 +249,25 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogue, stock, schemes, schemeDefaults, recipeLinks] = await Promise.all([
+    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
       settingsRepo.getPipeline('scheme'),
-      catalogueRepo.current(),
+      catalogueRepo.list(),
       paintRepo.listStock(),
       schemeRepo.list(),
       settingsRepo.getValue<Record<string, string>>('schemeDefaults', {}),
       settingsRepo.getValue<State['recipeLinks']>('recipeLinks', []),
+      settingsRepo.getValue<string | null>('activeCatalogue', null),
     ])
+    const catalogue = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
     set({
       units,
       pipeline: painting,
       pipelines: { painting, paint, scheme },
       catalogue: catalogue ?? null,
+      catalogues,
       paintStock: new Map(stock.map((s) => [s.paintId, s])),
       schemes,
       schemeDefaults,
@@ -257,44 +282,45 @@ export const useStore = create<State>((set, get) => ({
     set({ pipelines: { ...get().pipelines, [key]: p }, ...(key === 'painting' ? { pipeline: p } : {}) })
   },
 
-  async downloadCatalogue() {
+  async downloadCatalogue(repo = CURRENT_EDITION.repo) {
     const job = (j: Partial<CatalogueJob>) => set({ catalogueJob: { ...get().catalogueJob, ...j } })
     try {
-      job({ phase: 'checking', done: 0, total: 0, error: undefined })
-      const commit = await latestCommit(BSDATA_40K.repo)
+      job({ phase: 'checking', done: 0, total: 0, error: undefined, repo })
+      const commit = await latestCommit(repo)
       job({ phase: 'downloading' })
-      const files = await downloadDataFiles(BSDATA_40K.repo, commit, (done, total) => job({ done, total }))
+      const files = await downloadDataFiles(repo, commit, (done, total) => job({ done, total }))
       job({ phase: 'converting' })
-      const catalogue = await convert(files, { repo: BSDATA_40K.repo, commit, fetchedAt: new Date().toISOString() })
-      await catalogueRepo.replace(catalogue)
-      set({ catalogue })
+      const catalogue = await convert(files, { repo, commit, fetchedAt: new Date().toISOString() })
+      await installCatalogue(catalogue)
       job({ phase: 'idle' })
     } catch (e) {
       job({ phase: 'idle', error: (e as Error).message })
     }
   },
 
-  latestCatalogueCommit() {
-    return latestCommit(BSDATA_40K.repo)
+  latestCatalogueCommit(repo) {
+    return latestCommit(repo)
   },
 
   async importCatalogueFiles(picked) {
     const job = (j: Partial<CatalogueJob>) => set({ catalogueJob: { ...get().catalogueJob, ...j } })
     try {
-      job({ phase: 'converting', error: undefined })
+      job({ phase: 'converting', error: undefined, repo: 'local files' })
       const files = await Promise.all(picked.map(async (f) => ({ name: f.name, text: await f.text() })))
       const catalogue = await convert(files, { repo: 'local files', commit: 'local', fetchedAt: new Date().toISOString() })
-      await catalogueRepo.replace(catalogue)
-      set({ catalogue })
+      await installCatalogue(catalogue)
       job({ phase: 'idle' })
     } catch (e) {
       job({ phase: 'idle', error: (e as Error).message })
     }
   },
 
-  async removeCatalogue() {
-    await catalogueRepo.clear()
-    set({ catalogue: null })
+  async removeCatalogue(gameId) {
+    await catalogueRepo.remove(gameId)
+    const catalogues = get().catalogues.filter((c) => c.gameId !== gameId)
+    const catalogue = get().catalogue?.gameId === gameId ? (catalogues[0] ?? null) : get().catalogue
+    set({ catalogues, catalogue })
+    if (catalogue) await settingsRepo.setValue('activeCatalogue', catalogue.gameId)
   },
 
   async saveUnit(unit) {

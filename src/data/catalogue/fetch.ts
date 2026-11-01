@@ -1,7 +1,16 @@
 import type { SourceFile } from './bsdata'
 
-/** Where the 40k data lives. The daily CI check (bsdata-check.yml) verifies this still works. */
-export const BSDATA_40K = { repo: 'BSData/wh40k-10e' } as const
+/** Where the 40k data lives, per edition. The daily CI check (bsdata-check.yml) verifies both still work. */
+export const EDITIONS = [
+  { key: '11e', label: '11th edition', repo: 'BSData/wh40k-11e' },
+  { key: '10e', label: '10th edition', repo: 'BSData/wh40k-10e' },
+] as const
+export type Edition = (typeof EDITIONS)[number]
+
+/** The current edition (default for new downloads). */
+export const CURRENT_EDITION = EDITIONS[0]
+
+export const editionOfRepo = (repo: string) => EDITIONS.find((e) => e.repo === repo)
 
 type Fetch = typeof fetch
 
@@ -22,8 +31,9 @@ export async function latestCommit(repo: string, f: Fetch = fetch): Promise<stri
 export async function listDataFiles(repo: string, commit: string, f: Fetch = fetch): Promise<string[]> {
   const res = await ok(await f(`https://api.github.com/repos/${repo}/git/trees/${commit}`), 'list the BSData files')
   const tree = (await res.json()) as { tree?: { path: string; type: string }[] }
-  const paths = (tree.tree ?? []).filter((t) => t.type === 'blob' && /\.(gst|cat)$/.test(t.path)).map((t) => t.path)
-  if (!paths.some((p) => p.endsWith('.gst'))) throw new Error('The BSData repository no longer contains a game system file')
+  // XML repositories use .gst/.cat; newer ones (wh40k-11e) publish the same data as .json.
+  const paths = (tree.tree ?? []).filter((t) => t.type === 'blob' && /\.(gst|cat|json)$/.test(t.path) && !t.path.startsWith('.')).map((t) => t.path)
+  if (!paths.some((p) => /\.(gst|json)$/.test(p))) throw new Error('The BSData repository no longer contains a game system file')
   return paths
 }
 

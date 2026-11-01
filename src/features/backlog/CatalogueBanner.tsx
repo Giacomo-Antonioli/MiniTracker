@@ -25,7 +25,7 @@ export function CatalogueBanner() {
       <div className="min-w-0 flex-1">
         <p className="font-semibold">No unit catalogue yet</p>
         <p className="text-sm text-muted">
-          Download Warhammer 40,000 data (from BSData) to pick units from a list and see their points.
+          Download Warhammer 40,000 data (11th edition, from BSData) to pick units from a list and see their points. 10th edition is available in Settings → Catalogue data.
         </p>
         {busy && (
           <div className="mt-2 grid gap-1" role="status">

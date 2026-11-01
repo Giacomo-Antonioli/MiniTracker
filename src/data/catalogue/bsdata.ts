@@ -1,5 +1,6 @@
 import { XMLParser } from 'fast-xml-parser'
 import type { Catalogue, CatalogueSource, Datasheet, Faction, PointsStep, Rule } from '../../domain/catalogue/types'
+import { parseBsDataJson } from './bsdataJson'
 
 /**
  * Converts BattleScribe data files (.gst + .cat XML, as published by BSData) into a compact Catalogue.
@@ -70,9 +71,13 @@ interface CatInfo {
 }
 
 export function parseBsData(files: SourceFile[], source: CatalogueSource): Catalogue {
-  const gstFile = files.find((f) => f.name.endsWith('.gst'))
-  if (!gstFile) throw new Error('No game system (.gst) file found')
-  const gst = (parser.parse(gstFile.text).gameSystem as Node[])[0]
+  // XML (.gst/.cat) or JSON (.json, BSData's newer repositories): same structure once parsed.
+  const parsed = files
+    .filter((f) => /\.(gst|cat|json)$/i.test(f.name))
+    .map((f) => ({ name: f.name, doc: (f.name.toLowerCase().endsWith('.json') ? parseBsDataJson(f.text) : parser.parse(f.text)) as Record<string, Node[]> }))
+  const gstDoc = parsed.find((p) => p.doc.gameSystem)
+  if (!gstDoc) throw new Error('No game system file found')
+  const gst = gstDoc.doc.gameSystem[0]
   const ptsId = attr(kids(gst, 'costTypes', 'costType').find((c) => attr(c, 'name') === 'pts') ?? {}, 'id')
 
   const cats: CatInfo[] = []
@@ -82,8 +87,8 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
   const rules = new Map<string, Rule>()
   readRules(gst, 'core', undefined, rules)
 
-  for (const f of files.filter((x) => x.name.endsWith('.cat'))) {
-    const c = (parser.parse(f.text).catalogue as Node[])[0]
+  for (const p of parsed.filter((x) => x.doc.catalogue)) {
+    const c = p.doc.catalogue[0]
     const rootEntries = kids(c, 'selectionEntries', 'selectionEntry')
     for (const e of [...rootEntries, ...kids(c, 'sharedSelectionEntries', 'selectionEntry')]) {
       if (isUnit(e)) entries.set(attr(e, 'id')!, e)

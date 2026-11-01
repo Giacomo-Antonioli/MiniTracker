@@ -44,7 +44,7 @@ export function RulesPage({ onOpenSettings, onOpenDatasheet }: { onOpenSettings:
       <div className="grid max-w-xl gap-3">
         <h1 className="font-display text-2xl text-accent">Rules</h1>
         <p className="text-muted">Your catalogue was downloaded before rules were supported. Download it again to get every rule and ability explained.</p>
-        <button className="btn btn-primary w-fit" disabled={catalogueJob.phase !== 'idle'} onClick={() => void downloadCatalogue()}>
+        <button className="btn btn-primary w-fit" disabled={catalogueJob.phase !== 'idle'} onClick={() => void downloadCatalogue(catalogue.source.repo === 'local files' ? undefined : catalogue.source.repo)}>
           {catalogueJob.phase === 'idle' ? '⬇ Download again' : 'Downloading…'}
         </button>
       </div>

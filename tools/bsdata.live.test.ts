@@ -5,31 +5,31 @@
  */
 import { describe, expect, it } from 'vitest'
 import { parseBsData, type SourceFile } from '../src/data/catalogue/bsdata'
-import { BSDATA_40K, downloadDataFiles, latestCommit } from '../src/data/catalogue/fetch'
+import { EDITIONS, downloadDataFiles, latestCommit } from '../src/data/catalogue/fetch'
 
 // In CI, authenticate GitHub API calls to avoid shared-runner rate limits.
 const token = process.env.GITHUB_TOKEN
 const f: typeof fetch = (url, init) =>
   fetch(url, token && String(url).startsWith('https://api.github.com') ? { ...init, headers: { ...init?.headers, Authorization: `Bearer ${token}` } } : init)
 
-describe(`BSData live check (${BSDATA_40K.repo})`, () => {
+describe.each(EDITIONS)('BSData live check ($label, $repo)', (edition) => {
   let commit = ''
   let files: SourceFile[] = []
 
   it('the repository is reachable and has a latest commit', async () => {
-    commit = await latestCommit(BSDATA_40K.repo, f)
+    commit = await latestCommit(edition.repo, f)
     expect(commit).toMatch(/^[0-9a-f]{40}$/)
   })
 
   it('the data files download at that commit', async () => {
-    files = await downloadDataFiles(BSDATA_40K.repo, commit, undefined, f)
-    expect(files.filter((f) => f.name.endsWith('.gst'))).toHaveLength(1)
-    expect(files.filter((f) => f.name.endsWith('.cat')).length).toBeGreaterThanOrEqual(30)
-    for (const f of files) expect(f.text.startsWith('<?xml'), f.name).toBe(true)
+    files = await downloadDataFiles(edition.repo, commit, undefined, f)
+    // 10th edition: .gst + .cat XML; 11th edition: the same data as .json.
+    expect(files.length).toBeGreaterThanOrEqual(30)
+    for (const file of files) expect(/^\s*(<\?xml|\{)/.test(file.text), file.name).toBe(true)
   })
 
   it('the parser still reads real data correctly', () => {
-    const c = parseBsData(files, { repo: BSDATA_40K.repo, commit, fetchedAt: new Date().toISOString() })
+    const c = parseBsData(files, { repo: edition.repo, commit, fetchedAt: new Date().toISOString() })
     expect(c.gameName).toMatch(/Warhammer 40,000/)
     expect(c.factions.length).toBeGreaterThanOrEqual(25)
     expect(c.datasheets.length).toBeGreaterThanOrEqual(1000)

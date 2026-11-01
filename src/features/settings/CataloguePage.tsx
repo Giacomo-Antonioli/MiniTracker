@@ -1,88 +1,45 @@
 import { useState } from 'react'
 import { useStore } from '../../app/store'
-import { BSDATA_40K } from '../../data/catalogue/fetch'
+import { EDITIONS, type Edition } from '../../data/catalogue/fetch'
+import type { Catalogue } from '../../domain/catalogue/types'
 import { ProgressBar } from '../../ui/Dialog'
 
 export function CataloguePage() {
-  const { catalogue, catalogueJob: job, downloadCatalogue, latestCatalogueCommit, importCatalogueFiles, removeCatalogue } = useStore()
-  const [update, setUpdate] = useState<string | null>(null)
+  const { catalogues, catalogue: active, catalogueJob: job, importCatalogueFiles } = useStore()
   const busy = job.phase !== 'idle'
-
-  async function check() {
-    try {
-      const latest = await latestCatalogueCommit()
-      setUpdate(latest === catalogue?.source.commit ? 'You have the latest data.' : 'A newer version is available.')
-    } catch (e) {
-      setUpdate((e as Error).message)
-    }
-  }
-
-  const phaseText = {
-    idle: '',
-    checking: 'Checking the latest version…',
-    downloading: `Downloading files ${job.done}/${job.total}…`,
-    converting: 'Converting on this device…',
-  }[job.phase]
+  const local = catalogues.filter((c) => c.source.repo === 'local files')
 
   return (
     <div className="grid gap-4">
       <h2 className="font-display text-xl text-accent">Unit catalogue</h2>
       <p className="text-muted">
-        Unit, points and wargear data comes from the community{' '}
-        <a className="text-accent underline" href={`https://github.com/${BSDATA_40K.repo}`} target="_blank" rel="noreferrer">BSData</a>{' '}
-        project. Your browser downloads it directly from BSData and converts it here; MiniTracker never hosts this data.
+        Unit, points, rules and wargear data comes from the community{' '}
+        <a className="text-accent underline" href="https://github.com/BSData" target="_blank" rel="noreferrer">BSData</a> project. Your browser downloads it
+        directly from BSData and converts it here; MiniTracker never hosts this data. You can install both editions and switch between them.
       </p>
 
-      <section className="panel grid gap-2 p-4" aria-label="Catalogue status">
-        {catalogue ? (
-          <>
-            <h3 className="font-display text-lg">{catalogue.gameName}</h3>
-            <p className="text-sm">
-              {catalogue.datasheets.length} units in {catalogue.factions.length} factions
-            </p>
-            <p className="text-sm text-muted">
-              Source: {catalogue.source.repo}
-              {catalogue.source.commit !== 'local' && <> @ <code>{catalogue.source.commit.slice(0, 7)}</code></>} · downloaded{' '}
-              {new Date(catalogue.source.fetchedAt).toLocaleString()}
-            </p>
-          </>
-        ) : (
-          <p>No catalogue installed yet. Download it to pick units from a list and see points.</p>
-        )}
-        {busy && (
-          <div className="grid gap-1" role="status">
-            <span className="text-sm">{phaseText}</span>
-            <ProgressBar ratio={job.phase === 'downloading' && job.total ? job.done / job.total : job.phase === 'converting' ? 1 : 0} />
-          </div>
-        )}
-        {job.error && <p className="text-danger" role="alert">{job.error}</p>}
-        <div className="flex flex-wrap gap-2">
-          <button className="btn btn-primary" disabled={busy} onClick={() => void downloadCatalogue().then(() => setUpdate(null))}>
-            ⬇ {catalogue ? 'Download latest' : 'Download Warhammer 40,000 data'}
-          </button>
-          {catalogue && (
-            <button className="btn" disabled={busy} onClick={() => void check()}>Check for updates</button>
-          )}
-          {catalogue && (
-            <button className="btn btn-danger" disabled={busy} onClick={() => confirm('Remove the catalogue? Your units are kept.') && void removeCatalogue()}>
-              Remove
-            </button>
-          )}
-        </div>
-        {update && <p className="text-sm text-muted" role="status">{update}</p>}
-      </section>
+      {EDITIONS.map((e) => (
+        <EditionCard key={e.key} edition={e} installed={catalogues.find((c) => c.source.repo === e.repo)} active={active} />
+      ))}
+      {local.map((c) => (
+        <EditionCard key={c.gameId} installed={c} active={active} />
+      ))}
+
+      {job.phase === 'converting' && job.repo === 'local files' && <p className="text-sm" role="status">Converting files…</p>}
+      {job.error && job.repo === 'local files' && <p className="text-danger" role="alert">{job.error}</p>}
 
       <section className="panel grid gap-2 p-4">
         <h3 className="font-display text-lg">Import from files</h3>
         <p className="text-sm text-muted">
-          If GitHub can't be reached, download the repository as a zip elsewhere, unzip it, and pick all its <code>.gst</code> and <code>.cat</code> files.
+          If GitHub can't be reached, download a BSData repository as a zip elsewhere, unzip it, and pick all its <code>.gst</code>/<code>.cat</code> (10th)
+          or <code>.json</code> (11th) files.
         </p>
         <label className={`btn w-fit ${busy ? 'pointer-events-none opacity-50' : ''}`}>
           Choose files…
           <input
             type="file"
             multiple
-            accept=".gst,.cat"
+            accept=".gst,.cat,.json"
             aria-label="Catalogue files"
             className="sr-only"
             onChange={(e) => {
@@ -94,5 +51,90 @@ export function CataloguePage() {
         </label>
       </section>
     </div>
+  )
+}
+
+function EditionCard({ edition, installed, active }: { edition?: Edition; installed?: Catalogue; active: Catalogue | null }) {
+  const { catalogueJob: job, downloadCatalogue, latestCatalogueCommit, removeCatalogue, setActiveCatalogue } = useStore()
+  const [update, setUpdate] = useState<string | null>(null)
+  const repo = edition?.repo ?? installed!.source.repo
+  const title = edition?.label ?? installed!.gameName
+  const mine = job.repo === repo
+  const busy = job.phase !== 'idle'
+  const isActive = !!installed && active?.gameId === installed.gameId
+  const phaseText = {
+    idle: '',
+    checking: 'Checking the latest version…',
+    downloading: `Downloading files ${job.done}/${job.total}…`,
+    converting: 'Converting on this device…',
+  }[job.phase]
+
+  return (
+    <section className={`panel grid gap-2 p-4 ${isActive ? 'border-accent' : ''}`} aria-label={`Catalogue ${title}`}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-display text-lg">
+          {title} {isActive && <span className="ml-2 rounded border border-accent px-1.5 text-xs text-accent">active</span>}
+        </h3>
+        {edition && (
+          <a className="text-xs text-muted underline" href={`https://github.com/${repo}`} target="_blank" rel="noreferrer">{repo}</a>
+        )}
+      </div>
+      {installed ? (
+        <>
+          <p className="text-sm">
+            {installed.datasheets.length} units in {installed.factions.length} factions{installed.rules ? `, ${installed.rules.length} rules` : ''}
+          </p>
+          <p className="text-sm text-muted">
+            {installed.source.commit !== 'local' && (
+              <>
+                Version <code>{installed.source.commit.slice(0, 7)}</code> ·{' '}
+              </>
+            )}
+            downloaded {new Date(installed.source.fetchedAt).toLocaleString()}
+          </p>
+        </>
+      ) : (
+        <p className="text-sm text-muted">Not installed.</p>
+      )}
+      {mine && busy && (
+        <div className="grid gap-1" role="status">
+          <span className="text-sm">{phaseText}</span>
+          <ProgressBar ratio={job.phase === 'downloading' && job.total ? job.done / job.total : job.phase === 'converting' ? 1 : 0} />
+        </div>
+      )}
+      {mine && job.error && <p className="text-danger" role="alert">{job.error}</p>}
+      <div className="flex flex-wrap gap-2">
+        {installed && !isActive && (
+          <button className="btn btn-primary" onClick={() => void setActiveCatalogue(installed.gameId)}>Use this edition</button>
+        )}
+        {edition && (
+          <button className={`btn ${installed ? '' : 'btn-primary'}`} disabled={busy} onClick={() => void downloadCatalogue(repo).then(() => setUpdate(null))}>
+            ⬇ {installed ? 'Download latest' : `Download ${title}`}
+          </button>
+        )}
+        {installed && edition && (
+          <button
+            className="btn"
+            disabled={busy}
+            onClick={async () => {
+              try {
+                const latest = await latestCatalogueCommit(repo)
+                setUpdate(latest === installed.source.commit ? 'You have the latest data.' : 'A newer version is available.')
+              } catch (e) {
+                setUpdate((e as Error).message)
+              }
+            }}
+          >
+            Check for updates
+          </button>
+        )}
+        {installed && (
+          <button className="btn btn-danger" disabled={busy} onClick={() => confirm(`Remove ${title}? Your units are kept.`) && void removeCatalogue(installed.gameId)}>
+            Remove
+          </button>
+        )}
+      </div>
+      {update && <p className="text-sm text-muted" role="status">{update}</p>}
+    </section>
   )
 }

@@ -9,16 +9,16 @@ const cat = (gameId: string): Catalogue => ({
 })
 
 describe('CatalogueRepository', () => {
-  it('is empty at first, then replaces the installed catalogue', async () => {
+  it('keeps several editions side by side, updates and removes one', async () => {
     const db = new MiniTrackerDb(`cat-${Math.random()}`)
     const repo = new DexieCatalogueRepository(db)
-    expect(await repo.current()).toBeUndefined()
-    await repo.replace(cat('a'))
-    await repo.replace(cat('b'))
-    expect(await repo.current()).toEqual(cat('b'))
-    expect(await db.catalogues.count()).toBe(1)
-    await repo.clear()
-    expect(await repo.current()).toBeUndefined()
+    expect(await repo.list()).toEqual([])
+    await repo.save(cat('10e'))
+    await repo.save(cat('11e'))
+    await repo.save({ ...cat('11e'), gameName: 'updated' })
+    expect((await repo.list()).map((c) => [c.gameId, c.gameName])).toEqual([['10e', '10e'], ['11e', 'updated']])
+    await repo.remove('10e')
+    expect((await repo.list()).map((c) => c.gameId)).toEqual(['11e'])
     await db.delete()
   })
 })

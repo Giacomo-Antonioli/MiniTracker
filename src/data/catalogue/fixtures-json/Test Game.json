@@ -1,0 +1,47 @@
+{
+ "gameSystem": {
+  "costTypes": [
+   {
+    "id": "pts-id",
+    "name": "pts",
+    "defaultCostLimit": -1,
+    "hidden": false
+   },
+   {
+    "id": "xp-id",
+    "name": "Experience",
+    "defaultCostLimit": -1,
+    "hidden": true
+   }
+  ],
+  "sharedRules": [
+   {
+    "description": "Weapons with **[ASSAULT]** can shoot after Advancing.",
+    "alias": [
+     "ASSAULT"
+    ],
+    "id": "r-assault",
+    "name": "Assault",
+    "hidden": false
+   },
+   {
+    "description": "Each Critical Hit scores extra hits.",
+    "id": "r-sustained",
+    "name": "Sustained Hits",
+    "hidden": false
+   },
+   {
+    "description": "This unit can be set up in Reserves.",
+    "id": "r-deepstrike",
+    "name": "Deep Strike",
+    "hidden": false
+   }
+  ],
+  "xmlns": "http://www.battlescribe.net/schema/gameSystemSchema",
+  "id": "sys-test",
+  "name": "Test Game",
+  "revision": 3,
+  "battleScribeVersion": 2.03,
+  "type": "gameSystem"
+ }
+}

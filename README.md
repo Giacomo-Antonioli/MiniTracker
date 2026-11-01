@@ -28,7 +28,7 @@ No account, no server: your collection stays in your browser. Install it from th
 
 **New in v0.2**
 
-- **Unit catalogue.** Download every Warhammer 40,000 datasheet (unit sizes, points, keywords, wargear, abilities) from BSData in Settings → Catalogue data. The data is downloaded and converted on your device; MiniTracker never hosts it.
+- **Unit catalogue.** Download every Warhammer 40,000 datasheet (10th and/or 11th edition) (unit sizes, points, keywords, wargear, abilities) from BSData in Settings → Catalogue data. The data is downloaded and converted on your device; MiniTracker never hosts it.
 - **Searchable unit picker.** Type to find the exact datasheet when adding a unit; faction, size and live points fill in.
 - **Catalogue browser.** Every unit with points by size, abilities, wargear and keywords, plus how many you own.
 
