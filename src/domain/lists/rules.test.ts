@@ -81,6 +81,12 @@ describe('checkList', () => {
     expect(checkList(warlord(list('sf', [['commander']])), two).map((i) => i.message)).toEqual(['Needs at least 2 Battleline units'])
   })
 
+  it('accepts an Epic Hero without the Character keyword as Warlord', () => {
+    const king = { ...cat, datasheets: [...cat.datasheets, sheet('king', { keywords: ['Epic Hero'] })] }
+    const l = warlord(list('sf', [['king'], ['commander']]))
+    expect(checkList(l, king).map((i) => i.code)).toEqual([])
+  })
+
   it('needs exactly one Warlord, a Character', () => {
     const l = list('sf', [['commander'], ['commander']])
     expect(codes(l)).toEqual(['no-warlord'])

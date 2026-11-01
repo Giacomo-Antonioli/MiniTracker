@@ -94,7 +94,8 @@ export function checkList(l: ArmyList, cat: Catalogue): ListIssue[] {
   if (warlords.length > 1) add('warlords', 'Only one Warlord', warlords.map((e) => e.id))
   for (const e of warlords) {
     const d = sheets.get(e.datasheetId)
-    if (d && !hasKeyword(d, 'Character')) add('warlord-not-character', `${d.name} is not a Character and can't be the Warlord`, [e.id])
+    // Epic Heroes are Characters in the rules, even when the data leaves the keyword out (e.g. The Silent King).
+    if (d && !hasKeyword(d, 'Character') && !hasKeyword(d, 'Epic Hero')) add('warlord-not-character', `${d.name} is not a Character and can't be the Warlord`, [e.id])
   }
   if (cat.detachments) checkDetachments(l, cat, sheets, enh, add)
   return issues

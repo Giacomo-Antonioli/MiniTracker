@@ -90,6 +90,11 @@ export function listFromRoster(r: Roster, cat: Catalogue, edition: EditionKey, c
       if (!detachmentIds.includes(det.id)) detachmentIds.push(det.id)
       return
     }
+    // A choice inside the roster's detachment selection that the catalogue doesn't know (renamed or removed).
+    if (/detachment/i.test(s.name) && s.children.length && !s.children.some((c) => find(c, dets))) {
+      for (const c of s.children) if (c.type === 'upgrade') warnings.push(`Detachment not in the catalogue: ${c.name}`)
+      return
+    }
     const d = find(s, sheets)
     if (d) {
       const inner = descendants(s)
