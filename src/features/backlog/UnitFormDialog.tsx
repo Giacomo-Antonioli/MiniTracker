@@ -19,16 +19,28 @@ interface GroupDraft {
 const LIFECYCLES: Lifecycle[] = ['active', 'on-hold', 'sold', 'traded', 'gifted', 'lost']
 
 /** Add a new unit, or edit an existing one when `unit` is given. */
-export function UnitFormDialog({ unit, factions, onClose }: { unit?: OwnedUnit; factions: string[]; onClose: () => void }) {
+export function UnitFormDialog({
+  unit,
+  factions,
+  onClose,
+  preset,
+}: {
+  unit?: OwnedUnit
+  factions: string[]
+  onClose: () => void
+  /** Start a new unit from a catalogue datasheet (e.g. "Add to collection"). */
+  preset?: { datasheet: Datasheet; factionId?: string }
+}) {
   const { pipeline, saveUnit, catalogue } = useStore()
-  const [name, setName] = useState(unit?.customName ?? '')
-  const [faction, setFaction] = useState(unit?.factionName ?? '')
-  const [factionId, setFactionId] = useState(unit?.factionId)
-  const [datasheetId, setDatasheetId] = useState(unit?.datasheetId)
+  const presetFaction = preset && catalogue ? (preset.factionId && preset.datasheet.factionIds.includes(preset.factionId) ? preset.factionId : preset.datasheet.factionIds[0]) : undefined
+  const [name, setName] = useState(unit?.customName ?? preset?.datasheet.name ?? '')
+  const [faction, setFaction] = useState(unit?.factionName ?? (presetFaction ? catalogue!.factions.find((f) => f.id === presetFaction)?.name ?? '' : ''))
+  const [factionId, setFactionId] = useState(unit?.factionId ?? presetFaction)
+  const [datasheetId, setDatasheetId] = useState(unit?.datasheetId ?? preset?.datasheet.id)
   const [showLegends, setShowLegends] = useState(false)
   const [groups, setGroups] = useState<GroupDraft[]>(
     unit?.groups.map((g) => ({ ...g, loadout: g.loadout.join(', ') })) ?? [
-      { count: 1, status: pipeline.stages[0].id, loadout: '', magnetised: [] },
+      { count: preset?.datasheet.minModels ?? 1, status: pipeline.stages[0].id, loadout: '', magnetised: [] },
     ],
   )
   const [tutorials, setTutorials] = useState<Link[]>(unit?.tutorials ?? [])

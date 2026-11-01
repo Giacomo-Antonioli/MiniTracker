@@ -8,6 +8,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 - Unit catalogue: download Warhammer 40,000 data from BSData and convert it on the device (in a background worker), with update check and import from local files (#15).
 - Add unit: searchable pickers for faction and unit from the catalogue (keyboard and mouse); picking a datasheet fills name, faction, minimum size and wargear suggestions, and shows live points; custom names still allowed; Legends hidden unless asked (#17).
 - Unit details show the linked datasheet, role and current points (#17).
+- Catalogue browser: every unit with role, size, points by size, abilities, wargear, keywords and factions; search and filters (faction, role, owned only, Legends); owned counts; "Add to collection" (#16).
 - Daily CI check that the BSData link works and the parser still reads real data; opens an issue when it breaks (#15).
 
 ## [0.1.0] - 2026-11-01

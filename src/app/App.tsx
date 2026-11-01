@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { BacklogPage } from '../features/backlog/BacklogPage'
+import { CatalogueBrowser } from '../features/catalogue/CatalogueBrowser'
 import { BackupPage } from '../features/settings/BackupPage'
 import { CataloguePage } from '../features/settings/CataloguePage'
 import { PipelinePage } from '../features/settings/PipelinePage'
 import { useStore } from './store'
 
-type Page = 'backlog' | 'pipeline' | 'catalogue' | 'backup'
+type Page = 'backlog' | 'browse' | 'pipeline' | 'catalogue' | 'backup'
 const THEMES = { grimdark: 'Grimdark', forum2005: 'Forum 2005' } as const
 type Theme = keyof typeof THEMES
 
@@ -53,12 +54,13 @@ export default function App() {
       <nav className="panel m-2 mr-0 flex w-52 shrink-0 flex-col gap-1 p-3" aria-label="Main">
         <div className="mb-4 font-display text-lg tracking-wide text-accent">MiniTracker</div>
         {nav('backlog', 'Backlog')}
+        {nav('browse', 'Catalogue')}
         {SOON.map((s) => (
           <span key={s} className="px-3 py-1.5 text-muted/60" title="Coming in a later sprint">{s} ⌛</span>
         ))}
         <div className="mt-4 mb-1 px-3 text-xs uppercase tracking-wider text-muted">Settings</div>
         {nav('pipeline', 'Pipeline')}
-        {nav('catalogue', 'Catalogue')}
+        {nav('catalogue', 'Catalogue data')}
         {nav('backup', 'Backup')}
         <label className="mt-auto grid gap-1 px-3 text-xs text-muted">
           Theme
@@ -80,6 +82,8 @@ export default function App() {
           <p className="text-muted">Loading…</p>
         ) : page === 'backlog' ? (
           <BacklogPage />
+        ) : page === 'browse' ? (
+          <CatalogueBrowser onOpenSettings={() => setPage('catalogue')} />
         ) : page === 'pipeline' ? (
           <PipelinePage />
         ) : page === 'catalogue' ? (
