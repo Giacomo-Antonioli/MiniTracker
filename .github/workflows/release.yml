@@ -1,0 +1,44 @@
+name: Release
+# Push a tag like v0.2.0 to publish a GitHub release.
+# Notes come from that version's section in CHANGELOG.md; a zip of the built app is attached.
+on:
+  push:
+    tags: ['v*.*.*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - name: Check tag matches package.json version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$PKG" ]; then echo "Tag v$TAG does not match package.json $PKG"; exit 1; fi
+      - run: npm run test:coverage
+      - run: npm run build
+      - name: Extract release notes from CHANGELOG
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          awk -v v="$V" '
+            $0 ~ "^## \\[" v "\\]" {on=1; next}
+            on && /^## \[/ {exit}
+            on && /^\[.*\]: / {exit}
+            on {print}
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then echo "No CHANGELOG section for $V"; exit 1; fi
+          printf '\n**Live app:** https://giacomo-antonioli.github.io/MiniTracker/\n' >> notes.md
+      - name: Package built app
+        run: cd dist && zip -qr "../minitracker-${GITHUB_REF_NAME}-web.zip" .
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PRE=""
+          case "$GITHUB_REF_NAME" in *-*) PRE="--prerelease";; esac
+          gh release create "$GITHUB_REF_NAME" "minitracker-${GITHUB_REF_NAME}-web.zip" \
+            --title "MiniTracker $GITHUB_REF_NAME" --notes-file notes.md $PRE

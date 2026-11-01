@@ -2,10 +2,12 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vite'
+import pkg from './package.json' with { type: 'json' }
 
 // base matches the GitHub Pages path: https://<user>.github.io/MiniTracker/
 export default defineConfig({
   base: '/MiniTracker/',
+  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   plugins: [
     react(),
     tailwindcss(),

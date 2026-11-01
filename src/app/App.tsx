@@ -64,6 +64,14 @@ export default function App() {
             {Object.entries(THEMES).map(([id, name]) => <option key={id} value={id}>{name}</option>)}
           </select>
         </label>
+        <a
+          className="px-3 pt-2 text-xs text-muted hover:text-accent"
+          href={`https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v${__APP_VERSION__}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          v{__APP_VERSION__}
+        </a>
       </nav>
       <main className="min-w-0 flex-1 overflow-auto p-4">
         {!ready ? (
