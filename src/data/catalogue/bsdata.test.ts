@@ -77,7 +77,7 @@ describe('parseBsData', () => {
 
 describe('rules', () => {
   it('reads core rules from the game system and faction rules from catalogues', () => {
-    expect(cat.formatVersion).toBe(6)
+    expect(cat.formatVersion).toBe(7)
     expect(cat.rules!.map((r) => [r.name, r.kind])).toEqual([
       ['Assault', 'core'],
       ['Deep Strike', 'core'],
@@ -106,7 +106,7 @@ describe('pointsFor', () => {
   })
 
   it('reads battle sizes and keyword minimums from the main force', () => {
-    expect(cat.formatVersion).toBe(6)
+    expect(cat.formatVersion).toBe(7)
     expect(cat.muster).toMatchObject({
       battleSizes: [
         { id: 'bs-inc', name: 'Incursion', pointsLimit: 1000 },

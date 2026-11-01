@@ -3,10 +3,12 @@ import { catalogueFor, ctx, useStore } from '../../app/store'
 import { EDITIONS } from '../../data/catalogue/fetch'
 import { ownedByDatasheet } from '../../domain/catalogue/owned'
 import type { Catalogue, Datasheet } from '../../domain/catalogue/types'
+import type { OwnedUnit } from '../../domain/collection/types'
 import { removeEntry, updateEntry } from '../../domain/lists/list'
 import { listOwnership } from '../../domain/lists/ownership'
 import { listPoints } from '../../domain/lists/points'
 import { buyList, buyListText, type BuyPaint } from '../../domain/lists/buy'
+import { defaultPicks, effectiveLoadout, type LoadoutSource } from '../../domain/lists/loadout'
 import { addFromCollection, collectionPlan } from '../../domain/lists/collection'
 import { armySchemeChoices, paintPlan, resolveScheme, schemesToApply, unitSchemeChoices, type SchemeContext, type SchemeSource } from '../../domain/lists/schemes'
 import { totalModels } from '../../domain/collection/ownedUnit'
@@ -15,7 +17,7 @@ import { BuyListSheet } from './BuyListSheet'
 import { listToJson, listToText } from '../../domain/lists/io'
 import { evalLimit } from '../../domain/lists/conditions'
 import { addUnit, battleSizes, canLead, checkList, enhancementAllowed, legalUnits, listCounter } from '../../domain/lists/rules'
-import type { ArmyList, ListEntry, ListStatus } from '../../domain/lists/types'
+import type { ArmyList, ListEntry, ListStatus, LoadoutRow } from '../../domain/lists/types'
 
 const ROLE_ORDER = ['Epic Hero', 'Character', 'Battleline']
 const roleRank = (r: string) => (ROLE_ORDER.includes(r) ? ROLE_ORDER.indexOf(r) : ROLE_ORDER.length)
@@ -302,6 +304,14 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                       Scheme
                       <UnitSchemeSelect list={list} entry={e} ctx={schemeCtx} onChange={(schemeId) => edit(e.id, { schemeId })} />
                     </label>
+                    {d && (
+                      <LoadoutEditor
+                        d={d}
+                        entry={e}
+                        linked={o.from.map((f) => units.find((u) => u.id === f.unitId)).filter((u): u is NonNullable<typeof u> => !!u)}
+                        onChange={(rows) => edit(e.id, rows ? { loadout: rows, models: Math.max(1, rows.reduce((n, r) => n + r.count, 0)) } : { loadout: undefined })}
+                      />
+                    )}
                   </div>
                 )}
               </div>
@@ -758,6 +768,92 @@ function PdfDialog({ list, c, onCancel, onMake }: { list: ArmyList; c: SchemeCon
         <button className="btn btn-primary" onClick={() => onMake(perUnit ? draft : { ...draft, entries: draft.entries.map((x) => ({ ...x, schemeId: undefined })) })}>📄 Make PDF</button>
         <button className="btn" onClick={onCancel}>Cancel</button>
       </div>
+    </div>
+  )
+}
+
+const LOADOUT_SOURCE: Record<LoadoutSource, string> = { list: 'set in this list', models: 'from my models', default: 'default' }
+
+/** Models by type with their wargear choices. Editing saves the loadout to the list and sets the model count. */
+function LoadoutEditor({ d, entry, linked, onChange }: { d: Datasheet; entry: ListEntry; linked: OwnedUnit[]; onChange: (rows: LoadoutRow[] | undefined) => void }) {
+  if (!d.models?.length) return null
+  const { rows, source } = effectiveLoadout(entry, d, linked)
+  const types = new Map(d.models.map((m) => [m.id, m]))
+  const setRow = (i: number, patch: Partial<LoadoutRow>) => onChange(rows.map((r, k) => (k === i ? { ...r, ...patch } : r)))
+  const used = (id: string) => rows.filter((r) => r.modelId === id).reduce((n, r) => n + r.count, 0)
+  return (
+    <div className="grid basis-full gap-1 rounded border border-line/60 p-2" aria-label={`${d.name} loadout`}>
+      <div className="flex items-center gap-2 text-muted">
+        <span>Loadout · {LOADOUT_SOURCE[source]}</span>
+        {source !== 'list' && <span className="text-[10px]">(change anything to keep your own)</span>}
+        {source === 'list' && <button className="ml-auto underline" onClick={() => onChange(undefined)}>Reset</button>}
+      </div>
+      {rows.map((r, i) => {
+        const m = types.get(r.modelId)
+        if (!m) return <div key={i} className="text-danger">Unknown model type</div>
+        return (
+          <div key={i} className="flex flex-wrap items-center gap-2" data-testid="loadout-row">
+            <input
+              className="input w-14 py-0.5"
+              type="number"
+              min={0}
+              max={m.max}
+              aria-label={`${m.name} count`}
+              value={r.count}
+              onChange={(ev) => setRow(i, { count: Math.max(0, Number(ev.target.value) || 0) })}
+            />
+            <span className="font-semibold">× {m.name}</span>
+            {m.fixed.length > 0 && <span className="text-muted">{m.fixed.join(', ')}</span>}
+            {m.choices.map((c) =>
+              c.max === 1 ? (
+                <select
+                  key={c.id}
+                  className="input py-0.5"
+                  aria-label={`${m.name}: ${c.name}`}
+                  value={r.picks.find((p) => c.options.some((o) => o.id === p)) ?? ''}
+                  onChange={(ev) => setRow(i, { picks: [...r.picks.filter((p) => !c.options.some((o) => o.id === p)), ...(ev.target.value ? [ev.target.value] : [])] })}
+                >
+                  {c.min === 0 && <option value="">{c.name}: none</option>}
+                  {c.options.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+                </select>
+              ) : (
+                <span key={c.id} className="flex flex-wrap items-center gap-1">
+                  {c.name}:
+                  {c.options.map((o) => (
+                    <label key={o.id} className="flex items-center gap-0.5">
+                      <input
+                        className="input w-11 py-0"
+                        type="number"
+                        min={0}
+                        max={o.max}
+                        aria-label={`${m.name}: ${o.name}`}
+                        value={r.picks.filter((p) => p === o.id).length}
+                        onChange={(ev) => setRow(i, { picks: [...r.picks.filter((p) => p !== o.id), ...Array(Math.max(0, Number(ev.target.value) || 0)).fill(o.id)] })}
+                      />
+                      {o.name}
+                    </label>
+                  ))}
+                </span>
+              ),
+            )}
+            <button className="text-muted hover:text-danger" aria-label={`Remove ${m.name} row`} onClick={() => onChange(rows.filter((_, k) => k !== i))}>✕</button>
+          </div>
+        )
+      })}
+      <select
+        className="input w-fit py-0.5"
+        aria-label={`Add models to ${d.name}`}
+        value=""
+        onChange={(ev) => {
+          const m = types.get(ev.target.value)
+          if (m) onChange([...rows, { modelId: m.id, count: 1, picks: defaultPicks(m) }])
+        }}
+      >
+        <option value="">+ Add models</option>
+        {d.models.map((m) => (
+          <option key={m.id} value={m.id} disabled={used(m.id) >= m.max}>{m.name}</option>
+        ))}
+      </select>
     </div>
   )
 }

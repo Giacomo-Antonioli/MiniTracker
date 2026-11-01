@@ -1,5 +1,5 @@
 import { XMLParser } from 'fast-xml-parser'
-import type { ArmyLimit, BattleSize, StatLine, WeaponProfile, Catalogue, CatalogueSource, Condition, ConditionOp, DataLimit, Datasheet, Detachment, DetachmentCount, Enhancement, Faction, KeywordMinimum, Muster, PointsStep, Rule } from '../../domain/catalogue/types'
+import type { ArmyLimit, BattleSize, LoadoutChoice, LoadoutOption, ModelType, StatLine, WeaponProfile, Catalogue, CatalogueSource, Condition, ConditionOp, DataLimit, Datasheet, Detachment, DetachmentCount, Enhancement, Faction, KeywordMinimum, Muster, PointsStep, Rule } from '../../domain/catalogue/types'
 import { evalCondition } from '../../domain/lists/conditions'
 import { parseBsDataJson } from './bsdataJson'
 
@@ -173,11 +173,12 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
     const { keywords, stats, weapons } = readProfiles(e, linkable)
     const limit = armyLimit([e, rootLinks.get(id), ...ownCategory(e)].filter((x): x is Node => !!x), sizeIds)
     const leads = readLeads(e, categoryNames)
+    const models = readModels(e, linkable)
     const maxLeaders = kids(e, 'constraints', 'constraint')
       .filter((k) => attr(k, 'type') === 'max' && attr(k, 'field') === 'associations')
       .map((k) => Number(attr(k, 'value')))
       .reduce<number | undefined>((m, v) => (m === undefined ? v : Math.max(m, v)), undefined)
-    return { ...d, ...(ruleIds.length ? { ruleIds: [...new Set(ruleIds)] } : {}), ...(keywords.length ? { weaponKeywords: keywords } : {}), ...(stats.length ? { stats } : {}), ...(weapons.length ? { weapons } : {}), ...(limit ? { armyLimit: limit } : {}), ...(leads ? { leads } : {}), ...(maxLeaders !== undefined && maxLeaders !== 1 ? { maxLeaders } : {}) }
+    return { ...d, ...(ruleIds.length ? { ruleIds: [...new Set(ruleIds)] } : {}), ...(keywords.length ? { weaponKeywords: keywords } : {}), ...(stats.length ? { stats } : {}), ...(weapons.length ? { weapons } : {}), ...(limit ? { armyLimit: limit } : {}), ...(leads ? { leads } : {}), ...(models.length ? { models } : {}), ...(maxLeaders !== undefined && maxLeaders !== 1 ? { maxLeaders } : {}) }
   })
   datasheets.sort((a, b) => a.name.localeCompare(b.name))
 
@@ -187,7 +188,7 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
 
   const ruleList = [...rules.values()].sort((a, b) => Number(a.kind === 'faction') - Number(b.kind === 'faction') || a.name.localeCompare(b.name))
   const det = readDetachments(parsed, factionCats, byId, cond, costIds, muster.forceId)
-  return { formatVersion: 6, gameId: attr(gst, 'id')!, gameName: attr(gst, 'name')!, source, factions, datasheets, rules: ruleList, muster, ...det }
+  return { formatVersion: 7, gameId: attr(gst, 'id')!, gameName: attr(gst, 'name')!, source, factions, datasheets, rules: ruleList, muster, ...det }
 }
 
 /** Conditions of a modifier, flattened; undefined when they are combined in a way we don't read (nested groups, 'or'). */
@@ -196,6 +197,89 @@ function simpleConditions(m: Node): Node[] | undefined {
   if (groups.length) return undefined
   if (kids(m, 'repeats', 'repeat').length) return undefined
   return kids(m, 'conditions', 'condition')
+}
+
+/** Limits of an entry or link on its parent: [min, max]; missing max = `open`. */
+function parentLimits(n: Node, open: number): [number, number] {
+  const c = kids(n, 'constraints', 'constraint').filter((k) => attr(k, 'field') === 'selections' && attr(k, 'scope') === 'parent')
+  const v = (t: string) => c.find((k) => attr(k, 'type') === t)
+  return [Number(attr(v('min') ?? {}, 'value') ?? 0), v('max') ? Number(attr(v('max')!, 'value')) : open]
+}
+
+/**
+ * Model types of a unit with their wargear: fixed items (min = max) and choices (groups with min/max and options).
+ * Groups without limits (e.g. "Wargear") are looked through. A unit that is a single model is its own model type.
+ */
+function readModels(e: Node, linkable: Map<string, Node>): ModelType[] {
+  const children = (n: Node): { node: Node; target: Node; isLink: boolean }[] => [
+    ...kids(n, 'selectionEntries', 'selectionEntry').map((x) => ({ node: x, target: x, isLink: false })),
+    ...kids(n, 'selectionEntryGroups', 'selectionEntryGroup').map((x) => ({ node: x, target: x, isLink: false })),
+    ...kids(n, 'entryLinks', 'entryLink').flatMap((l) => {
+      const t = linkable.get(attr(l, 'targetId') ?? '')
+      return t && !hidden(l) ? [{ node: l, target: t, isLink: true }] : []
+    }),
+  ]
+  const options = (g: Node): LoadoutOption[] =>
+    children(g).flatMap(({ node, target, isLink }) => {
+      if (hidden(node) || NOT_WARGEAR(attr(node, 'name') ?? '')) return []
+      if (attr(target, 'type') === 'upgrade') return [{ id: attr(node, 'id')!, ...(isLink ? { targetId: attr(target, 'id')! } : {}), name: attr(node, 'name')!, max: parentLimits(node, 1)[1] }]
+      if (attr(target, 'type') === undefined && !NOT_WARGEAR_GROUP.test(attr(target, 'name') ?? '')) return options(target)
+      return []
+    })
+
+  const readModel = (m: Node, limits: [number, number]): ModelType => {
+    const fixed: string[] = []
+    const choices: LoadoutChoice[] = []
+    const visit = (n: Node) => {
+      for (const { node, target } of children(n)) {
+        const name = attr(node, 'name') ?? ''
+        if (hidden(node) || NOT_WARGEAR(name) || NOT_WARGEAR_GROUP.test(name)) continue
+        const [min, max] = parentLimits(node, Infinity)
+        if (attr(target, 'type') === 'upgrade') {
+          if (min >= 1 && min === max) fixed.push(name)
+          else choices.push({ id: attr(node, 'id')!, name, min, max: Number.isFinite(max) ? max : 1, options: [{ id: attr(node, 'id')!, name, max: Number.isFinite(max) ? max : 1 }] })
+        } else if (attr(target, 'type') === undefined) {
+          const hasLimits = kids(node, 'constraints', 'constraint').some((k) => attr(k, 'field') === 'selections') || kids(target, 'constraints', 'constraint').some((k) => attr(k, 'field') === 'selections')
+          if (!hasLimits) {
+            visit(target)
+            continue
+          }
+          const [gmin, gmax] = parentLimits(kids(node, 'constraints', 'constraint').length ? node : target, Infinity)
+          const opts = options(target)
+          if (!opts.length) continue
+          // One option that must be taken is not a choice.
+          if (opts.length === 1 && gmin >= 1 && gmin === gmax) {
+            fixed.push(opts[0].name)
+            continue
+          }
+          const def = attr(target, 'defaultSelectionEntryId')
+          choices.push({ id: attr(node, 'id')!, name, min: gmin, max: Number.isFinite(gmax) ? gmax : opts.reduce((a, o) => a + o.max, 0), ...(def && opts.some((o) => o.id === def) ? { defaultId: def } : {}), options: opts })
+        }
+      }
+    }
+    visit(m)
+    return { id: attr(m, 'id')!, name: attr(m, 'name')!, min: limits[0], max: limits[1], fixed: sortUnique(fixed), choices }
+  }
+
+  if (attr(e, 'type') === 'model') return [readModel(e, [1, 1])]
+  const hasModels = (n: Node, depth: number): boolean => depth < 5 && children(n).some((c) => attr(c.target, 'type') === 'model' || (attr(c.target, 'type') !== 'upgrade' && hasModels(c.target, depth + 1)))
+  // Model entries anywhere under the unit (through groups, size options and links), not inside other models.
+  const found = new Map<string, ModelType>()
+  const walkModels = (n: Node, depth: number) => {
+    if (depth > 6) return
+    for (const { node, target } of children(n)) {
+      if (hidden(node) || NOT_WARGEAR_GROUP.test(attr(node, 'name') ?? '')) continue
+      if (attr(target, 'type') === 'model') {
+        const [min, max] = parentLimits(node, OPEN)
+        // The same model in several size options (as one entry, or as copies with the same name): widest limits.
+        const key = attr(target, 'name')!
+        const cur = found.get(key)
+        found.set(key, cur ? { ...cur, min: Math.min(cur.min, min), max: Math.max(cur.max, max) } : readModel(target, [min, max]))
+      } else if (attr(target, 'type') !== 'upgrade' || hasModels(target, 0)) walkModels(target, depth + 1)
+    }
+  }
+  walkModels(e, 0)
+  return [...found.values()].map((m) => (m.max >= OPEN ? { ...m, max: 99 } : m))
 }
 
 /** A Leader's "Leading" association: the units (ids) or keywords it may be attached to. */

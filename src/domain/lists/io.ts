@@ -3,7 +3,7 @@ import type { Ctx } from '../collection/types'
 import { addEntry, createList, validateList } from './list'
 import { listPoints } from './points'
 import { COMBAT_PATROL, battleSizes } from './rules'
-import type { ArmyList, EditionKey } from './types'
+import type { ArmyList, EditionKey, LoadoutRow } from './types'
 
 /**
  * Import and export of army lists:
@@ -102,7 +102,8 @@ export function listFromRoster(r: Roster, cat: Catalogue, edition: EditionKey, c
       const models = modelCount || (s.type === 'model' ? s.number : d.minModels)
       const e = inner.map((x) => find(x, enh)).find((x) => x !== undefined)
       const warlord = inner.some((x) => norm(x.name) === 'warlord')
-      l = addEntry(l, { datasheetId: d.id, models, ...(e ? { enhancementId: e.id } : {}), ...(warlord ? { warlord: true } : {}) }, ctx)
+      const loadout = rosterLoadout(d, s, models)
+      l = addEntry(l, { datasheetId: d.id, models, ...(e ? { enhancementId: e.id } : {}), ...(warlord ? { warlord: true } : {}), ...(loadout ? { loadout } : {}) }, ctx)
       return
     }
     if (s.type === 'unit' || (s.type === 'model' && !s.children.some((c) => c.type === 'model'))) {
@@ -113,6 +114,29 @@ export function listFromRoster(r: Roster, cat: Catalogue, edition: EditionKey, c
   }
   force.selections.forEach(visit)
   return finish({ ...l, detachmentIds }, cat, texts, warnings)
+}
+
+/**
+ * The loadout a roster records for a unit: its model selections matched to the datasheet's model types (by id, else
+ * name), with the options found under each. Undefined when it doesn't add up to the unit's models.
+ */
+function rosterLoadout(d: Datasheet, unit: RosterSelection, models: number): LoadoutRow[] | undefined {
+  const types = d.models ?? []
+  if (!types.length) return undefined
+  const all = (s: RosterSelection): RosterSelection[] => s.children.flatMap((c) => [c, ...all(c)])
+  const modelSels = unit.type === 'model' ? [unit] : all(unit).filter((x) => x.type === 'model')
+  const rows: LoadoutRow[] = []
+  for (const ms of modelSels) {
+    const m = types.find((t) => ms.ids.includes(t.id)) ?? types.find((t) => norm(t.name) === norm(ms.name))
+    if (!m) return undefined
+    const below = ms === unit ? unit.children.flatMap((c) => [c, ...all(c)]) : all(ms)
+    const picks = m.choices.flatMap((c) => c.options.flatMap((o) => below.filter((x) => x.ids.includes(o.id) || (o.targetId !== undefined && x.ids.includes(o.targetId)) || norm(x.name) === norm(o.name)).flatMap((x) => Array(Math.max(1, x.number)).fill(o.id)).slice(0, o.max)))
+    const count = ms === unit ? 1 : ms.number
+    const same = rows.find((r) => r.modelId === m.id && r.picks.join() === picks.join())
+    if (same) same.count += count
+    else rows.push({ modelId: m.id, count, picks })
+  }
+  return rows.reduce((n, r) => n + r.count, 0) === models ? rows : undefined
 }
 
 const UNIT_LINE = /^(?:(\d+)\s*x\s+)?(.+?)\s*[([]\s*\+?(\d[\d,.]*)\s*(?:pts|points?)\s*[)\]]\s*$/i

@@ -1,5 +1,6 @@
 import type { BattleSize, Catalogue, Datasheet, Enhancement } from '../catalogue/types'
 import { evalCondition, evalLimit, type Counter } from './conditions'
+import { loadoutProblems } from './loadout'
 import type { Ctx } from '../collection/types'
 import { addEntry } from './list'
 import { listPoints } from './points'
@@ -42,6 +43,7 @@ export type IssueCode =
   | 'not-a-leader'
   | 'leader-target'
   | 'leaders'
+  | 'loadout'
 
 export interface ListIssue {
   code: IssueCode
@@ -107,6 +109,11 @@ export function checkList(l: ArmyList, cat: Catalogue): ListIssue[] {
     if (d && !hasKeyword(d, 'Character') && !hasKeyword(d, 'Epic Hero')) add('warlord-not-character', `${d.name} is not a Character and can't be the Warlord`, [e.id])
   }
   checkLeaders(l, cat, sheets, add)
+  // Loadouts set in the list (defaults are always legal).
+  for (const e of l.entries) {
+    const d = sheets.get(e.datasheetId)
+    if (d && e.loadout?.length) for (const m of loadoutProblems(d, e.models, e.loadout)) add('loadout', m, [e.id])
+  }
   if (cat.detachments) checkDetachments(l, cat, sheets, enh, add)
   return issues
 }

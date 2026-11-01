@@ -98,8 +98,8 @@ describe('text lists', () => {
     expect(text).toContain('  • Enhancement: Lucky Charm (+15)')
     const { list: back, warnings } = listFromText(text, cat, '11e', ctx)
     expect(warnings).toEqual([])
-    // Text groups units by role, so compare without order.
-    const shape = (l: typeof list) => ({ ...l, id: '', createdAt: '', updatedAt: '', entries: l.entries.map((e) => JSON.stringify({ ...e, id: '' })).sort() })
+    // Text groups units by role, so compare without order; text carries no loadout (rosters do).
+    const shape = (l: typeof list) => ({ ...l, id: '', createdAt: '', updatedAt: '', entries: l.entries.map((e) => JSON.stringify({ ...e, id: '', loadout: undefined })).sort() })
     expect(shape(back)).toEqual(shape(list))
   })
 })

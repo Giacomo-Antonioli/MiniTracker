@@ -37,12 +37,44 @@ export interface Datasheet {
   stats?: StatLine[]
   /** Weapon profiles of the unit and its wargear options (catalogue format 5). */
   weapons?: WeaponProfile[]
+  /** Model types with their wargear (catalogue format 7). */
+  models?: ModelType[]
   /** For Leaders: the units (datasheet ids) or keywords this unit can lead. */
   leads?: { ids: string[]; keywords: string[] }
   /** Most Leaders this unit can have attached (default 1). */
   maxLeaders?: number
   /** How many of this unit an army may include (e.g. 3, Epic Heroes 1); some battle sizes change it. */
   armyLimit?: ArmyLimit
+}
+
+/** One weapon or piece of wargear a model can pick. `id` is the data's own id for this option (link or entry). */
+export interface LoadoutOption {
+  id: string
+  /** Shared entry the option points to (same weapon in different choices has the same target). */
+  targetId?: string
+  name: string
+  /** Most of this option per model (usually 1). */
+  max: number
+}
+
+/** A choice a model makes, e.g. "Weapon 1": pick between min and max options. */
+export interface LoadoutChoice {
+  id: string
+  name: string
+  min: number
+  max: number
+  defaultId?: string
+  options: LoadoutOption[]
+}
+
+/** A kind of model in a unit, with how many the unit can have, its fixed wargear and its choices. */
+export interface ModelType {
+  id: string
+  name: string
+  min: number
+  max: number
+  fixed: string[]
+  choices: LoadoutChoice[]
 }
 
 /** A profile row as published: column name → value, in the data's column order. */
@@ -156,7 +188,7 @@ export interface CatalogueSource {
 }
 
 export interface Catalogue {
-  /** 2 = includes rules and ability texts; 3 = muster rules and army limits; 4 = detachments and enhancements; 5 = stat lines and weapon profiles; 6 = leaders and enhancement restrictions. Older catalogues have none. */
+  /** 2 = includes rules and ability texts; 3 = muster rules and army limits; 4 = detachments and enhancements; 5 = stat lines and weapon profiles; 6 = leaders and enhancement restrictions; 7 = model types and wargear choices. Older catalogues have none. */
   formatVersion?: number
   gameId: string
   gameName: string
