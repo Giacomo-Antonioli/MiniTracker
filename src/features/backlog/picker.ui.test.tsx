@@ -49,7 +49,7 @@ describe('Unit picker', () => {
 
     await user.click(within(d).getByRole('button', { name: 'Save' }))
     await user.click(await screen.findByRole('cell', { name: /Line Troopers/ }))
-    expect(screen.getByLabelText('Datasheet')).toHaveTextContent('Line Troopers · Battleline · 10 models · 160 pts')
+    expect(await screen.findByLabelText('Datasheet')).toHaveTextContent('Line Troopers · Battleline · 10 models · 160 pts')
     expect(useStore.getState().units[0]).toMatchObject({ datasheetId: 'u-troopers', factionId: 'cat-sub', factionName: 'Sub Testers' })
   })
 

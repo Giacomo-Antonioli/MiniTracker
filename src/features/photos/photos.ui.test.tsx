@@ -35,7 +35,7 @@ async function unitWithPanel() {
   await user.type(within(d).getByLabelText('Models'), '5')
   await user.click(within(d).getByRole('button', { name: 'Save' }))
   await user.click(await screen.findByRole('cell', { name: /Intercessor Squad/ }))
-  return { user, panel: screen.getByRole('complementary', { name: 'Unit details' }) }
+  return { user, panel: await screen.findByRole('complementary', { name: 'Unit details' }) }
 }
 
 describe('Photos', () => {

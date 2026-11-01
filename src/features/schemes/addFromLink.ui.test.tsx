@@ -46,7 +46,7 @@ describe('Add from link', () => {
     await user.click(within(d).getByLabelText('Recipe text'))
     await user.paste('Armour\n1. Basecoat with Grey Seer\n2. Wash with Nuln Oil\nIntro text that should vanish.\nRed markings\n- Layer Mephiston Red')
     const preview = within(d).getByRole('region', { name: 'Draft preview' })
-    expect(preview).toHaveTextContent('3 steps in 2 areas, 3 paints')
+    await waitFor(() => expect(preview).toHaveTextContent('3 steps in 2 areas, 3 paints'))
     await user.click(within(d).getByRole('button', { name: 'Create scheme' }))
 
     await waitFor(() => expect(useStore.getState().schemes).toHaveLength(1))

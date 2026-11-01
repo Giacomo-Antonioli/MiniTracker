@@ -94,7 +94,7 @@ describe('Schemes', () => {
     expect((within(d).getByLabelText('Paint scheme') as HTMLSelectElement).selectedOptions[0].textContent).toContain('Ultramarines Studio')
     await user.click(within(d).getByRole('button', { name: 'Save' }))
     await user.click(await screen.findByRole('cell', { name: /Hellblasters/ }))
-    expect(screen.getByRole('region', { name: 'Scheme' })).toHaveTextContent('Ultramarines Studio')
+    expect(await screen.findByRole('region', { name: 'Scheme' })).toHaveTextContent('Ultramarines Studio')
   })
 
   it('imports a shared scheme file with new ids', async () => {
