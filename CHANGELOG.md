@@ -13,6 +13,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 - Buy list in the builder: missing models per unit with their points, total, copy as text, and a printable sheet (save as PDF from the print dialog) (#60).
 - Lists and your collection: link each list unit to one of your units (a unit only once per list), painted progress per unit (🎨 painted/owned), a "From my collection" panel with models still to paint (⏭ Next up shortcut) and paints their schemes need that you don't have, "Add all my units" and "Start with all the units I own" for new lists (#53).
 - Import lists from BattleScribe / NewRecruit (.rosz, .ros; matched by BSData ids), from text (GW app / NewRecruit style, pasted or .txt; matched by names, with a list of anything not recognised) and from MiniTracker .json; export as text (copy or .txt) and .json (#55).
+- Backlog units show their datasheet: stat lines, ranged and melee weapon profiles, abilities, rules, weapon abilities, wargear options and keywords (open on the unit page, folded in the side panel). The catalogue browser shows stats and weapons too. Download the catalogue again to get stats and weapons.
 - Builder: add units by double-click or by dragging them anywhere onto the right-hand column; the unit panel can be resized (drag the divider, or arrow keys) and remembers its width; the + button stays visible on long names.
 
 ## [0.3.0] - 2026-11-02

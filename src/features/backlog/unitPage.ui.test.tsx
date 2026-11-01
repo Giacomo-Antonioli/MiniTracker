@@ -34,6 +34,22 @@ async function withUnits() {
 }
 
 describe('Unit page', () => {
+  it('shows the datasheet: stats, weapons, abilities, rules and wargear', async () => {
+    const user = await withUnits()
+    await user.dblClick(screen.getByRole('cell', { name: /Big Walker/ }))
+    const info = await screen.findByRole('group', { name: 'Datasheet details' })
+    expect(info).toHaveAttribute('open')
+    expect(within(info).getByRole('table', { name: 'Stat lines' })).toHaveTextContent('Big Walker8"93+107+3')
+    await user.click(screen.getByRole('button', { name: '← Back to backlog' }))
+    await user.dblClick(screen.getByRole('cell', { name: /Line Troopers/ }))
+    const troopers = await screen.findByRole('group', { name: 'Datasheet details' })
+    expect(within(troopers).getByRole('table', { name: 'Ranged weapons' })).toHaveTextContent('Rifle24"Assault, Sustained Hits 1')
+    expect(within(troopers).getByRole('region', { name: 'Abilities' })).toHaveTextContent('Hold the Line')
+    expect(within(troopers).getByRole('region', { name: 'Weapon abilities' })).toHaveTextContent('Assault')
+    expect(within(troopers).getByText('Flamer')).toBeInTheDocument()
+  })
+
+
   it('opens on double-click, shows the unit tag, and goes back with filters kept', async () => {
     const user = await withUnits()
     await user.type(screen.getByPlaceholderText(/Search name/), 'troop')

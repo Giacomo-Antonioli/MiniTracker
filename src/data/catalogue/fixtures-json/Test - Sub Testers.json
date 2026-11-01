@@ -53,7 +53,16 @@
     "import": true,
     "name": "Old Hero [Legends]",
     "hidden": false,
-    "id": "u-hero"
+    "id": "u-hero",
+    "infoLinks": [
+     {
+      "name": "Old Hero",
+      "id": "il1",
+      "hidden": false,
+      "type": "profile",
+      "targetId": "sp-hero"
+     }
+    ]
    }
   ],
   "xmlns": "http://www.battlescribe.net/schema/catalogueSchema",
@@ -76,6 +85,27 @@
       "scope": "roster",
       "shared": true,
       "id": "lim-h"
+     }
+    ]
+   }
+  ],
+  "sharedProfiles": [
+   {
+    "name": "Old Hero",
+    "typeId": "t-unit",
+    "typeName": "Unit",
+    "hidden": false,
+    "id": "sp-hero",
+    "characteristics": [
+     {
+      "name": "M",
+      "typeId": "c-m",
+      "$text": "6\""
+     },
+     {
+      "name": "W",
+      "typeId": "c-w",
+      "$text": "5"
      }
     ]
    }

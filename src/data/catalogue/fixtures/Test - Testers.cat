@@ -15,6 +15,18 @@
   </entryLinks>
   <sharedSelectionEntries>
     <selectionEntry type="model" import="true" name="Big Walker" hidden="false" id="u-walker">
+      <profiles>
+        <profile name="Big Walker" typeId="t-unit" typeName="Unit" hidden="false" id="pu1">
+          <characteristics>
+            <characteristic name="M" typeId="c-m">8&quot;</characteristic>
+            <characteristic name="T" typeId="c-t">9</characteristic>
+            <characteristic name="Sv" typeId="c-sv">3+</characteristic>
+            <characteristic name="W" typeId="c-w">10</characteristic>
+            <characteristic name="LD" typeId="c-ld">7+</characteristic>
+            <characteristic name="OC" typeId="c-oc">3</characteristic>
+          </characteristics>
+        </profile>
+      </profiles>
       <categoryLinks>
         <categoryLink targetId="c-veh" id="l4" primary="true" name="Vehicle"/>
         <categoryLink targetId="c-fac" id="l5" primary="false" name="Faction: Testers"/>
