@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Buy list includes the paints your list's units need for their schemes and you don't have (no pot, or only wishlist / ordered / empty), on screen, in the text copy and in the PDF (#73).
+
 ## [0.4.0] - 2026-11-01
 
 Army builder: lists from your collection, rule checks per edition, detachments, buy list, import/export.

@@ -6,7 +6,7 @@ import type { Catalogue, Datasheet } from '../../domain/catalogue/types'
 import { removeEntry, updateEntry } from '../../domain/lists/list'
 import { listOwnership } from '../../domain/lists/ownership'
 import { listPoints } from '../../domain/lists/points'
-import { buyList, buyListText } from '../../domain/lists/buy'
+import { buyList, buyListText, type BuyPaint } from '../../domain/lists/buy'
 import { addFromCollection, collectionPlan } from '../../domain/lists/collection'
 import { totalModels } from '../../domain/collection/ownedUnit'
 import { isGone, setFlags } from '../../domain/collection/pipeline'
@@ -144,7 +144,7 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
 }
 
 function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave: (l: ArmyList) => void }) {
-  const { units, pipeline } = useStore()
+  const { units, pipeline, schemes, paintStock, schemeDefaults, paints, loadPaints } = useStore()
   const [highlight, setHighlight] = useState<string[]>([])
   const [choose, setChoose] = useState<Datasheet | null>(null)
   const [dropping, setDropping] = useState(false)
@@ -159,6 +159,14 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   const points = useMemo(() => listPoints(list, sheets, enhancements), [list, sheets, enhancements])
   const offered = (cat.enhancements ?? []).filter((x) => list.detachmentIds?.includes(x.detachmentId))
   const own = useMemo(() => listOwnership(list, units, pipeline), [list, units, pipeline])
+  useEffect(() => {
+    if (!paints.length) void loadPaints()
+  }, [paints.length, loadPaints])
+  const plan = useMemo(() => collectionPlan(own, units, schemes, paintStock, schemeDefaults), [own, units, schemes, paintStock, schemeDefaults])
+  const missingPaints = useMemo((): BuyPaint[] => {
+    const names = new Map(paints.map((x) => [x.id, `${x.brand} ${x.name}`]))
+    return plan.missingPaints.map((m) => ({ name: names.get(m.paintId) ?? m.paintId, schemes: m.schemes }))
+  }, [plan, paints])
   const linkedElsewhere = (entryId: string) => new Set(list.entries.filter((x) => x.id !== entryId && x.ownedUnitId).map((x) => x.ownedUnitId))
   const issues = useMemo(() => (cat.muster ? checkList(list, cat) : []), [list, cat])
   const flagged = new Set(issues.flatMap((i) => i.entryIds))
@@ -293,8 +301,8 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 </button>
               ))
             )}
-        <CollectionPanel own={own} />
-        <BuyPanel list={list} rows={buyList(list, sheets, own, points)} subtitle={[cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name].filter(Boolean).join(' · ')} />
+        <CollectionPanel own={own} plan={plan} missingPaints={missingPaints} />
+        <BuyPanel list={list} rows={buyList(list, sheets, own, points)} paints={missingPaints} subtitle={[cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name].filter(Boolean).join(' · ')} />
           </section>
         )}
       </div>
@@ -494,7 +502,7 @@ function DetachmentBar({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; 
   )
 }
 
-function BuyPanel({ list, rows: b, subtitle }: { list: ArmyList; rows: ReturnType<typeof buyList>; subtitle: string }) {
+function BuyPanel({ list, rows: b, paints, subtitle }: { list: ArmyList; rows: ReturnType<typeof buyList>; paints: BuyPaint[]; subtitle: string }) {
   const [copied, setCopied] = useState('')
   const [printing, setPrinting] = useState(false)
   if (list.entries.length === 0) return null
@@ -502,13 +510,15 @@ function BuyPanel({ list, rows: b, subtitle }: { list: ArmyList; rows: ReturnTyp
     <section className="panel grid gap-2 p-3" aria-label="Buy list">
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="font-semibold">Buy list</h2>
-        <span className="text-sm text-muted">{b.missingModels ? `${b.missingModels} model${b.missingModels === 1 ? '' : 's'} to buy` : 'You own everything in this list'}</span>
-        {b.rows.length > 0 && (
+        <span className="text-sm text-muted">
+          {[b.missingModels ? `${b.missingModels} model${b.missingModels === 1 ? '' : 's'} to buy` : 'You own every model', paints.length ? `${paints.length} paint${paints.length === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ')}
+        </span>
+        {(b.rows.length > 0 || paints.length > 0) && (
           <button
             className="btn ml-auto px-2 py-0.5 text-sm"
             onClick={() => {
               navigator.clipboard
-                .writeText(buyListText(list.name, b))
+                .writeText(buyListText(list.name, b, paints))
                 .then(() => setCopied('Copied'))
                 .catch(() => setCopied('Copy failed'))
             }}
@@ -516,12 +526,12 @@ function BuyPanel({ list, rows: b, subtitle }: { list: ArmyList; rows: ReturnTyp
             📋 Copy as text
           </button>
         )}
-        {b.rows.length > 0 && (
+        {(b.rows.length > 0 || paints.length > 0) && (
           <button className="btn px-2 py-0.5 text-sm" title="Opens the print dialog: choose “Save as PDF”" onClick={() => setPrinting(true)}>
             📄 PDF
           </button>
         )}
-        {printing && <BuyListSheet list={list} buy={b} subtitle={subtitle} onDone={() => setPrinting(false)} />}
+        {printing && <BuyListSheet list={list} buy={b} paints={paints} subtitle={subtitle} onDone={() => setPrinting(false)} />}
         {copied && <span className="text-xs text-muted" role="status">{copied}</span>}
       </div>
       {b.rows.length > 0 && (
@@ -540,18 +550,28 @@ function BuyPanel({ list, rows: b, subtitle }: { list: ArmyList; rows: ReturnTyp
           </tbody>
         </table>
       )}
+      {paints.length > 0 && (
+        <table className="text-sm" aria-label="Paints to buy">
+          <thead className="text-left text-xs text-muted">
+            <tr><th className="font-normal">Paint</th><th className="text-right font-normal">For schemes</th></tr>
+          </thead>
+          <tbody>
+            {paints.map((x) => (
+              <tr key={x.name}>
+                <td>{x.name}</td>
+                <td className="text-right text-muted">{x.schemes.join(', ')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </section>
   )
 }
 
 /** What the collection still needs for this list: models to paint (with a "next up" shortcut) and missing paints. */
-function CollectionPanel({ own }: { own: ReturnType<typeof listOwnership> }) {
-  const { units, schemes, paintStock, schemeDefaults, paints, loadPaints, saveUnit } = useStore()
-  useEffect(() => {
-    if (!paints.length) void loadPaints()
-  }, [paints.length, loadPaints])
-  const plan = useMemo(() => collectionPlan(own, units, schemes, paintStock, schemeDefaults), [own, units, schemes, paintStock, schemeDefaults])
-  const paintName = new Map(paints.map((p) => [p.id, `${p.brand} ${p.name}`]))
+function CollectionPanel({ own, plan, missingPaints }: { own: ReturnType<typeof listOwnership>; plan: ReturnType<typeof collectionPlan>; missingPaints: BuyPaint[] }) {
+  const { saveUnit } = useStore()
   if (!plan.toPaint.length && !plan.missingPaints.length) return null
   return (
     <section className="panel grid gap-2 p-3" aria-label="From my collection">
@@ -579,8 +599,8 @@ function CollectionPanel({ own }: { own: ReturnType<typeof listOwnership> }) {
         <div className="grid gap-1 text-sm">
           <p className="text-muted">Paints missing for their schemes</p>
           <ul className="grid gap-0.5">
-            {plan.missingPaints.map((m) => (
-              <li key={m.paintId}>{paintName.get(m.paintId) ?? m.paintId} <span className="text-xs text-muted">({m.schemes.join(', ')})</span></li>
+            {missingPaints.map((m) => (
+              <li key={m.name}>{m.name} <span className="text-xs text-muted">({m.schemes.join(', ')})</span></li>
             ))}
           </ul>
         </div>

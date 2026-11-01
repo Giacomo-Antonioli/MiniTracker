@@ -242,6 +242,31 @@ describe('Armies', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('not a MiniTracker list')
   })
 
+  it('puts paints missing for the units\' schemes on the buy list, text and PDF', async () => {
+    const user = await start()
+    await appDb.schemes.put({ id: 'sc1', name: 'Sept', description: '', origin: 'personal', stage: 'final', tags: [], tips: '', tutorials: [], createdAt: 't', updatedAt: 't', sections: [{ id: 's', area: 'Armour', steps: [{ id: 'p', technique: 'Basecoat', paints: [{ paintId: 'ak_interactive/3b-au-zb-au' }], notes: '' }] }] } as never)
+    const [u] = await appDb.units.toArray()
+    await appDb.units.put({ ...u, schemeId: 'sc1' })
+    await useStore.getState().load()
+    await user.click(screen.getByRole('button', { name: '+ New list' }))
+    await user.type(screen.getByLabelText('Name'), 'Painted')
+    await user.selectOptions(screen.getByLabelText('Faction'), 'Testers')
+    await user.click(screen.getByLabelText('Start with all the units I own'))
+    await user.click(screen.getByRole('button', { name: 'Create' }))
+
+    const buy = await screen.findByRole('region', { name: 'Buy list' })
+    expect(buy).toHaveTextContent('You own every model · 1 paint')
+    expect(await within(buy).findByRole('table', { name: 'Paints to buy' })).toHaveTextContent('AK Interactive 3B Au/Zb AuSept')
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    await user.click(within(buy).getByRole('button', { name: '📋 Copy as text' }))
+    expect(writeText).toHaveBeenCalledWith('Buy list – Painted\n\nPaints (1):\n- AK Interactive 3B Au/Zb Au (Sept)')
+    window.print = vi.fn()
+    await user.click(within(buy).getByRole('button', { name: '📄 PDF' }))
+    expect(screen.getByLabelText('Buy list sheet')).toHaveTextContent('Paints☐AK Interactive 3B Au/Zb AuSept')
+    expect(within(screen.getByRole('region', { name: 'From my collection' })).getByText('AK Interactive 3B Au/Zb Au')).toBeInTheDocument()
+  })
+
   it('asks to download again when the catalogue has no rule data', async () => {
     const { muster: _, ...old } = catalogue
     const user = await start({ ...old, formatVersion: 2 })
