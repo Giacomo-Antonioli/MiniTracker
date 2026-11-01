@@ -1,13 +1,14 @@
 import type { OwnedUnit, StatusEvent } from '../domain/collection/types'
 import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Photo, PhotoFiles } from '../domain/photos/types'
+import type { ArmyList } from '../domain/lists/types'
 import type { PaintScheme } from '../domain/schemes/types'
 import { buildBackupZip, isZip, readBackupZip, type PhotoEntry, type PhotoFileRef } from './backupZip'
 import type { MiniTrackerDb, SettingRow } from './db'
 
 export const BACKUP_FORMAT = 'minitracker-backup'
 /** Bump when the file layout changes; parseBackup must keep reading older versions. */
-export const BACKUP_VERSION = 3
+export const BACKUP_VERSION = 4
 
 export interface Backup {
   format: typeof BACKUP_FORMAT
@@ -25,17 +26,20 @@ export interface Backup {
     /** Added in backup v3 (zip files only). */
     photos?: Photo[]
     photoFiles?: PhotoFileRef[]
+    /** Added in backup v4. */
+    lists?: ArmyList[]
   }
 }
 
 export async function exportBackup(db: MiniTrackerDb, now: string): Promise<Backup> {
-  const [units, statusEvents, settings, paintStock, customPaints, schemes] = await Promise.all([
+  const [units, statusEvents, settings, paintStock, customPaints, schemes, lists] = await Promise.all([
     db.units.toArray(),
     db.statusEvents.toArray(),
     db.settings.toArray(),
     db.paintStock.toArray(),
     db.customPaints.toArray(),
     db.schemes.toArray(),
+    db.lists.toArray(),
   ])
   // Sort so two exports of the same data are identical.
   const byId = <T extends { id: string }>(a: T, b: T) => a.id.localeCompare(b.id)
@@ -50,6 +54,7 @@ export async function exportBackup(db: MiniTrackerDb, now: string): Promise<Back
       paintStock: paintStock.sort((a, b) => a.paintId.localeCompare(b.paintId)),
       customPaints: customPaints.sort(byId),
       schemes: schemes.sort(byId),
+      lists: lists.sort(byId),
     },
   }
 }
@@ -74,6 +79,7 @@ export function parseBackup(text: string): Backup {
   // v1 files have no paint data; v1/v2 have no photos.
   const data = { ...d, paintStock: d.paintStock ?? [], customPaints: d.customPaints ?? [] }
   if (!Array.isArray(data.paintStock) || !Array.isArray(data.customPaints)) throw new Error('This backup file is damaged or incomplete')
+  if (data.lists !== undefined && !Array.isArray(data.lists)) throw new Error('This backup file is damaged or incomplete')
   if (data.schemes !== undefined && !Array.isArray(data.schemes)) throw new Error('This backup file is damaged or incomplete')
   if ((data.photos && !Array.isArray(data.photos)) || (data.photoFiles && !Array.isArray(data.photoFiles))) throw new Error('This backup file is damaged or incomplete')
   return { ...(b as Backup), data }
@@ -85,10 +91,11 @@ export function parseBackup(text: string): Backup {
  */
 export async function importBackup(db: MiniTrackerDb, backup: Backup, photos: { photos: Photo[]; files: PhotoFiles[] } | 'keep' = 'keep'): Promise<void> {
   const { units, statusEvents, settings, paintStock, customPaints } = backup.data
-  const tables = [db.units, db.statusEvents, db.settings, db.paintStock, db.customPaints, db.schemes, db.photos, db.photoFiles]
+  const tables = [db.units, db.statusEvents, db.settings, db.paintStock, db.customPaints, db.schemes, db.lists, db.photos, db.photoFiles]
   await db.transaction('rw', tables, async () => {
-    await Promise.all([db.units.clear(), db.statusEvents.clear(), db.settings.clear(), db.paintStock.clear(), db.customPaints.clear(), db.schemes.clear()])
+    await Promise.all([db.units.clear(), db.statusEvents.clear(), db.settings.clear(), db.paintStock.clear(), db.customPaints.clear(), db.schemes.clear(), db.lists.clear()])
     await db.schemes.bulkAdd(backup.data.schemes ?? [])
+    await db.lists.bulkAdd(backup.data.lists ?? [])
     await db.units.bulkAdd(units)
     await db.statusEvents.bulkAdd(statusEvents)
     await db.settings.bulkAdd(settings)
