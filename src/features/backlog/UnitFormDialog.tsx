@@ -231,7 +231,7 @@ export function UnitFormDialog({
             <option value="">None</option>
             {schemesForUnit(
               schemes,
-              { ...(unit ?? createUnit({ customName: name || 'unit', groups: [] }, { now: '', newId: () => '' })), customName: name, factionName: faction.trim() || undefined, schemeId: effectiveScheme },
+              { ...(unit ?? createUnit({ customName: name.trim() || 'unit', groups: [] }, { now: '', newId: () => '' })), customName: name, factionName: faction.trim() || undefined, schemeId: effectiveScheme },
               datasheet,
             ).map((g) => (
               <optgroup key={g.origin} label={ORIGIN_LABEL[g.origin]}>
