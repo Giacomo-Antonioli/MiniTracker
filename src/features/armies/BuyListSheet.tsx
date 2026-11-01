@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { BuyList } from '../../domain/lists/buy'
+import type { BuyList, BuyPaint } from '../../domain/lists/buy'
 import type { ArmyList } from '../../domain/lists/types'
 
 /** Printable buy list. Rendered off-screen and printed (or saved as PDF from the print dialog), like recipe cards. */
-export function BuyListSheet({ list, buy, subtitle, onDone }: { list: ArmyList; buy: BuyList; subtitle: string; onDone: () => void }) {
+export function BuyListSheet({ list, buy, paints = [], subtitle, onDone }: { list: ArmyList; buy: BuyList; paints?: BuyPaint[]; subtitle: string; onDone: () => void }) {
   const [date] = useState(() => new Date().toLocaleDateString())
   useEffect(() => {
     const done = () => onDone()
@@ -20,6 +20,7 @@ export function BuyListSheet({ list, buy, subtitle, onDone }: { list: ArmyList; 
     <div className="print-only" aria-label="Buy list sheet">
       <h1 className="text-2xl font-bold">Buy list – {list.name}</h1>
       <p className="text-sm">{subtitle}</p>
+      {buy.rows.length > 0 && (
       <table className="mt-4 w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-black text-left">
@@ -48,6 +49,23 @@ export function BuyListSheet({ list, buy, subtitle, onDone }: { list: ArmyList; 
           </tr>
         </tfoot>
       </table>
+      )}
+      {paints.length > 0 && (
+        <>
+          <h2 className="mt-6 text-lg font-bold">Paints</h2>
+          <table className="mt-2 w-full border-collapse text-sm">
+            <tbody>
+              {paints.map((x) => (
+                <tr key={x.name} className="border-b border-black/30">
+                  <td className="w-8 py-1">☐</td>
+                  <td className="py-1">{x.name}</td>
+                  <td className="py-1 text-right text-xs">{x.schemes.join(', ')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
       <p className="mt-6 text-xs">MiniTracker · {date}</p>
     </div>,
     document.body,

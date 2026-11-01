@@ -35,9 +35,20 @@ export function buyList(l: ArmyList, sheets: Map<string, Datasheet>, own: ListOw
   return { rows: list, missingModels: list.reduce((n, r) => n + r.missingModels, 0), points: list.reduce((n, r) => n + r.points, 0) }
 }
 
+/** A paint the list's units need for their schemes and you don't have. */
+export interface BuyPaint {
+  name: string
+  schemes: string[]
+}
+
 /** Plain text, e.g. for a shopping note or a message. */
-export function buyListText(listName: string, b: BuyList): string {
-  if (!b.rows.length) return `${listName}: nothing to buy`
-  const lines = b.rows.map((r) => `- ${r.name}: ${r.missingModels} model${r.missingModels === 1 ? '' : 's'}${r.units > 1 ? ` (${r.units} units)` : ''}`)
-  return [`Buy list – ${listName}`, ...lines, `Total: ${b.missingModels} models`].join('\n')
+export function buyListText(listName: string, b: BuyList, paints: BuyPaint[] = []): string {
+  if (!b.rows.length && !paints.length) return `${listName}: nothing to buy`
+  const out = [`Buy list – ${listName}`]
+  if (b.rows.length) {
+    out.push(...b.rows.map((r) => `- ${r.name}: ${r.missingModels} model${r.missingModels === 1 ? '' : 's'}${r.units > 1 ? ` (${r.units} units)` : ''}`))
+    out.push(`Total: ${b.missingModels} models`)
+  }
+  if (paints.length) out.push('', `Paints (${paints.length}):`, ...paints.map((x) => `- ${x.name} (${x.schemes.join(', ')})`))
+  return out.join('\n')
 }

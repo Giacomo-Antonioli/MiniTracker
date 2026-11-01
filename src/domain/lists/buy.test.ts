@@ -28,5 +28,8 @@ describe('buyList', () => {
     const two = addEntry(l, { datasheetId: 'stealth', models: 1 }, ctx)
     expect(buyListText('Tau', buyList(two, sheets, listOwnership(two, units), listPoints(two, sheets)))).toContain('- Stealth: 6 models (2 units)')
     expect(buyListText('Empty', { rows: [], missingModels: 0, points: 0 })).toBe('Empty: nothing to buy')
+    const paints = [{ name: 'Citadel Abaddon Black', schemes: ['Sept', 'Night'] }]
+    expect(buyListText('Tau', b, paints)).toBe('Buy list – Tau\n- Stealth: 5 models\n- Crisis: 2 models\n- Unknown unit: 2 models\nTotal: 9 models\n\nPaints (1):\n- Citadel Abaddon Black (Sept, Night)')
+    expect(buyListText('Only paints', { rows: [], missingModels: 0, points: 0 }, paints)).toBe('Buy list – Only paints\n\nPaints (1):\n- Citadel Abaddon Black (Sept, Night)')
   })
 })
