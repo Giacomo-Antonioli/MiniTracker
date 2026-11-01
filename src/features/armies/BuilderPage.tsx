@@ -141,6 +141,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   const [highlight, setHighlight] = useState<string[]>([])
   const [choose, setChoose] = useState<Datasheet | null>(null)
   const [dropping, setDropping] = useState(false)
+  const [panelWidth, setPanelWidth] = usePanelWidth()
   const add = (d: Datasheet, factionId?: string) => {
     if (!list.factionId && !factionId && d.factionIds.length > 1) return setChoose(d)
     setChoose(null)
@@ -159,27 +160,31 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   const leadable = list.entries.filter((e) => !sheets.get(e.datasheetId)?.keywords.includes('Character'))
 
   return (
-    <div className="grid items-start gap-3 lg:grid-cols-[22rem_1fr]">
+    <div className="grid items-start gap-3 lg:grid-cols-[var(--add-w)_auto_minmax(0,1fr)] lg:gap-0" style={{ '--add-w': `${panelWidth}px` } as React.CSSProperties}>
       <AddPanel list={list} cat={cat} onAdd={add} choose={choose} onCancelChoose={() => setChoose(null)} />
-      <div className="grid gap-3">
+      <ResizeHandle width={panelWidth} onChange={setPanelWidth} />
+      {/* The whole column takes drops, down to the bottom of the screen, not just the list box. */}
+      <div
+        className="grid min-h-[calc(100vh-8rem)] content-start gap-3"
+        data-testid="drop-zone"
+        onDragOver={(ev) => {
+          if (!ev.dataTransfer.types.includes(DRAG_TYPE)) return
+          ev.preventDefault()
+          setDropping(true)
+        }}
+        onDragLeave={(ev) => {
+          if (!ev.currentTarget.contains(ev.relatedTarget as Node | null)) setDropping(false)
+        }}
+        onDrop={(ev) => {
+          setDropping(false)
+          const d = sheets.get(ev.dataTransfer.getData(DRAG_TYPE))
+          if (!d) return
+          ev.preventDefault()
+          add(d)
+        }}
+      >
         {cat.detachments && <DetachmentBar list={list} cat={cat} onSave={onSave} />}
-        <section
-          className={`panel grid gap-1 p-3 ${dropping ? 'border-accent' : ''}`}
-          aria-label="List"
-          onDragOver={(ev) => {
-            if (!ev.dataTransfer.types.includes(DRAG_TYPE)) return
-            ev.preventDefault()
-            setDropping(true)
-          }}
-          onDragLeave={() => setDropping(false)}
-          onDrop={(ev) => {
-            setDropping(false)
-            const d = sheets.get(ev.dataTransfer.getData(DRAG_TYPE))
-            if (!d) return
-            ev.preventDefault()
-            add(d)
-          }}
-        >
+        <section className={`panel grid gap-1 p-3 ${dropping ? 'border-accent' : ''}`} aria-label="List">
           {list.entries.length === 0 && <p className="text-muted">No units yet. Add them from the left: +, double-click, or drag them here.</p>}
           {list.entries.map((e) => {
             const d = sheets.get(e.datasheetId)
@@ -260,6 +265,67 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   )
 }
 
+const WIDTH_KEY = 'builderPanelWidth'
+const MIN_W = 240
+const MAX_W = 640
+const clampW = (w: number) => Math.min(MAX_W, Math.max(MIN_W, Math.round(w)))
+
+/** Width of the add panel, remembered on this device. */
+function usePanelWidth(): [number, (w: number) => void] {
+  const [w, setW] = useState(() => {
+    try {
+      const v = Number(localStorage.getItem(WIDTH_KEY))
+      return v ? clampW(v) : 352
+    } catch {
+      return 352
+    }
+  })
+  const set = (v: number) => {
+    const c = clampW(v)
+    setW(c)
+    try {
+      localStorage.setItem(WIDTH_KEY, String(c))
+    } catch {
+      /* not remembered */
+    }
+  }
+  return [w, set]
+}
+
+/** Drag (or use arrow keys) to change the add panel's width. Wide screens only; on narrow ones the columns stack. */
+function ResizeHandle({ width, onChange }: { width: number; onChange: (w: number) => void }) {
+  return (
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize unit panel"
+      aria-valuenow={width}
+      aria-valuemin={MIN_W}
+      aria-valuemax={MAX_W}
+      tabIndex={0}
+      className="group mx-1 hidden w-2 cursor-col-resize self-stretch rounded focus:outline-none lg:flex lg:justify-center"
+      onPointerDown={(ev) => {
+        ev.preventDefault()
+        const startX = ev.clientX
+        const startW = width
+        const move = (e: PointerEvent) => onChange(startW + e.clientX - startX)
+        const up = () => {
+          window.removeEventListener('pointermove', move)
+          window.removeEventListener('pointerup', up)
+        }
+        window.addEventListener('pointermove', move)
+        window.addEventListener('pointerup', up)
+      }}
+      onKeyDown={(ev) => {
+        if (ev.key === 'ArrowLeft') onChange(width - 16)
+        if (ev.key === 'ArrowRight') onChange(width + 16)
+      }}
+    >
+      <span className="w-0.5 rounded bg-muted/30 group-hover:bg-accent group-focus:bg-accent" />
+    </div>
+  )
+}
+
 /** Data type used when dragging a unit from the add panel onto the list. */
 const DRAG_TYPE = 'application/x-minitracker-datasheet'
 
@@ -288,7 +354,7 @@ function AddPanel({ list, cat, onAdd, choose, onCancelChoose }: { list: ArmyList
   const count = groups.reduce((n, [, ds]) => n + ds.length, 0)
 
   return (
-    <section className="panel grid gap-2 p-3 lg:sticky lg:top-0 lg:max-h-[calc(100vh-6rem)] lg:overflow-auto" aria-label="Add units">
+    <section className="panel grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2 p-3 lg:sticky lg:top-0 lg:max-h-[calc(100vh-6rem)] lg:overflow-auto" aria-label="Add units">
       <input className="input" placeholder="🔍 Search units" aria-label="Search units" value={text} onChange={(e) => setText(e.target.value)} />
       <div className="flex flex-wrap gap-3 text-sm">
         <label className="flex items-center gap-1">
@@ -313,7 +379,7 @@ function AddPanel({ list, cat, onAdd, choose, onCancelChoose }: { list: ArmyList
         </p>
       )}
       {groups.map(([role, ds]) => (
-        <div key={role} className="grid gap-0.5">
+        <div key={role} className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-0.5">
           <h3 className="text-xs uppercase tracking-wide text-muted">{role}</h3>
           {ds.slice(0, 200).map((d) => (
             <div

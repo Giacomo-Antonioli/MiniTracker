@@ -128,14 +128,27 @@ describe('Armies', () => {
 
     const data = new Map<string, string>()
     const dataTransfer = { setData: (t: string, v: string) => data.set(t, v), getData: (t: string) => data.get(t) ?? '', get types() { return [...data.keys()] }, effectAllowed: '' }
-    const target = screen.getByRole('region', { name: 'List' })
+    // Drop on the empty space of the right column, below the list.
+    const target = screen.getByTestId('drop-zone')
     fireEvent.dragStart(row, { dataTransfer })
     fireEvent.dragOver(target, { dataTransfer })
+    expect(screen.getByRole('region', { name: 'List' })).toHaveClass('border-accent')
     fireEvent.drop(target, { dataTransfer })
     expect(screen.getAllByTestId('entry')).toHaveLength(2)
+    expect(screen.getByRole('region', { name: 'List' })).not.toHaveClass('border-accent')
     // Dropping something else does nothing.
     fireEvent.drop(target, { dataTransfer: { ...dataTransfer, getData: () => 'nope' } })
     expect(screen.getAllByTestId('entry')).toHaveLength(2)
+
+    // The unit panel can be resized (arrow keys here), within limits, and the width is remembered.
+    const handle = screen.getByRole('separator', { name: 'Resize unit panel' })
+    expect(handle).toHaveAttribute('aria-valuenow', '352')
+    handle.focus()
+    await user.keyboard('{ArrowRight}{ArrowRight}')
+    expect(handle).toHaveAttribute('aria-valuenow', '384')
+    for (let i = 0; i < 20; i++) await user.keyboard('{ArrowLeft}')
+    expect(handle).toHaveAttribute('aria-valuenow', '240')
+    expect(localStorage.getItem('builderPanelWidth')).toBe('240')
   })
 
   it('asks to download again when the catalogue has no rule data', async () => {
