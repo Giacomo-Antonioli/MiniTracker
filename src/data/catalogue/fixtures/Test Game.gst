@@ -17,4 +17,41 @@
       <description>This unit can be set up in Reserves.</description>
     </rule>
   </sharedRules>
+  <forceEntries>
+    <forceEntry id="f-crusade" name="Crusade Force" hidden="false"/>
+    <forceEntry id="f-army" name="Army Roster" hidden="false">
+      <categoryLinks>
+        <categoryLink id="fl-char" name="Character" hidden="false" targetId="c-char" primary="false">
+          <constraints>
+            <constraint type="min" value="1" field="selections" scope="roster" shared="true" id="min-char"/>
+          </constraints>
+          <modifiers>
+            <modifier type="set" value="0" field="min-char">
+              <conditionGroups>
+                <conditionGroup type="or">
+                  <conditions>
+                    <condition type="instanceOf" value="1" field="selections" scope="primary-catalogue" childId="cat-sub" shared="true"/>
+                  </conditions>
+                </conditionGroup>
+              </conditionGroups>
+            </modifier>
+          </modifiers>
+        </categoryLink>
+        <categoryLink id="fl-inf" name="Infantry" hidden="false" targetId="c-inf" primary="false"/>
+      </categoryLinks>
+    </forceEntry>
+  </forceEntries>
+  <sharedSelectionEntries>
+    <selectionEntry type="upgrade" import="true" name="Battle Size" hidden="false" id="e-bs">
+      <selectionEntryGroups>
+        <selectionEntryGroup name="Battle Size" hidden="false" id="g-bs">
+          <selectionEntries>
+            <selectionEntry type="upgrade" import="true" name="2. Strike Force (2000 Point limit)" hidden="false" id="bs-sf"/>
+            <selectionEntry type="upgrade" import="true" name="1. Incursion (1000 Point limit)" hidden="false" id="bs-inc"/>
+            <selectionEntry type="upgrade" import="true" name="Something else" hidden="false" id="bs-x"/>
+          </selectionEntries>
+        </selectionEntryGroup>
+      </selectionEntryGroups>
+    </selectionEntry>
+  </sharedSelectionEntries>
 </gameSystem>

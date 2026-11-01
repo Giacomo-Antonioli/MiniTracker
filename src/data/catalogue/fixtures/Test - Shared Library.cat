@@ -7,6 +7,9 @@
         <categoryLink targetId="c-bl" id="l2" primary="true" name="Battleline"/>
         <categoryLink targetId="c-fac" id="l3" primary="false" name="Faction: Testers"/>
       </categoryLinks>
+      <constraints>
+        <constraint type="max" value="0" field="selections" scope="force" shared="true" id="lim-t"/>
+      </constraints>
       <profiles>
         <profile name="Hold the Line" typeId="t-ab" typeName="Abilities" hidden="false" id="p1">
           <characteristics>
@@ -53,6 +56,11 @@
         <cost name="Experience" typeId="xp-id" value="0"/>
       </costs>
       <modifiers>
+        <modifier type="set" value="6" field="lim-t">
+          <conditions>
+            <condition type="atLeast" value="1" field="selections" scope="roster" childId="det-x" shared="true"/>
+          </conditions>
+        </modifier>
         <modifier type="set" value="160" field="pts-id">
           <conditions>
             <condition type="atLeast" value="6" field="selections" scope="u-troopers" childId="g-troopers" id="c1"/>

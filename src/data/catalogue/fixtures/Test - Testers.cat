@@ -21,6 +21,17 @@
       <costs>
         <cost name="pts" typeId="pts-id" value="150"/>
       </costs>
+      <constraints>
+        <constraint type="max" value="3" field="selections" scope="force" shared="true" id="lim-w"/>
+        <constraint type="max" value="1" field="selections" scope="parent" shared="true" id="lim-w-parent"/>
+      </constraints>
+      <modifiers>
+        <modifier type="set" value="2" field="lim-w">
+          <conditions>
+            <condition type="atLeast" value="1" field="selections" scope="roster" childId="bs-inc" shared="true"/>
+          </conditions>
+        </modifier>
+      </modifiers>
     </selectionEntry>
     <selectionEntry type="unit" import="true" name="Secret Thing" hidden="false" id="u-secret">
       <costs><cost name="pts" typeId="pts-id" value="1"/></costs>

@@ -183,13 +183,38 @@
       "type": "set",
       "value": 3,
       "field": "xp-id"
+     },
+     {
+      "type": "set",
+      "value": 6,
+      "field": "lim-t",
+      "conditions": [
+       {
+        "type": "atLeast",
+        "value": 1,
+        "field": "selections",
+        "scope": "roster",
+        "childId": "det-x",
+        "shared": true
+       }
+      ]
      }
     ],
     "type": "unit",
     "import": true,
     "name": "Line Troopers",
     "hidden": false,
-    "id": "u-troopers"
+    "id": "u-troopers",
+    "constraints": [
+     {
+      "type": "max",
+      "value": 0,
+      "field": "selections",
+      "scope": "force",
+      "shared": true,
+      "id": "lim-t"
+     }
+    ]
    },
    {
     "selectionEntries": [

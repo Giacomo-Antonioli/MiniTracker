@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pointsFor } from '../../domain/catalogue/points'
-import { parseBsData } from './bsdata'
+import { applyModifier, parseBsData } from './bsdata'
 
 const raw = import.meta.glob('./fixtures/*', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
 const files = Object.entries(raw).map(([path, text]) => ({ name: path.split('/').pop()!, text }))
@@ -77,7 +77,7 @@ describe('parseBsData', () => {
 
 describe('rules', () => {
   it('reads core rules from the game system and faction rules from catalogues', () => {
-    expect(cat.formatVersion).toBe(2)
+    expect(cat.formatVersion).toBe(3)
     expect(cat.rules!.map((r) => [r.name, r.kind])).toEqual([
       ['Assault', 'core'],
       ['Deep Strike', 'core'],
@@ -103,5 +103,32 @@ describe('pointsFor', () => {
     expect(pointsFor(d, 10)).toBe(160)
     expect(() => pointsFor(d, 4)).toThrow(/5–10/)
     expect(() => pointsFor(d, 11)).toThrow(/5–10/)
+  })
+
+  it('reads battle sizes and keyword minimums from the main force', () => {
+    expect(cat.formatVersion).toBe(3)
+    expect(cat.muster).toEqual({
+      battleSizes: [
+        { id: 'bs-inc', name: 'Incursion', pointsLimit: 1000 },
+        { id: 'bs-sf', name: 'Strike Force', pointsLimit: 2000 },
+      ],
+      keywordMinimums: [{ keyword: 'Character', min: 1, exemptFactionIds: ['cat-sub'] }],
+    })
+  })
+
+  it('reads army limits, with battle size changes, from the unit or a keyword only it has', () => {
+    expect(ds('Big Walker').armyLimit).toEqual({ max: 3, byBattleSize: { 'bs-inc': 2 } })
+    expect(ds('Old Hero').armyLimit).toEqual({ max: 1 })
+  })
+
+  it('skips limits changed by conditions it cannot read', () => {
+    expect(ds('Line Troopers').armyLimit).toBeUndefined()
+  })
+})
+
+describe('applyModifier', () => {
+  it('sets, increments and decrements limits; ignores other types', () => {
+    const m = (type: string, value: string) => ({ type, value }) as never
+    expect([applyModifier(3, m('set', '2')), applyModifier(3, m('increment', '1')), applyModifier(3, m('decrement', '1')), applyModifier(3, m('append', '9'))]).toEqual([2, 4, 2, 3])
   })
 })

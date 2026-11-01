@@ -62,7 +62,42 @@
     "import": true,
     "name": "Big Walker",
     "hidden": false,
-    "id": "u-walker"
+    "id": "u-walker",
+    "constraints": [
+     {
+      "type": "max",
+      "value": 3,
+      "field": "selections",
+      "scope": "force",
+      "shared": true,
+      "id": "lim-w"
+     },
+     {
+      "type": "max",
+      "value": 1,
+      "field": "selections",
+      "scope": "parent",
+      "shared": true,
+      "id": "lim-w-parent"
+     }
+    ],
+    "modifiers": [
+     {
+      "type": "set",
+      "value": 2,
+      "field": "lim-w",
+      "conditions": [
+       {
+        "type": "atLeast",
+        "value": 1,
+        "field": "selections",
+        "scope": "roster",
+        "childId": "bs-inc",
+        "shared": true
+       }
+      ]
+     }
+    ]
    },
    {
     "costs": [

@@ -42,6 +42,105 @@
   "name": "Test Game",
   "revision": 3,
   "battleScribeVersion": 2.03,
-  "type": "gameSystem"
+  "type": "gameSystem",
+  "forceEntries": [
+   {
+    "id": "f-crusade",
+    "name": "Crusade Force",
+    "hidden": false
+   },
+   {
+    "id": "f-army",
+    "name": "Army Roster",
+    "hidden": false,
+    "categoryLinks": [
+     {
+      "id": "fl-char",
+      "name": "Character",
+      "hidden": false,
+      "targetId": "c-char",
+      "primary": false,
+      "constraints": [
+       {
+        "type": "min",
+        "value": 1,
+        "field": "selections",
+        "scope": "roster",
+        "shared": true,
+        "id": "min-char"
+       }
+      ],
+      "modifiers": [
+       {
+        "type": "set",
+        "value": 0,
+        "field": "min-char",
+        "conditionGroups": [
+         {
+          "type": "or",
+          "conditions": [
+           {
+            "type": "instanceOf",
+            "value": 1,
+            "field": "selections",
+            "scope": "primary-catalogue",
+            "childId": "cat-sub",
+            "shared": true
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "id": "fl-inf",
+      "name": "Infantry",
+      "hidden": false,
+      "targetId": "c-inf",
+      "primary": false
+     }
+    ]
+   }
+  ],
+  "sharedSelectionEntries": [
+   {
+    "type": "upgrade",
+    "import": true,
+    "name": "Battle Size",
+    "hidden": false,
+    "id": "e-bs",
+    "selectionEntryGroups": [
+     {
+      "name": "Battle Size",
+      "hidden": false,
+      "id": "g-bs",
+      "selectionEntries": [
+       {
+        "type": "upgrade",
+        "import": true,
+        "name": "2. Strike Force (2000 Point limit)",
+        "hidden": false,
+        "id": "bs-sf"
+       },
+       {
+        "type": "upgrade",
+        "import": true,
+        "name": "1. Incursion (1000 Point limit)",
+        "hidden": false,
+        "id": "bs-inc"
+       },
+       {
+        "type": "upgrade",
+        "import": true,
+        "name": "Something else",
+        "hidden": false,
+        "id": "bs-x"
+       }
+      ]
+     }
+    ]
+   }
+  ]
  }
 }

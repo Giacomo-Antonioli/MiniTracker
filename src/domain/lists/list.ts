@@ -1,7 +1,7 @@
 import type { Ctx } from '../collection/types'
 import type { ArmyList, ListEntry } from './types'
 
-export type NewList = Pick<ArmyList, 'name' | 'edition' | 'factionId' | 'battleSize' | 'pointsLimit'> & Partial<Pick<ArmyList, 'status' | 'notes' | 'detachmentId'>>
+export type NewList = Pick<ArmyList, 'name' | 'edition' | 'battleSize' | 'pointsLimit'> & Partial<Pick<ArmyList, 'factionId' | 'status' | 'notes' | 'detachmentId'>>
 
 /** Throws a user-readable error if the list can't be stored. Rule problems are NOT errors (see #56). */
 export function validateList(l: ArmyList): void {
