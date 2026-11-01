@@ -32,6 +32,10 @@ No account, no server: your collection stays in your browser. Install it from th
 - **Searchable unit picker.** Type to find the exact datasheet when adding a unit; faction, size and live points fill in.
 - **Catalogue browser.** Every unit with points by size, abilities, wargear and keywords, plus how many you own.
 
+**Coming in v0.3**
+
+- **Paints.** ~1,500 Citadel, Army Painter, Vallejo and AK paints with colour swatches; inventory with stages (wishlist → in use → running low → empty), pots, price, shop, storage location, barcode, rating and notes; custom paints; CSV import/export.
+
 | Forum 2005 theme | Moving models |
 |---|---|
 | ![Forum 2005 theme](docs/screenshots/backlog-forum2005.png) | ![Move models dialog](docs/screenshots/move-models.png) |
@@ -99,6 +103,7 @@ Bug reports and ideas are welcome as [issues](https://github.com/Giacomo-Antonio
 
 ## Credits
 
+- Paint list: [minipainter](https://github.com/ArturSkowronski/minipainter) by Artur Skowronski (MIT), see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 - Unit and points data: the community-maintained [BSData](https://github.com/BSData) files ([wh40k-10e](https://github.com/BSData/wh40k-10e)). MiniTracker does not include or redistribute this data: each user's browser downloads it from BSData. A [daily check](.github/workflows/bsdata-check.yml) makes sure the download still works.
 
 ## License

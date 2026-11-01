@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { BacklogPage } from '../features/backlog/BacklogPage'
 import { CatalogueBrowser } from '../features/catalogue/CatalogueBrowser'
+import { PaintsPage } from '../features/paints/PaintsPage'
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { useStore } from './store'
 
-type Page = 'backlog' | 'browse' | 'settings'
+type Page = 'backlog' | 'browse' | 'paints' | 'settings'
 
-const SOON = ['Paints', 'Army lists', 'Games', 'Shopping']
+const SOON = ['Schemes', 'Army lists', 'Games', 'Shopping']
 
 export default function App() {
   const { ready, load, theme } = useStore()
@@ -42,6 +43,7 @@ export default function App() {
         <div className="mb-4 font-display text-lg tracking-wide text-accent">MiniTracker</div>
         {nav('backlog', 'Backlog')}
         {nav('browse', 'Catalogue')}
+        {nav('paints', 'Paints')}
         {SOON.map((s) => (
           <span key={s} className="px-3 py-1.5 text-muted/60" title="Coming in a later sprint">{s} ⌛</span>
         ))}
@@ -62,6 +64,8 @@ export default function App() {
           <p className="text-muted">Loading…</p>
         ) : page === 'backlog' ? (
           <BacklogPage />
+        ) : page === 'paints' ? (
+          <PaintsPage />
         ) : page === 'browse' ? (
           <CatalogueBrowser onOpenSettings={() => go('settings', 'catalogue')} />
         ) : (

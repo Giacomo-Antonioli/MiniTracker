@@ -40,4 +40,20 @@ describe('schema migrations', () => {
     expect(await db.settings.get('pipeline')).toBeDefined()
     await db.delete()
   })
+
+  it('v2 → v3 adds empty paint tables and keeps catalogues', async () => {
+    const name = `mig-${Math.random()}`
+    const v2 = new Dexie(name)
+    v2.version(1).stores({ units: 'id, customName, lifecycle, factionId, updatedAt', statusEvents: 'id, unitId, date', settings: 'key' })
+    v2.version(2).stores({ catalogues: 'gameId' })
+    await v2.table('catalogues').put({ gameId: 'g', datasheets: [] })
+    v2.close()
+
+    const db = new MiniTrackerDb(name)
+    await db.open()
+    expect(await db.paintStock.count()).toBe(0)
+    expect(await db.customPaints.count()).toBe(0)
+    expect(await db.catalogues.get('g')).toBeDefined()
+    await db.delete()
+  })
 })

@@ -1,3 +1,4 @@
+import type { PaintDef, PaintStock } from '../../domain/paints/types'
 import type { Catalogue } from '../../domain/catalogue/types'
 import { validatePipeline } from '../../domain/collection/pipeline'
 import { DEFAULT_PIPELINES, type PipelineKey } from '../../domain/pipelines'
@@ -92,5 +93,41 @@ export class DexieCatalogueRepository {
 
   async clear(): Promise<void> {
     await this.db.catalogues.clear()
+  }
+}
+
+export class DexiePaintRepository {
+  private db: MiniTrackerDb
+  constructor(db: MiniTrackerDb) {
+    this.db = db
+  }
+
+  listStock(): Promise<PaintStock[]> {
+    return this.db.paintStock.toArray()
+  }
+
+  async saveStock(s: PaintStock): Promise<void> {
+    await this.db.paintStock.put(s)
+  }
+
+  async deleteStock(paintId: string): Promise<void> {
+    await this.db.paintStock.delete(paintId)
+  }
+
+  listCustom(): Promise<PaintDef[]> {
+    return this.db.customPaints.toArray()
+  }
+
+  async saveCustom(p: PaintDef): Promise<void> {
+    if (!p.custom) throw new Error('Only custom paints can be saved')
+    await this.db.customPaints.put(p)
+  }
+
+  /** Deletes a custom paint and its stock. */
+  async deleteCustom(id: string): Promise<void> {
+    await this.db.transaction('rw', this.db.customPaints, this.db.paintStock, async () => {
+      await this.db.paintStock.delete(id)
+      await this.db.customPaints.delete(id)
+    })
   }
 }
