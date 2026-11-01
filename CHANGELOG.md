@@ -15,7 +15,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 - Backups include the paint inventory and custom paints (backup format v2; v1 files still import) (#26).
 - Photos for units and painting steps: original kept untouched, compressed copy (max 1600px, WebP/JPEG) shown in the app; gallery, viewer with captions, next/previous, download original, delete (#28).
 - Photo file names built from the mini: `<faction>_<unit>_<unit-tag>_<stage>_<date>_<nn>`, where the unit tag (`mt-xxxxxxxx`) is permanent and will be shared with QR/NFC tags (#28).
-- Settings → Storage shows photo usage and browser storage (#28).
+- Settings → Storage shows photo usage and browser storage, and can remove originals to free space (#28).
+- Backups are now one .zip with photos: **Light** (compressed copies, small) or **Full** (with originals), estimated size shown; built one photo at a time to keep memory low; images stored without re-compressing. Restoring a light backup keeps originals still on the device; older .json backups still import (#28).
 - Backlog banner when no unit catalogue is installed, with a one-click download and progress; can be hidden (#33).
 
 ## [0.2.0] - 2026-11-01

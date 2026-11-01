@@ -34,6 +34,19 @@ describe('PhotoRepository', () => {
     await db.delete()
   })
 
+  it('drops originals but keeps the shown copies', async () => {
+    const db = new MiniTrackerDb(`ph-${Math.random()}`)
+    const repo = new DexiePhotoRepository(db)
+    await repo.add(photo('p1', 'u1', 'a.jpg'), files('p1'))
+    await repo.add({ ...photo('p2', 'u1', 'b.jpg'), hasOriginal: false }, { id: 'p2', display: new Blob(['d']) })
+    expect(await repo.dropOriginals()).toBe(1000)
+    expect((await repo.usage()).originalBytes).toBe(0)
+    const f = await repo.files('p1')
+    expect(f?.original).toBeUndefined()
+    expect(f?.display).toBeDefined()
+    await db.delete()
+  })
+
   it('refuses duplicate file names and mismatched ids', async () => {
     const db = new MiniTrackerDb(`ph-${Math.random()}`)
     const repo = new DexiePhotoRepository(db)

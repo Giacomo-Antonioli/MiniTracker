@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { exportBackup, importBackup, parseBackup } from '../data/backup'
+import { exportBackupZip, importBackupFile } from '../data/backup'
 import { MiniTrackerDb } from '../data/db'
 import { convert } from '../data/catalogue/convert'
 import { BSDATA_40K, downloadDataFiles, latestCommit } from '../data/catalogue/fetch'
@@ -96,10 +96,12 @@ interface State {
   deletePhoto(photo: Photo): Promise<void>
   photoUsage(): ReturnType<DexiePhotoRepository['usage']>
   savePipeline(p: Pipeline): Promise<void>
-  /** JSON text of a full backup. */
-  exportBackup(): Promise<string>
-  /** Replace all data with a backup file's text, then reload. */
-  importBackup(text: string): Promise<void>
+  /** Backup zip; originals included only when asked. */
+  exportBackup(includeOriginals: boolean): Promise<Blob>
+  /** Replace all data with a backup file (zip or older JSON), then reload. Returns the unit and photo counts. */
+  importBackup(file: Blob): Promise<{ units: number; photos: number; exportedAt: string }>
+  /** Free space by deleting photo originals. Returns bytes freed. */
+  dropOriginals(): Promise<number>
 }
 
 export const useStore = create<State>((set, get) => ({
@@ -320,13 +322,20 @@ export const useStore = create<State>((set, get) => ({
     return get().savePipelineFor('painting', p)
   },
 
-  async exportBackup() {
-    return JSON.stringify(await exportBackup(db, new Date().toISOString()), null, 2)
+  exportBackup(includeOriginals) {
+    return exportBackupZip(db, new Date().toISOString(), includeOriginals)
   },
 
-  async importBackup(text) {
-    await importBackup(db, parseBackup(text))
-    set({ events: {} })
+  async importBackup(file) {
+    const b = await importBackupFile(db, file)
+    set({ events: {}, photos: {} })
     await get().load()
+    return { units: b.data.units.length, photos: b.data.photos?.length ?? 0, exportedAt: b.exportedAt }
+  },
+
+  async dropOriginals() {
+    const freed = await photoRepo.dropOriginals()
+    set({ photos: {} })
+    return freed
   },
 }))

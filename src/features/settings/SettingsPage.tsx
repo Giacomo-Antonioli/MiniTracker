@@ -104,6 +104,8 @@ const mb = (b: number) => `${(b / 1024 / 1024).toFixed(1)} MB`
 
 function StorageInfo() {
   const photoUsage = useStore((s) => s.photoUsage)
+  const dropOriginals = useStore((s) => s.dropOriginals)
+  const [freed, setFreed] = useState<number | null>(null)
   const [usage, setUsage] = useState<{ photos: number; displayBytes: number; originalBytes: number } | null>(null)
   const [quota, setQuota] = useState<{ usage?: number; quota?: number } | null>(null)
   useEffect(() => {
@@ -121,7 +123,20 @@ function StorageInfo() {
           This browser uses {mb(quota.usage ?? 0)} of about {mb(quota.quota)} available to MiniTracker.
         </p>
       )}
-      <p className="text-muted">Everything stays on this device. Photos are not in backups yet; that arrives next (light or full backups).</p>
+      <p className="text-muted">Everything stays on this device. The app shows the compressed copies; originals are only needed to download them at full quality.</p>
+      {usage && usage.originalBytes > 0 && (
+        <button
+          className="btn btn-danger mt-2 w-fit"
+          onClick={async () => {
+            if (!confirm(`Delete all photo originals and keep only the compressed copies? This frees about ${mb(usage.originalBytes)}. Make a full backup first if you want to keep them.`)) return
+            setFreed(await dropOriginals())
+            setUsage(await photoUsage())
+          }}
+        >
+          Remove originals (free {mb(usage.originalBytes)})
+        </button>
+      )}
+      {freed !== null && <p className="text-ok" role="status">Freed {mb(freed)}.</p>}
     </div>
   )
 }
