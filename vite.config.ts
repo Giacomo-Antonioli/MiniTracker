@@ -30,7 +30,7 @@ export default defineConfig({
     setupFiles: ['src/test/setup.ts'],
     coverage: {
       include: ['src/domain/**', 'src/data/**'],
-      exclude: ['**/*.test.ts', '**/types.ts'],
+      exclude: ['**/*.test.ts', '**/types.ts', '**/fixtures/**', 'src/data/catalogue/convert.ts', 'src/data/catalogue/parse.worker.ts'] /* worker glue: covered by e2e/catalogue.spec.ts */,
       thresholds: { lines: 90, branches: 90, functions: 90, statements: 90 },
     },
   },

@@ -1,3 +1,4 @@
+import type { Catalogue } from '../../domain/catalogue/types'
 import { DEFAULT_PIPELINE, validatePipeline } from '../../domain/collection/pipeline'
 import type { OwnedUnit, Pipeline, StatusEvent } from '../../domain/collection/types'
 import type { MiniTrackerDb } from '../db'
@@ -66,5 +67,28 @@ export class DexieSettingsRepository implements SettingsRepository {
   async savePipeline(pipeline: Pipeline) {
     validatePipeline(pipeline)
     await this.db.settings.put({ key: PIPELINE_KEY, value: pipeline })
+  }
+}
+
+export class DexieCatalogueRepository {
+  private db: MiniTrackerDb
+  constructor(db: MiniTrackerDb) {
+    this.db = db
+  }
+
+  /** The installed catalogue (one game for now). */
+  async current(): Promise<Catalogue | undefined> {
+    return (await this.db.catalogues.toArray())[0]
+  }
+
+  async replace(c: Catalogue): Promise<void> {
+    await this.db.transaction('rw', this.db.catalogues, async () => {
+      await this.db.catalogues.clear()
+      await this.db.catalogues.put(c)
+    })
+  }
+
+  async clear(): Promise<void> {
+    await this.db.catalogues.clear()
   }
 }

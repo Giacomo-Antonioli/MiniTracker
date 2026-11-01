@@ -1,0 +1,48 @@
+name: BSData check
+# Daily: is the BSData 40k link still valid, and does our parser still read it correctly?
+# Opens an issue on failure; closes it when the check passes again.
+on:
+  schedule:
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths: ['src/data/catalogue/**', 'tools/**', '.github/workflows/bsdata-check.yml']
+permissions:
+  contents: read
+  issues: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - id: live
+        run: npm run check:bsdata
+        env:
+          # Avoids GitHub API rate limits on shared runners.
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Open an issue on failure
+        if: failure() && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RUN="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          OPEN=$(gh issue list --label bsdata-check --state open --json number --jq '.[0].number')
+          if [ -n "$OPEN" ]; then
+            gh issue comment "$OPEN" --body "Still failing on $(date -u +%F): $RUN"
+          else
+            gh issue create --label bsdata-check --title "BSData check failing" \
+              --body "The daily check against BSData/wh40k-10e failed: $RUN
+
+          The catalogue download in the app may be broken (repo moved or renamed, files changed, or the parser needs updating)."
+          fi
+      - name: Close the issue when fixed
+        if: success() && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --label bsdata-check --state open --json number --jq '.[].number'); do
+            gh issue close "$n" --comment "BSData check passing again on $(date -u +%F)."
+          done

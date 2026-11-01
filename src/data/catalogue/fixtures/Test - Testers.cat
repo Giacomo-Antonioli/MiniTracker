@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<catalogue xmlns="http://www.battlescribe.net/schema/catalogueSchema" library="false" id="cat-testers" name="Test - Testers" gameSystemId="sys-test" revision="7" type="catalogue">
+  <catalogueLinks>
+    <catalogueLink type="catalogue" name="Test - Shared Library" id="cl1" targetId="cat-lib" importRootEntries="true"/>
+  </catalogueLinks>
+  <entryLinks>
+    <entryLink import="true" name="Big Walker" hidden="false" type="selectionEntry" id="el10" targetId="u-walker"/>
+    <entryLink import="true" name="Secret Thing" hidden="true" type="selectionEntry" id="el11" targetId="u-secret"/>
+  </entryLinks>
+  <sharedSelectionEntries>
+    <selectionEntry type="model" import="true" name="Big Walker" hidden="false" id="u-walker">
+      <categoryLinks>
+        <categoryLink targetId="c-veh" id="l4" primary="true" name="Vehicle"/>
+        <categoryLink targetId="c-fac" id="l5" primary="false" name="Faction: Testers"/>
+      </categoryLinks>
+      <costs>
+        <cost name="pts" typeId="pts-id" value="150"/>
+      </costs>
+    </selectionEntry>
+    <selectionEntry type="unit" import="true" name="Secret Thing" hidden="false" id="u-secret">
+      <costs><cost name="pts" typeId="pts-id" value="1"/></costs>
+    </selectionEntry>
+    <selectionEntry type="upgrade" import="true" name="Rifle" hidden="false" id="w-rifle"/>
+  </sharedSelectionEntries>
+</catalogue>

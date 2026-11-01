@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { BacklogPage } from '../features/backlog/BacklogPage'
 import { BackupPage } from '../features/settings/BackupPage'
+import { CataloguePage } from '../features/settings/CataloguePage'
 import { PipelinePage } from '../features/settings/PipelinePage'
 import { useStore } from './store'
 
-type Page = 'backlog' | 'pipeline' | 'backup'
+type Page = 'backlog' | 'pipeline' | 'catalogue' | 'backup'
 const THEMES = { grimdark: 'Grimdark', forum2005: 'Forum 2005' } as const
 type Theme = keyof typeof THEMES
 
@@ -57,6 +58,7 @@ export default function App() {
         ))}
         <div className="mt-4 mb-1 px-3 text-xs uppercase tracking-wider text-muted">Settings</div>
         {nav('pipeline', 'Pipeline')}
+        {nav('catalogue', 'Catalogue')}
         {nav('backup', 'Backup')}
         <label className="mt-auto grid gap-1 px-3 text-xs text-muted">
           Theme
@@ -80,6 +82,8 @@ export default function App() {
           <BacklogPage />
         ) : page === 'pipeline' ? (
           <PipelinePage />
+        ) : page === 'catalogue' ? (
+          <CataloguePage />
         ) : (
           <BackupPage />
         )}

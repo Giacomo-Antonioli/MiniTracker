@@ -26,4 +26,18 @@ describe('schema migrations', () => {
     expect(await db.statusEvents.where('unitId').equals('u1').count()).toBe(1)
     await db.delete()
   })
+
+  it('v1 → v2 adds an empty catalogues table and keeps everything else', async () => {
+    const name = `mig-${Math.random()}`
+    const v1 = new Dexie(name)
+    v1.version(1).stores({ units: 'id, customName, lifecycle, factionId, updatedAt', statusEvents: 'id, unitId, date', settings: 'key' })
+    await v1.table('settings').put({ key: 'pipeline', value: { stages: [] } })
+    v1.close()
+
+    const db = new MiniTrackerDb(name)
+    await db.open()
+    expect(await db.catalogues.count()).toBe(0)
+    expect(await db.settings.get('pipeline')).toBeDefined()
+    await db.delete()
+  })
 })

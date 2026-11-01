@@ -11,10 +11,12 @@
     "test": "vitest run",
     "typecheck": "tsc -b",
     "test:coverage": "vitest run --coverage",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "check:bsdata": "vitest run --config vitest.live.config.ts"
   },
   "dependencies": {
     "dexie": "^4.4.7",
+    "fast-xml-parser": "^5.11.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "zustand": "^5.0.16"

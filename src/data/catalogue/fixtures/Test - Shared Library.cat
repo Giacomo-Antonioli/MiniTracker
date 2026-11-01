@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<catalogue xmlns="http://www.battlescribe.net/schema/catalogueSchema" library="true" id="cat-lib" name="Test - Shared Library" gameSystemId="sys-test" revision="2" type="catalogue">
+  <selectionEntries>
+    <selectionEntry type="unit" import="true" name="Line Troopers" hidden="false" id="u-troopers">
+      <categoryLinks>
+        <categoryLink targetId="c-inf" id="l1" primary="false" name="Infantry"/>
+        <categoryLink targetId="c-bl" id="l2" primary="true" name="Battleline"/>
+        <categoryLink targetId="c-fac" id="l3" primary="false" name="Faction: Testers"/>
+      </categoryLinks>
+      <profiles>
+        <profile name="Hold the Line" typeId="t-ab" typeName="Abilities" hidden="false" id="p1"/>
+      </profiles>
+      <selectionEntryGroups>
+        <selectionEntryGroup name="Troopers" hidden="false" id="g-troopers">
+          <selectionEntries>
+            <selectionEntry type="model" import="true" name="Sergeant" hidden="false" id="m-sgt">
+              <constraints>
+                <constraint type="min" value="1" field="selections" scope="parent" id="k1"/>
+                <constraint type="max" value="1" field="selections" scope="parent" id="k2"/>
+              </constraints>
+              <selectionEntryGroups>
+                <selectionEntryGroup name="Weapon" hidden="false" id="g-w">
+                  <entryLinks>
+                    <entryLink import="true" name="Rifle" hidden="false" type="selectionEntry" id="el1" targetId="w-rifle"/>
+                    <entryLink import="true" name="Sword" hidden="false" type="selectionEntry" id="el2" targetId="w-sword"/>
+                    <entryLink import="true" name="Weapon Modifications" hidden="false" type="selectionEntryGroup" id="el3" targetId="g-mods"/>
+                  </entryLinks>
+                </selectionEntryGroup>
+              </selectionEntryGroups>
+            </selectionEntry>
+            <selectionEntry type="model" import="true" name="Trooper" hidden="false" id="m-trooper">
+              <selectionEntries>
+                <selectionEntry type="upgrade" import="true" name="Flamer" hidden="false" id="w-flamer"/>
+              </selectionEntries>
+            </selectionEntry>
+          </selectionEntries>
+          <constraints>
+            <constraint type="min" value="5" field="selections" scope="parent" id="k3"/>
+            <constraint type="max" value="10" field="selections" scope="parent" id="k4"/>
+          </constraints>
+        </selectionEntryGroup>
+      </selectionEntryGroups>
+      <costs>
+        <cost name="pts" typeId="pts-id" value="80"/>
+        <cost name="Experience" typeId="xp-id" value="0"/>
+      </costs>
+      <modifiers>
+        <modifier type="set" value="160" field="pts-id">
+          <conditions>
+            <condition type="atLeast" value="6" field="selections" scope="u-troopers" childId="g-troopers" id="c1"/>
+          </conditions>
+        </modifier>
+        <modifier type="set" value="3" field="xp-id"/>
+      </modifiers>
+    </selectionEntry>
+    <selectionEntry type="unit" import="true" name="Big Beasts" hidden="false" id="u-beasts">
+      <selectionEntries>
+        <selectionEntry type="model" import="true" name="Big Beast" hidden="false" id="m-beast">
+          <constraints>
+            <constraint type="min" value="1" field="selections" scope="parent" id="k5"/>
+            <constraint type="max" value="3" field="selections" scope="parent" id="k6"/>
+          </constraints>
+          <costs><cost name="pts" typeId="pts-id" value="90"/></costs>
+        </selectionEntry>
+      </selectionEntries>
+    </selectionEntry>
+    <selectionEntry type="unit" import="true" name="Optional Band" hidden="false" id="u-band">
+      <selectionEntries>
+        <selectionEntry type="model" import="true" name="Dancer" hidden="false" id="m-dancer">
+          <constraints>
+            <constraint type="max" value="1" field="selections" scope="parent" id="k7"/>
+          </constraints>
+        </selectionEntry>
+      </selectionEntries>
+      <costs><cost name="pts" typeId="pts-id" value="15"/></costs>
+    </selectionEntry>
+  </selectionEntries>
+</catalogue>
