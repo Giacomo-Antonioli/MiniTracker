@@ -1,0 +1,46 @@
+OK    lib/paint-pad-46204  "Pathfinder - Farsight Enclaves" by KDJ1  steps=34 paints=25 matched=96%  
+OK    lib/paint-pad-43762  "Ke'lshan Fire Warrior" by nkryik  steps=53 paints=28 matched=100%  
+OK    lib/paint-pad-39505  "Breacher Support Turret - TMM Farsight Cadre" by KDJ1  steps=26 paints=19 matched=74%  
+DROP  lib/paint-pad-27494  "Camo tau" by TDCliph  steps=6 paints=9 matched=22%  (too many unknown paints)
+OK    lib/paint-pad-26444  "Vespid Stingwings" by Rageino  steps=9 paints=10 matched=100%  
+OK    lib/paint-pad-26443  "Fire Warriors" by Rageino  steps=7 paints=7 matched=86%  
+OK    lib/paint-pad-26442  "Pathfinders" by Rageino  steps=8 paints=8 matched=88%  
+OK    lib/paint-pad-18771  "Vior'la Battlesuit" by Sollus  steps=25 paints=20 matched=100%  
+OK    lib/paint-pad-18752  "Stealth Suit" by Sollus  steps=18 paints=15 matched=93%  
+OK    lib/paint-pad-17626  "Arizona Peach Tea Vespids" by VolatileRig  steps=27 paints=21 matched=100%  
+OK    lib/paint-pad-17582  "Vespid Stingwing - GamesWorkshop" by SimoGecko  steps=18 paints=18 matched=100%  
+OK    lib/paint-pad-15415  "Blue Kroot" by Smigdit78  steps=21 paints=15 matched=100%  
+OK    lib/paint-pad-15184  "Speedy Pale Tan Kroot" by krootybooty  steps=41 paints=32 matched=94%  
+OK    lib/paint-pad-11653  "Vespid Stingwings" by notatadbad  steps=24 paints=21 matched=81%  
+OK    lib/paint-pad-11554  "Vespid Stingwings" by andypearson  steps=18 paints=16 matched=94%  
+OK    lib/paint-pad-8320  "Urban camo Pathfinders" by Refayr  steps=29 paints=17 matched=100%  
+OK    lib/paint-pad-5153  "Vespid Stingwings - Easy Contrast Paint" by Haeskre  steps=13 paints=10 matched=90%  
+OK    lib/paint-pad-4921  "Green Kroot Kalamandra" by andypearson  steps=23 paints=15 matched=100%  
+OK    lib/paint-pad-4531  "Dark Red Kroot" by andypearson  steps=46 paints=30 matched=100%  
+OK    lib/paint-pad-3509  "Shadowsun’s Hair" by andypearson  steps=9 paints=4 matched=100%  
+OK    lib/paint-pad-3451  "Breacher Team (Farsight Enclaves)" by revolver_40k  steps=21 paints=19 matched=89%  
+OK    lib/paint-pad-3220  "Tau Farsight / Au Taal Sept" by Warbringer  steps=36 paints=27 matched=85%  
+OK    lib/paint-pad-3101  "Tau" by tsemana  steps=13 paints=8 matched=88%  
+OK    lib/paint-pad-2759  "Shu'n Sept Pathfinder" by andromedastudio  steps=18 paints=13 matched=77%  
+OK    lib/paint-pad-2758  "Vash'ya Sept Fire Warrior" by andromedastudio  steps=13 paints=9 matched=100%  
+OK    lib/paint-pad-2757  "T'au Sept Shas'ui Fire Warrior" by andromedastudio  steps=22 paints=16 matched=94%  
+OK    lib/paint-pad-2756  "Farsight Enclaves Blooded Pathfinder" by andromedastudio  steps=20 paints=14 matched=86%  
+OK    lib/paint-pad-2755  "Tau'n Sept Fire Warrior" by andromedastudio  steps=12 paints=7 matched=71%  
+OK    lib/paint-pad-2754  "Dal'yth Sept Transpectral Interference Pathfinder" by andromedastudio  steps=17 paints=12 matched=83%  
+OK    lib/paint-pad-2721  "Au'taal Sept Shas'ui Pathfinder" by andromedastudio  steps=23 paints=15 matched=80%  
+OK    lib/paint-pad-2720  "Fal'shia Sept Fire Warrior" by andromedastudio  steps=22 paints=15 matched=100%  
+OK    lib/paint-pad-2719  "Mu'gulath Bay Fire Warrior" by andromedastudio  steps=14 paints=8 matched=100%  
+OK    lib/paint-pad-2718  "T'olku Sept Pathfinder" by andromedastudio  steps=17 paints=13 matched=85%  
+OK    lib/paint-pad-2717  "N'dras Sept Drone Controller Pathfinder" by andromedastudio  steps=6 paints=6 matched=83%  
+DROP  lib/paint-pad-2711  "Vior'la Sept Medical Technician Pathfinder" by andromedastudio  steps=1 paints=0 matched=0%  (too few steps)
+DROP  lib/paint-pad-2637  "Sa'cea Sept Pathfinder" by andromedastudio  steps=1 paints=0 matched=0%  (too few steps)
+DROP  lib/paint-pad-2636  "Ke'lshan Sept Shas'la & MV1 Gun Drone" by andromedastudio  steps=1 paints=1 matched=100%  (too few steps)
+OK    lib/paint-pad-2607  "Aeronautica - Tau Camo Red" by Bazleebub  steps=13 paints=9 matched=78%  
+DROP  lib/paint-pad-2084  "Green Alien Sword (For Necrons/Deathwatch/Tau)" by r.j.h.  steps=9 paints=3 matched=0%  (too many unknown paints)
+DROP  lib/paint-pad-2083  "Red Tau Armor" by r.j.h.  steps=6 paints=6 matched=17%  (too many unknown paints)
+OK    lib/paint-pad-1284  "Tau Jade Armour" by RookieBrushes  steps=5 paints=3 matched=100%  
+OK    lib/paint-pad-75  "T'au troops: green undersuit" by andypearson  steps=41 paints=29 matched=100%  
+OK    lib/paint-pad-66  "T'au Stealth Suits" by andypearson  steps=19 paints=19 matched=95%  
+OK    lib/paint-pad-14  "T’au fusion weapons" by andypearson  steps=7 paints=6 matched=100%  
+OK    lib/paint-pad-6  "T’au troops: red undersuit" by andypearson  steps=32 paints=24 matched=100%  
+MANUAL lib/tale-of-painters-tau-sept-fire-warriors  "T'au Sept Fire Warriors"

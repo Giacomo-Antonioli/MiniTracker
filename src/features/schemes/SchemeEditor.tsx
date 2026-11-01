@@ -15,7 +15,8 @@ export function SchemeEditor({ scheme, onOpen, onClose }: { scheme: PaintScheme;
   const [error, setError] = useState('')
   const dirty = JSON.stringify(draft) !== JSON.stringify(scheme)
   const byId = useMemo(() => new Map(paints.map((p) => [p.id, p])), [paints])
-  const base = draft.basedOn ? schemes.find((s) => s.id === draft.basedOn) : undefined
+  const { library } = useStore()
+  const base = draft.basedOn ? [...schemes, ...library].find((s) => s.id === draft.basedOn) : undefined
   const missing = missingPaints(draft, paintStock)
   const usedBy = units.filter((u) => u.schemeId === scheme.id)
   const c = () => ctx()

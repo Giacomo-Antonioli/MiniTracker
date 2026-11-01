@@ -30,6 +30,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
+## Scheme library (src/data/schemes/library.json)
+
+Painting steps and paint lists collected from public recipe pages by `tools/schemes/scrape.mts`
+(Paint Pad, Tale of Painters). Only facts are stored (areas, techniques, paints, ratios), with the
+author, title and link of each source; no prose or images. Credit belongs to the original authors.
+
 ## Unit catalogue
 
 Not included. Each user's browser downloads it from [BSData](https://github.com/BSData/wh40k-10e).

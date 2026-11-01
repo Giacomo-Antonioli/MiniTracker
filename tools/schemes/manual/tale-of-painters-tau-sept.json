@@ -1,0 +1,45 @@
+{
+  "id": "lib/tale-of-painters-tau-sept-fire-warriors",
+  "name": "T'au Sept Fire Warriors",
+  "factionName": "T'au Empire",
+  "tags": ["T'au Sept", "Fire Warrior"],
+  "source": { "title": "Tutorial: How to Paint T'au Sept Fire Warriors (Tale of Painters)", "author": "Garfy", "url": "https://taleofpainters.com/2017/09/tutorial-how-to-paint-tau/" },
+  "date": "2017-09-23",
+  "sections": [
+    { "area": "Preparation", "steps": [{ "technique": "prime", "paints": [{ "name": "Black", "brand": "Vallejo" }], "note": "black undercoat" }] },
+    { "area": "Cloth", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "Rhinox Hide" }] },
+      { "technique": "layer", "paints": [{ "name": "Gorthor Brown" }] },
+      { "technique": "highlight", "paints": [{ "name": "Baneblade Brown" }] },
+      { "technique": "shade", "paints": [{ "name": "Agrax Earthshade" }] }
+    ] },
+    { "area": "Armour", "steps": [
+      { "technique": "layer", "paints": [{ "name": "Tau Light Ochre" }], "thinning": "slightly thinned", "note": "3 thin coats" },
+      { "technique": "recess shade", "paints": [{ "name": "Skrag Brown" }], "thinning": "slightly thinned", "note": "line the joints" },
+      { "technique": "glaze", "paints": [{ "name": "Lahmian Medium", "parts": 4 }, { "name": "Skrag Brown", "parts": 1 }], "note": "upper part of flat panels" },
+      { "technique": "highlight", "paints": [{ "name": "Lahmian Medium", "parts": 1 }, { "name": "Zamesi Desert", "parts": 1 }], "note": "lower part of panels, helmet top" },
+      { "technique": "edge highlight", "paints": [{ "name": "Screaming Skull" }], "thinning": "thinned" }
+    ] },
+    { "area": "Skin", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "The Fang" }] },
+      { "technique": "highlight", "paints": [{ "name": "Russ Grey" }], "note": "creases" }
+    ] },
+    { "area": "Lenses", "steps": [
+      { "technique": "glaze", "paints": [{ "name": "Mephiston Red" }, { "name": "Lahmian Medium", "parts": 3 }], "note": "subtle glow around lenses (1 red : 3 medium)" },
+      { "technique": "basecoat", "paints": [{ "name": "Jokaero Orange" }] },
+      { "technique": "layer", "paints": [{ "name": "Flash Gitz Yellow" }], "note": "dot in the centre" },
+      { "technique": "highlight", "paints": [{ "name": "White Scar" }], "note": "small dot (original used Ceramite White, now discontinued)" }
+    ] },
+    { "area": "Markings", "steps": [{ "technique": "details", "paints": [{ "name": "White Scar" }], "thinning": "thinned", "note": "sept markings and symbol; tidy with the armour colour" }] },
+    { "area": "Weapons", "steps": [
+      { "technique": "highlight", "paints": [{ "name": "Eshin Grey" }, { "name": "Lahmian Medium" }], "note": "black areas and hooves (1:1)" },
+      { "technique": "edge highlight", "paints": [{ "name": "Dawnstone" }] },
+      { "technique": "details", "paints": [{ "name": "Auric Armour Gold" }], "note": "gun details" }
+    ] },
+    { "area": "Base", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "Armageddon Dust" }] },
+      { "technique": "basecoat", "paints": [{ "name": "Steel Legion Drab" }], "note": "base rim" },
+      { "technique": "drybrush", "paints": [{ "name": "Screaming Skull" }] }
+    ] }
+  ]
+}

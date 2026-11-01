@@ -26,12 +26,12 @@ async function openPaints() {
 describe('Paints page', () => {
   it('lists the bundled paints with search and brand filter', async () => {
     const user = await openPaints()
-    expect(screen.getByText(/^1517 paints$/)).toBeInTheDocument()
+    expect(Number(screen.getByText(/^\d+ paints$/).textContent!.split(' ')[0])).toBeGreaterThan(1500)
     await user.type(screen.getByPlaceholderText(/Search name or brand/), 'macragge blue')
     expect(screen.getByRole('button', { name: 'Macragge Blue (Citadel)' })).toBeInTheDocument()
     await user.clear(screen.getByPlaceholderText(/Search name or brand/))
     await user.selectOptions(within(screen.getByRole('region', { name: 'Paint filters' })).getByLabelText('Brand'), 'Vallejo')
-    expect(screen.getByText(/^\d+ paints$/).textContent).not.toBe('1517 paints')
+    expect(Number(screen.getByText(/^\d+ paints$/).textContent!.split(' ')[0])).toBeLessThan(400)
   })
 
   it('adds a paint to the inventory and edits its stock', async () => {

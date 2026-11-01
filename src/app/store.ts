@@ -27,6 +27,12 @@ const paintRepo = new DexiePaintRepository(db)
 const photoRepo = new DexiePhotoRepository(db)
 const schemeRepo = new DexieSchemeRepository(db)
 
+/** Bundled community/official schemes (scraped facts + credit), loaded on demand. */
+async function loadLibraryFile(): Promise<{ schemes: PaintScheme[]; paints: PaintDef[] }> {
+  const mod = await import('../data/schemes/library.json')
+  return mod.default as unknown as { schemes: PaintScheme[]; paints: PaintDef[] }
+}
+
 /** The bundled paint list is ~200 KB, so it is loaded only when needed. */
 async function loadSeedPaints(): Promise<PaintDef[]> {
   const mod = await import('../data/paints/seed.json')
@@ -99,6 +105,9 @@ interface State {
   deletePhoto(photo: Photo): Promise<void>
   photoUsage(): ReturnType<DexiePhotoRepository['usage']>
   schemes: PaintScheme[]
+  /** Read-only schemes bundled with the app (ids start with "lib/"). */
+  library: PaintScheme[]
+  loadLibrary(): Promise<void>
   /** Default scheme per faction name. */
   schemeDefaults: Record<string, string>
   saveScheme(s: PaintScheme): Promise<void>
@@ -128,9 +137,17 @@ export const useStore = create<State>((set, get) => ({
   paintStock: new Map(),
 
   async loadPaints() {
-    const [seed, custom] = await Promise.all([loadSeedPaints(), paintRepo.listCustom()])
-    const paints = [...seed, ...custom].sort((a, b) => a.brand.localeCompare(b.brand) || a.name.localeCompare(b.name))
+    const [seed, custom, lib] = await Promise.all([loadSeedPaints(), paintRepo.listCustom(), loadLibraryFile()])
+    const known = new Set([...seed, ...custom].map((p) => p.id))
+    const paints = [...seed, ...custom, ...lib.paints.filter((p) => !known.has(p.id))].sort((a, b) => a.brand.localeCompare(b.brand) || a.name.localeCompare(b.name))
     set({ paints })
+  },
+
+  library: [],
+
+  async loadLibrary() {
+    if (get().library.length) return
+    set({ library: (await loadLibraryFile()).schemes })
   },
 
   async saveStock(stock) {
