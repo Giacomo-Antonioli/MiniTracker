@@ -11,6 +11,7 @@
   <entryLinks>
     <entryLink import="true" name="Big Walker" hidden="false" type="selectionEntry" id="el10" targetId="u-walker"/>
     <entryLink import="true" name="Secret Thing" hidden="true" type="selectionEntry" id="el11" targetId="u-secret"/>
+    <entryLink import="true" name="Detachment" hidden="false" type="selectionEntryGroup" id="el-det" targetId="g-det"/>
   </entryLinks>
   <sharedSelectionEntries>
     <selectionEntry type="model" import="true" name="Big Walker" hidden="false" id="u-walker">
@@ -47,4 +48,85 @@
       </profiles>
     </selectionEntry>
   </sharedSelectionEntries>
+  <sharedSelectionEntryGroups>
+    <selectionEntryGroup name="Detachment" hidden="false" id="g-det">
+      <constraints>
+        <constraint type="min" value="1" field="selections" scope="parent" shared="true" id="det-min"/>
+        <constraint type="max" value="-1" field="selections" scope="parent" shared="true" id="det-max"/>
+      </constraints>
+      <modifiers>
+        <modifier type="set" value="1" field="det-max">
+          <conditions>
+            <condition type="atLeast" value="1" field="selections" scope="force" childId="bs-inc" shared="true"/>
+          </conditions>
+        </modifier>
+      </modifiers>
+      <selectionEntries>
+        <selectionEntry type="upgrade" import="true" name="Line Doctrine" hidden="false" id="det-line">
+          <costs>
+            <cost name="pts" typeId="pts-id" value="0"/>
+            <cost name="Detachment Points" typeId="dp-id" value="1"/>
+          </costs>
+        </selectionEntry>
+        <selectionEntry type="upgrade" import="true" name="Heavy Doctrine" hidden="false" id="det-heavy">
+          <costs>
+            <cost name="pts" typeId="pts-id" value="0"/>
+            <cost name="Detachment Points" typeId="dp-id" value="3"/>
+          </costs>
+          <categoryLinks>
+            <categoryLink targetId="c-3dp" id="l-3dp" primary="false" name="3DP Detachment"/>
+          </categoryLinks>
+        </selectionEntry>
+        <selectionEntry type="upgrade" import="true" name="Boarding Doctrine" hidden="false" id="det-board">
+          <costs>
+            <cost name="pts" typeId="pts-id" value="0"/>
+            <cost name="Detachment Points" typeId="dp-id" value="1"/>
+          </costs>
+          <modifiers>
+            <modifier type="set" value="true" field="hidden">
+              <conditions>
+                <condition type="notInstanceOf" value="1" field="selections" scope="force" childId="f-board" shared="true"/>
+              </conditions>
+            </modifier>
+          </modifiers>
+        </selectionEntry>
+      </selectionEntries>
+    </selectionEntryGroup>
+    <selectionEntryGroup name="Enhancements" hidden="false" id="g-enh">
+      <selectionEntryGroups>
+        <selectionEntryGroup name="Line Doctrine Enhancements" hidden="false" id="g-enh-line">
+          <modifiers>
+            <modifier type="set" value="true" field="hidden">
+              <conditions>
+                <condition type="lessThan" value="1" field="selections" scope="roster" childId="det-line" shared="true"/>
+              </conditions>
+            </modifier>
+          </modifiers>
+          <selectionEntries>
+            <selectionEntry type="upgrade" import="true" name="Lucky Charm" hidden="false" id="enh-charm">
+              <costs>
+                <cost name="pts" typeId="pts-id" value="15"/>
+                <cost name="Enhancements" typeId="en-id" value="1"/>
+              </costs>
+            </selectionEntry>
+          </selectionEntries>
+        </selectionEntryGroup>
+      </selectionEntryGroups>
+      <selectionEntries>
+        <selectionEntry type="upgrade" import="true" name="Big Banner" hidden="false" id="enh-banner">
+          <costs>
+            <cost name="pts" typeId="pts-id" value="20"/>
+            <cost name="Enhancements" typeId="en-id" value="1"/>
+          </costs>
+          <modifiers>
+            <modifier type="set" value="true" field="hidden">
+              <conditions>
+                <condition type="lessThan" value="1" field="selections" scope="roster" childId="det-heavy" shared="true"/>
+              </conditions>
+            </modifier>
+          </modifiers>
+        </selectionEntry>
+      </selectionEntries>
+    </selectionEntryGroup>
+  </sharedSelectionEntryGroups>
 </catalogue>

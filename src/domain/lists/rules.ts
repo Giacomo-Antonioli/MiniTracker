@@ -1,4 +1,5 @@
-import type { BattleSize, Catalogue, Datasheet } from '../catalogue/types'
+import type { BattleSize, Catalogue, Datasheet, Enhancement } from '../catalogue/types'
+import { evalLimit, type Counter } from './conditions'
 import type { Ctx } from '../collection/types'
 import { addEntry } from './list'
 import { listPoints } from './points'
@@ -6,7 +7,8 @@ import type { ArmyList } from './types'
 
 /**
  * List checks for an edition, driven by the catalogue (BSData), plus a few rules the data does not hold:
- * Combat Patrol (500 points, points check only), exactly one Warlord, and Epic Heroes at most once.
+ * Combat Patrol (500 points, points check only), exactly one Warlord, Epic Heroes at most once, enhancements only on
+ * Characters that are not Epic Heroes, one per unit, and at most 3 when the data gives no number (10th edition).
  * Problems are reported, never enforced: a list that breaks rules can still be saved.
  */
 
@@ -27,6 +29,16 @@ export type IssueCode =
   | 'no-warlord'
   | 'warlords'
   | 'warlord-not-character'
+  | 'no-detachment'
+  | 'detachments'
+  | 'detachment-points'
+  | 'detachment-faction'
+  | 'unknown-detachment'
+  | 'enhancements'
+  | 'enhancement-detachment'
+  | 'enhancement-twice'
+  | 'enhancement-unit'
+  | 'unknown-enhancement'
 
 export interface ListIssue {
   code: IssueCode
@@ -50,7 +62,8 @@ export function checkList(l: ArmyList, cat: Catalogue): ListIssue[] {
   const size = battleSizes(cat).find((b) => b.id === l.battleSize)
   if (!size) add('battle-size', 'Battle size not found in this edition')
 
-  const pts = listPoints(l, sheets)
+  const enh = new Map((cat.enhancements ?? []).map((x) => [x.id, x]))
+  const pts = listPoints(l, sheets, enh)
   for (const e of l.entries) {
     const d = sheets.get(e.datasheetId)
     if (!d) add('unknown-unit', 'Unit not in the catalogue (removed or renamed?)', [e.id])
@@ -83,7 +96,70 @@ export function checkList(l: ArmyList, cat: Catalogue): ListIssue[] {
     const d = sheets.get(e.datasheetId)
     if (d && !hasKeyword(d, 'Character')) add('warlord-not-character', `${d.name} is not a Character and can't be the Warlord`, [e.id])
   }
+  if (cat.detachments) checkDetachments(l, cat, sheets, enh, add)
   return issues
+}
+
+/** Counts what a list has, for BSData conditions (see conditions.ts). */
+export function listCounter(l: ArmyList, cat: Catalogue): Counter {
+  const sheets = new Map(cat.datasheets.map((d) => [d.id, d]))
+  const dets = (cat.detachments ?? []).filter((d) => l.detachmentIds?.includes(d.id))
+  return ({ id, keyword }) => {
+    if (keyword) {
+      return dets.filter((d) => d.keywords.includes(keyword)).length + l.entries.filter((e) => {
+        const d = sheets.get(e.datasheetId)
+        return d && hasKeyword(d, keyword)
+      }).length
+    }
+    if (!id) return 0
+    if (id === l.battleSize || id === cat.muster?.forceId) return 1
+    return dets.filter((d) => d.id === id).length + l.entries.filter((e) => e.datasheetId === id || e.enhancementId === id).length
+  }
+}
+
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
+
+function checkDetachments(
+  l: ArmyList,
+  cat: Catalogue,
+  sheets: Map<string, Datasheet>,
+  enh: Map<string, Enhancement>,
+  add: (code: IssueCode, message: string, entryIds?: string[]) => void,
+) {
+  const count = listCounter(l, cat)
+  const all = new Map((cat.detachments ?? []).map((d) => [d.id, d]))
+  const chosen = l.detachmentIds ?? []
+  for (const id of chosen) {
+    const d = all.get(id)
+    if (!d) add('unknown-detachment', 'A detachment is not in the catalogue (removed or renamed?)')
+    else if (l.factionId && !d.factionIds.includes(l.factionId)) add('detachment-faction', `${d.name} is not a detachment of this faction`)
+  }
+  const rule = l.factionId ? cat.detachmentCounts?.[l.factionId] : undefined
+  if (chosen.length < (rule?.min ?? 1)) add('no-detachment', 'Choose a detachment')
+  const maxDets = rule ? evalLimit(rule.max, count) : -1
+  if (maxDets >= 0 && chosen.length > maxDets) add('detachments', `${plural(chosen.length, 'detachment')}, max ${maxDets} here`)
+  if (cat.muster?.detachmentPoints) {
+    const budget = evalLimit(cat.muster.detachmentPoints, count)
+    const used = chosen.reduce((n, id) => n + (all.get(id)?.detachmentPoints ?? 0), 0)
+    if (budget >= 0 && used > budget) add('detachment-points', `Detachments cost ${used} detachment points, max ${budget}`)
+  }
+
+  const withEnh = l.entries.filter((e) => e.enhancementId)
+  const cap = cat.muster?.enhancements ? evalLimit(cat.muster.enhancements, count) : 3
+  if (cap >= 0 && withEnh.length > cap) add('enhancements', `${plural(withEnh.length, 'enhancement')}, max ${cap}`, withEnh.map((e) => e.id))
+  const seen = new Map<string, string[]>()
+  for (const e of withEnh) {
+    const x = enh.get(e.enhancementId!)
+    const d = sheets.get(e.datasheetId)
+    if (!x) {
+      add('unknown-enhancement', 'An enhancement is not in the catalogue (removed or renamed?)', [e.id])
+      continue
+    }
+    seen.set(x.id, [...(seen.get(x.id) ?? []), e.id])
+    if (!chosen.includes(x.detachmentId)) add('enhancement-detachment', `${x.name} needs its detachment (${all.get(x.detachmentId)?.name ?? 'not chosen'})`, [e.id])
+    if (d && (!hasKeyword(d, 'Character') || hasKeyword(d, 'Epic Hero'))) add('enhancement-unit', `${d.name} can't take an enhancement (Characters only, not Epic Heroes)`, [e.id])
+  }
+  for (const [id, entryIds] of seen) if (entryIds.length > 1) add('enhancement-twice', `${enh.get(id)!.name} is taken ${entryIds.length} times`, entryIds)
 }
 
 /** Units a list of this faction can take. */
