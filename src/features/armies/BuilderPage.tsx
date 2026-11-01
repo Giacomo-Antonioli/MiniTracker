@@ -6,6 +6,8 @@ import type { Catalogue, Datasheet } from '../../domain/catalogue/types'
 import { removeEntry, updateEntry } from '../../domain/lists/list'
 import { listOwnership } from '../../domain/lists/ownership'
 import { listPoints } from '../../domain/lists/points'
+import { buyList, buyListText } from '../../domain/lists/buy'
+import { BuyListSheet } from './BuyListSheet'
 import { evalLimit } from '../../domain/lists/conditions'
 import { addUnit, battleSizes, checkList, legalUnits, listCounter } from '../../domain/lists/rules'
 import type { ArmyList, ListEntry, ListStatus } from '../../domain/lists/types'
@@ -258,6 +260,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 </button>
               ))
             )}
+        <BuyPanel list={list} rows={buyList(list, sheets, own, points)} subtitle={[cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name].filter(Boolean).join(' · ')} />
           </section>
         )}
       </div>
@@ -443,6 +446,56 @@ function DetachmentBar({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; 
       )}
       {budget !== undefined && budget >= 0 && (
         <span className={`ml-auto text-sm ${used > budget ? 'text-danger' : 'text-muted'}`}>{used} / {budget} detachment points</span>
+      )}
+    </section>
+  )
+}
+
+function BuyPanel({ list, rows: b, subtitle }: { list: ArmyList; rows: ReturnType<typeof buyList>; subtitle: string }) {
+  const [copied, setCopied] = useState('')
+  const [printing, setPrinting] = useState(false)
+  if (list.entries.length === 0) return null
+  return (
+    <section className="panel grid gap-2 p-3" aria-label="Buy list">
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="font-semibold">Buy list</h2>
+        <span className="text-sm text-muted">{b.missingModels ? `${b.missingModels} model${b.missingModels === 1 ? '' : 's'} to buy` : 'You own everything in this list'}</span>
+        {b.rows.length > 0 && (
+          <button
+            className="btn ml-auto px-2 py-0.5 text-sm"
+            onClick={() => {
+              navigator.clipboard
+                .writeText(buyListText(list.name, b))
+                .then(() => setCopied('Copied'))
+                .catch(() => setCopied('Copy failed'))
+            }}
+          >
+            📋 Copy as text
+          </button>
+        )}
+        {b.rows.length > 0 && (
+          <button className="btn px-2 py-0.5 text-sm" title="Opens the print dialog: choose “Save as PDF”" onClick={() => setPrinting(true)}>
+            📄 PDF
+          </button>
+        )}
+        {printing && <BuyListSheet list={list} buy={b} subtitle={subtitle} onDone={() => setPrinting(false)} />}
+        {copied && <span className="text-xs text-muted" role="status">{copied}</span>}
+      </div>
+      {b.rows.length > 0 && (
+        <table className="text-sm">
+          <thead className="text-left text-xs text-muted">
+            <tr><th className="font-normal">Unit</th><th className="text-right font-normal">Models</th><th className="text-right font-normal">Points in list</th></tr>
+          </thead>
+          <tbody>
+            {b.rows.map((r) => (
+              <tr key={r.datasheetId}>
+                <td>{r.name}{r.units > 1 ? <span className="text-muted"> ×{r.units}</span> : null}</td>
+                <td className="text-right">{r.missingModels}</td>
+                <td className="text-right">{r.points}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </section>
   )
