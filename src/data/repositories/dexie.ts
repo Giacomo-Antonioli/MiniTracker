@@ -1,0 +1,70 @@
+import { DEFAULT_PIPELINE, validatePipeline } from '../../domain/collection/pipeline'
+import type { OwnedUnit, Pipeline, StatusEvent } from '../../domain/collection/types'
+import type { MiniTrackerDb } from '../db'
+import type { EventRepository, SettingsRepository, UnitRepository } from './types'
+
+export class DexieUnitRepository implements UnitRepository {
+  private db: MiniTrackerDb
+  constructor(db: MiniTrackerDb) {
+    this.db = db
+  }
+
+  get(id: string) {
+    return this.db.units.get(id)
+  }
+
+  async list() {
+    const all = await this.db.units.toArray()
+    return all.sort((a, b) => a.customName.localeCompare(b.customName, undefined, { sensitivity: 'base' }))
+  }
+
+  async save(unit: OwnedUnit) {
+    await this.db.units.put(unit)
+  }
+
+  async delete(id: string) {
+    await this.db.transaction('rw', this.db.units, this.db.statusEvents, async () => {
+      await this.db.statusEvents.where('unitId').equals(id).delete()
+      await this.db.units.delete(id)
+    })
+  }
+
+  async recordMove(unit: OwnedUnit, event: StatusEvent) {
+    if (event.unitId !== unit.id) throw new Error('Event belongs to a different unit')
+    await this.db.transaction('rw', this.db.units, this.db.statusEvents, async () => {
+      await this.db.units.put(unit)
+      await this.db.statusEvents.put(event)
+    })
+  }
+}
+
+export class DexieEventRepository implements EventRepository {
+  private db: MiniTrackerDb
+  constructor(db: MiniTrackerDb) {
+    this.db = db
+  }
+
+  async listForUnit(unitId: string) {
+    const events = await this.db.statusEvents.where('unitId').equals(unitId).toArray()
+    return events.sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
+  }
+}
+
+const PIPELINE_KEY = 'pipeline'
+
+export class DexieSettingsRepository implements SettingsRepository {
+  private db: MiniTrackerDb
+  constructor(db: MiniTrackerDb) {
+    this.db = db
+  }
+
+  async getPipeline() {
+    const row = await this.db.settings.get(PIPELINE_KEY)
+    return (row?.value as Pipeline | undefined) ?? structuredClone(DEFAULT_PIPELINE)
+  }
+
+  async savePipeline(pipeline: Pipeline) {
+    validatePipeline(pipeline)
+    await this.db.settings.put({ key: PIPELINE_KEY, value: pipeline })
+  }
+}
