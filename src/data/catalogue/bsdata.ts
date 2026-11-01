@@ -1,5 +1,5 @@
 import { XMLParser } from 'fast-xml-parser'
-import type { ArmyLimit, BattleSize, Catalogue, CatalogueSource, Condition, ConditionOp, DataLimit, Datasheet, Detachment, DetachmentCount, Enhancement, Faction, KeywordMinimum, Muster, PointsStep, Rule } from '../../domain/catalogue/types'
+import type { ArmyLimit, BattleSize, StatLine, WeaponProfile, Catalogue, CatalogueSource, Condition, ConditionOp, DataLimit, Datasheet, Detachment, DetachmentCount, Enhancement, Faction, KeywordMinimum, Muster, PointsStep, Rule } from '../../domain/catalogue/types'
 import { evalCondition } from '../../domain/lists/conditions'
 import { parseBsDataJson } from './bsdataJson'
 
@@ -98,6 +98,7 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
       linkable.set(attr(e, 'id')!, e)
     }
     for (const g of kids(c, 'sharedSelectionEntryGroups', 'selectionEntryGroup')) linkable.set(attr(g, 'id')!, g)
+    for (const pr of kids(c, 'sharedProfiles', 'profile')) linkable.set(attr(pr, 'id')!, pr)
     readRules(c, 'faction', attr(c, 'library') === 'true' ? undefined : attr(c, 'id'), rules)
     const links = kids(c, 'entryLinks', 'entryLink').filter((l) => !hidden(l) && attr(l, 'type') === 'selectionEntry')
     for (const l of links) if (!rootLinks.has(attr(l, 'targetId')!)) rootLinks.set(attr(l, 'targetId')!, l)
@@ -169,9 +170,9 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
       .filter((l) => attr(l, 'type') === 'rule' && !hidden(l))
       .map((l) => attr(l, 'targetId')!)
       .filter((rid) => rules.has(rid))
-    const keywords = weaponKeywords(e, linkable)
+    const { keywords, stats, weapons } = readProfiles(e, linkable)
     const limit = armyLimit([e, rootLinks.get(id), ...ownCategory(e)].filter((x): x is Node => !!x), sizeIds)
-    return { ...d, ...(ruleIds.length ? { ruleIds: [...new Set(ruleIds)] } : {}), ...(keywords.length ? { weaponKeywords: keywords } : {}), ...(limit ? { armyLimit: limit } : {}) }
+    return { ...d, ...(ruleIds.length ? { ruleIds: [...new Set(ruleIds)] } : {}), ...(keywords.length ? { weaponKeywords: keywords } : {}), ...(stats.length ? { stats } : {}), ...(weapons.length ? { weapons } : {}), ...(limit ? { armyLimit: limit } : {}) }
   })
   datasheets.sort((a, b) => a.name.localeCompare(b.name))
 
@@ -181,7 +182,7 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
 
   const ruleList = [...rules.values()].sort((a, b) => Number(a.kind === 'faction') - Number(b.kind === 'faction') || a.name.localeCompare(b.name))
   const det = readDetachments(parsed, factionCats, byId, cond, costIds, muster.forceId)
-  return { formatVersion: 4, gameId: attr(gst, 'id')!, gameName: attr(gst, 'name')!, source, factions, datasheets, rules: ruleList, muster, ...det }
+  return { formatVersion: 5, gameId: attr(gst, 'id')!, gameName: attr(gst, 'name')!, source, factions, datasheets, rules: ruleList, muster, ...det }
 }
 
 /** Conditions of a modifier, flattened; undefined when they are combined in a way we don't read (nested groups, 'or'). */
@@ -563,17 +564,38 @@ function collectWargear(n: Node): string[] {
   return out
 }
 
-/** Weapon keywords ("Assault", "Sustained Hits 1"…) from weapon profiles under a unit, following links to shared weapons. */
-function weaponKeywords(e: Node, linkable: Map<string, Node>): string[] {
+/**
+ * Profiles under a unit, following links to shared weapons: stat lines ("Unit"), weapon profiles, and the weapon
+ * keywords ("Assault", "Sustained Hits 1"…) used to explain weapon abilities.
+ */
+function readProfiles(e: Node, linkable: Map<string, Node>): { keywords: string[]; stats: StatLine[]; weapons: WeaponProfile[] } {
   const out = new Set<string>()
+  const stats = new Map<string, StatLine>()
+  const weapons = new Map<string, WeaponProfile>()
   const seen = new Set<string>()
+  const row = (el: Node): [string, string][] => kids(el, 'characteristics', 'characteristic').map((ch) => [attr(ch, 'name')!, textOf(ch) || '-'])
   const visit = (n: Node) => {
     walk(n, (tag, el) => {
-      if (tag === 'profile' && (attr(el, 'typeName') ?? '').includes('Weapons')) {
-        const kw = kids(el, 'characteristics', 'characteristic').find((ch) => attr(ch, 'name') === 'Keywords')
-        for (const k of (kw ? textOf(kw) : '').split(',')) {
-          const t = k.trim()
-          if (t && t !== '-') out.add(t)
+      if (tag === 'profile' && !hidden(el)) {
+        const type = attr(el, 'typeName') ?? ''
+        const name = attr(el, 'name')!
+        if (type === 'Unit' && !stats.has(name)) stats.set(name, { name, values: row(el) })
+        if (type.includes('Weapons')) {
+          const kind = type.startsWith('Melee') ? 'melee' : 'ranged'
+          if (!weapons.has(`${kind}:${name}`)) weapons.set(`${kind}:${name}`, { name, kind, values: row(el) })
+          const kw = kids(el, 'characteristics', 'characteristic').find((ch) => attr(ch, 'name') === 'Keywords')
+          for (const k of (kw ? textOf(kw) : '').split(',')) {
+            const t = k.trim()
+            if (t && t !== '-') out.add(t)
+          }
+        }
+      }
+      // Shared profiles (often the unit's stat line) are reached through info links.
+      if (tag === 'infoLink' && !hidden(el) && attr(el, 'type') === 'profile') {
+        const target = linkable.get(attr(el, 'targetId') ?? '')
+        if (target && !seen.has(attr(el, 'targetId')!)) {
+          seen.add(attr(el, 'targetId')!)
+          visit({ profiles: [{ profile: [target] }] } as unknown as Node)
         }
       }
       // Follow links to single entries (the unit's weapons), not to shared groups such as Crusade
@@ -589,5 +611,6 @@ function weaponKeywords(e: Node, linkable: Map<string, Node>): string[] {
     })
   }
   visit(e)
-  return sortUnique([...out])
+  const byName = <T extends { name: string }>(a: T, b: T) => a.name.localeCompare(b.name)
+  return { keywords: sortUnique([...out]), stats: [...stats.values()], weapons: [...weapons.values()].sort((a, b) => a.kind.localeCompare(b.kind) || byName(a, b)) }
 }

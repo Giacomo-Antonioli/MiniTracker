@@ -77,7 +77,7 @@ describe('parseBsData', () => {
 
 describe('rules', () => {
   it('reads core rules from the game system and faction rules from catalogues', () => {
-    expect(cat.formatVersion).toBe(4)
+    expect(cat.formatVersion).toBe(5)
     expect(cat.rules!.map((r) => [r.name, r.kind])).toEqual([
       ['Assault', 'core'],
       ['Deep Strike', 'core'],
@@ -106,7 +106,7 @@ describe('pointsFor', () => {
   })
 
   it('reads battle sizes and keyword minimums from the main force', () => {
-    expect(cat.formatVersion).toBe(4)
+    expect(cat.formatVersion).toBe(5)
     expect(cat.muster).toMatchObject({
       battleSizes: [
         { id: 'bs-inc', name: 'Incursion', pointsLimit: 1000 },
@@ -158,6 +158,16 @@ describe('detachments and enhancements', () => {
       { id: 'enh-banner', name: 'Big Banner', points: 20, detachmentId: 'det-heavy' },
       { id: 'enh-charm', name: 'Lucky Charm', points: 15, detachmentId: 'det-line' },
     ])
+  })
+})
+
+describe('stat lines and weapon profiles', () => {
+  it('reads unit stats and weapons, following links to shared weapons', () => {
+    expect(ds('Big Walker').stats).toEqual([{ name: 'Big Walker', values: [['M', '8"'], ['T', '9'], ['Sv', '3+'], ['W', '10'], ['LD', '7+'], ['OC', '3']] }])
+    expect(ds('Line Troopers').weapons).toEqual([{ name: 'Rifle', kind: 'ranged', values: [['Range', '24"'], ['Keywords', 'Assault, Sustained Hits 1']] }])
+    expect(ds('Old Hero').weapons).toBeUndefined()
+    // Stat line in a shared profile, reached through an info link.
+    expect(ds('Old Hero').stats).toEqual([{ name: 'Old Hero', values: [['M', '6"'], ['W', '5']] }])
   })
 })
 

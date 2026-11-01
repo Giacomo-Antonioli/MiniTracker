@@ -5,8 +5,7 @@ import { searchDatasheets } from '../../domain/catalogue/search'
 import type { Catalogue, Datasheet } from '../../domain/catalogue/types'
 import { factionsOf } from '../../domain/collection/backlog'
 import { UnitFormDialog } from '../backlog/UnitFormDialog'
-import { ruleForKeyword } from '../../domain/catalogue/rules'
-import { RuleText } from '../rules/RuleText'
+import { DatasheetInfo } from './DatasheetInfo'
 
 export function CatalogueBrowser({ onOpenSettings, openId }: { onOpenSettings: () => void; openId?: string }) {
   const { catalogue, units } = useStore()
@@ -178,36 +177,7 @@ function DatasheetPanel({
         </table>
       </section>
 
-      {d.abilities.length > 0 && (
-        <section className="grid gap-2 border-b border-line p-4" aria-label="Abilities">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">Abilities</h3>
-          {d.abilities.map((a) => <RuleText key={a} name={a} text={d.abilityTexts?.[a]} />)}
-        </section>
-      )}
-      {(d.ruleIds?.length ?? 0) > 0 && (
-        <section className="grid gap-2 border-b border-line p-4" aria-label="Rules">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">Rules</h3>
-          {d.ruleIds!.map((id) => {
-            const r = catalogue.rules?.find((x) => x.id === id)
-            return r ? <RuleText key={id} name={r.name} text={r.text} /> : null
-          })}
-        </section>
-      )}
-      {(d.weaponKeywords?.length ?? 0) > 0 && (
-        <section className="grid gap-2 border-b border-line p-4" aria-label="Weapon abilities">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">Weapon abilities</h3>
-          {d.weaponKeywords!.map((k) => {
-            const r = ruleForKeyword(catalogue.rules ?? [], k)
-            return <RuleText key={k} name={k} text={r?.text} />
-          })}
-        </section>
-      )}
-      {!catalogue.rules && (
-        <p className="border-b border-line p-4 text-xs text-muted">Download the catalogue again (Settings → Catalogue data) to see what each ability and rule means.</p>
-      )}
-      {section('Wargear options', d.wargear)}
-      {section('Keywords', d.keywords)}
-      {section('Faction keywords', d.factionKeywords)}
+      <DatasheetInfo catalogue={catalogue} d={d} />
       {section(`Available to (${factionNames.length})`, factionNames as string[])}
 
       {ownedUnits.length > 0 && (

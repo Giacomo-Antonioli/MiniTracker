@@ -105,6 +105,47 @@
        }
       ]
      }
+    ],
+    "profiles": [
+     {
+      "name": "Big Walker",
+      "typeId": "t-unit",
+      "typeName": "Unit",
+      "hidden": false,
+      "id": "pu1",
+      "characteristics": [
+       {
+        "name": "M",
+        "typeId": "c-m",
+        "$text": "8\""
+       },
+       {
+        "name": "T",
+        "typeId": "c-t",
+        "$text": "9"
+       },
+       {
+        "name": "Sv",
+        "typeId": "c-sv",
+        "$text": "3+"
+       },
+       {
+        "name": "W",
+        "typeId": "c-w",
+        "$text": "10"
+       },
+       {
+        "name": "LD",
+        "typeId": "c-ld",
+        "$text": "7+"
+       },
+       {
+        "name": "OC",
+        "typeId": "c-oc",
+        "$text": "3"
+       }
+      ]
+     }
     ]
    },
    {

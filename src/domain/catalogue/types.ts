@@ -33,8 +33,22 @@ export interface Datasheet {
   ruleIds?: string[]
   /** Weapon abilities as written on its weapons, e.g. "Assault", "Sustained Hits 1". */
   weaponKeywords?: string[]
+  /** Stat lines (M, T, Sv, W, LD, OC…), one per model profile (catalogue format 5). */
+  stats?: StatLine[]
+  /** Weapon profiles of the unit and its wargear options (catalogue format 5). */
+  weapons?: WeaponProfile[]
   /** How many of this unit an army may include (e.g. 3, Epic Heroes 1); some battle sizes change it. */
   armyLimit?: ArmyLimit
+}
+
+/** A profile row as published: column name → value, in the data's column order. */
+export interface StatLine {
+  name: string
+  values: [string, string][]
+}
+
+export interface WeaponProfile extends StatLine {
+  kind: 'ranged' | 'melee'
 }
 
 export interface ArmyLimit {
@@ -135,7 +149,7 @@ export interface CatalogueSource {
 }
 
 export interface Catalogue {
-  /** 2 = includes rules and ability texts; 3 = muster rules and army limits; 4 = detachments and enhancements. Older catalogues have none. */
+  /** 2 = includes rules and ability texts; 3 = muster rules and army limits; 4 = detachments and enhancements; 5 = stat lines and weapon profiles. Older catalogues have none. */
   formatVersion?: number
   gameId: string
   gameName: string
