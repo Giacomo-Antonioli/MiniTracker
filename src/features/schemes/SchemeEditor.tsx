@@ -172,6 +172,19 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
           <textarea className="input min-h-14" value={draft.tips} onChange={(e) => patch({ tips: e.target.value })} />
         </label>
         <label className="grid gap-1 md:col-span-2">
+          <span className="text-sm text-muted">Applies to unit types (comma separated; empty = whole army)</span>
+          <input
+            className="input"
+            aria-label="Applies to"
+            placeholder="e.g. Kroot, Vespid, Stealth"
+            value={(draft.appliesTo ?? []).join(', ')}
+            onChange={(e) => {
+              const list = e.target.value.split(',').map((t) => t.trim()).filter(Boolean)
+              patch({ appliesTo: list.length ? list : undefined })
+            }}
+          />
+        </label>
+        <label className="grid gap-1 md:col-span-2">
           <span className="text-sm text-muted">Tags (comma separated)</span>
           <input className="input" value={draft.tags.join(', ')} onChange={(e) => patch({ tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })} />
         </label>

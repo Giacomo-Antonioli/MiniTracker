@@ -7,8 +7,9 @@ import { RecipeCard } from './RecipeCard'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
 
 /** Read-only view of a library scheme, with ways to make it your own. */
-export function SchemeView({ scheme, onOpen, onClose }: { scheme: PaintScheme; onOpen: (id: string) => void; onClose: () => void }) {
-  const { paints, paintStock, saveScheme } = useStore()
+export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: PaintScheme; onOpen: (id: string) => void; onClose: () => void; onOpenUnit?: (id: string) => void }) {
+  const { paints, paintStock, saveScheme, units } = useStore()
+  const usedBy = units.filter((u) => u.schemeId === scheme.id)
   const byId = useMemo(() => new Map(paints.map((p) => [p.id, p])), [paints])
   const missing = missingPaints(scheme, paintStock)
   const [printing, setPrinting] = useState(false)
@@ -36,6 +37,18 @@ export function SchemeView({ scheme, onOpen, onClose }: { scheme: PaintScheme; o
             {scheme.factionName}
             {scheme.tags.length > 0 && ` · ${scheme.tags.join(', ')}`}
           </span>
+          <span className="text-sm text-muted">{scheme.appliesTo?.length ? `For: ${scheme.appliesTo.join(', ')}` : 'For the whole army'}</span>
+          {usedBy.length > 0 && (
+            <span className="text-sm text-ok">
+              used by{' '}
+              {usedBy.map((u, i) => (
+                <span key={u.id}>
+                  {i > 0 && ', '}
+                  {onOpenUnit ? <button className="underline" onClick={() => onOpenUnit(u.id)}>{u.customName}</button> : u.customName}
+                </span>
+              ))}
+            </span>
+          )}
           {scheme.source && (
             <p className="text-sm">
               Source:{' '}

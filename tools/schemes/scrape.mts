@@ -50,7 +50,9 @@ for (const f of sources.factions) {
     report.push(`${verdict === 'ok' ? 'OK  ' : 'DROP'}  ${id}  "${s.title}" by ${s.author ?? '?'}  steps=${d.stats.steps} paints=${d.stats.paints} matched=${Math.round(ratio * 100)}%  ${verdict === 'ok' ? '' : `(${verdict})`}`)
     if (verdict !== 'ok') continue
 
-    const tags = f.tags.filter((t: string) => norm(s.title).includes(norm(t)))
+    const septs = f.septs.filter((t: string) => norm(s.title).includes(norm(t)))
+    const appliesTo = f.unitTypes.filter((t: string) => norm(s.title).includes(norm(t)))
+    const tags = [...septs, ...appliesTo]
     let n = 0
     const scheme: PaintScheme = {
       id,
@@ -60,6 +62,7 @@ for (const f of sources.factions) {
       factionName: f.faction,
       stage: 'final',
       tags,
+      ...(appliesTo.length ? { appliesTo } : {}),
       tips: '',
       tutorials: [],
       source: { title: `${s.title} (${s.site})`, url: job.url, ...(s.author ? { author: s.author } : {}) },

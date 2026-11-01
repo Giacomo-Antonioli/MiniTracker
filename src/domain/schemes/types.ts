@@ -36,6 +36,8 @@ export interface PaintScheme {
   /** The scheme this one is a variant of. */
   basedOn?: string
   factionName?: string
+  /** Unit types this scheme is made for (e.g. "Vespid", "Stealth"). Empty = army-wide. */
+  appliesTo?: string[]
   /** Stage id from the scheme pipeline (idea, testing, final, archived). */
   stage: string
   tags: string[]

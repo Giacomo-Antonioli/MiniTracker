@@ -1,5 +1,5 @@
 {
-  "note": "Recipe sources for the bundled scheme library. Only facts (areas, steps, paints) plus credit and link are kept.",
+  "note": "Recipe sources for the bundled scheme library. Only facts (areas, steps, paints) plus credit and link are kept. septs = army-wide tags; unitTypes = the scheme only applies to units of that type.",
   "factions": [
     {
       "faction": "T'au Empire",
@@ -11,7 +11,7 @@
         }
       ],
       "pages": [],
-      "tags": [
+      "septs": [
         "T'au Sept",
         "Vior'la",
         "Farsight",
@@ -25,6 +25,12 @@
         "Shun",
         "Mu'gulath Bay",
         "Kel'shan",
+        "T'olku",
+        "N'dras",
+        "Camo",
+        "Urban"
+      ],
+      "unitTypes": [
         "Kroot",
         "Vespid",
         "Stealth",
@@ -33,8 +39,9 @@
         "Breacher",
         "Crisis",
         "Battlesuit",
-        "Camo",
-        "Urban"
+        "Shadowsun",
+        "Drone",
+        "Aeronautica"
       ]
     }
   ]
