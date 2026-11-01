@@ -6,10 +6,12 @@ import { ColourStrip } from './ColourStrip'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
 import { SchemeEditor } from './SchemeEditor'
 import { SchemeView } from './SchemeView'
+import { AddFromLinkDialog } from './AddFromLinkDialog'
+import type { RecipePayload } from './recipeImport'
 
 const ORDER: SchemeOrigin[] = ['official', 'community', 'personal']
 
-export function SchemesPage({ openId }: { openId?: string }) {
+export function SchemesPage({ openId, payload, onPayloadUsed }: { openId?: string; payload?: RecipePayload; onPayloadUsed?: () => void }) {
   const { schemes: mine, library, loadLibrary, paints, paintStock, units, pipelines, schemeDefaults, loadPaints, saveScheme, importSchemes } = useStore()
   const [showLibrary, setShowLibrary] = useState(true)
   const schemes = useMemo(() => (showLibrary ? [...mine, ...library] : mine), [mine, library, showLibrary])
@@ -19,6 +21,7 @@ export function SchemesPage({ openId }: { openId?: string }) {
   const [stage, setStage] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(openId ?? null)
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
+  const [adding, setAdding] = useState(false)
 
   useEffect(() => {
     if (!paints.length) void loadPaints()
@@ -69,6 +72,7 @@ export function SchemesPage({ openId }: { openId?: string }) {
                 }}
               />
             </label>
+            <button className="btn" onClick={() => setAdding(true)}>🔗 Add from link</button>
             <button className="btn btn-primary" onClick={() => void create()}>+ New scheme</button>
           </div>
         </header>
@@ -113,6 +117,16 @@ export function SchemesPage({ openId }: { openId?: string }) {
         {schemes.length > 0 && shown.length === 0 && <p className="text-center text-muted">No schemes match these filters.</p>}
       </div>
 
+      {(adding || payload) && (
+        <AddFromLinkDialog
+          payload={payload}
+          onClose={() => {
+            setAdding(false)
+            onPayloadUsed?.()
+          }}
+          onCreated={setSelectedId}
+        />
+      )}
       {selected &&
         (selected.id.startsWith('lib/') ? (
           <SchemeView key={selected.id} scheme={selected} onOpen={setSelectedId} onClose={() => setSelectedId(null)} />

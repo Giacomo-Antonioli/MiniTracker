@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PaintDef } from '../paints/types'
-import { buildDraft, detectTechnique, matchPaint, normaliseBrand } from './extract'
+import { blocksFromText, buildDraft, detectTechnique, draftFromPage, matchPaint, normaliseBrand } from './extract'
 
 const paints: PaintDef[] = [
   { id: 'citadel/the-fang', brand: 'Citadel', name: 'The Fang', hex: '#4a667b' },
@@ -111,5 +111,32 @@ describe('buildDraft', () => {
 
   it('drops empty areas', () => {
     expect(buildDraft([{ type: 'heading', text: 'Empty' }], paints).sections).toEqual([])
+  })
+})
+
+describe('pages and pasted text', () => {
+  it('draftFromPage drops prose without paints and empty areas', () => {
+    const d = draftFromPage(
+      [
+        { type: 'heading', text: 'Introduction' },
+        { type: 'step', text: 'The T\'au are a young race with a lot of history.' },
+        { type: 'heading', text: 'Armour' },
+        { type: 'step', text: 'Basecoat with Tau Light Ochre.' },
+        { type: 'step', text: 'Thanks for reading, leave a comment!' },
+      ],
+      paints,
+    )
+    expect(d.sections).toEqual([{ area: 'Armour', steps: [{ technique: 'basecoat', paints: [{ paintId: 'citadel/tau-light-ochre' }], note: '' }] }])
+    expect(d.stats).toEqual({ steps: 1, paints: 1, matched: 1 })
+  })
+
+  it('blocksFromText spots headings and strips list markers', () => {
+    expect(blocksFromText('Armour\n1. Basecoat with Tau Light Ochre.\n- Shade with Skrag Brown\n\nSkin\n• Basecoat The Fang')).toEqual([
+      { type: 'heading', text: 'Armour' },
+      { type: 'step', text: 'Basecoat with Tau Light Ochre.' },
+      { type: 'step', text: 'Shade with Skrag Brown' },
+      { type: 'heading', text: 'Skin' },
+      { type: 'step', text: 'Basecoat The Fang' },
+    ])
   })
 })
