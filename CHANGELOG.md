@@ -4,6 +4,10 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Unit catalogue: download Warhammer 40,000 data from BSData and convert it on the device (in a background worker), with update check and import from local files (#15).
+- Daily CI check that the BSData link works and the parser still reads real data; opens an issue when it breaks (#15).
+
 ## [0.1.0] - 2026-11-01
 
 First release: the backlog tracker.

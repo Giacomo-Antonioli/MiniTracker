@@ -26,6 +26,10 @@ No account, no server: your collection stays in your browser. Install it from th
 - **Backup.** Export everything to one JSON file; restore it on any device.
 - **Themes.** *Grimdark* (modern dark) and *Forum 2005* (old-school fantasy forum).
 
+**Coming in v0.2**
+
+- **Unit catalogue.** Download every Warhammer 40,000 datasheet (unit sizes, points, keywords, wargear, abilities) from BSData in Settings → Catalogue. The data is downloaded and converted on your device; MiniTracker never hosts it.
+
 | Forum 2005 theme | Moving models |
 |---|---|
 | ![Forum 2005 theme](docs/screenshots/backlog-forum2005.png) | ![Move models dialog](docs/screenshots/move-models.png) |
@@ -72,6 +76,7 @@ npm run dev            # http://localhost:5173/MiniTracker/
 | `npm test` | Unit and component tests |
 | `npm run test:coverage` | Tests with coverage (fails under 90% on domain/data) |
 | `npm run e2e` | Playwright end-to-end tests (desktop + iPad viewports) |
+| `npm run check:bsdata` | Live check: download real BSData and parse it (needs internet) |
 | `npm run lint` / `npm run typecheck` | Static checks |
 | `npm run build` | Production build into `dist/` |
 
@@ -92,7 +97,7 @@ Bug reports and ideas are welcome as [issues](https://github.com/Giacomo-Antonio
 
 ## Credits
 
-- Unit and points data (from v0.2): the community-maintained [BSData](https://github.com/BSData) files.
+- Unit and points data: the community-maintained [BSData](https://github.com/BSData) files ([wh40k-10e](https://github.com/BSData/wh40k-10e)). MiniTracker does not include or redistribute this data: each user's browser downloads it from BSData. A [daily check](.github/workflows/bsdata-check.yml) makes sure the download still works.
 
 ## License
 
