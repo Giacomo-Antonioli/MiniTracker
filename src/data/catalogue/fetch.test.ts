@@ -28,6 +28,11 @@ describe('BSData fetch', () => {
     expect(await listDataFiles('o/r', SHA, f)).toEqual(['Game.gst', 'Faction A.cat'])
   })
 
+  it('accepts JSON repositories (wh40k-11e)', async () => {
+    const f = fakeFetch({ [`/git/trees/${SHA}`]: () => Response.json({ tree: [{ path: 'Warhammer 40,000.json', type: 'blob' }, { path: "T'au Empire.json", type: 'blob' }, { path: '.github', type: 'tree' }] }) })
+    expect(await listDataFiles('o/r', SHA, f)).toEqual(['Warhammer 40,000.json', "T'au Empire.json"])
+  })
+
   it('fails if the game system file is missing', async () => {
     const f = fakeFetch({ [`/git/trees/${SHA}`]: () => Response.json({ tree: [{ path: 'x.cat', type: 'blob' }] }) })
     await expect(listDataFiles('o/r', SHA, f)).rejects.toThrow(/game system/)

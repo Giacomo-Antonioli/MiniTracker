@@ -11,10 +11,10 @@ test('import catalogue from local files', async ({ page }) => {
   page.on('pageerror', (e) => errors.push(e.message))
   await page.goto('./')
   await page.getByRole('button', { name: /Settings/ }).click()
-  await expect(page.getByText('No catalogue installed yet')).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Catalogue 11th edition' })).toContainText('Not installed.')
 
   await page.getByLabel('Catalogue files').setInputFiles(files)
-  const status = page.getByRole('region', { name: 'Catalogue status' })
+  const status = page.getByRole('region', { name: 'Catalogue Test Game' })
   await expect(status).toContainText('Test Game')
   await expect(status).toContainText('5 units in 2 factions')
 

@@ -1,0 +1,118 @@
+{
+ "catalogue": {
+  "catalogueLinks": [
+   {
+    "type": "catalogue",
+    "name": "Test - Shared Library",
+    "id": "cl1",
+    "targetId": "cat-lib",
+    "importRootEntries": true
+   }
+  ],
+  "rules": [
+   {
+    "description": "Testers units re-roll hit rolls of 1.",
+    "id": "r-doctrine",
+    "name": "Testers Doctrine",
+    "hidden": false
+   }
+  ],
+  "entryLinks": [
+   {
+    "import": true,
+    "name": "Big Walker",
+    "hidden": false,
+    "type": "selectionEntry",
+    "id": "el10",
+    "targetId": "u-walker"
+   },
+   {
+    "import": true,
+    "name": "Secret Thing",
+    "hidden": true,
+    "type": "selectionEntry",
+    "id": "el11",
+    "targetId": "u-secret"
+   }
+  ],
+  "sharedSelectionEntries": [
+   {
+    "categoryLinks": [
+     {
+      "targetId": "c-veh",
+      "id": "l4",
+      "primary": true,
+      "name": "Vehicle"
+     },
+     {
+      "targetId": "c-fac",
+      "id": "l5",
+      "primary": false,
+      "name": "Faction: Testers"
+     }
+    ],
+    "costs": [
+     {
+      "name": "pts",
+      "typeId": "pts-id",
+      "value": 150
+     }
+    ],
+    "type": "model",
+    "import": true,
+    "name": "Big Walker",
+    "hidden": false,
+    "id": "u-walker"
+   },
+   {
+    "costs": [
+     {
+      "name": "pts",
+      "typeId": "pts-id",
+      "value": 1
+     }
+    ],
+    "type": "unit",
+    "import": true,
+    "name": "Secret Thing",
+    "hidden": false,
+    "id": "u-secret"
+   },
+   {
+    "profiles": [
+     {
+      "characteristics": [
+       {
+        "$text": "24\"",
+        "name": "Range",
+        "typeId": "t-r"
+       },
+       {
+        "$text": "Assault, Sustained Hits 1",
+        "name": "Keywords",
+        "typeId": "t-kw"
+       }
+      ],
+      "name": "Rifle",
+      "typeId": "t-rw",
+      "typeName": "Ranged Weapons",
+      "hidden": false,
+      "id": "pw1"
+     }
+    ],
+    "type": "upgrade",
+    "import": true,
+    "name": "Rifle",
+    "hidden": false,
+    "id": "w-rifle"
+   }
+  ],
+  "xmlns": "http://www.battlescribe.net/schema/catalogueSchema",
+  "library": false,
+  "id": "cat-testers",
+  "name": "Test - Testers",
+  "gameSystemId": "sys-test",
+  "revision": 7,
+  "type": "catalogue"
+ }
+}

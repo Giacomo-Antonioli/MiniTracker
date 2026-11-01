@@ -1,0 +1,274 @@
+{
+ "catalogue": {
+  "selectionEntries": [
+   {
+    "categoryLinks": [
+     {
+      "targetId": "c-inf",
+      "id": "l1",
+      "primary": false,
+      "name": "Infantry"
+     },
+     {
+      "targetId": "c-bl",
+      "id": "l2",
+      "primary": true,
+      "name": "Battleline"
+     },
+     {
+      "targetId": "c-fac",
+      "id": "l3",
+      "primary": false,
+      "name": "Faction: Testers"
+     }
+    ],
+    "profiles": [
+     {
+      "characteristics": [
+       {
+        "$text": "Once per battle, this unit can **hold** its ground.",
+        "name": "Description",
+        "typeId": "t-desc"
+       }
+      ],
+      "name": "Hold the Line",
+      "typeId": "t-ab",
+      "typeName": "Abilities",
+      "hidden": false,
+      "id": "p1"
+     }
+    ],
+    "infoLinks": [
+     {
+      "name": "Deep Strike",
+      "hidden": false,
+      "type": "rule",
+      "id": "il1",
+      "targetId": "r-deepstrike"
+     },
+     {
+      "name": "Testers Doctrine",
+      "hidden": false,
+      "type": "rule",
+      "id": "il2",
+      "targetId": "r-doctrine"
+     }
+    ],
+    "selectionEntryGroups": [
+     {
+      "selectionEntries": [
+       {
+        "constraints": [
+         {
+          "type": "min",
+          "value": 1,
+          "field": "selections",
+          "scope": "parent",
+          "id": "k1"
+         },
+         {
+          "type": "max",
+          "value": 1,
+          "field": "selections",
+          "scope": "parent",
+          "id": "k2"
+         }
+        ],
+        "selectionEntryGroups": [
+         {
+          "entryLinks": [
+           {
+            "import": true,
+            "name": "Rifle",
+            "hidden": false,
+            "type": "selectionEntry",
+            "id": "el1",
+            "targetId": "w-rifle"
+           },
+           {
+            "import": true,
+            "name": "Sword",
+            "hidden": false,
+            "type": "selectionEntry",
+            "id": "el2",
+            "targetId": "w-sword"
+           },
+           {
+            "import": true,
+            "name": "Weapon Modifications",
+            "hidden": false,
+            "type": "selectionEntryGroup",
+            "id": "el3",
+            "targetId": "g-mods"
+           }
+          ],
+          "name": "Weapon",
+          "hidden": false,
+          "id": "g-w"
+         }
+        ],
+        "type": "model",
+        "import": true,
+        "name": "Sergeant",
+        "hidden": false,
+        "id": "m-sgt"
+       },
+       {
+        "selectionEntries": [
+         {
+          "type": "upgrade",
+          "import": true,
+          "name": "Flamer",
+          "hidden": false,
+          "id": "w-flamer"
+         }
+        ],
+        "type": "model",
+        "import": true,
+        "name": "Trooper",
+        "hidden": false,
+        "id": "m-trooper"
+       }
+      ],
+      "constraints": [
+       {
+        "type": "min",
+        "value": 5,
+        "field": "selections",
+        "scope": "parent",
+        "id": "k3"
+       },
+       {
+        "type": "max",
+        "value": 10,
+        "field": "selections",
+        "scope": "parent",
+        "id": "k4"
+       }
+      ],
+      "name": "Troopers",
+      "hidden": false,
+      "id": "g-troopers"
+     }
+    ],
+    "costs": [
+     {
+      "name": "pts",
+      "typeId": "pts-id",
+      "value": 80
+     },
+     {
+      "name": "Experience",
+      "typeId": "xp-id",
+      "value": 0
+     }
+    ],
+    "modifiers": [
+     {
+      "conditions": [
+       {
+        "type": "atLeast",
+        "value": 6,
+        "field": "selections",
+        "scope": "u-troopers",
+        "childId": "g-troopers",
+        "id": "c1"
+       }
+      ],
+      "type": "set",
+      "value": 160,
+      "field": "pts-id"
+     },
+     {
+      "type": "set",
+      "value": 3,
+      "field": "xp-id"
+     }
+    ],
+    "type": "unit",
+    "import": true,
+    "name": "Line Troopers",
+    "hidden": false,
+    "id": "u-troopers"
+   },
+   {
+    "selectionEntries": [
+     {
+      "constraints": [
+       {
+        "type": "min",
+        "value": 1,
+        "field": "selections",
+        "scope": "parent",
+        "id": "k5"
+       },
+       {
+        "type": "max",
+        "value": 3,
+        "field": "selections",
+        "scope": "parent",
+        "id": "k6"
+       }
+      ],
+      "costs": [
+       {
+        "name": "pts",
+        "typeId": "pts-id",
+        "value": 90
+       }
+      ],
+      "type": "model",
+      "import": true,
+      "name": "Big Beast",
+      "hidden": false,
+      "id": "m-beast"
+     }
+    ],
+    "type": "unit",
+    "import": true,
+    "name": "Big Beasts",
+    "hidden": false,
+    "id": "u-beasts"
+   },
+   {
+    "selectionEntries": [
+     {
+      "constraints": [
+       {
+        "type": "max",
+        "value": 1,
+        "field": "selections",
+        "scope": "parent",
+        "id": "k7"
+       }
+      ],
+      "type": "model",
+      "import": true,
+      "name": "Dancer",
+      "hidden": false,
+      "id": "m-dancer"
+     }
+    ],
+    "costs": [
+     {
+      "name": "pts",
+      "typeId": "pts-id",
+      "value": 15
+     }
+    ],
+    "type": "unit",
+    "import": true,
+    "name": "Optional Band",
+    "hidden": false,
+    "id": "u-band"
+   }
+  ],
+  "xmlns": "http://www.battlescribe.net/schema/catalogueSchema",
+  "library": true,
+  "id": "cat-lib",
+  "name": "Test - Shared Library",
+  "gameSystemId": "sys-test",
+  "revision": 2,
+  "type": "catalogue"
+ }
+}

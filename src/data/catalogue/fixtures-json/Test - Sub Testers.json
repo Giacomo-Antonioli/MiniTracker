@@ -1,0 +1,61 @@
+{
+ "catalogue": {
+  "catalogueLinks": [
+   {
+    "type": "catalogue",
+    "name": "Test - Testers",
+    "id": "cl2",
+    "targetId": "cat-testers",
+    "importRootEntries": true
+   }
+  ],
+  "selectionEntries": [
+   {
+    "categoryLinks": [
+     {
+      "targetId": "c-char",
+      "id": "l6",
+      "primary": true,
+      "name": "Character"
+     }
+    ],
+    "costs": [
+     {
+      "name": "pts",
+      "typeId": "pts-id",
+      "value": 95
+     }
+    ],
+    "modifiers": [
+     {
+      "conditions": [
+       {
+        "type": "equalTo",
+        "value": 1,
+        "field": "selections",
+        "scope": "roster",
+        "childId": "x",
+        "id": "c9"
+       }
+      ],
+      "type": "set",
+      "value": 0,
+      "field": "pts-id"
+     }
+    ],
+    "type": "model",
+    "import": true,
+    "name": "Old Hero [Legends]",
+    "hidden": false,
+    "id": "u-hero"
+   }
+  ],
+  "xmlns": "http://www.battlescribe.net/schema/catalogueSchema",
+  "library": false,
+  "id": "cat-sub",
+  "name": "Test - Testers - Sub Testers",
+  "gameSystemId": "sys-test",
+  "revision": 1,
+  "type": "catalogue"
+ }
+}

@@ -93,20 +93,18 @@ export class DexieCatalogueRepository {
     this.db = db
   }
 
-  /** The installed catalogue (one game for now). */
-  async current(): Promise<Catalogue | undefined> {
-    return (await this.db.catalogues.toArray())[0]
+  /** All installed catalogues (e.g. 10th and 11th edition). */
+  list(): Promise<Catalogue[]> {
+    return this.db.catalogues.toArray()
   }
 
-  async replace(c: Catalogue): Promise<void> {
-    await this.db.transaction('rw', this.db.catalogues, async () => {
-      await this.db.catalogues.clear()
-      await this.db.catalogues.put(c)
-    })
+  /** Install or update one catalogue (keyed by game system id, so editions sit side by side). */
+  async save(c: Catalogue): Promise<void> {
+    await this.db.catalogues.put(c)
   }
 
-  async clear(): Promise<void> {
-    await this.db.catalogues.clear()
+  async remove(gameId: string): Promise<void> {
+    await this.db.catalogues.delete(gameId)
   }
 }
 

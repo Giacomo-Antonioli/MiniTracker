@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- 10th and 11th edition catalogues, selectable: Settings → Catalogue data has a card per edition (download, update check, remove, "Use this edition"); both can be installed. The parser reads BSData's new JSON format (11th edition) as well as XML. New downloads default to 11th edition. The daily BSData check covers both (#58).
+
 ## [0.3.0] - 2026-11-02
 
 Paints, schemes, photos and rules.
