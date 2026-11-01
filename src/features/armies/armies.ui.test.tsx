@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from '../../app/App'
@@ -77,7 +77,7 @@ describe('Armies', () => {
     expect(row).toHaveTextContent('450 / 1000 pts')
     expect(row).toHaveTextContent('Testers · 11th edition · Incursion')
     expect(row).toHaveTextContent('🟡 Missing 2 models')
-    expect(row).toHaveTextContent('⚠ 3 rule issues')
+    expect(row).toHaveTextContent('⚠ 4 rule issues')
     await user.click(screen.getByRole('button', { name: 'Complete' }))
     expect(screen.getByText('No lists match this filter.')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Rule issues' }))
@@ -85,6 +85,70 @@ describe('Armies', () => {
 
     // Saved: still there after a reload.
     expect((await appDb.lists.toArray())[0]).toMatchObject({ name: 'Walkers', factionId: 'cat-testers', pointsLimit: 1000 })
+  })
+
+  it('chooses detachments within the detachment points and gives enhancements to Characters', async () => {
+    const user = await start()
+    await user.click(screen.getByRole('button', { name: '+ New list' }))
+    await user.type(screen.getByLabelText('Name'), 'Heroes')
+    await user.selectOptions(screen.getByLabelText('Faction'), 'Sub Testers')
+    await user.click(screen.getByRole('button', { name: 'Create' }))
+    const bar = await screen.findByRole('region', { name: 'Detachments' })
+
+    await user.selectOptions(within(bar).getByLabelText('Add detachment'), 'Line Doctrine (1 DP)')
+    expect(within(bar).getByText('1 / 3 detachment points')).toBeInTheDocument()
+
+    const add = screen.getByRole('region', { name: 'Add units' })
+    await user.click(within(add).getByLabelText('Not owned'))
+    await user.click(within(add).getByLabelText('Legends'))
+    await user.click(within(add).getByRole('button', { name: 'Add Old Hero' }))
+    await user.selectOptions(screen.getByLabelText('Old Hero enhancement'), 'Lucky Charm (+15)')
+    expect(screen.getByTestId('entry')).toHaveTextContent('110')
+
+    await user.selectOptions(within(bar).getByLabelText('Add detachment'), 'Heavy Doctrine (3 DP)')
+    expect(within(bar).getByText('4 / 3 detachment points')).toBeInTheDocument()
+    const issues = screen.getByRole('region', { name: 'Issues' })
+    expect(within(issues).getByText('⚠ Detachments cost 4 detachment points, max 3')).toBeInTheDocument()
+
+    await user.click(within(bar).getByRole('button', { name: 'Remove Line Doctrine' }))
+    expect(within(issues).getByText('⚠ Lucky Charm needs its detachment (Line Doctrine)')).toBeInTheDocument()
+    expect(screen.getByLabelText('Old Hero enhancement')).toHaveDisplayValue('Lucky Charm (detachment not chosen)')
+    expect((await appDb.lists.toArray())[0]).toMatchObject({ detachmentIds: ['det-heavy'], entries: [{ enhancementId: 'enh-charm' }] })
+  })
+
+  it('adds units by double-click and by dragging them onto the list', async () => {
+    const user = await start()
+    await user.click(screen.getByRole('button', { name: '+ New list' }))
+    await user.type(screen.getByLabelText('Name'), 'Quick')
+    await user.selectOptions(screen.getByLabelText('Faction'), 'Testers')
+    await user.click(screen.getByRole('button', { name: 'Create' }))
+    const row = (await screen.findAllByTestId('unit-option')).find((r) => r.textContent?.includes('Big Walker'))!
+    await user.dblClick(row)
+    expect(screen.getAllByTestId('entry')).toHaveLength(1)
+
+    const data = new Map<string, string>()
+    const dataTransfer = { setData: (t: string, v: string) => data.set(t, v), getData: (t: string) => data.get(t) ?? '', get types() { return [...data.keys()] }, effectAllowed: '' }
+    // Drop on the empty space of the right column, below the list.
+    const target = screen.getByTestId('drop-zone')
+    fireEvent.dragStart(row, { dataTransfer })
+    fireEvent.dragOver(target, { dataTransfer })
+    expect(screen.getByRole('region', { name: 'List' })).toHaveClass('border-accent')
+    fireEvent.drop(target, { dataTransfer })
+    expect(screen.getAllByTestId('entry')).toHaveLength(2)
+    expect(screen.getByRole('region', { name: 'List' })).not.toHaveClass('border-accent')
+    // Dropping something else does nothing.
+    fireEvent.drop(target, { dataTransfer: { ...dataTransfer, getData: () => 'nope' } })
+    expect(screen.getAllByTestId('entry')).toHaveLength(2)
+
+    // The unit panel can be resized (arrow keys here), within limits, and the width is remembered.
+    const handle = screen.getByRole('separator', { name: 'Resize unit panel' })
+    expect(handle).toHaveAttribute('aria-valuenow', '352')
+    handle.focus()
+    await user.keyboard('{ArrowRight}{ArrowRight}')
+    expect(handle).toHaveAttribute('aria-valuenow', '384')
+    for (let i = 0; i < 20; i++) await user.keyboard('{ArrowLeft}')
+    expect(handle).toHaveAttribute('aria-valuenow', '240')
+    expect(localStorage.getItem('builderPanelWidth')).toBe('240')
   })
 
   it('asks to download again when the catalogue has no rule data', async () => {

@@ -4,6 +4,8 @@
   <costTypes>
     <costType id="pts-id" name="pts" defaultCostLimit="-1" hidden="false"/>
     <costType id="xp-id" name="Experience" defaultCostLimit="-1" hidden="true"/>
+    <costType id="dp-id" name="Detachment Points" defaultCostLimit="-1" hidden="false"/>
+    <costType id="en-id" name="Enhancements" defaultCostLimit="-1" hidden="false"/>
   </costTypes>
   <sharedRules>
     <rule id="r-assault" name="Assault" hidden="false">
@@ -20,6 +22,39 @@
   <forceEntries>
     <forceEntry id="f-crusade" name="Crusade Force" hidden="false"/>
     <forceEntry id="f-army" name="Army Roster" hidden="false">
+        <constraints>
+          <constraint type="max" value="2" field="dp-id" scope="parent" shared="true" id="lim-dp"/>
+          <constraint type="max" value="2" field="en-id" scope="force" shared="true" id="lim-en"/>
+        </constraints>
+        <modifiers>
+          <modifier type="set" value="3" field="lim-dp">
+            <conditionGroups>
+              <conditionGroup type="or">
+                <conditions>
+                  <condition type="equalTo" value="1" field="selections" scope="force" childId="bs-sf" shared="true"/>
+                </conditions>
+                <conditionGroups>
+                  <conditionGroup type="and">
+                    <conditions>
+                      <condition type="equalTo" value="1" field="selections" scope="force" childId="bs-inc" shared="true"/>
+                      <condition type="atLeast" value="1" field="selections" scope="force" childId="c-3dp" shared="true"/>
+                    </conditions>
+                  </conditionGroup>
+                </conditionGroups>
+              </conditionGroup>
+            </conditionGroups>
+          </modifier>
+          <modifier type="set" value="4" field="lim-en">
+            <conditions>
+              <condition type="equalTo" value="0" field="selections" scope="force" childId="bs-inc" shared="true"/>
+            </conditions>
+          </modifier>
+          <modifier type="increment" value="1" field="lim-en">
+            <repeats>
+              <repeat value="1" repeats="1" field="selections" scope="roster" childId="x" roundUp="false"/>
+            </repeats>
+          </modifier>
+        </modifiers>
       <categoryLinks>
         <categoryLink id="fl-char" name="Character" hidden="false" targetId="c-char" primary="false">
           <constraints>
@@ -54,4 +89,7 @@
       </selectionEntryGroups>
     </selectionEntry>
   </sharedSelectionEntries>
+  <categoryEntries>
+    <categoryEntry id="c-3dp" name="3DP Detachment" hidden="false"/>
+  </categoryEntries>
 </gameSystem>

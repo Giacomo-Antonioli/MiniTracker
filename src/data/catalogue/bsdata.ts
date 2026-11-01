@@ -1,5 +1,6 @@
 import { XMLParser } from 'fast-xml-parser'
-import type { ArmyLimit, BattleSize, Catalogue, CatalogueSource, Datasheet, Faction, KeywordMinimum, Muster, PointsStep, Rule } from '../../domain/catalogue/types'
+import type { ArmyLimit, BattleSize, Catalogue, CatalogueSource, Condition, ConditionOp, DataLimit, Datasheet, Detachment, DetachmentCount, Enhancement, Faction, KeywordMinimum, Muster, PointsStep, Rule } from '../../domain/catalogue/types'
+import { evalCondition } from '../../domain/lists/conditions'
 import { parseBsDataJson } from './bsdataJson'
 
 /**
@@ -129,7 +130,14 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
     }
   }
 
-  const muster = readMuster(gst)
+  const categoryNames = new Map<string, string>()
+  for (const p of parsed) {
+    const root = p.doc.gameSystem?.[0] ?? p.doc.catalogue?.[0]
+    for (const ce of kids(root, 'categoryEntries', 'categoryEntry')) categoryNames.set(attr(ce, 'id')!, attr(ce, 'name')!)
+  }
+  const costIds = new Map(kids(gst, 'costTypes', 'costType').map((c) => [attr(c, 'name')!, attr(c, 'id')!]))
+  const cond = conditionReader(categoryNames)
+  const muster = readMuster(gst, cond, costIds)
   const sizeIds = new Set(muster.battleSizes.map((b) => b.id))
   // Some factions (e.g. Necrons) put a unit's limit on a keyword only that unit has, instead of on the unit.
   // Limits on keywords shared by several units (e.g. "Battlesuit") are other rules and are not read here.
@@ -172,7 +180,8 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
     .sort((a, b) => a.name.localeCompare(b.name))
 
   const ruleList = [...rules.values()].sort((a, b) => Number(a.kind === 'faction') - Number(b.kind === 'faction') || a.name.localeCompare(b.name))
-  return { formatVersion: 3, gameId: attr(gst, 'id')!, gameName: attr(gst, 'name')!, source, factions, datasheets, rules: ruleList, muster }
+  const det = readDetachments(parsed, factionCats, byId, cond, costIds, muster.forceId)
+  return { formatVersion: 4, gameId: attr(gst, 'id')!, gameName: attr(gst, 'name')!, source, factions, datasheets, rules: ruleList, muster, ...det }
 }
 
 /** Conditions of a modifier, flattened; undefined when they are combined in a way we don't read (nested groups, 'or'). */
@@ -238,8 +247,48 @@ function armyLimit(nodes: Node[], sizeIds: Set<string>): ArmyLimit | undefined {
   return { max: base, ...(diff.length ? { byBattleSize: Object.fromEntries(diff) } : {}) }
 }
 
-/** Battle sizes and keyword minimums from the game system's main force (BSData 40k: "Army Roster"). */
-function readMuster(gst: Node): Muster {
+const OPS = new Set<ConditionOp>(['atLeast', 'atMost', 'equalTo', 'notEqualTo', 'lessThan', 'greaterThan', 'instanceOf', 'notInstanceOf'])
+
+/** Turns a modifier's conditions into a Condition (undefined when it uses something we don't read, e.g. repeats). */
+function conditionReader(categoryNames: Map<string, string>) {
+  const leaf = (c: Node): Condition | undefined => {
+    const op = attr(c, 'type') as ConditionOp
+    if (!OPS.has(op)) return undefined
+    const id = attr(c, 'childId') ?? ''
+    const value = Number(attr(c, 'value') ?? 0)
+    return categoryNames.has(id) ? { op, value, keyword: categoryNames.get(id)! } : { op, value, id }
+  }
+  const group = (n: Node, type: 'and' | 'or'): Condition | undefined => {
+    const parts: (Condition | undefined)[] = [
+      ...kids(n, 'conditions', 'condition').map(leaf),
+      ...kids(n, 'conditionGroups', 'conditionGroup').map((g) => group(g, attr(g, 'type') === 'or' ? 'or' : 'and')),
+    ]
+    if (parts.some((x) => !x)) return undefined
+    const list = parts as Condition[]
+    return list.length === 1 ? list[0] : type === 'or' ? { any: list } : { all: list }
+  }
+  return (m: Node): Condition | null | undefined => {
+    if (kids(m, 'repeats', 'repeat').length) return undefined
+    if (!kids(m, 'conditions', 'condition').length && !kids(m, 'conditionGroups', 'conditionGroup').length) return null
+    return group(m, 'and')
+  }
+}
+type CondReader = ReturnType<typeof conditionReader>
+
+/** A "max" constraint with the modifiers that change it; modifiers we can't read are left out. */
+function dataLimit(c: Node, mods: Node[], cond: CondReader): DataLimit {
+  const modifiers = mods
+    .filter((m) => attr(m, 'field') === attr(c, 'id') && ['set', 'increment', 'decrement'].includes(attr(m, 'type') ?? ''))
+    .flatMap((m) => {
+      const when = cond(m)
+      if (when === undefined) return []
+      return [{ type: attr(m, 'type') as 'set', value: Number(attr(m, 'value')), ...(when ? { when } : {}) }]
+    })
+  return { max: Number(attr(c, 'value')), modifiers }
+}
+
+/** Battle sizes, keyword minimums and detachment/enhancement budgets from the game system's main force (BSData 40k: "Army Roster"). */
+function readMuster(gst: Node, cond: CondReader, costIds: Map<string, string>): Muster {
   const battleSizes: BattleSize[] = []
   walk(gst, (tag, el) => {
     if (tag !== 'selectionEntryGroup' || attr(el, 'name') !== 'Battle Size') return
@@ -268,7 +317,128 @@ function readMuster(gst: Node): Muster {
       keywordMinimums.push({ keyword: attr(cl, 'name')!, min: Number(attr(c, 'value')), exemptFactionIds: [...exempt].sort() })
     }
   }
-  return { battleSizes, keywordMinimums }
+  const out: Muster = { battleSizes, keywordMinimums }
+  if (main) {
+    out.forceId = attr(main, 'id')
+    const mods = kids(main, 'modifiers', 'modifier')
+    for (const c of kids(main, 'constraints', 'constraint')) {
+      if (attr(c, 'type') !== 'max') continue
+      if (attr(c, 'field') === costIds.get('Detachment Points')) out.detachmentPoints = dataLimit(c, mods, cond)
+      if (attr(c, 'field') === costIds.get('Enhancements')) out.enhancements = dataLimit(c, mods, cond)
+    }
+  }
+  return out
+}
+
+/** Hidden in an Army Roster that has only `present` chosen (e.g. Boarding Actions-only detachments are)? */
+function hiddenInArmy(n: Node, cond: CondReader, present: (string | undefined)[]): boolean {
+  if (hidden(n)) return true
+  return kids(n, 'modifiers', 'modifier').some((m) => {
+    if (attr(m, 'field') !== 'hidden' || attr(m, 'type') !== 'set' || attr(m, 'value') !== 'true') return false
+    const when = cond(m)
+    if (when === undefined) return false
+    return when === null || evalCondition(when, (x) => (x.id && present.includes(x.id) ? 1 : 0))
+  })
+}
+
+/** Ids anywhere in a node's modifier conditions. */
+function conditionIds(n: Node): string[] {
+  const out: string[] = []
+  for (const m of kids(n, 'modifiers', 'modifier')) {
+    walk(m, (tag, el) => {
+      if (tag === 'condition' && attr(el, 'childId')) out.push(attr(el, 'childId')!)
+    })
+  }
+  return out
+}
+
+/**
+ * Detachments, their enhancements, and how many detachments each faction takes.
+ * A faction's detachments are found by following its "Detachment" entry or group, through links into any file
+ * (some factions keep them in a library). An enhancement belongs to the detachment its hidden-unless condition names.
+ */
+function readDetachments(
+  parsed: { doc: Record<string, Node[]> }[],
+  factionCats: CatInfo[],
+  byId: Map<string, CatInfo>,
+  cond: CondReader,
+  costIds: Map<string, string>,
+  forceId: string | undefined,
+): Pick<Catalogue, 'detachments' | 'enhancements' | 'detachmentCounts'> {
+  const cost = (n: Node, name: string) => Number(attr(kids(n, 'costs', 'cost').find((c) => attr(c, 'typeId') === costIds.get(name)) ?? {}, 'value') ?? 0)
+  const targets = new Map<string, Node>()
+  const catDocs = parsed.map((p) => p.doc.catalogue?.[0]).filter((c): c is Node => !!c)
+  for (const c of catDocs) {
+    for (const e of [...kids(c, 'sharedSelectionEntries', 'selectionEntry'), ...kids(c, 'selectionEntries', 'selectionEntry')]) targets.set(attr(e, 'id')!, e)
+    for (const g of kids(c, 'sharedSelectionEntryGroups', 'selectionEntryGroup')) targets.set(attr(g, 'id')!, g)
+  }
+  const isDetachmentNode = (n: Node) => attr(n, 'name') === 'Detachment'
+
+  const detachments = new Map<string, Detachment>()
+  const detachmentCounts: Record<string, DetachmentCount> = {}
+  for (const f of factionCats) {
+    // Like BattleScribe: the faction's own entries plus the root entries of catalogues it imports.
+    const closure = (id: string, seen = new Set<string>()): string[] => {
+      if (seen.has(id)) return []
+      seen.add(id)
+      return [id, ...(byId.get(id)?.imports ?? []).flatMap((t) => closure(t, seen))]
+    }
+    const starts: Node[] = []
+    for (const cid of closure(f.id)) {
+      const doc = catDocs.find((c) => attr(c, 'id') === cid)
+      if (!doc) continue
+      walk(doc, (tag, el) => {
+        if (isDetachmentNode(el) && ['selectionEntry', 'selectionEntryGroup', 'entryLink'].includes(tag)) starts.push(el)
+      })
+    }
+    const seen = new Set<Node>()
+    const visit = (n: Node | undefined, depth: number) => {
+      if (!n || seen.has(n) || depth > 6 || hidden(n)) return
+      seen.add(n)
+      if (attr(n, 'targetId') !== undefined && attr(n, 'type') !== 'upgrade') return visit(targets.get(attr(n, 'targetId')!), depth + 1)
+      if (isDetachmentNode(n) && attr(n, 'type') === undefined && !detachmentCounts[f.id]) {
+        const cons = kids(n, 'constraints', 'constraint').filter((k) => attr(k, 'field') === 'selections')
+        const min = cons.find((k) => attr(k, 'type') === 'min')
+        const max = cons.find((k) => attr(k, 'type') === 'max')
+        detachmentCounts[f.id] = { min: min ? Number(attr(min, 'value')) : 0, max: max ? dataLimit(max, kids(n, 'modifiers', 'modifier'), cond) : { max: -1, modifiers: [] } }
+      }
+      if (attr(n, 'type') === 'upgrade' && !isDetachmentNode(n)) {
+        if (hiddenInArmy(n, cond, [forceId])) return
+        const cur = detachments.get(attr(n, 'id')!) ?? {
+          id: attr(n, 'id')!,
+          name: attr(n, 'name')!,
+          factionIds: [],
+          detachmentPoints: cost(n, 'Detachment Points'),
+          keywords: sortUnique(kids(n, 'categoryLinks', 'categoryLink').map((l) => attr(l, 'name')!)),
+        }
+        if (!cur.factionIds.includes(f.id)) cur.factionIds.push(f.id)
+        detachments.set(cur.id, cur)
+        return
+      }
+      for (const c of [...kids(n, 'selectionEntries', 'selectionEntry'), ...kids(n, 'selectionEntryGroups', 'selectionEntryGroup'), ...kids(n, 'entryLinks', 'entryLink')]) visit(c, depth + 1)
+    }
+    for (const s0 of starts) visit(s0, 0)
+  }
+
+  const enhancements = new Map<string, Enhancement>()
+  for (const c of catDocs) {
+    walk(c, (tag, g) => {
+      if (tag !== 'selectionEntryGroup' || !/enhancement/i.test(attr(g, 'name') ?? '') || hidden(g)) return
+      const groupDet = conditionIds(g).find((id) => detachments.has(id))
+      for (const e of kids(g, 'selectionEntries', 'selectionEntry')) {
+        if (attr(e, 'type') !== 'upgrade' || hidden(e) || enhancements.has(attr(e, 'id')!)) continue
+        const detachmentId = conditionIds(e).find((id) => detachments.has(id)) ?? groupDet
+        // Visibility conditions are skipped: besides "this detachment is chosen" they say which units may take it.
+        // Boarding Actions enhancements drop out because their detachments are not in the list.
+        if (!detachmentId) continue
+        enhancements.set(attr(e, 'id')!, { id: attr(e, 'id')!, name: attr(e, 'name')!, points: cost(e, 'pts'), detachmentId })
+      }
+    })
+  }
+
+  const byName = <T extends { name: string }>(a: T, b: T) => a.name.localeCompare(b.name)
+  for (const d of detachments.values()) d.factionIds.sort()
+  return { detachments: [...detachments.values()].sort(byName), enhancements: [...enhancements.values()].sort(byName), detachmentCounts }
 }
 
 function toDatasheet(e: Node, factionIds: string[], ptsId: string | undefined): Datasheet {

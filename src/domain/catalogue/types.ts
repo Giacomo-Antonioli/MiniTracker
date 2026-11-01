@@ -57,10 +57,63 @@ export interface KeywordMinimum {
   exemptFactionIds: string[]
 }
 
+/**
+ * A BSData condition, kept so it can be checked against a list later.
+ * Leaves count what the list has: a battle size, detachment, unit or enhancement by id, or units/detachments with a keyword.
+ */
+export type Condition =
+  | { all: Condition[] }
+  | { any: Condition[] }
+  | { op: ConditionOp; value: number; id?: string; keyword?: string }
+
+export type ConditionOp = 'atLeast' | 'atMost' | 'equalTo' | 'notEqualTo' | 'lessThan' | 'greaterThan' | 'instanceOf' | 'notInstanceOf'
+
+export interface LimitModifier {
+  type: 'set' | 'increment' | 'decrement'
+  value: number
+  /** Missing = always applies. */
+  when?: Condition
+}
+
+/** A maximum that modifiers can change depending on the list (-1 = no limit). */
+export interface DataLimit {
+  max: number
+  modifiers: LimitModifier[]
+}
+
 /** Army-building rules read from the data. */
 export interface Muster {
   battleSizes: BattleSize[]
   keywordMinimums: KeywordMinimum[]
+  /** Detachment points an army may spend (11th edition). */
+  detachmentPoints?: DataLimit
+  /** Enhancements an army may take. */
+  enhancements?: DataLimit
+  /** The main force (Army Roster): conditions "is this an Army Roster" count it as present. */
+  forceId?: string
+}
+
+export interface Detachment {
+  id: string
+  name: string
+  factionIds: string[]
+  /** 11th edition cost against the army's detachment points; 0 in 10th. */
+  detachmentPoints: number
+  /** Keywords such as "3DP Detachment" that conditions can test. */
+  keywords: string[]
+}
+
+export interface Enhancement {
+  id: string
+  name: string
+  points: number
+  detachmentId: string
+}
+
+/** How many detachments a faction's army takes. */
+export interface DetachmentCount {
+  min: number
+  max: DataLimit
 }
 
 export interface Rule {
@@ -82,7 +135,7 @@ export interface CatalogueSource {
 }
 
 export interface Catalogue {
-  /** 2 = includes rules and ability texts; 3 = muster rules and army limits. Older catalogues have none. */
+  /** 2 = includes rules and ability texts; 3 = muster rules and army limits; 4 = detachments and enhancements. Older catalogues have none. */
   formatVersion?: number
   gameId: string
   gameName: string
@@ -93,4 +146,9 @@ export interface Catalogue {
   rules?: Rule[]
   /** Missing in catalogues downloaded before format 3. */
   muster?: Muster
+  /** Missing in catalogues downloaded before format 4. */
+  detachments?: Detachment[]
+  enhancements?: Enhancement[]
+  /** Faction id → detachment count rule. */
+  detachmentCounts?: Record<string, DetachmentCount>
 }

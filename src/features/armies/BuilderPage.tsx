@@ -6,7 +6,8 @@ import type { Catalogue, Datasheet } from '../../domain/catalogue/types'
 import { removeEntry, updateEntry } from '../../domain/lists/list'
 import { listOwnership } from '../../domain/lists/ownership'
 import { listPoints } from '../../domain/lists/points'
-import { addUnit, battleSizes, checkList, legalUnits } from '../../domain/lists/rules'
+import { evalLimit } from '../../domain/lists/conditions'
+import { addUnit, battleSizes, checkList, legalUnits, listCounter } from '../../domain/lists/rules'
 import type { ArmyList, ListEntry, ListStatus } from '../../domain/lists/types'
 
 const ROLE_ORDER = ['Epic Hero', 'Character', 'Battleline']
@@ -59,7 +60,10 @@ export function BuilderPage({ listId, onBack, onOpenSettings }: { listId: string
 
 function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?: Catalogue; onBack: () => void; onSave: (l: ArmyList) => void; onDelete: () => void }) {
   const sizes = cat ? battleSizes(cat) : []
-  const points = useMemo(() => listPoints(list, new Map((cat?.datasheets ?? []).map((d) => [d.id, d]))).total, [list, cat])
+  const points = useMemo(
+    () => listPoints(list, new Map((cat?.datasheets ?? []).map((d) => [d.id, d])), new Map((cat?.enhancements ?? []).map((x) => [x.id, x]))).total,
+    [list, cat],
+  )
   const set = (patch: Partial<ArmyList>) => onSave({ ...list, ...patch, updatedAt: new Date().toISOString() })
   const factionLocked = list.entries.length > 0
   const [name, setName] = useState(list.name)
@@ -135,8 +139,18 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
 function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave: (l: ArmyList) => void }) {
   const { units } = useStore()
   const [highlight, setHighlight] = useState<string[]>([])
+  const [choose, setChoose] = useState<Datasheet | null>(null)
+  const [dropping, setDropping] = useState(false)
+  const [panelWidth, setPanelWidth] = usePanelWidth()
+  const add = (d: Datasheet, factionId?: string) => {
+    if (!list.factionId && !factionId && d.factionIds.length > 1) return setChoose(d)
+    setChoose(null)
+    onSave(addUnit(list, d, d.minModels, ctx(), factionId))
+  }
   const sheets = useMemo(() => new Map(cat.datasheets.map((d) => [d.id, d])), [cat])
-  const points = useMemo(() => listPoints(list, sheets), [list, sheets])
+  const enhancements = useMemo(() => new Map((cat.enhancements ?? []).map((x) => [x.id, x])), [cat])
+  const points = useMemo(() => listPoints(list, sheets, enhancements), [list, sheets, enhancements])
+  const offered = (cat.enhancements ?? []).filter((x) => list.detachmentIds?.includes(x.detachmentId))
   const own = useMemo(() => listOwnership(list, units), [list, units])
   const issues = useMemo(() => (cat.muster ? checkList(list, cat) : []), [list, cat])
   const flagged = new Set(issues.flatMap((i) => i.entryIds))
@@ -146,11 +160,32 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   const leadable = list.entries.filter((e) => !sheets.get(e.datasheetId)?.keywords.includes('Character'))
 
   return (
-    <div className="grid items-start gap-3 lg:grid-cols-[22rem_1fr]">
-      <AddPanel list={list} cat={cat} onSave={onSave} />
-      <div className="grid gap-3">
-        <section className="panel grid gap-1 p-3" aria-label="List">
-          {list.entries.length === 0 && <p className="text-muted">No units yet. Add them from the left.</p>}
+    <div className="grid items-start gap-3 lg:grid-cols-[var(--add-w)_auto_minmax(0,1fr)] lg:gap-0" style={{ '--add-w': `${panelWidth}px` } as React.CSSProperties}>
+      <AddPanel list={list} cat={cat} onAdd={add} choose={choose} onCancelChoose={() => setChoose(null)} />
+      <ResizeHandle width={panelWidth} onChange={setPanelWidth} />
+      {/* The whole column takes drops, down to the bottom of the screen, not just the list box. */}
+      <div
+        className="grid min-h-[calc(100vh-8rem)] content-start gap-3"
+        data-testid="drop-zone"
+        onDragOver={(ev) => {
+          if (!ev.dataTransfer.types.includes(DRAG_TYPE)) return
+          ev.preventDefault()
+          setDropping(true)
+        }}
+        onDragLeave={(ev) => {
+          if (!ev.currentTarget.contains(ev.relatedTarget as Node | null)) setDropping(false)
+        }}
+        onDrop={(ev) => {
+          setDropping(false)
+          const d = sheets.get(ev.dataTransfer.getData(DRAG_TYPE))
+          if (!d) return
+          ev.preventDefault()
+          add(d)
+        }}
+      >
+        {cat.detachments && <DetachmentBar list={list} cat={cat} onSave={onSave} />}
+        <section className={`panel grid gap-1 p-3 ${dropping ? 'border-accent' : ''}`} aria-label="List">
+          {list.entries.length === 0 && <p className="text-muted">No units yet. Add them from the left: +, double-click, or drag them here.</p>}
           {list.entries.map((e) => {
             const d = sheets.get(e.datasheetId)
             const o = own.byEntry.get(e.id)!
@@ -166,6 +201,22 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                   ★
                 </button>
                 <span className="min-w-0 flex-1 truncate">{d?.name ?? 'Unknown unit'}</span>
+                {isChar && !d?.keywords.includes('Epic Hero') && cat.detachments && (offered.length > 0 || e.enhancementId) && (
+                  <select
+                    className="input py-0.5 text-xs"
+                    aria-label={`${d?.name} enhancement`}
+                    value={e.enhancementId ?? ''}
+                    onChange={(ev) => edit(e.id, { enhancementId: ev.target.value || undefined })}
+                  >
+                    <option value="">Enhancement: none</option>
+                    {e.enhancementId && !offered.some((x) => x.id === e.enhancementId) && (
+                      <option value={e.enhancementId}>{enhancements.get(e.enhancementId)?.name ?? 'Unknown enhancement'} (detachment not chosen)</option>
+                    )}
+                    {offered.map((x) => (
+                      <option key={x.id} value={x.id}>{x.name} (+{x.points})</option>
+                    ))}
+                  </select>
+                )}
                 {isChar && leadable.length > 0 && (
                   <select className="input py-0.5 text-xs" aria-label={`${d?.name} leads`} value={e.attachedTo ?? ''} onChange={(ev) => edit(e.id, { attachedTo: ev.target.value || undefined })}>
                     <option value="">Leads: none</option>
@@ -214,12 +265,75 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   )
 }
 
-function AddPanel({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave: (l: ArmyList) => void }) {
+const WIDTH_KEY = 'builderPanelWidth'
+const MIN_W = 240
+const MAX_W = 640
+const clampW = (w: number) => Math.min(MAX_W, Math.max(MIN_W, Math.round(w)))
+
+/** Width of the add panel, remembered on this device. */
+function usePanelWidth(): [number, (w: number) => void] {
+  const [w, setW] = useState(() => {
+    try {
+      const v = Number(localStorage.getItem(WIDTH_KEY))
+      return v ? clampW(v) : 352
+    } catch {
+      return 352
+    }
+  })
+  const set = (v: number) => {
+    const c = clampW(v)
+    setW(c)
+    try {
+      localStorage.setItem(WIDTH_KEY, String(c))
+    } catch {
+      /* not remembered */
+    }
+  }
+  return [w, set]
+}
+
+/** Drag (or use arrow keys) to change the add panel's width. Wide screens only; on narrow ones the columns stack. */
+function ResizeHandle({ width, onChange }: { width: number; onChange: (w: number) => void }) {
+  return (
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize unit panel"
+      aria-valuenow={width}
+      aria-valuemin={MIN_W}
+      aria-valuemax={MAX_W}
+      tabIndex={0}
+      className="group mx-1 hidden w-2 cursor-col-resize self-stretch rounded focus:outline-none lg:flex lg:justify-center"
+      onPointerDown={(ev) => {
+        ev.preventDefault()
+        const startX = ev.clientX
+        const startW = width
+        const move = (e: PointerEvent) => onChange(startW + e.clientX - startX)
+        const up = () => {
+          window.removeEventListener('pointermove', move)
+          window.removeEventListener('pointerup', up)
+        }
+        window.addEventListener('pointermove', move)
+        window.addEventListener('pointerup', up)
+      }}
+      onKeyDown={(ev) => {
+        if (ev.key === 'ArrowLeft') onChange(width - 16)
+        if (ev.key === 'ArrowRight') onChange(width + 16)
+      }}
+    >
+      <span className="w-0.5 rounded bg-muted/30 group-hover:bg-accent group-focus:bg-accent" />
+    </div>
+  )
+}
+
+/** Data type used when dragging a unit from the add panel onto the list. */
+const DRAG_TYPE = 'application/x-minitracker-datasheet'
+
+function AddPanel({ list, cat, onAdd, choose, onCancelChoose }: { list: ArmyList; cat: Catalogue; onAdd: (d: Datasheet, factionId?: string) => void; choose: Datasheet | null; onCancelChoose: () => void }) {
   const { units } = useStore()
   const [text, setText] = useState('')
   const [notOwned, setNotOwned] = useState(false)
   const [legends, setLegends] = useState(false)
-  const [choose, setChoose] = useState<Datasheet | null>(null)
   const owned = useMemo(() => ownedByDatasheet(units), [units])
 
   const groups = useMemo(() => {
@@ -235,16 +349,12 @@ function AddPanel({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSav
     return [...map].sort(([a], [b]) => roleRank(a) - roleRank(b) || a.localeCompare(b))
   }, [cat, list.factionId, legends, notOwned, owned, text])
 
-  const add = (d: Datasheet, factionId?: string) => {
-    if (!list.factionId && !factionId && d.factionIds.length > 1) return setChoose(d)
-    setChoose(null)
-    onSave(addUnit(list, d, d.minModels, ctx(), factionId))
-  }
+  const add = onAdd
   const factionName = (id: string) => cat.factions.find((f) => f.id === id)?.name ?? id
   const count = groups.reduce((n, [, ds]) => n + ds.length, 0)
 
   return (
-    <section className="panel grid gap-2 p-3 lg:sticky lg:top-0 lg:max-h-[calc(100vh-6rem)] lg:overflow-auto" aria-label="Add units">
+    <section className="panel grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2 p-3 lg:sticky lg:top-0 lg:max-h-[calc(100vh-6rem)] lg:overflow-auto" aria-label="Add units">
       <input className="input" placeholder="🔍 Search units" aria-label="Search units" value={text} onChange={(e) => setText(e.target.value)} />
       <div className="flex flex-wrap gap-3 text-sm">
         <label className="flex items-center gap-1">
@@ -260,7 +370,7 @@ function AddPanel({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSav
           {choose.factionIds.map((f) => (
             <button key={f} className="btn" onClick={() => add(choose, f)}>{factionName(f)}</button>
           ))}
-          <button className="btn" onClick={() => setChoose(null)}>Cancel</button>
+          <button className="btn" onClick={onCancelChoose}>Cancel</button>
         </div>
       )}
       {count === 0 && (
@@ -269,20 +379,71 @@ function AddPanel({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSav
         </p>
       )}
       {groups.map(([role, ds]) => (
-        <div key={role} className="grid gap-0.5">
+        <div key={role} className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-0.5">
           <h3 className="text-xs uppercase tracking-wide text-muted">{role}</h3>
           {ds.slice(0, 200).map((d) => (
-            <div key={d.id} className="flex items-center gap-2 text-sm">
+            <div
+              key={d.id}
+              data-testid="unit-option"
+              className="flex cursor-grab select-none items-center gap-2 rounded px-1 text-sm hover:bg-panel-2"
+              title="Double-click or drag onto the list to add"
+              draggable
+              onDragStart={(ev) => {
+                ev.dataTransfer.setData(DRAG_TYPE, d.id)
+                ev.dataTransfer.effectAllowed = 'copy'
+              }}
+              onDoubleClick={() => add(d)}
+            >
               <span className="min-w-0 flex-1 truncate">
                 {d.name}
                 {owned.has(d.id) && <span className="ml-1 text-accent" title={`You own ${owned.get(d.id)!.models} models`}>✓</span>}
               </span>
-              <span className="text-xs text-muted">{d.points[0]?.points ?? '—'}</span>
-              <button className="btn px-2 py-0.5" aria-label={`Add ${d.name}`} onClick={() => add(d)}>+</button>
+              <span className="shrink-0 text-xs text-muted">{d.points[0]?.points ?? '—'}</span>
+              <button className="btn shrink-0 px-2 py-0.5" aria-label={`Add ${d.name}`} onClick={() => add(d)}>+</button>
             </div>
           ))}
         </div>
       ))}
+    </section>
+  )
+}
+
+function DetachmentBar({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave: (l: ArmyList) => void }) {
+  const chosen = list.detachmentIds ?? []
+  const all = new Map((cat.detachments ?? []).map((d) => [d.id, d]))
+  const available = (cat.detachments ?? []).filter((d) => list.factionId && d.factionIds.includes(list.factionId) && !chosen.includes(d.id))
+  const used = chosen.reduce((n, id) => n + (all.get(id)?.detachmentPoints ?? 0), 0)
+  const budget = cat.muster?.detachmentPoints ? evalLimit(cat.muster.detachmentPoints, listCounter(list, cat)) : undefined
+  const set = (ids: string[]) => onSave({ ...list, detachmentIds: ids, updatedAt: ctx().now })
+
+  return (
+    <section className="panel flex flex-wrap items-center gap-2 p-3" aria-label="Detachments">
+      <span className="text-sm text-muted">Detachments</span>
+      {chosen.map((id) => {
+        const d = all.get(id)
+        return (
+          <span key={id} className="flex items-center gap-1 rounded border border-accent/50 px-2 py-0.5 text-sm">
+            {d?.name ?? 'Unknown detachment'}
+            {!!d?.detachmentPoints && <span className="text-xs text-muted">{d.detachmentPoints} DP</span>}
+            <button aria-label={`Remove ${d?.name ?? 'detachment'}`} className="ml-1 text-muted hover:text-danger" onClick={() => set(chosen.filter((x) => x !== id))}>✕</button>
+          </span>
+        )
+      })}
+      {list.factionId ? (
+        available.length > 0 && (
+          <select className="input py-0.5 text-sm" aria-label="Add detachment" value="" onChange={(e) => e.target.value && set([...chosen, e.target.value])}>
+            <option value="">+ Add detachment</option>
+            {available.map((d) => (
+              <option key={d.id} value={d.id}>{d.name}{d.detachmentPoints ? ` (${d.detachmentPoints} DP)` : ''}</option>
+            ))}
+          </select>
+        )
+      ) : (
+        <span className="text-sm text-muted">Choose a faction or add a unit first</span>
+      )}
+      {budget !== undefined && budget >= 0 && (
+        <span className={`ml-auto text-sm ${used > budget ? 'text-danger' : 'text-muted'}`}>{used} / {budget} detachment points</span>
+      )}
     </section>
   )
 }

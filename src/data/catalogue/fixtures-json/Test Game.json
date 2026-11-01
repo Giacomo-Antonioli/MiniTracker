@@ -12,6 +12,18 @@
     "name": "Experience",
     "defaultCostLimit": -1,
     "hidden": true
+   },
+   {
+    "id": "dp-id",
+    "name": "Detachment Points",
+    "defaultCostLimit": -1,
+    "hidden": false
+   },
+   {
+    "id": "en-id",
+    "name": "Enhancements",
+    "defaultCostLimit": -1,
+    "hidden": false
    }
   ],
   "sharedRules": [
@@ -100,6 +112,99 @@
       "targetId": "c-inf",
       "primary": false
      }
+    ],
+    "constraints": [
+     {
+      "type": "max",
+      "value": 2,
+      "field": "dp-id",
+      "scope": "parent",
+      "shared": true,
+      "id": "lim-dp"
+     },
+     {
+      "type": "max",
+      "value": 2,
+      "field": "en-id",
+      "scope": "force",
+      "shared": true,
+      "id": "lim-en"
+     }
+    ],
+    "modifiers": [
+     {
+      "type": "set",
+      "value": 3,
+      "field": "lim-dp",
+      "conditionGroups": [
+       {
+        "type": "or",
+        "conditions": [
+         {
+          "type": "equalTo",
+          "value": 1,
+          "field": "selections",
+          "scope": "force",
+          "childId": "bs-sf",
+          "shared": true
+         }
+        ],
+        "conditionGroups": [
+         {
+          "type": "and",
+          "conditions": [
+           {
+            "type": "equalTo",
+            "value": 1,
+            "field": "selections",
+            "scope": "force",
+            "childId": "bs-inc",
+            "shared": true
+           },
+           {
+            "type": "atLeast",
+            "value": 1,
+            "field": "selections",
+            "scope": "force",
+            "childId": "c-3dp",
+            "shared": true
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "set",
+      "value": 4,
+      "field": "lim-en",
+      "conditions": [
+       {
+        "type": "equalTo",
+        "value": 0,
+        "field": "selections",
+        "scope": "force",
+        "childId": "bs-inc",
+        "shared": true
+       }
+      ]
+     },
+     {
+      "type": "increment",
+      "value": 1,
+      "field": "lim-en",
+      "repeats": [
+       {
+        "value": 1,
+        "repeats": 1,
+        "field": "selections",
+        "scope": "roster",
+        "childId": "x",
+        "roundUp": false
+       }
+      ]
+     }
     ]
    }
   ],
@@ -140,6 +245,13 @@
       ]
      }
     ]
+   }
+  ],
+  "categoryEntries": [
+   {
+    "id": "c-3dp",
+    "name": "3DP Detachment",
+    "hidden": false
    }
   ]
  }

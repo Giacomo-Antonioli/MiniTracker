@@ -33,6 +33,14 @@
     "type": "selectionEntry",
     "id": "el11",
     "targetId": "u-secret"
+   },
+   {
+    "import": true,
+    "name": "Detachment",
+    "hidden": false,
+    "type": "selectionEntryGroup",
+    "id": "el-det",
+    "targetId": "g-det"
    }
   ],
   "sharedSelectionEntries": [
@@ -148,6 +156,220 @@
   "name": "Test - Testers",
   "gameSystemId": "sys-test",
   "revision": 7,
-  "type": "catalogue"
+  "type": "catalogue",
+  "sharedSelectionEntryGroups": [
+   {
+    "name": "Detachment",
+    "hidden": false,
+    "id": "g-det",
+    "constraints": [
+     {
+      "type": "min",
+      "value": 1,
+      "field": "selections",
+      "scope": "parent",
+      "shared": true,
+      "id": "det-min"
+     },
+     {
+      "type": "max",
+      "value": -1,
+      "field": "selections",
+      "scope": "parent",
+      "shared": true,
+      "id": "det-max"
+     }
+    ],
+    "modifiers": [
+     {
+      "type": "set",
+      "value": 1,
+      "field": "det-max",
+      "conditions": [
+       {
+        "type": "atLeast",
+        "value": 1,
+        "field": "selections",
+        "scope": "force",
+        "childId": "bs-inc",
+        "shared": true
+       }
+      ]
+     }
+    ],
+    "selectionEntries": [
+     {
+      "type": "upgrade",
+      "import": true,
+      "name": "Line Doctrine",
+      "hidden": false,
+      "id": "det-line",
+      "costs": [
+       {
+        "name": "pts",
+        "typeId": "pts-id",
+        "value": 0
+       },
+       {
+        "name": "Detachment Points",
+        "typeId": "dp-id",
+        "value": 1
+       }
+      ]
+     },
+     {
+      "type": "upgrade",
+      "import": true,
+      "name": "Heavy Doctrine",
+      "hidden": false,
+      "id": "det-heavy",
+      "costs": [
+       {
+        "name": "pts",
+        "typeId": "pts-id",
+        "value": 0
+       },
+       {
+        "name": "Detachment Points",
+        "typeId": "dp-id",
+        "value": 3
+       }
+      ],
+      "categoryLinks": [
+       {
+        "targetId": "c-3dp",
+        "id": "l-3dp",
+        "primary": false,
+        "name": "3DP Detachment"
+       }
+      ]
+     },
+     {
+      "type": "upgrade",
+      "import": true,
+      "name": "Boarding Doctrine",
+      "hidden": false,
+      "id": "det-board",
+      "costs": [
+       {
+        "name": "pts",
+        "typeId": "pts-id",
+        "value": 0
+       },
+       {
+        "name": "Detachment Points",
+        "typeId": "dp-id",
+        "value": 1
+       }
+      ],
+      "modifiers": [
+       {
+        "type": "set",
+        "value": true,
+        "field": "hidden",
+        "conditions": [
+         {
+          "type": "notInstanceOf",
+          "value": 1,
+          "field": "selections",
+          "scope": "force",
+          "childId": "f-board",
+          "shared": true
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "Enhancements",
+    "hidden": false,
+    "id": "g-enh",
+    "selectionEntryGroups": [
+     {
+      "name": "Line Doctrine Enhancements",
+      "hidden": false,
+      "id": "g-enh-line",
+      "modifiers": [
+       {
+        "type": "set",
+        "value": true,
+        "field": "hidden",
+        "conditions": [
+         {
+          "type": "lessThan",
+          "value": 1,
+          "field": "selections",
+          "scope": "roster",
+          "childId": "det-line",
+          "shared": true
+         }
+        ]
+       }
+      ],
+      "selectionEntries": [
+       {
+        "type": "upgrade",
+        "import": true,
+        "name": "Lucky Charm",
+        "hidden": false,
+        "id": "enh-charm",
+        "costs": [
+         {
+          "name": "pts",
+          "typeId": "pts-id",
+          "value": 15
+         },
+         {
+          "name": "Enhancements",
+          "typeId": "en-id",
+          "value": 1
+         }
+        ]
+       }
+      ]
+     }
+    ],
+    "selectionEntries": [
+     {
+      "type": "upgrade",
+      "import": true,
+      "name": "Big Banner",
+      "hidden": false,
+      "id": "enh-banner",
+      "costs": [
+       {
+        "name": "pts",
+        "typeId": "pts-id",
+        "value": 20
+       },
+       {
+        "name": "Enhancements",
+        "typeId": "en-id",
+        "value": 1
+       }
+      ],
+      "modifiers": [
+       {
+        "type": "set",
+        "value": true,
+        "field": "hidden",
+        "conditions": [
+         {
+          "type": "lessThan",
+          "value": 1,
+          "field": "selections",
+          "scope": "roster",
+          "childId": "det-heavy",
+          "shared": true
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ]
  }
 }

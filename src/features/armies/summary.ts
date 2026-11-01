@@ -19,7 +19,7 @@ export function summarise(l: ArmyList, cat: Catalogue | undefined, units: OwnedU
   const own = listOwnership(l, units)
   const sheets = new Map((cat?.datasheets ?? []).map((d) => [d.id, d]))
   return {
-    points: listPoints(l, sheets).total,
+    points: listPoints(l, sheets, new Map((cat?.enhancements ?? []).map((x) => [x.id, x]))).total,
     complete: own.complete,
     missingModels: own.missingModels,
     issues: cat?.muster ? checkList(l, cat) : undefined,

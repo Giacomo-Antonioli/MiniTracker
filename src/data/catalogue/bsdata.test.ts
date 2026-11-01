@@ -77,7 +77,7 @@ describe('parseBsData', () => {
 
 describe('rules', () => {
   it('reads core rules from the game system and faction rules from catalogues', () => {
-    expect(cat.formatVersion).toBe(3)
+    expect(cat.formatVersion).toBe(4)
     expect(cat.rules!.map((r) => [r.name, r.kind])).toEqual([
       ['Assault', 'core'],
       ['Deep Strike', 'core'],
@@ -106,13 +106,14 @@ describe('pointsFor', () => {
   })
 
   it('reads battle sizes and keyword minimums from the main force', () => {
-    expect(cat.formatVersion).toBe(3)
-    expect(cat.muster).toEqual({
+    expect(cat.formatVersion).toBe(4)
+    expect(cat.muster).toMatchObject({
       battleSizes: [
         { id: 'bs-inc', name: 'Incursion', pointsLimit: 1000 },
         { id: 'bs-sf', name: 'Strike Force', pointsLimit: 2000 },
       ],
       keywordMinimums: [{ keyword: 'Character', min: 1, exemptFactionIds: ['cat-sub'] }],
+      forceId: 'f-army',
     })
   })
 
@@ -123,6 +124,40 @@ describe('pointsFor', () => {
 
   it('skips limits changed by conditions it cannot read', () => {
     expect(ds('Line Troopers').armyLimit).toBeUndefined()
+  })
+})
+
+describe('detachments and enhancements', () => {
+  it('reads the detachment points and enhancement limits with their conditions; skips modifiers with repeats', () => {
+    expect(cat.muster!.detachmentPoints).toEqual({
+      max: 2,
+      modifiers: [
+        {
+          type: 'set',
+          value: 3,
+          when: { any: [{ op: 'equalTo', value: 1, id: 'bs-sf' }, { all: [{ op: 'equalTo', value: 1, id: 'bs-inc' }, { op: 'atLeast', value: 1, keyword: '3DP Detachment' }] }] },
+        },
+      ],
+    })
+    expect(cat.muster!.enhancements).toEqual({ max: 2, modifiers: [{ type: 'set', value: 4, when: { op: 'equalTo', value: 0, id: 'bs-inc' } }] })
+  })
+
+  it('finds detachments through links, for the faction and the factions that import it; skips Boarding Actions ones', () => {
+    expect(cat.detachments).toEqual([
+      { id: 'det-heavy', name: 'Heavy Doctrine', factionIds: ['cat-sub', 'cat-testers'], detachmentPoints: 3, keywords: ['3DP Detachment'] },
+      { id: 'det-line', name: 'Line Doctrine', factionIds: ['cat-sub', 'cat-testers'], detachmentPoints: 1, keywords: [] },
+    ])
+    expect(cat.detachmentCounts!['cat-testers']).toEqual({
+      min: 1,
+      max: { max: -1, modifiers: [{ type: 'set', value: 1, when: { op: 'atLeast', value: 1, id: 'bs-inc' } }] },
+    })
+  })
+
+  it('links each enhancement to its detachment from the group or its own condition', () => {
+    expect(cat.enhancements).toEqual([
+      { id: 'enh-banner', name: 'Big Banner', points: 20, detachmentId: 'det-heavy' },
+      { id: 'enh-charm', name: 'Lucky Charm', points: 15, detachmentId: 'det-line' },
+    ])
   })
 })
 

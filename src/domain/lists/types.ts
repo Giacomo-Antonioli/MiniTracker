@@ -30,8 +30,8 @@ export interface ArmyList {
   battleSize: string
   /** Set from the battle size, editable by the user. */
   pointsLimit: number
-  /** Detachments come in #54. */
-  detachmentId?: string
+  /** Chosen detachments (10th edition: one; 11th: several, within the detachment points). */
+  detachmentIds?: string[]
   status: ListStatus
   entries: ListEntry[]
   notes: string

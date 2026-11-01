@@ -9,6 +9,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 - Army lists: edition, battle size (Combat Patrol, Incursion, Strike Force, Onslaught), editable points limit, planned/playable; points and owned / partly owned / missing are worked out from the catalogue and your collection; lists are in backups (#51).
 - Rule checks per edition from BSData: points limit, unit copies (with Incursion limits), at least one Character, unit sizes, one Character Warlord, Epic Heroes once; Combat Patrol checks points only. Lists that break rules can still be saved (#56). Download your catalogue again to enable checks.
 - Armies page: all lists with complete / missing models and rules OK / issues flags, with filters; builder with legal units of the list's faction grouped by role, a "Not owned" switch (off: only units you own), Legends switch, Warlord star, model counts, leader attachment, ownership per unit and a clickable issues panel. The first unit sets the faction (#52).
+- Detachments and enhancements from BSData, both editions: 11th edition armies take several detachments within their detachment points (2 at Incursion, or 3 with a 3DP detachment; 3 at Strike Force; 4 at Onslaught), 10th edition one. Enhancements of the chosen detachments on Characters (not Epic Heroes), with points; checks for count (11th: 2 at Incursion, else 4; 10th: 3), duplicates, wrong detachment and wrong unit (#54). Download your catalogue again to get them.
+- Builder: add units by double-click or by dragging them anywhere onto the right-hand column; the unit panel can be resized (drag the divider, or arrow keys) and remembers its width; the + button stays visible on long names.
 
 ## [0.3.0] - 2026-11-02
 
