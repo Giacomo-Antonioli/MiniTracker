@@ -4,6 +4,7 @@ import { pointsFor } from '../../domain/catalogue/points'
 import { totalModels } from '../../domain/collection/ownedUnit'
 import { setFlags } from '../../domain/collection/pipeline'
 import type { ModelGroup, OwnedUnit } from '../../domain/collection/types'
+import { DatasheetInfo } from '../catalogue/DatasheetInfo'
 import { PhotoGallery } from '../photos/PhotoGallery'
 import { PhotoThumb } from '../photos/PhotoThumb'
 import { PhotoViewer } from '../photos/PhotoViewer'
@@ -169,6 +170,13 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
           </p>
         )}
       </section>
+
+      {datasheet && catalogue && (
+        <details className="border-b border-line" open={page} aria-label="Datasheet details">
+          <summary className="cursor-pointer p-4 text-xs font-semibold uppercase tracking-wider text-muted">Datasheet: stats, weapons, abilities, rules, wargear</summary>
+          <DatasheetInfo catalogue={catalogue} d={datasheet} />
+        </details>
+      )}
 
       <PhotoGallery unit={unit} photos={photos} thumbSize={page ? 'h-40 w-40' : undefined} />
 

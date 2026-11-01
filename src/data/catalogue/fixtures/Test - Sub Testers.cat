@@ -16,6 +16,9 @@
         <categoryLink targetId="c-char" id="l6" primary="true" name="Character"/>
         <categoryLink targetId="c-oldhero" id="l7" primary="false" name="Hero of Old"/>
       </categoryLinks>
+      <infoLinks>
+        <infoLink name="Old Hero" id="il1" hidden="false" type="profile" targetId="sp-hero"/>
+      </infoLinks>
       <costs><cost name="pts" typeId="pts-id" value="95"/></costs>
       <modifiers>
         <modifier type="set" value="0" field="pts-id">
@@ -26,4 +29,12 @@
       </modifiers>
     </selectionEntry>
   </selectionEntries>
+  <sharedProfiles>
+    <profile name="Old Hero" typeId="t-unit" typeName="Unit" hidden="false" id="sp-hero">
+      <characteristics>
+        <characteristic name="M" typeId="c-m">6&quot;</characteristic>
+        <characteristic name="W" typeId="c-w">5</characteristic>
+      </characteristics>
+    </profile>
+  </sharedProfiles>
 </catalogue>
