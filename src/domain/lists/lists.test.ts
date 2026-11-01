@@ -36,6 +36,11 @@ describe('army list', () => {
     expect(() => addEntry(l, { datasheetId: 'x', models: 1, attachedTo: 'nope' }, ctx)).toThrow(/attached/)
     // over the points limit is fine to store
     expect(() => validateList(addEntry(l, { datasheetId: 'x', models: 99 }, ctx))).not.toThrow()
+    const one = addEntry(l, { datasheetId: 'x', models: 1 }, ctx)
+    expect(() => validateList({ ...one, entries: [one.entries[0], one.entries[0]] })).toThrow(/Duplicate/)
+    expect(() => updateEntry(one, 'nope', { models: 2 }, ctx)).toThrow(/Unknown entry/)
+    const two = addEntry(addEntry(l, { datasheetId: 'a', models: 1 }, ctx), { datasheetId: 'b', models: 1 }, ctx)
+    expect(removeEntry(two, two.entries[0].id, ctx).entries.map((e) => e.datasheetId)).toEqual(['b'])
   })
 })
 

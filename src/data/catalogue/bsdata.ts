@@ -191,7 +191,7 @@ function battleSizeOf(c: Node, sizeIds: Set<string>): string | undefined {
   return (t === 'atLeast' || t === 'equalTo' || t === 'greaterThan') && Number(attr(c, 'value')) >= (t === 'greaterThan' ? 0 : 1) ? id : undefined
 }
 
-function applyModifier(value: number, m: Node): number {
+export function applyModifier(value: number, m: Node): number {
   const v = Number(attr(m, 'value'))
   switch (attr(m, 'type')) {
     case 'set':

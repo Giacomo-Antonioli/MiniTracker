@@ -40,6 +40,7 @@ const warlord = (l: ArmyList, i = 0) => updateEntry(l, l.entries[i].id, { warlor
 describe('battle sizes', () => {
   it('adds Combat Patrol (500) before the sizes from the data', () => {
     expect(battleSizes(cat).map((b) => [b.name, b.pointsLimit])).toEqual([['Combat Patrol', 500], ['Incursion', 1000], ['Strike Force', 2000]])
+    expect(battleSizes({ ...cat, muster: undefined })).toEqual([COMBAT_PATROL])
   })
 })
 
@@ -75,12 +76,16 @@ describe('checkList', () => {
     const l = warlord(list('sf', [['crisis', 3]]))
     expect(codes(l)).toEqual(['keyword-minimum', 'warlord-not-character'])
     expect(codes({ ...l, factionId: 'knights' })).toEqual(['warlord-not-character'])
+    const two = { ...cat, muster: { ...cat.muster!, keywordMinimums: [{ keyword: 'Battleline', min: 2, exemptFactionIds: [] }] } }
+    expect(checkList(warlord(list('sf', [['commander']])), two).map((i) => i.message)).toEqual(['Needs at least 2 Battleline units'])
   })
 
   it('needs exactly one Warlord, a Character', () => {
     const l = list('sf', [['commander'], ['commander']])
     expect(codes(l)).toEqual(['no-warlord'])
     expect(checkList(warlord(warlord(l), 1), cat)).toMatchObject([{ code: 'warlords', entryIds: l.entries.map((e) => e.id) }])
+    // a Warlord whose unit left the catalogue is reported once, as unknown
+    expect(codes(warlord(list('sf', [['commander'], ['gone']]), 1))).toEqual(['unknown-unit'])
   })
 
   it('Combat Patrol checks points and unit sizes only', () => {

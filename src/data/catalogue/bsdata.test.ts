@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pointsFor } from '../../domain/catalogue/points'
-import { parseBsData } from './bsdata'
+import { applyModifier, parseBsData } from './bsdata'
 
 const raw = import.meta.glob('./fixtures/*', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
 const files = Object.entries(raw).map(([path, text]) => ({ name: path.split('/').pop()!, text }))
@@ -123,5 +123,12 @@ describe('pointsFor', () => {
 
   it('skips limits changed by conditions it cannot read', () => {
     expect(ds('Line Troopers').armyLimit).toBeUndefined()
+  })
+})
+
+describe('applyModifier', () => {
+  it('sets, increments and decrements limits; ignores other types', () => {
+    const m = (type: string, value: string) => ({ type, value }) as never
+    expect([applyModifier(3, m('set', '2')), applyModifier(3, m('increment', '1')), applyModifier(3, m('decrement', '1')), applyModifier(3, m('append', '9'))]).toEqual([2, 4, 2, 3])
   })
 })
