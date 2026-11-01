@@ -1,1 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap');
 @import "tailwindcss";
+
+/* Colour tokens. Every theme sets the same variables; components only use these. */
+@theme {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-ok: var(--ok);
+  --color-danger: var(--danger);
+  --font-display: var(--display);
+  --font-body: var(--body);
+}
+
+/* Grimdark (default): modern dark, brass accent. */
+:root,
+[data-theme='grimdark'] {
+  --bg: #121114;
+  --panel: #1b1a1f;
+  --panel-2: #24222a;
+  --line: #34313b;
+  --fg: #e8e4dc;
+  --muted: #9a94a3;
+  --accent: #c9a24a;
+  --accent-fg: #17140c;
+  --ok: #6fae6a;
+  --danger: #d0574f;
+  --display: 'Cinzel', Georgia, serif;
+  --body: 'Inter', system-ui, sans-serif;
+  --radius: 6px;
+}
+
+/* Forum 2005: dark brown, gold serif headings, bevelled panels. */
+[data-theme='forum2005'] {
+  --bg: #0d0906;
+  --panel: #1e140c;
+  --panel-2: #2a1c10;
+  --line: #5a4024;
+  --fg: #d8cdb8;
+  --muted: #9c8c70;
+  --accent: #f2c24a;
+  --accent-fg: #1a1007;
+  --ok: #8fbf4a;
+  --danger: #d4453a;
+  --display: Georgia, 'Times New Roman', serif;
+  --body: Verdana, Tahoma, sans-serif;
+  --radius: 0;
+}
+
+[data-theme='forum2005'] body {
+  background-image: radial-gradient(ellipse at top, #2b1c0f 0%, #0d0906 70%);
+  font-size: 13px;
+}
+[data-theme='forum2005'] .panel {
+  border: 2px solid var(--line);
+  box-shadow: inset 1px 1px 0 #7a5a30, inset -1px -1px 0 #000;
+}
+[data-theme='forum2005'] tbody tr:nth-child(even) {
+  background: #160f08;
+}
+[data-theme='forum2005'] h1,
+[data-theme='forum2005'] h2 {
+  text-shadow: 1px 1px 0 #000;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  color: var(--fg);
+  cursor: pointer;
+}
+.btn:hover {
+  border-color: var(--accent);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.btn-danger {
+  color: var(--danger);
+}
+
+.input {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--fg);
+  padding: 0.3rem 0.5rem;
+}
+.input:focus {
+  outline: 1px solid var(--accent);
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.6);
+}

@@ -5,3 +5,4 @@
 - Domain: owned units with model groups, split/merge and magnetised slots (#1).
 - Domain: editable global painting pipeline, status history with date/photo/note, lifecycle states, favourite/next-up flags, external refs for future digital twins (#2).
 - Data: IndexedDB storage (Dexie) with unit, history and settings repositories; atomic status moves; migration test pattern (#3).
+- UI: backlog table with progress, filters and search; unit details panel with history; move-models dialog; add/edit unit form; pipeline settings; Grimdark and Forum 2005 themes (#4).
