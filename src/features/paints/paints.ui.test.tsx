@@ -102,7 +102,8 @@ describe('Paints page', () => {
     const user = await openPaints()
     const csv = 'brand,name,quantity,location\nCitadel,Nuln Oil,2,Drawer B\nGreen Stuff World,Rocket Green,1,\n'
     await user.upload(screen.getByLabelText('Paint CSV file'), new File([csv], 'paints.csv', { type: 'text/csv' }))
-    expect(await screen.findByText(/Imported 2 paints \(1 new custom\)/)).toBeInTheDocument()
+    // Loading the bundled paints can be slow when the whole suite runs with coverage.
+    expect(await screen.findByText(/Imported 2 paints \(1 new custom\)/, undefined, { timeout: 5000 })).toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Paint stats' })).toHaveTextContent('2 paints owned')
   })
 })
