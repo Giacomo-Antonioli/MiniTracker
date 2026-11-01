@@ -164,7 +164,7 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
       .filter((c): c is Node => !!c)
 
   const datasheets: Datasheet[] = [...factionsByEntry].map(([id, facs]) => {
-    const d = toDatasheet(entries.get(id)!, [...facs].sort(), ptsId)
+    const d = toDatasheet(entries.get(id)!, [...facs].sort(), ptsId, linkable)
     const e = entries.get(id)!
     const ruleIds = kids(e, 'infoLinks', 'infoLink')
       .filter((l) => attr(l, 'type') === 'rule' && !hidden(l))
@@ -442,7 +442,7 @@ function readDetachments(
   return { detachments: [...detachments.values()].sort(byName), enhancements: [...enhancements.values()].sort(byName), detachmentCounts }
 }
 
-function toDatasheet(e: Node, factionIds: string[], ptsId: string | undefined): Datasheet {
+function toDatasheet(e: Node, factionIds: string[], ptsId: string | undefined, linkable: Map<string, Node>): Datasheet {
   const rawName = attr(e, 'name')!
   const legends = /\[Legends\]/i.test(rawName)
   const name = rawName.replace(/\s*\[Legends\]\s*/i, '').trim()
@@ -461,7 +461,7 @@ function toDatasheet(e: Node, factionIds: string[], ptsId: string | undefined): 
     const text = desc ? textOf(desc) : ''
     if (text) abilityTexts[attr(p, 'name')!] = text
   }
-  const [rawMin, maxModels] = modelCount(e, true)
+  const [rawMin, maxModels] = modelCount(e, true, linkable)
   const minModels = Math.max(1, Math.min(rawMin, maxModels))
 
   return {
@@ -482,29 +482,56 @@ function toDatasheet(e: Node, factionIds: string[], ptsId: string | undefined): 
 }
 
 /** [min, max] from "selections" constraints on model entries and their groups. */
-function modelCount(n: Node, isRoot: boolean): [number, number] {
+/** "No limit of its own": a model whose count is set by the group around it (e.g. "4-9 Hearthguard"). */
+const OPEN = 1000
+
+/**
+ * [min, max] models of a unit, from "selections" constraints on model entries and their groups.
+ * Handles size options (upgrades that each contain models: pick one), models reached through entry links (the link
+ * carries the count), and models without a limit of their own inside a limited group.
+ */
+function modelCount(n: Node, isRoot: boolean, linkable: Map<string, Node>): [number, number] {
   const own = (type: 'min' | 'max') => {
     const c = kids(n, 'constraints', 'constraint').find(
       (k) => attr(k, 'type') === type && attr(k, 'field') === 'selections' && attr(k, 'scope') === 'parent',
     )
     return c ? Number(attr(c, 'value')) : undefined
   }
-  if (attr(n, 'type') === 'model' && !isRoot) return [own('min') ?? 0, own('max') ?? 0]
+  if (attr(n, 'type') === 'model' && !isRoot) return [own('min') ?? 0, own('max') ?? OPEN]
 
   let min = 0
   let max = 0
-  for (const child of [...kids(n, 'selectionEntries', 'selectionEntry'), ...kids(n, 'selectionEntryGroups', 'selectionEntryGroup')]) {
-    if (attr(child, 'type') === 'upgrade') continue
-    const [a, b] = modelCount(child, false)
+  const options: [number, number][] = []
+  const children = [
+    ...kids(n, 'selectionEntries', 'selectionEntry'),
+    ...kids(n, 'selectionEntryGroups', 'selectionEntryGroup'),
+    // A link to a model counts as that model, with the link's own limits.
+    ...kids(n, 'entryLinks', 'entryLink').flatMap((l) => {
+      const t = linkable.get(attr(l, 'targetId') ?? '')
+      return t && !hidden(l) && attr(t, 'type') === 'model' ? [{ ...t, constraints: l.constraints } as Node] : []
+    }),
+  ]
+  for (const child of children) {
+    const [a, b] = modelCount(child, false, linkable)
+    if (attr(child, 'type') === 'upgrade') {
+      if (b > 0 && b < OPEN) options.push([a, b])
+      continue
+    }
     min += a
     max += b
+  }
+  if (options.length) {
+    min += Math.min(...options.map((o) => o[0]))
+    max += Math.max(...options.map((o) => o[1]))
+    if (attr(n, 'type') === undefined) return [min, Math.min(max, OPEN)]
   }
   const isGroup = attr(n, 'type') === undefined
   if (isGroup && max > 0) {
     min = own('min') ?? min
     max = own('max') ?? max
   }
-  if (isRoot && max === 0) return [1, 1]
+  max = Math.min(max, OPEN)
+  if (isRoot && (max === 0 || max >= OPEN)) return [Math.max(1, min), Math.max(1, min)]
   return [min, max]
 }
 

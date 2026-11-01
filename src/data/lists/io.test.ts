@@ -27,6 +27,13 @@ describe('rosters (.ros / .rosz)', () => {
     expect(warnings).toEqual(['Not in the catalogue: Mystery Unit'])
   })
 
+  it('warns about a detachment the catalogue does not know', () => {
+    const old = parseRosterXml(ros.replace('name="Line Doctrine" entryId="el-det::det-line"', 'name="Oathband" entryId="el-det::det-gone"'))
+    const { list, warnings } = listFromRoster(old, cat, '11e', ctx)
+    expect(list.detachmentIds).toEqual([])
+    expect(warnings).toContain('Detachment not in the catalogue: Oathband')
+  })
+
   it('rejects files that are not rosters, and rosters without a force', () => {
     expect(() => readRoster(strToU8('<x/>'))).toThrow(/not a BattleScribe roster/)
     expect(() => readRoster(zipSync({}))).toThrow(/empty/)
