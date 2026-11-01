@@ -11,12 +11,17 @@ const low = (s: string) => s.toLowerCase().replace(/['’]/g, '')
  *   datasheet name/keywords mention it; army-wide schemes fit every unit of the faction.
  */
 export function schemeFitsUnit(s: PaintScheme, unit: OwnedUnit, datasheet?: Datasheet): boolean {
+  return schemeFits(s, { factionNames: [unit.factionName, ...(datasheet?.factionKeywords ?? [])], names: [unit.customName, datasheet?.name ?? '', ...(datasheet?.keywords ?? [])] })
+}
+
+/** Same rule for anything with faction names and names/keywords to match (e.g. a unit in an army list). */
+export function schemeFits(s: PaintScheme, target: { factionNames: (string | undefined)[]; names: string[] }): boolean {
   if (s.factionName) {
-    const factions = [unit.factionName, ...(datasheet?.factionKeywords ?? [])].filter((f): f is string => !!f).map(low)
+    const factions = target.factionNames.filter((f): f is string => !!f).map(low)
     if (!factions.includes(low(s.factionName))) return false
   }
   if (!s.appliesTo?.length) return true
-  const hay = low([unit.customName, datasheet?.name ?? '', ...(datasheet?.keywords ?? [])].join(' | '))
+  const hay = low(target.names.join(' | '))
   return s.appliesTo.some((t) => hay.includes(low(t)))
 }
 
