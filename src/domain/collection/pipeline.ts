@@ -57,9 +57,14 @@ export function reorderStages(p: Pipeline, ids: StageId[]): Pipeline {
 
 /** Remove a stage, unless some unit still has models in it. */
 export function removeStage(p: Pipeline, id: StageId, units: OwnedUnit[]): Pipeline {
+  return removeUnusedStage(p, id, units.some((u) => u.groups.some((g) => g.status === id)) ? 1 : 0)
+}
+
+/** Remove a stage from any pipeline, unless `usedBy` items are still in it. */
+export function removeUnusedStage(p: Pipeline, id: StageId, usedBy: number): Pipeline {
   indexOf(p, id)
   if (p.stages.length === 1) throw new Error('Pipeline needs at least one stage')
-  if (units.some((u) => u.groups.some((g) => g.status === id))) throw new Error(`Stage "${id}" is in use`)
+  if (usedBy > 0) throw new Error(`Stage "${id}" is in use`)
   return { stages: p.stages.filter((s) => s.id !== id) }
 }
 

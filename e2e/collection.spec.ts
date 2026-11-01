@@ -42,6 +42,7 @@ test('collector flow: add units, paint some, data survives reload', async ({ pag
 
 test('theme switch is remembered', async ({ page }) => {
   await page.goto('./')
+  await page.getByRole('button', { name: /Settings/ }).click()
   await page.getByLabel('Theme').selectOption('forum2005')
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'forum2005')
@@ -51,7 +52,7 @@ test('backup: export then restore after deleting', async ({ page }, info) => {
   page.on('dialog', (d) => d.accept())
   await page.goto('./')
   await addUnit(page, 'Backup Squad', 'Ultramarines', [[5, 'built']])
-  await page.getByRole('button', { name: 'Backup' }).click()
+  await page.getByRole('button', { name: /Settings/ }).click()
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Download backup/ }).click()])
   const file = info.outputPath('backup.json')
   await download.saveAs(file)
@@ -61,8 +62,8 @@ test('backup: export then restore after deleting', async ({ page }, info) => {
   await page.getByRole('button', { name: 'Delete' }).click()
   await expect(page.getByText('Your backlog is empty')).toBeVisible()
 
-  await page.getByRole('button', { name: 'Backup' }).click()
-  await page.locator('input[type=file]').setInputFiles(file)
+  await page.getByRole('button', { name: /Settings/ }).click()
+  await page.getByLabel('Backup file').setInputFiles(file)
   await expect(page.getByText('Restored 1 units.')).toBeVisible()
   await page.getByRole('button', { name: 'Backlog', exact: true }).click()
   await expect(page.getByRole('cell', { name: 'Backup Squad' })).toBeVisible()

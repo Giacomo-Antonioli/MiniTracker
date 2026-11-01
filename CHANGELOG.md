@@ -4,6 +4,13 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Changed
+- Settings is now one page: Appearance (theme), Pipelines, Catalogue data and Backup; theme moved there from the sidebar (#33).
+
+### Added
+- Paint pipeline (wishlist → ordered → sealed → in use → running low → empty) and scheme pipeline (idea → testing → final → archived), editable like the painting pipeline (#33).
+- Backlog banner when no unit catalogue is installed, with a one-click download and progress; can be hidden (#33).
+
 ## [0.2.0] - 2026-11-01
 
 The unit catalogue.

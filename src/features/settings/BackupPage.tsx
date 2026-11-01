@@ -34,24 +34,25 @@ export function BackupPage() {
   }
 
   return (
-    <div className="grid max-w-2xl gap-4">
-      <h1 className="font-display text-2xl text-accent">Backup</h1>
+    <div className="grid gap-4">
+      <h2 className="font-display text-xl text-accent">Backup</h2>
       <p className="text-muted">
         Your data lives only in this browser. Download a backup regularly, and use it to move your collection to another device.
       </p>
       <section className="panel grid gap-2 p-4">
-        <h2 className="font-display text-lg">Export</h2>
+        <h3 className="font-display text-lg">Export</h3>
         <p className="text-sm text-muted">Saves units, history and settings to one JSON file.</p>
         <button className="btn btn-primary w-fit" onClick={() => void download()}>⬇ Download backup</button>
       </section>
       <section className="panel grid gap-2 p-4">
-        <h2 className="font-display text-lg">Import</h2>
+        <h3 className="font-display text-lg">Import</h3>
         <p className="text-sm text-muted">Replaces everything in this browser with the file's content. You'll be asked to confirm.</p>
         <label className="btn w-fit">
           ⬆ Choose backup file…
           <input
             type="file"
             accept="application/json,.json"
+            aria-label="Backup file"
             className="sr-only"
             onChange={(e) => {
               const f = e.target.files?.[0]

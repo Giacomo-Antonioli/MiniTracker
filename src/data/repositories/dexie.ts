@@ -1,5 +1,6 @@
 import type { Catalogue } from '../../domain/catalogue/types'
-import { DEFAULT_PIPELINE, validatePipeline } from '../../domain/collection/pipeline'
+import { validatePipeline } from '../../domain/collection/pipeline'
+import { DEFAULT_PIPELINES, type PipelineKey } from '../../domain/pipelines'
 import type { OwnedUnit, Pipeline, StatusEvent } from '../../domain/collection/types'
 import type { MiniTrackerDb } from '../db'
 import type { EventRepository, SettingsRepository, UnitRepository } from './types'
@@ -51,7 +52,8 @@ export class DexieEventRepository implements EventRepository {
   }
 }
 
-const PIPELINE_KEY = 'pipeline'
+// 'pipeline' is the original (v0.1) key of the painting pipeline; keep it so saved data still loads.
+const storageKey = (key: PipelineKey) => (key === 'painting' ? 'pipeline' : `pipeline:${key}`)
 
 export class DexieSettingsRepository implements SettingsRepository {
   private db: MiniTrackerDb
@@ -59,14 +61,14 @@ export class DexieSettingsRepository implements SettingsRepository {
     this.db = db
   }
 
-  async getPipeline() {
-    const row = await this.db.settings.get(PIPELINE_KEY)
-    return (row?.value as Pipeline | undefined) ?? structuredClone(DEFAULT_PIPELINE)
+  async getPipeline(key: PipelineKey = 'painting') {
+    const row = await this.db.settings.get(storageKey(key))
+    return (row?.value as Pipeline | undefined) ?? structuredClone(DEFAULT_PIPELINES[key])
   }
 
-  async savePipeline(pipeline: Pipeline) {
+  async savePipeline(pipeline: Pipeline, key: PipelineKey = 'painting') {
     validatePipeline(pipeline)
-    await this.db.settings.put({ key: PIPELINE_KEY, value: pipeline })
+    await this.db.settings.put({ key: storageKey(key), value: pipeline })
   }
 }
 

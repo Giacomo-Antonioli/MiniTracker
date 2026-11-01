@@ -1,30 +1,17 @@
 import { useEffect, useState } from 'react'
 import { BacklogPage } from '../features/backlog/BacklogPage'
 import { CatalogueBrowser } from '../features/catalogue/CatalogueBrowser'
-import { BackupPage } from '../features/settings/BackupPage'
-import { CataloguePage } from '../features/settings/CataloguePage'
-import { PipelinePage } from '../features/settings/PipelinePage'
+import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { useStore } from './store'
 
-type Page = 'backlog' | 'browse' | 'pipeline' | 'catalogue' | 'backup'
-const THEMES = { grimdark: 'Grimdark', forum2005: 'Forum 2005' } as const
-type Theme = keyof typeof THEMES
-
-function readTheme(): Theme {
-  try {
-    const t = localStorage.getItem('theme')
-    return t && t in THEMES ? (t as Theme) : 'grimdark'
-  } catch {
-    return 'grimdark'
-  }
-}
+type Page = 'backlog' | 'browse' | 'settings'
 
 const SOON = ['Paints', 'Army lists', 'Games', 'Shopping']
 
 export default function App() {
-  const { ready, load } = useStore()
+  const { ready, load, theme } = useStore()
   const [page, setPage] = useState<Page>('backlog')
-  const [theme, setTheme] = useState<Theme>(readTheme)
+  const [section, setSection] = useState<SettingsSection | undefined>()
 
   useEffect(() => {
     void load()
@@ -32,18 +19,18 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
-    try {
-      localStorage.setItem('theme', theme)
-    } catch {
-      /* storage unavailable: theme just isn't remembered */
-    }
   }, [theme])
+
+  const go = (p: Page, s?: SettingsSection) => {
+    setPage(p)
+    setSection(s)
+  }
 
   const nav = (id: Page, label: string) => (
     <button
       className={`w-full rounded px-3 py-1.5 text-left ${page === id ? 'bg-panel-2 text-accent' : 'hover:bg-panel-2'}`}
       aria-current={page === id ? 'page' : undefined}
-      onClick={() => setPage(id)}
+      onClick={() => go(id)}
     >
       {label}
     </button>
@@ -58,24 +45,17 @@ export default function App() {
         {SOON.map((s) => (
           <span key={s} className="px-3 py-1.5 text-muted/60" title="Coming in a later sprint">{s} ⌛</span>
         ))}
-        <div className="mt-4 mb-1 px-3 text-xs uppercase tracking-wider text-muted">Settings</div>
-        {nav('pipeline', 'Pipeline')}
-        {nav('catalogue', 'Catalogue data')}
-        {nav('backup', 'Backup')}
-        <label className="mt-auto grid gap-1 px-3 text-xs text-muted">
-          Theme
-          <select className="input" value={theme} onChange={(e) => setTheme(e.target.value as Theme)}>
-            {Object.entries(THEMES).map(([id, name]) => <option key={id} value={id}>{name}</option>)}
-          </select>
-        </label>
-        <a
-          className="px-3 pt-2 text-xs text-muted hover:text-accent"
-          href={`https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v${__APP_VERSION__}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          v{__APP_VERSION__}
-        </a>
+        <div className="mt-auto grid gap-1">
+          {nav('settings', '⚙ Settings')}
+          <a
+            className="px-3 pt-2 text-xs text-muted hover:text-accent"
+            href={`https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v${__APP_VERSION__}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            v{__APP_VERSION__}
+          </a>
+        </div>
       </nav>
       <main className="min-w-0 flex-1 overflow-auto p-4">
         {!ready ? (
@@ -83,13 +63,9 @@ export default function App() {
         ) : page === 'backlog' ? (
           <BacklogPage />
         ) : page === 'browse' ? (
-          <CatalogueBrowser onOpenSettings={() => setPage('catalogue')} />
-        ) : page === 'pipeline' ? (
-          <PipelinePage />
-        ) : page === 'catalogue' ? (
-          <CataloguePage />
+          <CatalogueBrowser onOpenSettings={() => go('settings', 'catalogue')} />
         ) : (
-          <BackupPage />
+          <SettingsPage section={section} />
         )}
       </main>
     </div>
