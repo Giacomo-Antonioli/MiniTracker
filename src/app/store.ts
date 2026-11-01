@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { exportBackup, importBackup, parseBackup } from '../data/backup'
 import { MiniTrackerDb } from '../data/db'
 import { DexieEventRepository, DexieSettingsRepository, DexieUnitRepository } from '../data/repositories/dexie'
 import { DEFAULT_PIPELINE, moveModels, type MoveOptions } from '../domain/collection/pipeline'
@@ -23,6 +24,10 @@ interface State {
   loadEvents(unitId: string): Promise<void>
   move(unit: OwnedUnit, groupId: string, count: number, to: StageId, opts: MoveOptions): Promise<void>
   savePipeline(p: Pipeline): Promise<void>
+  /** JSON text of a full backup. */
+  exportBackup(): Promise<string>
+  /** Replace all data with a backup file's text, then reload. */
+  importBackup(text: string): Promise<void>
 }
 
 export const useStore = create<State>((set, get) => ({
@@ -63,5 +68,15 @@ export const useStore = create<State>((set, get) => ({
   async savePipeline(p) {
     await settingsRepo.savePipeline(p)
     set({ pipeline: p })
+  },
+
+  async exportBackup() {
+    return JSON.stringify(await exportBackup(db, new Date().toISOString()), null, 2)
+  },
+
+  async importBackup(text) {
+    await importBackup(db, parseBackup(text))
+    set({ events: {} })
+    await get().load()
   },
 }))

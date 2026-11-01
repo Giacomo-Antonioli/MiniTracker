@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BacklogPage } from '../features/backlog/BacklogPage'
+import { BackupPage } from '../features/settings/BackupPage'
 import { PipelinePage } from '../features/settings/PipelinePage'
 import { useStore } from './store'
 
@@ -72,10 +73,7 @@ export default function App() {
         ) : page === 'pipeline' ? (
           <PipelinePage />
         ) : (
-          <div className="grid gap-2">
-            <h1 className="font-display text-2xl text-accent">Backup</h1>
-            <p className="text-muted">Export and import arrive with issue #5.</p>
-          </div>
+          <BackupPage />
         )}
       </main>
     </div>
