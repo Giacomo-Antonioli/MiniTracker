@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ctx, useStore } from '../../app/store'
+import { pointsFor } from '../../domain/catalogue/points'
+import { totalModels } from '../../domain/collection/ownedUnit'
 import { setFlags } from '../../domain/collection/pipeline'
 import type { ModelGroup, OwnedUnit } from '../../domain/collection/types'
 import { MoveDialog } from './MoveDialog'
@@ -7,7 +9,15 @@ import { MoveDialog } from './MoveDialog'
 const fmt = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
 
 export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: () => void; onClose: () => void }) {
-  const { pipeline, events, loadEvents, saveUnit, deleteUnit } = useStore()
+  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue } = useStore()
+  const datasheet = unit.datasheetId ? catalogue?.datasheets.find((d) => d.id === unit.datasheetId) : undefined
+  const models = totalModels(unit)
+  let points: number | undefined
+  try {
+    points = datasheet ? pointsFor(datasheet, models) : undefined
+  } catch {
+    points = undefined
+  }
   const [moving, setMoving] = useState<ModelGroup | null>(null)
   const stageName = (id: string) => pipeline.stages.find((s) => s.id === id)?.name ?? id
   const history = [...(events[unit.id] ?? [])].reverse()
@@ -32,6 +42,18 @@ export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: 
         <p className="mt-1 text-sm text-muted">
           {unit.factionName ?? 'No faction'} · {unit.lifecycle}
         </p>
+        {datasheet && (
+          <p className="mt-1 text-sm" aria-label="Datasheet">
+            📜 {datasheet.name}
+            {datasheet.role && <span className="text-muted"> · {datasheet.role}</span>}
+            <span className="text-muted"> · {models} models</span>
+            {points !== undefined ? (
+              <b className="text-accent"> · {points || '?'} pts</b>
+            ) : (
+              <span className="text-danger"> · size {datasheet.minModels}–{datasheet.maxModels} allowed</span>
+            )}
+          </p>
+        )}
         <div className="mt-3 flex gap-2">
           <button className="btn" onClick={onEdit}>Edit</button>
           <button
