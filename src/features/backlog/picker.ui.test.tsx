@@ -85,6 +85,13 @@ describe('Unit picker', () => {
     expect(useStore.getState().units[0].datasheetId).toBeUndefined()
   })
 
+  it('explains Legends with an info tooltip', async () => {
+    const user = userEvent.setup()
+    const d = await openForm(user)
+    const info = within(d).getByRole('button', { name: 'What are Legends?' })
+    expect(info).toHaveAccessibleDescription(/no longer updates/)
+  })
+
   it('shows Legends units when asked', async () => {
     const user = userEvent.setup()
     const d = await openForm(user)

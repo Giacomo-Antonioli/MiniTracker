@@ -7,6 +7,7 @@ import { createUnit } from '../../domain/collection/ownedUnit'
 import type { Lifecycle, Link, OwnedUnit } from '../../domain/collection/types'
 import { Combobox, type ComboOption } from '../../ui/Combobox'
 import { Dialog } from '../../ui/Dialog'
+import { InfoTip } from '../../ui/InfoTip'
 
 interface GroupDraft {
   id?: string
@@ -15,6 +16,11 @@ interface GroupDraft {
   loadout: string
   magnetised: OwnedUnit['groups'][number]['magnetised']
 }
+
+const LEGENDS_INFO =
+  'Legends are older units that Games Workshop no longer updates for current matched play. ' +
+  'You can still use them in casual and narrative games, but they are usually not allowed in tournaments. ' +
+  'They are hidden from the list unless you tick this box.'
 
 const LIFECYCLES: Lifecycle[] = ['active', 'on-hold', 'sold', 'traded', 'gifted', 'lost']
 
@@ -166,9 +172,12 @@ export function UnitFormDialog({
         />
         <div className="flex flex-wrap items-center gap-3 text-sm">
           {catalogue && (
-            <label className="flex items-center gap-1 text-muted">
-              <input type="checkbox" checked={showLegends} onChange={(e) => setShowLegends(e.target.checked)} /> Show Legends
-            </label>
+            <span className="flex items-center gap-1.5">
+              <label className="flex items-center gap-1 text-muted">
+                <input type="checkbox" checked={showLegends} onChange={(e) => setShowLegends(e.target.checked)} /> Show Legends
+              </label>
+              <InfoTip label="What are Legends?" text={LEGENDS_INFO} />
+            </span>
           )}
           {datasheet ? (
             <span className="flex items-center gap-2" data-testid="datasheet-link">
