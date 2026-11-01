@@ -52,7 +52,7 @@ describe('Unit page', () => {
   it('opens from the side panel button and edits from the page', async () => {
     const user = await withUnits()
     await user.click(screen.getByRole('cell', { name: /Big Walker/ }))
-    await user.click(screen.getByRole('button', { name: /Open page/ }))
+    await user.click(await screen.findByRole('button', { name: /Open page/ }))
     const page = screen.getByRole('article', { name: 'Unit page' })
     await user.click(within(page).getByRole('button', { name: 'Edit' }))
     const d = screen.getByRole('dialog', { name: 'Edit unit' })

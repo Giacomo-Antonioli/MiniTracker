@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../app/store'
 import { factionsOf, filterUnits, stageTotals, unitProgress, type BacklogFilter } from '../../domain/collection/backlog'
 import { progress } from '../../domain/collection/pipeline'
@@ -7,6 +7,9 @@ import { ProgressBar } from '../../ui/Dialog'
 import { CatalogueBanner } from './CatalogueBanner'
 import { UnitFormDialog } from './UnitFormDialog'
 import { UnitPanel } from './UnitPanel'
+
+/** How long a single click waits for a possible second click. */
+const DOUBLE_CLICK_MS = 250
 
 const ago = (iso: string) => {
   const d = Math.floor((Date.now() - Date.parse(iso)) / 86_400_000)
@@ -23,20 +26,20 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet }: { onOpenUnit?: (id:
   const total = progress(units, pipeline, 'painted')
   const selected = units.find((u) => u.id === selectedId)
   const set = (patch: Partial<BacklogFilter>) => setFilter({ ...filter, ...patch })
-  // Double-click opens the unit page. The first click opens the side panel, which can reflow the list
-  // (filters wrap, rows move), so the second click may land elsewhere in the list: track the row instead.
-  const lastClick = useRef<{ id: string; at: number } | null>(null)
-  const onListClick = (e: React.MouseEvent) => {
-    const last = lastClick.current
-    if (e.detail < 2 || !last || e.timeStamp - last.at > 600 || !onOpenUnit) return
-    if ((e.target as HTMLElement).closest('input, select, button, textarea, label')) return
-    lastClick.current = null
-    onOpenUnit(last.id)
+  // Single click opens the side panel, double-click opens the unit page. Opening the panel reflows the
+  // list (filters wrap, rows move), so it waits briefly: a second click in that time is a double-click,
+  // and nothing has moved under the cursor yet.
+  const pending = useRef<number | undefined>(undefined)
+  useEffect(() => () => window.clearTimeout(pending.current), [])
+  const onRowClick = (id: string, clicks: number) => {
+    window.clearTimeout(pending.current)
+    if (clicks >= 2 && onOpenUnit) return onOpenUnit(id)
+    pending.current = window.setTimeout(() => setSelectedId(id), onOpenUnit ? DOUBLE_CLICK_MS : 0)
   }
 
   return (
     <div className="flex h-full gap-4">
-      <div className="flex min-w-0 flex-1 flex-col gap-4" onClick={onListClick}>
+      <div className="flex min-w-0 flex-1 flex-col gap-4">
         <header className="flex items-center justify-between">
           <h1 className="font-display text-2xl text-accent">Backlog</h1>
           <button className="btn btn-primary" onClick={() => setEditing('new')}>+ Add unit</button>
@@ -91,10 +94,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet }: { onOpenUnit?: (id:
                 return (
                   <tr
                     key={u.id}
-                    onClick={(e) => {
-                      if (e.detail === 1) lastClick.current = { id: u.id, at: e.timeStamp }
-                      setSelectedId(u.id)
-                    }}
+                    onClick={(e) => onRowClick(u.id, e.detail)}
                     title="Double-click to open the unit page"
                     className={`cursor-pointer select-none border-b border-line/50 hover:bg-panel-2 ${u.id === selectedId ? 'bg-panel-2' : ''}`}
                   >
