@@ -17,6 +17,12 @@
       "id": "l6",
       "primary": true,
       "name": "Character"
+     },
+     {
+      "targetId": "c-oldhero",
+      "id": "l7",
+      "primary": false,
+      "name": "Hero of Old"
      }
     ],
     "costs": [
@@ -56,6 +62,23 @@
   "name": "Test - Testers - Sub Testers",
   "gameSystemId": "sys-test",
   "revision": 1,
-  "type": "catalogue"
+  "type": "catalogue",
+  "categoryEntries": [
+   {
+    "id": "c-oldhero",
+    "name": "Hero of Old",
+    "hidden": false,
+    "constraints": [
+     {
+      "type": "max",
+      "value": 1,
+      "field": "selections",
+      "scope": "roster",
+      "shared": true,
+      "id": "lim-h"
+     }
+    ]
+   }
+  ]
  }
 }

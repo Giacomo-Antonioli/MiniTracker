@@ -3,10 +3,18 @@
   <catalogueLinks>
     <catalogueLink type="catalogue" name="Test - Testers" id="cl2" targetId="cat-testers" importRootEntries="true"/>
   </catalogueLinks>
+  <categoryEntries>
+    <categoryEntry id="c-oldhero" name="Hero of Old" hidden="false">
+      <constraints>
+        <constraint type="max" value="1" field="selections" scope="roster" shared="true" id="lim-h"/>
+      </constraints>
+    </categoryEntry>
+  </categoryEntries>
   <selectionEntries>
     <selectionEntry type="model" import="true" name="Old Hero [Legends]" hidden="false" id="u-hero">
       <categoryLinks>
         <categoryLink targetId="c-char" id="l6" primary="true" name="Character"/>
+        <categoryLink targetId="c-oldhero" id="l7" primary="false" name="Hero of Old"/>
       </categoryLinks>
       <costs><cost name="pts" typeId="pts-id" value="95"/></costs>
       <modifiers>

@@ -33,6 +33,34 @@ export interface Datasheet {
   ruleIds?: string[]
   /** Weapon abilities as written on its weapons, e.g. "Assault", "Sustained Hits 1". */
   weaponKeywords?: string[]
+  /** How many of this unit an army may include (e.g. 3, Epic Heroes 1); some battle sizes change it. */
+  armyLimit?: ArmyLimit
+}
+
+export interface ArmyLimit {
+  max: number
+  /** Battle size id → max, only where it differs from `max`. */
+  byBattleSize?: Record<string, number>
+}
+
+export interface BattleSize {
+  id: string
+  name: string
+  pointsLimit: number
+}
+
+/** "At least N units with this keyword", e.g. 1 Character. */
+export interface KeywordMinimum {
+  keyword: string
+  min: number
+  /** Factions (catalogue ids) the rule does not apply to. */
+  exemptFactionIds: string[]
+}
+
+/** Army-building rules read from the data. */
+export interface Muster {
+  battleSizes: BattleSize[]
+  keywordMinimums: KeywordMinimum[]
 }
 
 export interface Rule {
@@ -54,7 +82,7 @@ export interface CatalogueSource {
 }
 
 export interface Catalogue {
-  /** 2 = includes rules and ability texts. Older catalogues have none. */
+  /** 2 = includes rules and ability texts; 3 = muster rules and army limits. Older catalogues have none. */
   formatVersion?: number
   gameId: string
   gameName: string
@@ -63,4 +91,6 @@ export interface Catalogue {
   datasheets: Datasheet[]
   /** Missing in catalogues downloaded before format 2. */
   rules?: Rule[]
+  /** Missing in catalogues downloaded before format 3. */
+  muster?: Muster
 }

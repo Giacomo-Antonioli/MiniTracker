@@ -1,10 +1,10 @@
 import { XMLParser } from 'fast-xml-parser'
-import type { Catalogue, CatalogueSource, Datasheet, Faction, PointsStep, Rule } from '../../domain/catalogue/types'
+import type { ArmyLimit, BattleSize, Catalogue, CatalogueSource, Datasheet, Faction, KeywordMinimum, Muster, PointsStep, Rule } from '../../domain/catalogue/types'
 import { parseBsDataJson } from './bsdataJson'
 
 /**
  * Converts BattleScribe data files (.gst + .cat XML, as published by BSData) into a compact Catalogue.
- * Reads units, sizes, points, keywords, wargear and abilities. Full list-building rules come later (v0.4).
+ * Reads units, sizes, points, keywords, wargear, abilities and the army-building limits that depend only on battle size.
  */
 
 export interface SourceFile {
@@ -84,6 +84,8 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
   const entries = new Map<string, Node>()
   /** Every root/shared entry and group of any type, to follow links (e.g. to weapons). */
   const linkable = new Map<string, Node>()
+  /** Entry links of root units by target id: links can carry their own limits. */
+  const rootLinks = new Map<string, Node>()
   const rules = new Map<string, Rule>()
   readRules(gst, 'core', undefined, rules)
 
@@ -97,6 +99,7 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
     for (const g of kids(c, 'sharedSelectionEntryGroups', 'selectionEntryGroup')) linkable.set(attr(g, 'id')!, g)
     readRules(c, 'faction', attr(c, 'library') === 'true' ? undefined : attr(c, 'id'), rules)
     const links = kids(c, 'entryLinks', 'entryLink').filter((l) => !hidden(l) && attr(l, 'type') === 'selectionEntry')
+    for (const l of links) if (!rootLinks.has(attr(l, 'targetId')!)) rootLinks.set(attr(l, 'targetId')!, l)
     cats.push({
       id: attr(c, 'id')!,
       name: attr(c, 'name')!,
@@ -126,6 +129,31 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
     }
   }
 
+  const muster = readMuster(gst)
+  const sizeIds = new Set(muster.battleSizes.map((b) => b.id))
+  // Some factions (e.g. Necrons) put a unit's limit on a keyword only that unit has, instead of on the unit.
+  // Limits on keywords shared by several units (e.g. "Battlesuit") are other rules and are not read here.
+  const categories = new Map<string, Node>()
+  for (const p of parsed) {
+    const root = p.doc.gameSystem?.[0] ?? p.doc.catalogue?.[0]
+    for (const ce of kids(root, 'categoryEntries', 'categoryEntry')) if (!categories.has(attr(ce, 'id')!)) categories.set(attr(ce, 'id')!, ce)
+  }
+  const plainName = (e: Node) => (attr(e, 'name') ?? '').replace(/\s*\[Legends\]\s*/i, '').trim()
+  const carriers = new Map<string, Set<string>>()
+  for (const id of factionsByEntry.keys()) {
+    for (const l of kids(entries.get(id)!, 'categoryLinks', 'categoryLink')) {
+      const t = attr(l, 'targetId') ?? ''
+      if (!carriers.has(t)) carriers.set(t, new Set())
+      carriers.get(t)!.add(plainName(entries.get(id)!))
+    }
+  }
+  const ownCategory = (e: Node): Node[] =>
+    kids(e, 'categoryLinks', 'categoryLink')
+      .map((l) => attr(l, 'targetId') ?? '')
+      .filter((t) => carriers.get(t)?.size === 1)
+      .map((t) => categories.get(t))
+      .filter((c): c is Node => !!c)
+
   const datasheets: Datasheet[] = [...factionsByEntry].map(([id, facs]) => {
     const d = toDatasheet(entries.get(id)!, [...facs].sort(), ptsId)
     const e = entries.get(id)!
@@ -134,7 +162,8 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
       .map((l) => attr(l, 'targetId')!)
       .filter((rid) => rules.has(rid))
     const keywords = weaponKeywords(e, linkable)
-    return { ...d, ...(ruleIds.length ? { ruleIds: [...new Set(ruleIds)] } : {}), ...(keywords.length ? { weaponKeywords: keywords } : {}) }
+    const limit = armyLimit([e, rootLinks.get(id), ...ownCategory(e)].filter((x): x is Node => !!x), sizeIds)
+    return { ...d, ...(ruleIds.length ? { ruleIds: [...new Set(ruleIds)] } : {}), ...(keywords.length ? { weaponKeywords: keywords } : {}), ...(limit ? { armyLimit: limit } : {}) }
   })
   datasheets.sort((a, b) => a.name.localeCompare(b.name))
 
@@ -143,7 +172,103 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
     .sort((a, b) => a.name.localeCompare(b.name))
 
   const ruleList = [...rules.values()].sort((a, b) => Number(a.kind === 'faction') - Number(b.kind === 'faction') || a.name.localeCompare(b.name))
-  return { formatVersion: 2, gameId: attr(gst, 'id')!, gameName: attr(gst, 'name')!, source, factions, datasheets, rules: ruleList }
+  return { formatVersion: 3, gameId: attr(gst, 'id')!, gameName: attr(gst, 'name')!, source, factions, datasheets, rules: ruleList, muster }
+}
+
+/** Conditions of a modifier, flattened; undefined when they are combined in a way we don't read (nested groups, 'or'). */
+function simpleConditions(m: Node): Node[] | undefined {
+  const groups = kids(m, 'conditionGroups', 'conditionGroup')
+  if (groups.length) return undefined
+  if (kids(m, 'repeats', 'repeat').length) return undefined
+  return kids(m, 'conditions', 'condition')
+}
+
+/** Battle size a condition tests for ("this roster has Incursion selected"), if that is all it tests. */
+function battleSizeOf(c: Node, sizeIds: Set<string>): string | undefined {
+  const id = attr(c, 'childId') ?? ''
+  const t = attr(c, 'type')
+  if (!sizeIds.has(id) || attr(c, 'field') !== 'selections') return undefined
+  return (t === 'atLeast' || t === 'equalTo' || t === 'greaterThan') && Number(attr(c, 'value')) >= (t === 'greaterThan' ? 0 : 1) ? id : undefined
+}
+
+function applyModifier(value: number, m: Node): number {
+  const v = Number(attr(m, 'value'))
+  switch (attr(m, 'type')) {
+    case 'set':
+      return v
+    case 'increment':
+      return value + v
+    case 'decrement':
+      return value - v
+    default:
+      return value
+  }
+}
+
+/**
+ * Most units of this datasheet an army may take: "max N selections" limits on the whole army (force/roster scope),
+ * including changes that depend only on battle size. Changes with other conditions are skipped.
+ */
+function armyLimit(nodes: Node[], sizeIds: Set<string>): ArmyLimit | undefined {
+  let base: number | undefined
+  const bySize = new Map<string, number>()
+  for (const n of nodes) {
+    const mods = kids(n, 'modifiers', 'modifier')
+    for (const c of kids(n, 'constraints', 'constraint')) {
+      if (attr(c, 'type') !== 'max' || attr(c, 'field') !== 'selections' || !['force', 'roster'].includes(attr(c, 'scope') ?? '')) continue
+      let max = Number(attr(c, 'value'))
+      if (!(max >= 0)) continue
+      const sizes = new Map<string, number>()
+      // A limit changed by conditions we can't read (e.g. "0 unless detachment X") is skipped: better no check than a wrong one.
+      let readable = true
+      for (const m of mods.filter((x) => attr(x, 'field') === attr(c, 'id'))) {
+        const conds = simpleConditions(m)
+        const size = conds?.length === 1 ? battleSizeOf(conds[0], sizeIds) : undefined
+        if (conds?.length === 0) max = applyModifier(max, m)
+        else if (size) sizes.set(size, applyModifier(sizes.get(size) ?? max, m))
+        else readable = false
+      }
+      if (!readable) continue
+      for (const id of sizeIds) bySize.set(id, Math.min(bySize.get(id) ?? Infinity, sizes.get(id) ?? max))
+      base = Math.min(base ?? Infinity, max)
+    }
+  }
+  if (base === undefined) return undefined
+  const diff = [...bySize].filter(([, v]) => v !== base)
+  return { max: base, ...(diff.length ? { byBattleSize: Object.fromEntries(diff) } : {}) }
+}
+
+/** Battle sizes and keyword minimums from the game system's main force (BSData 40k: "Army Roster"). */
+function readMuster(gst: Node): Muster {
+  const battleSizes: BattleSize[] = []
+  walk(gst, (tag, el) => {
+    if (tag !== 'selectionEntryGroup' || attr(el, 'name') !== 'Battle Size') return
+    for (const s of kids(el, 'selectionEntries', 'selectionEntry')) {
+      const name = attr(s, 'name') ?? ''
+      const pts = /\((\d+) Points? limit\)/i.exec(name)
+      if (!pts || battleSizes.some((b) => b.id === attr(s, 'id'))) continue
+      battleSizes.push({ id: attr(s, 'id')!, name: name.replace(/^\d+\.\s*/, '').replace(/\s*\(.*\)\s*$/, ''), pointsLimit: Number(pts[1]) })
+    }
+  })
+  battleSizes.sort((a, b) => a.pointsLimit - b.pointsLimit)
+
+  const forces = kids(gst, 'forceEntries', 'forceEntry').filter((f) => !hidden(f))
+  const main = forces.find((f) => attr(f, 'name') === 'Army Roster') ?? forces.find((f) => !/crusade|boarding/i.test(attr(f, 'name') ?? ''))
+  const keywordMinimums: KeywordMinimum[] = []
+  for (const cl of main ? kids(main, 'categoryLinks', 'categoryLink') : []) {
+    const mods = kids(cl, 'modifiers', 'modifier')
+    for (const c of kids(cl, 'constraints', 'constraint')) {
+      if (attr(c, 'type') !== 'min' || attr(c, 'field') !== 'selections' || Number(attr(c, 'value')) < 1) continue
+      // "Set to 0 when the army's faction is X" → X is exempt.
+      const exempt = new Set<string>()
+      for (const m of mods.filter((x) => attr(x, 'field') === attr(c, 'id') && attr(x, 'type') === 'set' && Number(attr(x, 'value')) === 0)) {
+        const conds = [...kids(m, 'conditions', 'condition'), ...kids(m, 'conditionGroups', 'conditionGroup').flatMap((g) => kids(g, 'conditions', 'condition'))]
+        for (const k of conds) if (attr(k, 'scope') === 'primary-catalogue' && attr(k, 'type') === 'instanceOf') exempt.add(attr(k, 'childId')!)
+      }
+      keywordMinimums.push({ keyword: attr(cl, 'name')!, min: Number(attr(c, 'value')), exemptFactionIds: [...exempt].sort() })
+    }
+  }
+  return { battleSizes, keywordMinimums }
 }
 
 function toDatasheet(e: Node, factionIds: string[], ptsId: string | undefined): Datasheet {

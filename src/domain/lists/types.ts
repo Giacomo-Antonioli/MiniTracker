@@ -24,8 +24,9 @@ export interface ArmyList {
   id: string
   name: string
   edition: EditionKey
-  factionId: string
-  /** BSData battle size entry, e.g. Combat Patrol … Onslaught. */
+  /** Unset until chosen, or until the first unit is added (see addUnit). */
+  factionId?: string
+  /** Battle size id: a BSData battle size entry, or COMBAT_PATROL.id. */
   battleSize: string
   /** Set from the battle size, editable by the user. */
   pointsLimit: number
