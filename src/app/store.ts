@@ -59,6 +59,17 @@ function readTheme(): Theme {
   }
 }
 
+/** How rule explanations show: closed until the arrow is clicked, always open, or open on hover. */
+export type RuleDisplay = 'collapsed' | 'expanded' | 'hover'
+function readRuleDisplay(): RuleDisplay {
+  try {
+    const v = localStorage.getItem('ruleDisplay')
+    return v === 'expanded' || v === 'hover' ? v : 'collapsed'
+  } catch {
+    return 'collapsed'
+  }
+}
+
 export const ctx = (): Ctx => ({ now: new Date().toISOString(), newId: () => crypto.randomUUID() })
 
 interface State {
@@ -74,6 +85,8 @@ interface State {
   savePipelineFor(key: PipelineKey, p: Pipeline): Promise<void>
   theme: Theme
   setTheme(theme: Theme): void
+  ruleDisplay: RuleDisplay
+  setRuleDisplay(v: RuleDisplay): void
   /** Bundled + custom paints; empty until loadPaints() ran. */
   paints: PaintDef[]
   paintStock: Map<string, PaintStock>
@@ -144,6 +157,15 @@ export const useStore = create<State>((set, get) => ({
   catalogueJob: { phase: 'idle', done: 0, total: 0 },
   pipelines: DEFAULT_PIPELINES,
   theme: readTheme(),
+  ruleDisplay: readRuleDisplay(),
+  setRuleDisplay(v) {
+    try {
+      localStorage.setItem('ruleDisplay', v)
+    } catch {
+      /* not remembered */
+    }
+    set({ ruleDisplay: v })
+  },
   paints: [],
   paintStock: new Map(),
 

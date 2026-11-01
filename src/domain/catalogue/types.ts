@@ -27,6 +27,23 @@ export interface Datasheet {
   wargear: string[]
   abilities: string[]
   legends: boolean
+  /** Ability name → its text (catalogue format 2). */
+  abilityTexts?: Record<string, string>
+  /** Rules the unit has (core like Deep Strike, faction like Oath of Moment) — ids in Catalogue.rules. */
+  ruleIds?: string[]
+  /** Weapon abilities as written on its weapons, e.g. "Assault", "Sustained Hits 1". */
+  weaponKeywords?: string[]
+}
+
+export interface Rule {
+  id: string
+  name: string
+  /** Rule text as published in the data (may contain **bold** markers). */
+  text: string
+  kind: 'core' | 'faction'
+  /** For faction rules: the catalogue (faction) that defines it. */
+  factionId?: string
+  aliases?: string[]
 }
 
 export interface CatalogueSource {
@@ -37,9 +54,13 @@ export interface CatalogueSource {
 }
 
 export interface Catalogue {
+  /** 2 = includes rules and ability texts. Older catalogues have none. */
+  formatVersion?: number
   gameId: string
   gameName: string
   source: CatalogueSource
   factions: Faction[]
   datasheets: Datasheet[]
+  /** Missing in catalogues downloaded before format 2. */
+  rules?: Rule[]
 }

@@ -3,12 +3,13 @@ import { BacklogPage } from '../features/backlog/BacklogPage'
 import { UnitPage } from '../features/backlog/UnitPage'
 import { CatalogueBrowser } from '../features/catalogue/CatalogueBrowser'
 import { PaintsPage } from '../features/paints/PaintsPage'
+import { RulesPage } from '../features/rules/RulesPage'
 import { SchemesPage } from '../features/schemes/SchemesPage'
 import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeImport'
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { useStore } from './store'
 
-type Page = 'backlog' | 'unit' | 'browse' | 'paints' | 'schemes' | 'settings'
+type Page = 'backlog' | 'unit' | 'browse' | 'rules' | 'paints' | 'schemes' | 'settings'
 
 const SOON = ['Army lists', 'Games', 'Shopping']
 
@@ -64,6 +65,7 @@ export default function App() {
         <div className="mb-4 font-display text-lg tracking-wide text-accent">MiniTracker</div>
         {nav('backlog', 'Backlog')}
         {nav('browse', 'Catalogue')}
+        {nav('rules', 'Rules')}
         {nav('paints', 'Paints')}
         {nav('schemes', 'Schemes')}
         {SOON.map((s) => (
@@ -90,6 +92,8 @@ export default function App() {
           <UnitPage unitId={unitId} onBack={() => setPage('backlog')} onOpenDatasheet={openDatasheet} />
         ) : page === 'schemes' ? (
           <SchemesPage payload={recipe ?? undefined} onPayloadUsed={() => setRecipe(null)} />
+        ) : page === 'rules' ? (
+          <RulesPage onOpenSettings={() => go('settings', 'catalogue')} onOpenDatasheet={openDatasheet} />
         ) : page === 'paints' ? (
           <PaintsPage />
         ) : page === 'browse' ? (

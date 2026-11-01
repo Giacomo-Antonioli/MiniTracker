@@ -1,5 +1,5 @@
 import { XMLParser } from 'fast-xml-parser'
-import type { Catalogue, CatalogueSource, Datasheet, Faction, PointsStep } from '../../domain/catalogue/types'
+import type { Catalogue, CatalogueSource, Datasheet, Faction, PointsStep, Rule } from '../../domain/catalogue/types'
 
 /**
  * Converts BattleScribe data files (.gst + .cat XML, as published by BSData) into a compact Catalogue.
@@ -29,6 +29,38 @@ const hidden = (n: Node) => attr(n, 'hidden') === 'true'
 const isUnit = (n: Node) => ['unit', 'model'].includes(attr(n, 'type') ?? '')
 const sortUnique = (xs: string[]) => [...new Set(xs)].sort((a, b) => a.localeCompare(b))
 
+/** Text content of an element that may also carry attributes. */
+const textOf = (v: unknown): string => {
+  const x = Array.isArray(v) ? v[0] : v
+  if (typeof x === 'string') return x.trim()
+  if (x && typeof x === 'object' && '#text' in x) return String((x as Record<string, unknown>)['#text']).trim()
+  return ''
+}
+
+/** Visit every element below `n` with its tag name. */
+function walk(n: Node, visit: (tag: string, el: Node) => void) {
+  for (const [key, val] of Object.entries(n)) {
+    if (!Array.isArray(val)) continue
+    for (const child of val) {
+      if (child && typeof child === 'object') {
+        visit(key, child as Node)
+        walk(child as Node, visit)
+      }
+    }
+  }
+}
+
+function readRules(root: Node, kind: Rule['kind'], factionId: string | undefined, into: Map<string, Rule>) {
+  walk(root, (tag, el) => {
+    if (tag !== 'rule' || hidden(el)) return
+    const id = attr(el, 'id')
+    const name = attr(el, 'name')
+    if (!id || !name || into.has(id)) return
+    const aliases = ((el.alias as unknown[] | undefined) ?? []).map(textOf).filter(Boolean)
+    into.set(id, { id, name, text: textOf(el.description), kind, ...(factionId ? { factionId } : {}), ...(aliases.length ? { aliases } : {}) })
+  })
+}
+
 interface CatInfo {
   id: string
   name: string
@@ -45,13 +77,20 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
 
   const cats: CatInfo[] = []
   const entries = new Map<string, Node>()
+  /** Every root/shared entry and group of any type, to follow links (e.g. to weapons). */
+  const linkable = new Map<string, Node>()
+  const rules = new Map<string, Rule>()
+  readRules(gst, 'core', undefined, rules)
 
   for (const f of files.filter((x) => x.name.endsWith('.cat'))) {
     const c = (parser.parse(f.text).catalogue as Node[])[0]
     const rootEntries = kids(c, 'selectionEntries', 'selectionEntry')
     for (const e of [...rootEntries, ...kids(c, 'sharedSelectionEntries', 'selectionEntry')]) {
       if (isUnit(e)) entries.set(attr(e, 'id')!, e)
+      linkable.set(attr(e, 'id')!, e)
     }
+    for (const g of kids(c, 'sharedSelectionEntryGroups', 'selectionEntryGroup')) linkable.set(attr(g, 'id')!, g)
+    readRules(c, 'faction', attr(c, 'library') === 'true' ? undefined : attr(c, 'id'), rules)
     const links = kids(c, 'entryLinks', 'entryLink').filter((l) => !hidden(l) && attr(l, 'type') === 'selectionEntry')
     cats.push({
       id: attr(c, 'id')!,
@@ -82,14 +121,24 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
     }
   }
 
-  const datasheets: Datasheet[] = [...factionsByEntry].map(([id, facs]) => toDatasheet(entries.get(id)!, [...facs].sort(), ptsId))
+  const datasheets: Datasheet[] = [...factionsByEntry].map(([id, facs]) => {
+    const d = toDatasheet(entries.get(id)!, [...facs].sort(), ptsId)
+    const e = entries.get(id)!
+    const ruleIds = kids(e, 'infoLinks', 'infoLink')
+      .filter((l) => attr(l, 'type') === 'rule' && !hidden(l))
+      .map((l) => attr(l, 'targetId')!)
+      .filter((rid) => rules.has(rid))
+    const keywords = weaponKeywords(e, linkable)
+    return { ...d, ...(ruleIds.length ? { ruleIds: [...new Set(ruleIds)] } : {}), ...(keywords.length ? { weaponKeywords: keywords } : {}) }
+  })
   datasheets.sort((a, b) => a.name.localeCompare(b.name))
 
   const factions: Faction[] = factionCats
     .map((c) => ({ id: c.id, name: c.name.split(' - ').at(-1)!.trim(), fullName: c.name }))
     .sort((a, b) => a.name.localeCompare(b.name))
 
-  return { gameId: attr(gst, 'id')!, gameName: attr(gst, 'name')!, source, factions, datasheets }
+  const ruleList = [...rules.values()].sort((a, b) => Number(a.kind === 'faction') - Number(b.kind === 'faction') || a.name.localeCompare(b.name))
+  return { formatVersion: 2, gameId: attr(gst, 'id')!, gameName: attr(gst, 'name')!, source, factions, datasheets, rules: ruleList }
 }
 
 function toDatasheet(e: Node, factionIds: string[], ptsId: string | undefined): Datasheet {
@@ -103,7 +152,14 @@ function toDatasheet(e: Node, factionIds: string[], ptsId: string | undefined): 
   const keywords = sortUnique(catNames.filter((n) => !n.startsWith('Faction: ') && n !== name))
   const role = attr(cats.find((c) => attr(c, 'primary') === 'true') ?? {}, 'name')
 
-  const abilities = kids(e, 'profiles', 'profile').filter((p) => attr(p, 'typeName') === 'Abilities').map((p) => attr(p, 'name')!)
+  const abilityProfiles = kids(e, 'profiles', 'profile').filter((p) => attr(p, 'typeName') === 'Abilities' && !hidden(p))
+  const abilities = abilityProfiles.map((p) => attr(p, 'name')!)
+  const abilityTexts: Record<string, string> = {}
+  for (const p of abilityProfiles) {
+    const desc = kids(p, 'characteristics', 'characteristic').find((ch) => attr(ch, 'name') === 'Description')
+    const text = desc ? textOf(desc) : ''
+    if (text) abilityTexts[attr(p, 'name')!] = text
+  }
   const [rawMin, maxModels] = modelCount(e, true)
   const minModels = Math.max(1, Math.min(rawMin, maxModels))
 
@@ -120,6 +176,7 @@ function toDatasheet(e: Node, factionIds: string[], ptsId: string | undefined): 
     wargear: sortUnique(collectWargear(e)),
     abilities: sortUnique(abilities),
     legends,
+    ...(Object.keys(abilityTexts).length ? { abilityTexts } : {}),
   }
 }
 
@@ -204,4 +261,33 @@ function collectWargear(n: Node): string[] {
     if (!hidden(l) && attr(l, 'type') === 'selectionEntry') out.push(attr(l, 'name')!)
   }
   return out
+}
+
+/** Weapon keywords ("Assault", "Sustained Hits 1"…) from weapon profiles under a unit, following links to shared weapons. */
+function weaponKeywords(e: Node, linkable: Map<string, Node>): string[] {
+  const out = new Set<string>()
+  const seen = new Set<string>()
+  const visit = (n: Node) => {
+    walk(n, (tag, el) => {
+      if (tag === 'profile' && (attr(el, 'typeName') ?? '').includes('Weapons')) {
+        const kw = kids(el, 'characteristics', 'characteristic').find((ch) => attr(ch, 'name') === 'Keywords')
+        for (const k of (kw ? textOf(kw) : '').split(',')) {
+          const t = k.trim()
+          if (t && t !== '-') out.add(t)
+        }
+      }
+      // Follow links to single entries (the unit's weapons), not to shared groups such as Crusade
+      // "Weapon Modifications", which list many weapons the unit can't take.
+      if (tag === 'entryLink' && !hidden(el) && attr(el, 'type') === 'selectionEntry') {
+        const target = linkable.get(attr(el, 'targetId') ?? '')
+        const tid = attr(el, 'targetId')!
+        if (target && !seen.has(tid)) {
+          seen.add(tid)
+          visit(target)
+        }
+      }
+    })
+  }
+  visit(e)
+  return sortUnique([...out])
 }

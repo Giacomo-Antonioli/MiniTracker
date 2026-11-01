@@ -8,8 +8,16 @@
         <categoryLink targetId="c-fac" id="l3" primary="false" name="Faction: Testers"/>
       </categoryLinks>
       <profiles>
-        <profile name="Hold the Line" typeId="t-ab" typeName="Abilities" hidden="false" id="p1"/>
+        <profile name="Hold the Line" typeId="t-ab" typeName="Abilities" hidden="false" id="p1">
+          <characteristics>
+            <characteristic name="Description" typeId="t-desc">Once per battle, this unit can **hold** its ground.</characteristic>
+          </characteristics>
+        </profile>
       </profiles>
+      <infoLinks>
+        <infoLink name="Deep Strike" hidden="false" type="rule" id="il1" targetId="r-deepstrike"/>
+        <infoLink name="Testers Doctrine" hidden="false" type="rule" id="il2" targetId="r-doctrine"/>
+      </infoLinks>
       <selectionEntryGroups>
         <selectionEntryGroup name="Troopers" hidden="false" id="g-troopers">
           <selectionEntries>
