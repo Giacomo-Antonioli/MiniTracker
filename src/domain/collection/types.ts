@@ -63,6 +63,8 @@ export interface OwnedUnit {
   customName: string
   datasheetId?: string
   factionId?: string
+  /** Free-text faction until the catalogue (v0.2) provides factionId. */
+  factionName?: string
   kitIds: string[]
   groups: ModelGroup[]
   schemeId?: string

@@ -16,6 +16,10 @@ export const DEFAULT_PIPELINE: Pipeline = {
 /** Lifecycle states whose models no longer count towards the backlog. */
 const GONE: ReadonlySet<Lifecycle> = new Set(['sold', 'traded', 'gifted', 'lost'])
 
+export function isGone(lifecycle: Lifecycle): boolean {
+  return GONE.has(lifecycle)
+}
+
 export function validatePipeline(p: Pipeline): void {
   if (p.stages.length === 0) throw new Error('Pipeline needs at least one stage')
   const seen = new Set<string>()
@@ -106,7 +110,7 @@ export function progress(units: OwnedUnit[], pipeline: Pipeline, target: StageId
   let done = 0
   let total = 0
   for (const u of units) {
-    if (GONE.has(u.lifecycle)) continue
+    if (isGone(u.lifecycle)) continue
     for (const g of u.groups) {
       total += g.count
       if (pipeline.stages.findIndex((s) => s.id === g.status) >= t) done += g.count
