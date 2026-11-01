@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { THEMES, useStore, type Theme } from '../../app/store'
+import { THEMES, useStore, type RuleDisplay, type Theme } from '../../app/store'
 import { DEFAULT_PIPELINES } from '../../domain/pipelines'
 import { BackupPage } from './BackupPage'
 import { CataloguePage } from './CataloguePage'
@@ -16,7 +16,7 @@ const SECTIONS: { id: SettingsSection; label: string }[] = [
 ]
 
 export function SettingsPage({ section }: { section?: SettingsSection }) {
-  const { theme, setTheme, pipelines, savePipelineFor, units, paintStock, schemes } = useStore()
+  const { theme, setTheme, ruleDisplay, setRuleDisplay, pipelines, savePipelineFor, units, paintStock, schemes } = useStore()
 
   useEffect(() => {
     if (section) document.getElementById(`settings-${section}`)?.scrollIntoView?.({ block: 'start' })
@@ -43,7 +43,15 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
 
       <section id="settings-appearance" className="grid scroll-mt-4 gap-3">
         <h2 className="font-display text-xl text-accent">Appearance</h2>
-        <div className="panel p-4">
+        <div className="panel grid gap-3 p-4">
+          <label className="flex items-center gap-3">
+            Rule explanations
+            <select className="input" value={ruleDisplay} onChange={(e) => setRuleDisplay(e.target.value as RuleDisplay)}>
+              <option value="collapsed">Collapsed (open with the ▸ arrow)</option>
+              <option value="expanded">Always expanded</option>
+              <option value="hover">Show on hover</option>
+            </select>
+          </label>
           <label className="flex items-center gap-3">
             Theme
             <select className="input" value={theme} onChange={(e) => setTheme(e.target.value as Theme)}>

@@ -40,6 +40,12 @@ describe(`BSData live check (${BSDATA_40K.repo})`, () => {
     expect(intercessors).toMatchObject({ minModels: 5, maxModels: 10, role: 'Battleline' })
     expect(intercessors!.points[0].points).toBeGreaterThan(0)
 
+    // Rules (catalogue format 2): core rules with text, and units linked to them.
+    expect(c.rules!.filter((r) => r.kind === 'core' && r.text).length).toBeGreaterThanOrEqual(25)
+    expect(c.rules!.length).toBeGreaterThanOrEqual(200)
+    expect(intercessors!.ruleIds?.length).toBeGreaterThan(0)
+    expect(Object.keys(intercessors!.abilityTexts ?? {}).length).toBeGreaterThan(0)
+
     const unpriced = c.datasheets.filter((d) => d.points[0].points === 0).length / c.datasheets.length
     expect(unpriced, 'share of units without points').toBeLessThan(0.05)
   })

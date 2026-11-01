@@ -75,6 +75,27 @@ describe('parseBsData', () => {
   })
 })
 
+describe('rules', () => {
+  it('reads core rules from the game system and faction rules from catalogues', () => {
+    expect(cat.formatVersion).toBe(2)
+    expect(cat.rules!.map((r) => [r.name, r.kind])).toEqual([
+      ['Assault', 'core'],
+      ['Deep Strike', 'core'],
+      ['Sustained Hits', 'core'],
+      ['Testers Doctrine', 'faction'],
+    ])
+    expect(cat.rules![0]).toMatchObject({ id: 'r-assault', text: 'Weapons with **[ASSAULT]** can shoot after Advancing.', aliases: ['ASSAULT'] })
+    expect(cat.rules![3]).toMatchObject({ factionId: 'cat-testers' })
+  })
+
+  it('links units to their rules, ability texts and weapon keywords', () => {
+    const d = ds('Line Troopers')
+    expect(d.ruleIds).toEqual(['r-deepstrike', 'r-doctrine'])
+    expect(d.abilityTexts).toEqual({ 'Hold the Line': 'Once per battle, this unit can **hold** its ground.' })
+    expect(d.weaponKeywords).toEqual(['Assault', 'Sustained Hits 1'])
+  })
+})
+
 describe('pointsFor', () => {
   it('picks the price for a unit size', () => {
     const d = ds('Line Troopers')

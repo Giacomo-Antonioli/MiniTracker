@@ -3,6 +3,11 @@
   <catalogueLinks>
     <catalogueLink type="catalogue" name="Test - Shared Library" id="cl1" targetId="cat-lib" importRootEntries="true"/>
   </catalogueLinks>
+  <rules>
+    <rule id="r-doctrine" name="Testers Doctrine" hidden="false">
+      <description>Testers units re-roll hit rolls of 1.</description>
+    </rule>
+  </rules>
   <entryLinks>
     <entryLink import="true" name="Big Walker" hidden="false" type="selectionEntry" id="el10" targetId="u-walker"/>
     <entryLink import="true" name="Secret Thing" hidden="true" type="selectionEntry" id="el11" targetId="u-secret"/>
@@ -20,6 +25,15 @@
     <selectionEntry type="unit" import="true" name="Secret Thing" hidden="false" id="u-secret">
       <costs><cost name="pts" typeId="pts-id" value="1"/></costs>
     </selectionEntry>
-    <selectionEntry type="upgrade" import="true" name="Rifle" hidden="false" id="w-rifle"/>
+    <selectionEntry type="upgrade" import="true" name="Rifle" hidden="false" id="w-rifle">
+      <profiles>
+        <profile name="Rifle" typeId="t-rw" typeName="Ranged Weapons" hidden="false" id="pw1">
+          <characteristics>
+            <characteristic name="Range" typeId="t-r">24"</characteristic>
+            <characteristic name="Keywords" typeId="t-kw">Assault, Sustained Hits 1</characteristic>
+          </characteristics>
+        </profile>
+      </profiles>
+    </selectionEntry>
   </sharedSelectionEntries>
 </catalogue>

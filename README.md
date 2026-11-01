@@ -34,6 +34,7 @@ No account, no server: your collection stays in your browser. Install it from th
 
 **Coming in v0.3**
 
+- **Rules.** Every core and faction rule and ability explained, in the catalogue and on a searchable Rules page.
 - **Schemes.** Official, community and personal paint schemes with variants; a bundled library of community recipes (credited); "Add from link" and a **Send to MiniTracker** bookmarklet that turns any recipe page you're reading into a draft scheme.
 - **Paints.** ~1,500 Citadel, Army Painter, Vallejo and AK paints with colour swatches; inventory with stages (wishlist → in use → running low → empty), pots, price, shop, storage location, barcode, rating and notes; custom paints; CSV import/export.
 
