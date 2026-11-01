@@ -113,6 +113,10 @@ interface State {
   saveScheme(s: PaintScheme): Promise<void>
   deleteScheme(id: string): Promise<void>
   setDefaultScheme(faction: string, schemeId: string | undefined): Promise<void>
+  /** Links pasted in "Add from link", kept so you can come back to them. */
+  recipeLinks: { url: string; title?: string; addedAt: string; schemeId?: string }[]
+  rememberLink(link: { url: string; title?: string; schemeId?: string }): Promise<void>
+  forgetLink(url: string): Promise<void>
   /** Import a shared scheme file; returns the new schemes. */
   importSchemes(text: string): Promise<PaintScheme[]>
   savePipeline(p: Pipeline): Promise<void>
@@ -194,7 +198,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogue, stock, schemes, schemeDefaults] = await Promise.all([
+    const [units, painting, paint, scheme, catalogue, stock, schemes, schemeDefaults, recipeLinks] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
@@ -203,6 +207,7 @@ export const useStore = create<State>((set, get) => ({
       paintRepo.listStock(),
       schemeRepo.list(),
       settingsRepo.getValue<Record<string, string>>('schemeDefaults', {}),
+      settingsRepo.getValue<State['recipeLinks']>('recipeLinks', []),
     ])
     set({
       units,
@@ -212,6 +217,7 @@ export const useStore = create<State>((set, get) => ({
       paintStock: new Map(stock.map((s) => [s.paintId, s])),
       schemes,
       schemeDefaults,
+      recipeLinks,
       ready: true,
     })
     if (get().paints.length) await get().loadPaints()
@@ -371,6 +377,22 @@ export const useStore = create<State>((set, get) => ({
     else delete defaults[faction]
     await settingsRepo.setValue('schemeDefaults', defaults)
     set({ schemeDefaults: defaults })
+  },
+
+  recipeLinks: [],
+
+  async rememberLink(link) {
+    const others = get().recipeLinks.filter((l) => l.url !== link.url)
+    const prev = get().recipeLinks.find((l) => l.url === link.url)
+    const links = [{ ...prev, ...link, addedAt: prev?.addedAt ?? new Date().toISOString() }, ...others]
+    await settingsRepo.setValue('recipeLinks', links)
+    set({ recipeLinks: links })
+  },
+
+  async forgetLink(url) {
+    const links = get().recipeLinks.filter((l) => l.url !== url)
+    await settingsRepo.setValue('recipeLinks', links)
+    set({ recipeLinks: links })
   },
 
   async importSchemes(text) {

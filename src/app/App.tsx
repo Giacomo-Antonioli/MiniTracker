@@ -3,6 +3,7 @@ import { BacklogPage } from '../features/backlog/BacklogPage'
 import { CatalogueBrowser } from '../features/catalogue/CatalogueBrowser'
 import { PaintsPage } from '../features/paints/PaintsPage'
 import { SchemesPage } from '../features/schemes/SchemesPage'
+import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeImport'
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { useStore } from './store'
 
@@ -12,8 +13,15 @@ const SOON = ['Army lists', 'Games', 'Shopping']
 
 export default function App() {
   const { ready, load, theme } = useStore()
-  const [page, setPage] = useState<Page>('backlog')
+  // A recipe sent by the bookmarklet arrives in the URL (#recipe=…): start on Schemes with it.
+  const [recipe, setRecipe] = useState<RecipePayload | null>(() => readRecipeHash(location.hash))
+  const [page, setPage] = useState<Page>(() => (readRecipeHash(location.hash) ? 'schemes' : 'backlog'))
   const [section, setSection] = useState<SettingsSection | undefined>()
+
+  useEffect(() => {
+    // Remove the recipe from the address bar so a reload doesn't import it again.
+    if (location.hash.startsWith('#recipe=')) history.replaceState(null, '', location.pathname + location.search)
+  }, [])
 
   useEffect(() => {
     void load()
@@ -67,7 +75,7 @@ export default function App() {
         ) : page === 'backlog' ? (
           <BacklogPage />
         ) : page === 'schemes' ? (
-          <SchemesPage />
+          <SchemesPage payload={recipe ?? undefined} onPayloadUsed={() => setRecipe(null)} />
         ) : page === 'paints' ? (
           <PaintsPage />
         ) : page === 'browse' ? (

@@ -164,3 +164,25 @@ export function buildDraft(blocks: SourceBlock[], paints: PaintDef[]): Draft {
     stats: { steps: kept.reduce((n, s) => n + s.steps.length, 0), paints: seen.size, matched },
   }
 }
+
+/**
+ * For whole web pages (bookmarklet, pasted text): keep only steps that use a paint, drop empty areas.
+ * Pages contain lots of prose; a step without any paint is almost always noise.
+ */
+export function draftFromPage(blocks: SourceBlock[], paints: PaintDef[]): Draft {
+  const d = buildDraft(blocks, paints)
+  const sections = d.sections.map((s) => ({ ...s, steps: s.steps.filter((st) => st.paints.length > 0) })).filter((s) => s.steps.length > 0)
+  const used = new Set(sections.flatMap((s) => s.steps.flatMap((st) => st.paints.map((p) => p.paintId))))
+  return {
+    sections: sections as Draft['sections'],
+    newPaints: d.newPaints.filter((p) => used.has(p.id)),
+    stats: { steps: sections.reduce((n, s) => n + s.steps.length, 0), paints: used.size, matched: [...used].filter((id) => !id.startsWith('lib/')).length },
+  }
+}
+
+/** Pasted text → blocks: short lines without a full stop or a technique word look like headings. */
+export function blocksFromText(text: string): SourceBlock[] {
+  const lines = text.split(/\r?\n/).map((l) => l.replace(/^\s*(\d+[.)]|[-*•])\s*/, '').trim()).filter(Boolean)
+  const looksLikeHeading = (l: string) => l.length <= 40 && !/[.!?:]$/.test(l) && !/\d/.test(l) && !detectTechnique(l)
+  return lines.map((l) => (looksLikeHeading(l) ? { type: 'heading' as const, text: l } : { type: 'step' as const, text: l }))
+}
