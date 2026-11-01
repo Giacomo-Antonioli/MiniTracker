@@ -24,6 +24,7 @@ async function seed(target: MiniTrackerDb) {
   await target.settings.put({ key: 'another', value: 1 })
   await target.paintStock.put({ paintId: 'c/nuln', stage: 'in-use', quantity: 2, favourite: true, notes: '', updatedAt: 't' })
   await target.customPaints.put({ id: 'custom/1', brand: 'GSW', name: 'Rocket', hex: '#00ff00', custom: true })
+  await target.schemes.put({ id: 's1', name: 'Blue', description: '', origin: 'personal', stage: 'idea', tags: [], tips: '', tutorials: [], sections: [], createdAt: 't', updatedAt: 't' })
   await new DexieSettingsRepository(target).savePipeline(addStage(DEFAULT_PIPELINE, { id: 'washed', name: 'Washed' }))
 }
 
@@ -54,6 +55,7 @@ describe('backup', () => {
     const b = await exportBackup(db, 'x')
     expect(b.data.paintStock).toHaveLength(1)
     expect(b.data.customPaints).toHaveLength(1)
+    expect(b.data.schemes).toHaveLength(1)
   })
 
   it('still reads v1 backups (no paint data)', () => {

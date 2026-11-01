@@ -1,3 +1,5 @@
+import { validateScheme } from '../../domain/schemes/scheme'
+import type { PaintScheme } from '../../domain/schemes/types'
 import type { Photo, PhotoFiles } from '../../domain/photos/types'
 import type { PaintDef, PaintStock } from '../../domain/paints/types'
 import type { Catalogue } from '../../domain/catalogue/types'
@@ -69,6 +71,14 @@ export class DexieSettingsRepository implements SettingsRepository {
   async getPipeline(key: PipelineKey = 'painting') {
     const row = await this.db.settings.get(storageKey(key))
     return (row?.value as Pipeline | undefined) ?? structuredClone(DEFAULT_PIPELINES[key])
+  }
+
+  async getValue<T>(key: string, fallback: T): Promise<T> {
+    return ((await this.db.settings.get(key))?.value as T | undefined) ?? fallback
+  }
+
+  async setValue(key: string, value: unknown): Promise<void> {
+    await this.db.settings.put({ key, value })
   }
 
   async savePipeline(pipeline: Pipeline, key: PipelineKey = 'painting') {
@@ -198,5 +208,39 @@ export class DexiePhotoRepository {
       displayBytes: all.reduce((n, p) => n + p.displayBytes, 0),
       originalBytes: all.reduce((n, p) => n + (p.hasOriginal ? p.originalBytes : 0), 0),
     }
+  }
+}
+
+export class DexieSchemeRepository {
+  private db: MiniTrackerDb
+  constructor(db: MiniTrackerDb) {
+    this.db = db
+  }
+
+  async list(): Promise<PaintScheme[]> {
+    return (await this.db.schemes.toArray()).sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  async save(s: PaintScheme): Promise<void> {
+    validateScheme(s)
+    await this.db.schemes.put(s)
+  }
+
+  async saveMany(list: PaintScheme[]): Promise<void> {
+    list.forEach(validateScheme)
+    await this.db.schemes.bulkPut(list)
+  }
+
+  /** Deletes a scheme; units using it are unlinked and variants lose their link. */
+  async delete(id: string): Promise<void> {
+    await this.db.transaction('rw', this.db.schemes, this.db.units, async () => {
+      await this.db.schemes.delete(id)
+      await this.db.schemes.where('basedOn').equals(id).modify((s) => {
+        delete s.basedOn
+      })
+      await this.db.units.filter((u) => u.schemeId === id).modify((u) => {
+        delete u.schemeId
+      })
+    })
   }
 }
