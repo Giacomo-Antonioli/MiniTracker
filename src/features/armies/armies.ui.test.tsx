@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../app/App'
 import { appDb, useStore } from '../../app/store'
 import { parseBsData } from '../../data/catalogue/bsdata'
@@ -68,6 +68,25 @@ describe('Armies', () => {
 
     await user.click(screen.getAllByRole('button', { name: 'Warlord: Big Walker' })[0])
     expect(within(issues).getByText(/is not a Character/)).toBeInTheDocument()
+
+    const buy = screen.getByRole('region', { name: 'Buy list' })
+    expect(buy).toHaveTextContent('3 models to buy')
+    expect(within(buy).getByRole('row', { name: /Big Walker×3 3 450/ })).toBeInTheDocument()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    await user.click(within(buy).getByRole('button', { name: '📋 Copy as text' }))
+    expect(writeText).toHaveBeenCalledWith('Buy list – Walkers\n- Big Walker: 3 models (3 units)\nTotal: 3 models')
+    expect(await within(buy).findByText('Copied')).toBeInTheDocument()
+    const print = vi.fn()
+    window.print = print
+    await user.click(within(buy).getByRole('button', { name: '📄 PDF' }))
+    const sheet = screen.getByLabelText('Buy list sheet')
+    expect(sheet).toHaveTextContent('Buy list – Walkers')
+    expect(sheet).toHaveTextContent('Testers · 11th edition · Incursion')
+    expect(sheet).toHaveTextContent('☐Big Walker (3 units)3450')
+    await vi.waitFor(() => expect(print).toHaveBeenCalled())
+    window.dispatchEvent(new Event('afterprint'))
+    await vi.waitFor(() => expect(screen.queryByLabelText('Buy list sheet')).toBeNull())
 
     await user.click(screen.getAllByRole('button', { name: 'Remove Big Walker' })[3])
     expect(screen.getAllByTestId('entry')).toHaveLength(3)
