@@ -19,6 +19,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 - Backups are now one .zip with photos: **Light** (compressed copies, small) or **Full** (with originals), estimated size shown; built one photo at a time to keep memory low; images stored without re-compressing. Restoring a light backup keeps originals still on the device; older .json backups still import (#28).
 - Paint schemes: official, community (with source) and personal schemes; areas with ordered steps (technique, paints with mix ratios, thinning, tool, note); status from the scheme pipeline, difficulty, minutes per model, tips, tags; colour strip; missing paints (#27).
 - "Make my variant" copies any scheme with a link to the original and shows paints added/dropped; default scheme per faction (pre-selected for new units); scheme shown on units; share/import scheme files (friends' custom paints come along); schemes in backups (#27).
+- Scheme library: 40 T'au Empire community schemes (Paint Pad, Tale of Painters) bundled read-only with credit and links; "Save a copy" or "Make my variant" to make them yours; extra paints they use are added to the paint list.
+- Recipe extractor (`src/domain/schemes/extract.ts`): turns recipe pages into areas and steps matched to our paints (techniques, mix ratios, spelling slips); scraper tool `npm run schemes:scrape` with Paint Pad and blog adapters.
 - Backlog banner when no unit catalogue is installed, with a one-click download and progress; can be hidden (#33).
 
 ## [0.2.0] - 2026-11-01

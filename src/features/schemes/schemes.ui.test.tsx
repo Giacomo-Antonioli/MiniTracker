@@ -12,7 +12,7 @@ beforeEach(async () => {
   await appDb.open()
   useStore.setState({
     ready: false, units: [], events: {}, photos: {}, pipeline: DEFAULT_PIPELINE, pipelines: DEFAULT_PIPELINES,
-    catalogue: null, paints: [], paintStock: new Map(), schemes: [], schemeDefaults: {},
+    catalogue: null, paints: [], paintStock: new Map(), schemes: [], library: [], schemeDefaults: {},
   })
   vi.spyOn(window, 'confirm').mockReturnValue(true)
   URL.createObjectURL = vi.fn(() => 'blob:x')
@@ -115,5 +115,31 @@ describe('Schemes', () => {
     await user.click(within(ed).getByRole('button', { name: 'Delete' }))
     await waitFor(() => expect(useStore.getState().schemes).toHaveLength(0))
     expect(screen.queryByRole('region', { name: 'Scheme editor' })).not.toBeInTheDocument()
+  })
+
+  it('shows the bundled library, opens a library scheme read-only, and saves a copy with its credit', async () => {
+    const user = await openSchemes()
+    await waitFor(() => expect(useStore.getState().library.length).toBeGreaterThan(30))
+    expect(screen.getByLabelText(/^Library \(\d+\)/)).toBeChecked()
+    await user.type(screen.getByPlaceholderText('🔍 Search'), "fal'shia")
+    await user.click(screen.getByRole('button', { name: /Scheme Fal'shia Sept Fire Warrior/ }))
+    const view = screen.getByRole('region', { name: 'Library scheme' })
+    expect(within(view).getByRole('link', { name: /Paint Pad/ })).toHaveAttribute('href', expect.stringContaining('paintpad.app/recipes/2720'))
+    expect(view).toHaveTextContent('by andromedastudio')
+    expect(view).toHaveTextContent('Athonian Camoshade')
+    expect(within(view).queryByLabelText('Scheme name')).not.toBeInTheDocument() // read-only
+
+    await user.click(within(view).getByRole('button', { name: '+ Save a copy' }))
+    await waitFor(() => expect(useStore.getState().schemes).toHaveLength(1))
+    const copy = useStore.getState().schemes[0]
+    expect(copy).toMatchObject({ name: "Fal'shia Sept Fire Warrior", origin: 'community', basedOn: 'lib/paint-pad-2720', source: { author: 'andromedastudio' } })
+    expect(await screen.findByRole('region', { name: 'Scheme editor' })).toBeInTheDocument()
+  })
+
+  it('library can be hidden', async () => {
+    const user = await openSchemes()
+    await waitFor(() => expect(useStore.getState().library.length).toBeGreaterThan(30))
+    await user.click(screen.getByLabelText(/^Library/))
+    expect(screen.queryByRole('button', { name: /Scheme Fal'shia/ })).not.toBeInTheDocument()
   })
 })

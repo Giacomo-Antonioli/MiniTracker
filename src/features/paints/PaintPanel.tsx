@@ -96,7 +96,7 @@ export function PaintPanel({ paint, onClose }: { paint: PaintDef; onClose: () =>
         </section>
       )}
 
-      {paint.custom && (
+      {paint.custom && !paint.id.startsWith('lib/') && (
         <section className="mt-auto border-t border-line p-4">
           <button className="btn btn-danger" onClick={() => confirm(`Delete custom paint ${paint.name}?`) && void deleteCustomPaint(paint.id).then(onClose)}>
             Delete custom paint

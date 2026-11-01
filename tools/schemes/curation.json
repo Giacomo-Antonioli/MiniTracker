@@ -1,0 +1,5 @@
+{
+  "note": "Manual review of scraped schemes: exclude ids, or override fields (name, factionName, tags, tips).",
+  "exclude": [],
+  "overrides": {}
+}

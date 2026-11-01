@@ -1,0 +1,41 @@
+{
+  "note": "Recipe sources for the bundled scheme library. Only facts (areas, steps, paints) plus credit and link are kept.",
+  "factions": [
+    {
+      "faction": "T'au Empire",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/tau-empire",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "tags": [
+        "T'au Sept",
+        "Vior'la",
+        "Farsight",
+        "Sa'cea",
+        "Bork'an",
+        "Dal'yth",
+        "Fal'shia",
+        "T'au'n",
+        "Vash'ya",
+        "Au'taal",
+        "Shun",
+        "Mu'gulath Bay",
+        "Kel'shan",
+        "Kroot",
+        "Vespid",
+        "Stealth",
+        "Pathfinder",
+        "Fire Warrior",
+        "Breacher",
+        "Crisis",
+        "Battlesuit",
+        "Camo",
+        "Urban"
+      ]
+    }
+  ]
+}

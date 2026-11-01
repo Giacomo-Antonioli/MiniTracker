@@ -5,11 +5,14 @@ import type { PaintScheme, SchemeOrigin } from '../../domain/schemes/types'
 import { ColourStrip } from './ColourStrip'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
 import { SchemeEditor } from './SchemeEditor'
+import { SchemeView } from './SchemeView'
 
 const ORDER: SchemeOrigin[] = ['official', 'community', 'personal']
 
 export function SchemesPage({ openId }: { openId?: string }) {
-  const { schemes, paints, paintStock, units, pipelines, schemeDefaults, loadPaints, saveScheme, importSchemes } = useStore()
+  const { schemes: mine, library, loadLibrary, paints, paintStock, units, pipelines, schemeDefaults, loadPaints, saveScheme, importSchemes } = useStore()
+  const [showLibrary, setShowLibrary] = useState(true)
+  const schemes = useMemo(() => (showLibrary ? [...mine, ...library] : mine), [mine, library, showLibrary])
   const [text, setText] = useState('')
   const [faction, setFaction] = useState('')
   const [origin, setOrigin] = useState<'' | SchemeOrigin>('')
@@ -19,7 +22,8 @@ export function SchemesPage({ openId }: { openId?: string }) {
 
   useEffect(() => {
     if (!paints.length) void loadPaints()
-  }, [paints.length, loadPaints])
+    void loadLibrary()
+  }, [paints.length, loadPaints, loadLibrary])
 
   const factions = useMemo(() => [...new Set(schemes.map((s) => s.factionName).filter((f): f is string => !!f))].sort(), [schemes])
   const shown = useMemo(() => {
@@ -29,7 +33,7 @@ export function SchemesPage({ openId }: { openId?: string }) {
       .filter((s) => words.every((w) => `${s.name} ${s.factionName ?? ''} ${s.tags.join(' ')}`.toLowerCase().includes(w)))
       .sort((a, b) => ORDER.indexOf(a.origin) - ORDER.indexOf(b.origin) || a.name.localeCompare(b.name))
   }, [schemes, text, faction, origin, stage])
-  const selected = schemes.find((s) => s.id === selectedId)
+  const selected = [...mine, ...library].find((s) => s.id === selectedId)
   const usedBy = (id: string) => units.filter((u) => u.schemeId === id).length
 
   async function create() {
@@ -80,6 +84,9 @@ export function SchemesPage({ openId }: { openId?: string }) {
             <option value="">Any origin</option>
             {ORDER.map((o) => <option key={o} value={o}>{ORIGIN_LABEL[o]}</option>)}
           </select>
+          <label className="flex items-center gap-1 text-sm">
+            <input type="checkbox" checked={showLibrary} onChange={(e) => setShowLibrary(e.target.checked)} /> Library ({library.length})
+          </label>
           <select className="input" aria-label="Status" value={stage} onChange={(e) => setStage(e.target.value)}>
             <option value="">Any status</option>
             {pipelines.scheme.stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -96,17 +103,22 @@ export function SchemesPage({ openId }: { openId?: string }) {
               used={usedBy(s.id)}
               isDefault={!!s.factionName && schemeDefaults[s.factionName] === s.id}
               stageName={pipelines.scheme.stages.find((x) => x.id === s.stage)?.name ?? s.stage}
-              base={s.basedOn ? schemes.find((x) => x.id === s.basedOn)?.name : undefined}
+              base={s.basedOn ? [...mine, ...library].find((x) => x.id === s.basedOn)?.name : undefined}
               active={s.id === selectedId}
               onOpen={() => setSelectedId(s.id)}
             />
           ))}
         </ul>
-        {schemes.length === 0 && <p className="text-center text-muted">No schemes yet. Create one, or import a scheme file from a friend.</p>}
+        {schemes.length === 0 && <p className="text-center text-muted">No schemes yet. Create one, browse the library, or import a scheme file from a friend.</p>}
         {schemes.length > 0 && shown.length === 0 && <p className="text-center text-muted">No schemes match these filters.</p>}
       </div>
 
-      {selected && <SchemeEditor key={selected.id} scheme={selected} onOpen={setSelectedId} onClose={() => setSelectedId(null)} />}
+      {selected &&
+        (selected.id.startsWith('lib/') ? (
+          <SchemeView key={selected.id} scheme={selected} onOpen={setSelectedId} onClose={() => setSelectedId(null)} />
+        ) : (
+          <SchemeEditor key={selected.id} scheme={selected} onOpen={setSelectedId} onClose={() => setSelectedId(null)} />
+        ))}
     </div>
   )
 }
@@ -129,7 +141,10 @@ function SchemeCard(props: {
         <ColourStrip colours={props.strip} />
         <span className="flex items-start justify-between gap-2">
           <span className="font-semibold">{s.name}{props.isDefault && <span title="Default for this faction"> ⭐</span>}</span>
-          <span className={`shrink-0 rounded border px-1.5 text-xs ${ORIGIN_STYLE[s.origin]}`}>{ORIGIN_LABEL[s.origin]}</span>
+          <span className="flex shrink-0 gap-1">
+            {s.id.startsWith('lib/') && <span className="rounded border border-line px-1.5 text-xs text-muted">Library</span>}
+            <span className={`rounded border px-1.5 text-xs ${ORIGIN_STYLE[s.origin]}`}>{ORIGIN_LABEL[s.origin]}</span>
+          </span>
         </span>
         <span className="text-xs text-muted">
           {[s.factionName, props.stageName, s.difficulty && `${'●'.repeat(s.difficulty)}${'○'.repeat(5 - s.difficulty)}`, s.minutesPerModel && `${s.minutesPerModel} min/model`]
@@ -137,6 +152,7 @@ function SchemeCard(props: {
             .join(' · ')}
         </span>
         {props.base && <span className="text-xs text-muted">↳ variant of {props.base}</span>}
+        {s.source?.author && <span className="text-xs text-muted">by {s.source.author}</span>}
         <span className="flex gap-3 text-xs">
           {props.used > 0 && <span className="text-ok">{props.used} unit{props.used > 1 ? 's' : ''}</span>}
           {props.missing > 0 && <span className="text-danger">{props.missing} paint{props.missing > 1 ? 's' : ''} missing</span>}
