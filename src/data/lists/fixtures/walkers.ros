@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Hand-written roster in BattleScribe format, against the test catalogue in data/catalogue/fixtures. -->
+<roster id="r1" name="Walker Strike" battleScribeVersion="2.03" gameSystemId="sys-test" gameSystemName="Test Game" xmlns="http://www.battlescribe.net/schema/rosterSchema">
+  <costs><cost name="pts" typeId="pts-id" value="555.0"/></costs>
+  <forces>
+    <force id="f1" name="Army Roster" entryId="f-army" catalogueId="cat-testers" catalogueRevision="7" catalogueName="Test - Testers">
+      <selections>
+        <selection id="s1" name="Battle Size" entryId="e-bs" number="1" type="upgrade">
+          <selections>
+            <selection id="s2" name="2. Strike Force (2000 Point limit)" entryId="e-bs::bs-sf" entryGroupId="g-bs" number="1" type="upgrade"/>
+          </selections>
+        </selection>
+        <selection id="s3" name="Detachment" entryId="el-det" number="1" type="upgrade">
+          <selections>
+            <selection id="s4" name="Line Doctrine" entryId="el-det::det-line" entryGroupId="g-det" number="1" type="upgrade"/>
+          </selections>
+        </selection>
+        <selection id="s5" name="Big Walker" entryId="el10::u-walker" number="1" type="model">
+          <selections>
+            <selection id="s6" name="Warlord" entryId="w-1" number="1" type="upgrade"/>
+            <selection id="s7" name="Lucky Charm" entryId="g-enh::enh-charm" number="1" type="upgrade"/>
+          </selections>
+          <costs><cost name="pts" typeId="pts-id" value="165.0"/></costs>
+        </selection>
+        <selection id="s8" name="Line Troopers" entryId="el-lt::u-troopers" number="1" type="unit">
+          <selections>
+            <selection id="s9" name="Sergeant" entryId="m-sgt" number="1" type="model"/>
+            <selection id="s10" name="Trooper" entryId="m-trooper" number="7" type="model">
+              <selections><selection id="s11" name="Flamer" entryId="w-flamer" number="1" type="upgrade"/></selections>
+            </selection>
+          </selections>
+        </selection>
+        <selection id="s12" name="Mystery Unit" entryId="nope" number="1" type="unit"/>
+      </selections>
+    </force>
+  </forces>
+</roster>

@@ -11,6 +11,7 @@ import { addFromCollection, collectionPlan } from '../../domain/lists/collection
 import { totalModels } from '../../domain/collection/ownedUnit'
 import { isGone, setFlags } from '../../domain/collection/pipeline'
 import { BuyListSheet } from './BuyListSheet'
+import { listToJson, listToText } from '../../domain/lists/io'
 import { evalLimit } from '../../domain/lists/conditions'
 import { addUnit, battleSizes, checkList, legalUnits, listCounter } from '../../domain/lists/rules'
 import type { ArmyList, ListEntry, ListStatus } from '../../domain/lists/types'
@@ -136,6 +137,7 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
         <option value="planned">Planned</option>
         <option value="playable">Playable</option>
       </select>
+      <ExportMenu list={list} cat={cat} />
       <button className="btn btn-danger ml-auto" onClick={onDelete}>Delete list</button>
     </header>
   )
@@ -573,5 +575,42 @@ function CollectionPanel({ own }: { own: ReturnType<typeof listOwnership> }) {
         </div>
       )}
     </section>
+  )
+}
+
+function download(name: string, text: string, type: string) {
+  const url = URL.createObjectURL(new Blob([text], { type }))
+  const a = document.createElement('a')
+  a.href = url
+  a.download = name
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+/** Export as text (copy or .txt) or as a MiniTracker .json file. */
+function ExportMenu({ list, cat }: { list: ArmyList; cat?: Catalogue }) {
+  const [msg, setMsg] = useState('')
+  const label = EDITIONS.find((e) => e.key === list.edition)?.label ?? list.edition
+  const file = list.name.replace(/[^\w\- ]+/g, '').trim() || 'list'
+  return (
+    <details className="relative">
+      <summary className="btn list-none">⬇ Export</summary>
+      <div className="panel absolute right-0 z-10 mt-1 grid w-48 gap-1 p-2">
+        <button
+          className="btn text-left text-sm"
+          onClick={() =>
+            navigator.clipboard
+              .writeText(listToText(list, cat, label))
+              .then(() => setMsg('Copied'))
+              .catch(() => setMsg('Copy failed'))
+          }
+        >
+          📋 Copy list as text
+        </button>
+        <button className="btn text-left text-sm" onClick={() => download(`${file}.txt`, listToText(list, cat, label), 'text/plain')}>📄 Text file (.txt)</button>
+        <button className="btn text-left text-sm" onClick={() => download(`${file}.json`, listToJson(list), 'application/json')}>🗂 MiniTracker file (.json)</button>
+        {msg && <span className="text-xs text-muted" role="status">{msg}</span>}
+      </div>
+    </details>
   )
 }

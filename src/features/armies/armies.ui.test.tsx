@@ -195,12 +195,51 @@ describe('Armies', () => {
     const mine = screen.getByRole('region', { name: 'From my collection' })
     expect(mine).toHaveTextContent('1 model not painted yet')
     await user.click(within(mine).getByRole('button', { name: 'Next up: My walker' }))
-    expect(within(mine).getByRole('button', { name: 'Next up: My walker' })).toHaveAttribute('aria-pressed', 'true')
+    await vi.waitFor(() => expect(within(mine).getByRole('button', { name: 'Next up: My walker' })).toHaveAttribute('aria-pressed', 'true'))
     expect((await appDb.units.toArray()).find((u) => u.customName === 'My walker')!.nextUp).toBe(true)
 
     // "Add all my units" skips what is already in.
     await user.click(screen.getByRole('button', { name: '⤵ Add all my units' }))
     expect(screen.getAllByTestId('entry')).toHaveLength(2)
+  })
+
+  it('imports a .rosz file and pasted text, and exports text and JSON', async () => {
+    const user = await start()
+    const ros = (import.meta.glob('../../data/lists/fixtures/walkers.ros', { query: '?raw', import: 'default', eager: true }) as Record<string, string>)['../../data/lists/fixtures/walkers.ros']
+    const { strToU8, zipSync } = await import('fflate')
+    await user.click(screen.getByRole('button', { name: '⬆ Import' }))
+    await user.upload(screen.getByLabelText('List file'), new File([zipSync({ 'w.ros': strToU8(ros) })], 'walkers.rosz'))
+    const result = await screen.findByRole('region', { name: 'Import result' })
+    expect(result).toHaveTextContent('Imported “Walker Strike” with 2 units')
+    expect(result).toHaveTextContent('Not in the catalogue: Mystery Unit')
+    await user.click(within(result).getByRole('button', { name: 'Open list' }))
+    expect(await screen.findAllByTestId('entry')).toHaveLength(2)
+
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    await user.click(screen.getByText('⬇ Export'))
+    await user.click(screen.getByRole('button', { name: '📋 Copy list as text' }))
+    expect(writeText.mock.calls[0][0]).toContain('Detachment: Line Doctrine')
+    const created: Blob[] = []
+    URL.createObjectURL = vi.fn((b: Blob) => (created.push(b), 'blob:x'))
+    URL.revokeObjectURL = vi.fn()
+    await user.click(screen.getByRole('button', { name: '🗂 MiniTracker file (.json)' }))
+    expect(JSON.parse(await created[0].text())).toMatchObject({ format: 'minitracker-list', list: { name: 'Walker Strike' } })
+    await user.click(screen.getByRole('button', { name: '📄 Text file (.txt)' }))
+    expect(await created[1].text()).toContain('Big Walker')
+
+    // Pasted text with nothing to warn about opens the new list directly.
+    await user.click(screen.getByRole('button', { name: '← Armies' }))
+    await user.click(screen.getByRole('button', { name: '⬆ Import' }))
+    await user.type(screen.getByRole('textbox'), 'Pasted (165 points){enter}Testers{enter}Strike Force{enter}Big Walker (150 points){enter}')
+    await user.click(screen.getByRole('button', { name: 'Import text' }))
+    expect(await screen.findByLabelText('List name')).toHaveValue('Pasted')
+
+    // A bad file shows an error.
+    await user.click(screen.getByRole('button', { name: '← Armies' }))
+    await user.click(screen.getByRole('button', { name: '⬆ Import' }))
+    await user.upload(screen.getByLabelText('List file'), new File(['{}'], 'x.json'))
+    expect(await screen.findByRole('alert')).toHaveTextContent('not a MiniTracker list')
   })
 
   it('asks to download again when the catalogue has no rule data', async () => {
