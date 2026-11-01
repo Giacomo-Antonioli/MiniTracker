@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie'
+import type { ArmyList } from '../domain/lists/types'
 import type { Catalogue } from '../domain/catalogue/types'
 import type { OwnedUnit, StatusEvent } from '../domain/collection/types'
 import type { PaintDef, PaintStock } from '../domain/paints/types'
@@ -11,7 +12,7 @@ export interface SettingRow {
 }
 
 /** Bump together with a new `version(n)` block and a test in migrations.test.ts. */
-export const DB_VERSION = 6
+export const DB_VERSION = 7
 
 export class MiniTrackerDb extends Dexie {
   units!: Table<OwnedUnit, string>
@@ -27,6 +28,8 @@ export class MiniTrackerDb extends Dexie {
   photos!: Table<Photo, string>
   photoFiles!: Table<PhotoFiles, string>
   schemes!: Table<PaintScheme, string>
+  /** Army lists (#51). */
+  lists!: Table<ArmyList, string>
 
   constructor(name = 'minitracker') {
     super(name)
@@ -46,5 +49,7 @@ export class MiniTrackerDb extends Dexie {
     this.version(5).stores({ schemes: 'id, origin, factionName, basedOn, stage' })
     // v6: photos can belong to schemes (#27).
     this.version(6).stores({ photos: 'id, unitId, schemeId, &fileName, createdAt' })
+    // v7: army lists (#51).
+    this.version(7).stores({ lists: 'id, factionId, edition, updatedAt' })
   }
 }

@@ -1,3 +1,5 @@
+import { validateList } from '../../domain/lists/list'
+import type { ArmyList } from '../../domain/lists/types'
 import { validateScheme } from '../../domain/schemes/scheme'
 import type { PaintScheme } from '../../domain/schemes/types'
 import type { Photo, PhotoFiles } from '../../domain/photos/types'
@@ -29,8 +31,18 @@ export class DexieUnitRepository implements UnitRepository {
   }
 
   async delete(id: string) {
-    await this.db.transaction('rw', [this.db.units, this.db.statusEvents, this.db.photos, this.db.photoFiles], async () => {
+    await this.db.transaction('rw', [this.db.units, this.db.statusEvents, this.db.photos, this.db.photoFiles, this.db.lists], async () => {
       const photoIds = (await this.db.photos.where('unitId').equals(id).primaryKeys()) as string[]
+      // Lists keep the entry; it is matched by datasheet from now on.
+      await this.db.lists
+        .filter((l) => l.entries.some((e) => e.ownedUnitId === id))
+        .modify((l) => {
+          l.entries = l.entries.map((e) => {
+            if (e.ownedUnitId !== id) return e
+            const { ownedUnitId: _, ...rest } = e
+            return rest
+          })
+        })
       await this.db.photoFiles.bulkDelete(photoIds)
       await this.db.photos.bulkDelete(photoIds)
       await this.db.statusEvents.where('unitId').equals(id).delete()
@@ -248,5 +260,30 @@ export class DexieSchemeRepository {
         delete u.schemeId
       })
     })
+  }
+}
+
+export class DexieListRepository {
+  private db: MiniTrackerDb
+  constructor(db: MiniTrackerDb) {
+    this.db = db
+  }
+
+  async get(id: string): Promise<ArmyList | undefined> {
+    return this.db.lists.get(id)
+  }
+
+  /** Most recently changed first. */
+  async list(): Promise<ArmyList[]> {
+    return (await this.db.lists.toArray()).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt) || a.name.localeCompare(b.name))
+  }
+
+  async save(l: ArmyList): Promise<void> {
+    validateList(l)
+    await this.db.lists.put(l)
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.db.lists.delete(id)
   }
 }

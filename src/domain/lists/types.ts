@@ -1,0 +1,39 @@
+/** Catalogue edition a list was built for (matches EDITIONS keys in data/catalogue/fetch.ts). */
+export type EditionKey = '11e' | '10e'
+
+export type ListStatus = 'planned' | 'playable'
+
+/** One unit in an army list. */
+export interface ListEntry {
+  id: string
+  datasheetId: string
+  /** Number of models; sets the points step. */
+  models: number
+  /** Chosen wargear options. */
+  wargear: string[]
+  /** Enhancement given to this unit (#54). */
+  enhancementId?: string
+  warlord?: boolean
+  /** Optional link to one unit of the collection; otherwise matched by datasheet. */
+  ownedUnitId?: string
+  /** Id of the entry this leader is attached to. */
+  attachedTo?: string
+}
+
+export interface ArmyList {
+  id: string
+  name: string
+  edition: EditionKey
+  factionId: string
+  /** BSData battle size entry, e.g. Combat Patrol … Onslaught. */
+  battleSize: string
+  /** Set from the battle size, editable by the user. */
+  pointsLimit: number
+  /** Detachments come in #54. */
+  detachmentId?: string
+  status: ListStatus
+  entries: ListEntry[]
+  notes: string
+  createdAt: string
+  updatedAt: string
+}
