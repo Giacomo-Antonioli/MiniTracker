@@ -22,6 +22,41 @@ export interface Link {
   kind: 'build' | 'paint' | 'lore' | 'other'
 }
 
+/** Overall state of a unit, separate from its painting stage. */
+export type Lifecycle = 'active' | 'on-hold' | 'sold' | 'traded' | 'gifted' | 'lost'
+
+/** Generic pointer to an outside resource; `kind` is open so new integrations need no schema change. */
+export interface ExternalRef {
+  kind: string
+  uri: string
+  label?: string
+}
+
+export interface Stage {
+  id: StageId
+  name: string
+}
+
+/** One global, user-editable list of stages, in order. */
+export interface Pipeline {
+  stages: Stage[]
+}
+
+/** One step in a unit's painting history. */
+export interface StatusEvent {
+  id: string
+  unitId: string
+  groupId: string
+  from: StageId
+  to: StageId
+  count: number
+  /** ISO date or date-time; defaults to now, user-editable. */
+  date: string
+  direction: 'forward' | 'backward'
+  photoId?: string
+  note: string
+}
+
 export interface OwnedUnit {
   id: string
   /** Own name, kept even if the catalogue entry changes or disappears. */
@@ -35,6 +70,11 @@ export interface OwnedUnit {
   notes: string
   photoIds: string[]
   tags: string[]
+  lifecycle: Lifecycle
+  favourite: boolean
+  nextUp: boolean
+  /** Links to things outside the app, e.g. a digital twin or a 3D model file. */
+  externalRefs: ExternalRef[]
   createdAt: string
   updatedAt: string
 }

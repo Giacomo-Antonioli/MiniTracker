@@ -5,6 +5,10 @@ updates:
     schedule: { interval: weekly }
     groups:
       dev-deps: { dependency-type: development }
+    ignore:
+      # Match the Node version we run on (24); bump together with CI's node-version.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: monthly }
