@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-11-02
+
 ### Added
 - Colour schemes for army lists: an army scheme in the builder header and, per unit, a scheme in its details (▸). A unit without a choice uses the scheme on your model, then a version of the army scheme made for its unit type, then the army scheme, then the faction default. "Use these schemes on my models" applies them to linked models (asks before changing a model that has another scheme). Your schemes and the bundled library are offered (#83).
 - PDF asks for the army scheme and, optionally, a scheme per unit; it lists each scheme with its units (to buy / to paint / painted ✓) and its paints, ticked when you have them. Buy-list paints now come from every unit in the list, owned or not (#83).
@@ -101,7 +103,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.4.2
 [0.4.1]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.4.1
 [0.4.0]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.4.0
 [0.3.0]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.3.0
