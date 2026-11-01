@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-02
+
 ### Added
 - Buy list includes the paints your list's units need for their schemes and you don't have (no pot, or only wishlist / ordered / empty), on screen, in the text copy and in the PDF (#73).
 
@@ -95,7 +97,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.4.1
 [0.4.0]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.4.0
 [0.3.0]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.3.0
 [0.2.0]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.2.0
