@@ -4,6 +4,10 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-02
+
+Paints, schemes, photos and rules.
+
 ### Changed
 - Settings is now one page: Appearance (theme), Pipelines, Catalogue data and Backup; theme moved there from the sidebar (#33).
 
@@ -66,6 +70,7 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.3.0
 [0.2.0]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.1.0
