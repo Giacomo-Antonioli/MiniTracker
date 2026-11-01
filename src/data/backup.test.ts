@@ -22,6 +22,8 @@ async function seed(target: MiniTrackerDb) {
   const { unit, event } = moveModels(u, u.groups[0].id, 2, 'primed', DEFAULT_PIPELINE, ctx, { note: 'hi' })
   await new DexieUnitRepository(target).recordMove(unit, event)
   await target.settings.put({ key: 'another', value: 1 })
+  await target.paintStock.put({ paintId: 'c/nuln', stage: 'in-use', quantity: 2, favourite: true, notes: '', updatedAt: 't' })
+  await target.customPaints.put({ id: 'custom/1', brand: 'GSW', name: 'Rocket', hex: '#00ff00', custom: true })
   await new DexieSettingsRepository(target).savePipeline(addStage(DEFAULT_PIPELINE, { id: 'washed', name: 'Washed' }))
 }
 
@@ -45,6 +47,19 @@ describe('backup', () => {
     const after = await exportBackup(other, 'x')
     expect(after).toEqual(before)
     await other.delete()
+  })
+
+  it('includes paint stock and custom paints', async () => {
+    await seed(db)
+    const b = await exportBackup(db, 'x')
+    expect(b.data.paintStock).toHaveLength(1)
+    expect(b.data.customPaints).toHaveLength(1)
+  })
+
+  it('still reads v1 backups (no paint data)', () => {
+    const v1 = { format: BACKUP_FORMAT, version: 1, exportedAt: 'x', data: { units: [], statusEvents: [], settings: [] } }
+    expect(parseBackup(JSON.stringify(v1)).data).toMatchObject({ paintStock: [], customPaints: [] })
+    expect(() => parseBackup(JSON.stringify({ ...v1, data: { ...v1.data, paintStock: 'x' } }))).toThrow(/damaged/)
   })
 
   it('rejects files that are not MiniTracker backups', () => {

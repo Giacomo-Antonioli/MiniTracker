@@ -9,6 +9,10 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ### Added
 - Paint pipeline (wishlist → ordered → sealed → in use → running low → empty) and scheme pipeline (idea → testing → final → archived), editable like the painting pipeline (#33).
+- Paints page: ~1,500 bundled paints (Citadel, Army Painter, Vallejo, AK Interactive; from minipainter, MIT) with swatches, search and filters (brand, type, colour, stage, owned, favourites) (#26).
+- Paint inventory: stage from the paint pipeline, pots with +/−, purchase date, price, shop, location, barcode, rating, favourite, notes; running low / empty shortcuts; stats (owned, pots, value, running low, wishlist, per brand) (#26).
+- Custom paints with colour picker; CSV import/export of the inventory (#26).
+- Backups include the paint inventory and custom paints (backup format v2; v1 files still import) (#26).
 - Backlog banner when no unit catalogue is installed, with a one-click download and progress; can be hidden (#33).
 
 ## [0.2.0] - 2026-11-01

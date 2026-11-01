@@ -3,7 +3,9 @@ import { exportBackup, importBackup, parseBackup } from '../data/backup'
 import { MiniTrackerDb } from '../data/db'
 import { convert } from '../data/catalogue/convert'
 import { BSDATA_40K, downloadDataFiles, latestCommit } from '../data/catalogue/fetch'
-import { DexieCatalogueRepository, DexieEventRepository, DexieSettingsRepository, DexieUnitRepository } from '../data/repositories/dexie'
+import { DexieCatalogueRepository, DexieEventRepository, DexiePaintRepository, DexieSettingsRepository, DexieUnitRepository } from '../data/repositories/dexie'
+import { inventoryFromCsv } from '../domain/paints/csv'
+import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Catalogue } from '../domain/catalogue/types'
 import { DEFAULT_PIPELINES, type PipelineKey } from '../domain/pipelines'
 import { DEFAULT_PIPELINE, moveModels, type MoveOptions } from '../domain/collection/pipeline'
@@ -16,6 +18,13 @@ const unitsRepo = new DexieUnitRepository(db)
 const eventsRepo = new DexieEventRepository(db)
 const settingsRepo = new DexieSettingsRepository(db)
 const catalogueRepo = new DexieCatalogueRepository(db)
+const paintRepo = new DexiePaintRepository(db)
+
+/** The bundled paint list is ~200 KB, so it is loaded only when needed. */
+async function loadSeedPaints(): Promise<PaintDef[]> {
+  const mod = await import('../data/paints/seed.json')
+  return (mod.default as { paints: PaintDef[] }).paints
+}
 
 export interface CatalogueJob {
   phase: 'idle' | 'checking' | 'downloading' | 'converting'
@@ -51,6 +60,16 @@ interface State {
   savePipelineFor(key: PipelineKey, p: Pipeline): Promise<void>
   theme: Theme
   setTheme(theme: Theme): void
+  /** Bundled + custom paints; empty until loadPaints() ran. */
+  paints: PaintDef[]
+  paintStock: Map<string, PaintStock>
+  loadPaints(): Promise<void>
+  saveStock(s: PaintStock): Promise<void>
+  removeStock(paintId: string): Promise<void>
+  saveCustomPaint(p: PaintDef): Promise<void>
+  deleteCustomPaint(id: string): Promise<void>
+  /** Import an inventory CSV; returns what happened. */
+  importPaintCsv(text: string): Promise<{ imported: number; created: number; skipped: { line: number; reason: string }[] }>
   load(): Promise<void>
   /** Download the latest BSData files and convert them on this device. */
   downloadCatalogue(): Promise<void>
@@ -79,6 +98,48 @@ export const useStore = create<State>((set, get) => ({
   catalogueJob: { phase: 'idle', done: 0, total: 0 },
   pipelines: DEFAULT_PIPELINES,
   theme: readTheme(),
+  paints: [],
+  paintStock: new Map(),
+
+  async loadPaints() {
+    const [seed, custom] = await Promise.all([loadSeedPaints(), paintRepo.listCustom()])
+    const paints = [...seed, ...custom].sort((a, b) => a.brand.localeCompare(b.brand) || a.name.localeCompare(b.name))
+    set({ paints })
+  },
+
+  async saveStock(stock) {
+    await paintRepo.saveStock(stock)
+    set({ paintStock: new Map(get().paintStock).set(stock.paintId, stock) })
+  },
+
+  async removeStock(paintId) {
+    await paintRepo.deleteStock(paintId)
+    const m = new Map(get().paintStock)
+    m.delete(paintId)
+    set({ paintStock: m })
+  },
+
+  async saveCustomPaint(paint) {
+    await paintRepo.saveCustom(paint)
+    const others = get().paints.filter((p) => p.id !== paint.id)
+    set({ paints: [...others, paint].sort((a, b) => a.brand.localeCompare(b.brand) || a.name.localeCompare(b.name)) })
+  },
+
+  async importPaintCsv(text) {
+    if (!get().paints.length) await get().loadPaints()
+    const stages = get().pipelines.paint.stages
+    const r = inventoryFromCsv(text, get().paints, stages.some((x) => x.id === 'sealed') ? 'sealed' : stages[0].id, ctx())
+    for (const p of r.newPaints) await get().saveCustomPaint(p)
+    for (const st of r.stocks) await get().saveStock(st)
+    return { imported: r.stocks.length, created: r.newPaints.length, skipped: r.skipped }
+  },
+
+  async deleteCustomPaint(id) {
+    await paintRepo.deleteCustom(id)
+    const m = new Map(get().paintStock)
+    m.delete(id)
+    set({ paints: get().paints.filter((p) => p.id !== id), paintStock: m })
+  },
 
   setTheme(theme) {
     try {
@@ -90,14 +151,23 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogue] = await Promise.all([
+    const [units, painting, paint, scheme, catalogue, stock] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
       settingsRepo.getPipeline('scheme'),
       catalogueRepo.current(),
+      paintRepo.listStock(),
     ])
-    set({ units, pipeline: painting, pipelines: { painting, paint, scheme }, catalogue: catalogue ?? null, ready: true })
+    set({
+      units,
+      pipeline: painting,
+      pipelines: { painting, paint, scheme },
+      catalogue: catalogue ?? null,
+      paintStock: new Map(stock.map((s) => [s.paintId, s])),
+      ready: true,
+    })
+    if (get().paints.length) await get().loadPaints()
   },
 
   async savePipelineFor(key, p) {
