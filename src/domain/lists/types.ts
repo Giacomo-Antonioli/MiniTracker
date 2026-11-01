@@ -16,6 +16,8 @@ export interface ListEntry {
   warlord?: boolean
   /** Optional link to one unit of the collection; otherwise matched by datasheet. */
   ownedUnitId?: string
+  /** Colour scheme for this unit in this list (overrides the army scheme). */
+  schemeId?: string
   /** Id of the entry this leader is attached to. */
   attachedTo?: string
 }
@@ -32,6 +34,8 @@ export interface ArmyList {
   pointsLimit: number
   /** Chosen detachments (10th edition: one; 11th: several, within the detachment points). */
   detachmentIds?: string[]
+  /** Colour scheme for the whole army. */
+  schemeId?: string
   status: ListStatus
   entries: ListEntry[]
   notes: string

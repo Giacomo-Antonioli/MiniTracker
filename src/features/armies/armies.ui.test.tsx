@@ -80,6 +80,7 @@ describe('Armies', () => {
     const print = vi.fn()
     window.print = print
     await user.click(within(buy).getByRole('button', { name: '📄 PDF' }))
+    await user.click(within(screen.getByRole('dialog', { name: 'Make PDF' })).getByRole('button', { name: '📄 Make PDF' }))
     const sheet = screen.getByLabelText('Buy list sheet')
     expect(sheet).toHaveTextContent('Buy list – Walkers')
     expect(sheet).toHaveTextContent('Testers · 11th edition · Incursion')
@@ -263,8 +264,43 @@ describe('Armies', () => {
     expect(writeText).toHaveBeenCalledWith('Buy list – Painted\n\nPaints (1):\n- AK Interactive 3B Au/Zb Au (Sept)')
     window.print = vi.fn()
     await user.click(within(buy).getByRole('button', { name: '📄 PDF' }))
-    expect(screen.getByLabelText('Buy list sheet')).toHaveTextContent('Paints☐AK Interactive 3B Au/Zb AuSept')
+    const dialog = screen.getByRole('dialog', { name: 'Make PDF' })
+    await user.click(within(dialog).getByLabelText('Choose a scheme per unit'))
+    expect(within(dialog).getByLabelText('Big Walker scheme')).toHaveDisplayValue('Auto: Sept (from my model)')
+    await user.click(within(dialog).getByRole('button', { name: '📄 Make PDF' }))
+    const sheet = screen.getByLabelText('Buy list sheet')
+    expect(sheet).toHaveTextContent('Scheme: SeptBig Walker (to paint)')
+    expect(sheet).toHaveTextContent('☐AK Interactive 3B Au/Zb Aubuy')
     expect(within(screen.getByRole('region', { name: 'From my collection' })).getByText('AK Interactive 3B Au/Zb Au')).toBeInTheDocument()
+  })
+
+  it('chooses an army scheme, shows it per unit, and applies it to my models', async () => {
+    const user = await start()
+    const base = { description: '', stage: 'final', tags: [], tips: '', tutorials: [], createdAt: 't', updatedAt: 't', sections: [] }
+    await appDb.schemes.bulkPut([
+      { ...base, id: 'army', name: 'Blue Army', origin: 'personal', factionName: 'Testers' },
+      { ...base, id: 'walkers', name: 'Walker Red', origin: 'community', factionName: 'Testers', appliesTo: ['Walker'] },
+      { ...base, id: 'other', name: 'Other Faction', origin: 'personal', factionName: 'Someone' },
+    ] as never)
+    await useStore.getState().load()
+    await user.click(screen.getByRole('button', { name: '+ New list' }))
+    await user.type(screen.getByLabelText('Name'), 'Blue')
+    await user.selectOptions(screen.getByLabelText('Faction'), 'Testers')
+    await user.click(screen.getByLabelText('Start with all the units I own'))
+    await user.click(screen.getByRole('button', { name: 'Create' }))
+
+    const army = await screen.findByLabelText('Army scheme')
+    expect(within(army).getAllByRole('option').map((o) => o.textContent)).toEqual(['Army scheme: none', '🎨 Blue Army'])
+    await user.selectOptions(army, '🎨 Blue Army')
+    await user.click(screen.getByRole('button', { name: 'Details: Big Walker' }))
+    const pick = screen.getByLabelText('Big Walker scheme')
+    expect(pick).toHaveDisplayValue('Auto: Blue Army (army scheme)')
+    expect(within(pick).getAllByRole('option').map((o) => o.textContent)).toEqual(['Auto: Blue Army (army scheme)', 'Walker Red', 'Blue Army'])
+
+    await user.click(screen.getByRole('button', { name: '🎨 Use these schemes on my models (1)' }))
+    await vi.waitFor(async () => expect((await appDb.units.toArray())[0].schemeId).toBe('army'))
+    expect(await screen.findByLabelText('Big Walker scheme')).toHaveDisplayValue('Auto: Blue Army (from my model)')
+    expect((await appDb.lists.toArray())[0].schemeId).toBe('army')
   })
 
   it('asks to download again when the catalogue has no rule data', async () => {

@@ -8,6 +8,7 @@ import { listOwnership } from '../../domain/lists/ownership'
 import { listPoints } from '../../domain/lists/points'
 import { buyList, buyListText, type BuyPaint } from '../../domain/lists/buy'
 import { addFromCollection, collectionPlan } from '../../domain/lists/collection'
+import { armySchemeChoices, paintPlan, resolveScheme, schemesToApply, unitSchemeChoices, type SchemeContext, type SchemeSource } from '../../domain/lists/schemes'
 import { totalModels } from '../../domain/collection/ownedUnit'
 import { isGone, setFlags } from '../../domain/collection/pipeline'
 import { BuyListSheet } from './BuyListSheet'
@@ -137,6 +138,7 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
         <option value="planned">Planned</option>
         <option value="playable">Playable</option>
       </select>
+      {cat && list.factionId && <ArmySchemeSelect list={list} factionName={cat.factions.find((f) => f.id === list.factionId)?.name} onChange={(schemeId) => set({ schemeId })} />}
       <ExportMenu list={list} cat={cat} />
       <button className="btn btn-danger ml-auto" onClick={onDelete}>Delete list</button>
     </header>
@@ -144,7 +146,12 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
 }
 
 function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave: (l: ArmyList) => void }) {
-  const { units, pipeline, schemes, paintStock, schemeDefaults, paints, loadPaints } = useStore()
+  const { units, pipeline, schemes: mine, library, loadLibrary, paintStock, schemeDefaults, paints, loadPaints } = useStore()
+  useEffect(() => {
+    void loadLibrary()
+  }, [loadLibrary])
+  // Your schemes plus the bundled library, as on the unit page.
+  const schemes = useMemo(() => [...mine, ...library], [mine, library])
   const [highlight, setHighlight] = useState<string[]>([])
   const [choose, setChoose] = useState<Datasheet | null>(null)
   const [dropping, setDropping] = useState(false)
@@ -163,10 +170,14 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
     if (!paints.length) void loadPaints()
   }, [paints.length, loadPaints])
   const plan = useMemo(() => collectionPlan(own, units, schemes, paintStock, schemeDefaults), [own, units, schemes, paintStock, schemeDefaults])
-  const missingPaints = useMemo((): BuyPaint[] => {
-    const names = new Map(paints.map((x) => [x.id, `${x.brand} ${x.name}`]))
-    return plan.missingPaints.map((m) => ({ name: names.get(m.paintId) ?? m.paintId, schemes: m.schemes }))
-  }, [plan, paints])
+  const factionName = cat.factions.find((f) => f.id === list.factionId)?.name
+  const schemeCtx = useMemo((): SchemeContext => ({ schemes, sheets, units, own, factionName, defaults: schemeDefaults }), [schemes, sheets, units, own, factionName, schemeDefaults])
+  const pplan = useMemo(() => paintPlan(list, schemeCtx, paintStock), [list, schemeCtx, paintStock])
+  const paintName = useMemo(() => new Map(paints.map((x) => [x.id, `${x.brand} ${x.name}`])), [paints])
+  // Paints come from every unit's scheme, owned or not.
+  const missingPaints = useMemo((): BuyPaint[] => pplan.missing.map((m) => ({ name: paintName.get(m.paintId) ?? m.paintId, schemes: m.schemes })), [pplan, paintName])
+  const [openRows, setOpenRows] = useState<Set<string>>(new Set())
+  const toggleRow = (id: string) => setOpenRows((cur) => { const next = new Set(cur); if (next.has(id)) next.delete(id); else next.add(id); return next })
   const linkedElsewhere = (entryId: string) => new Set(list.entries.filter((x) => x.id !== entryId && x.ownedUnitId).map((x) => x.ownedUnitId))
   const issues = useMemo(() => (cat.muster ? checkList(list, cat) : []), [list, cat])
   const flagged = new Set(issues.flatMap((i) => i.entryIds))
@@ -222,6 +233,9 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 data-testid="entry"
                 className={`flex flex-wrap items-center gap-2 rounded px-2 py-1 ${highlight.includes(e.id) ? 'bg-accent/20' : flagged.has(e.id) ? 'bg-danger/10' : ''}`}
               >
+                <button className="w-5 text-muted" aria-label={`Details: ${d?.name ?? 'unit'}`} aria-expanded={openRows.has(e.id)} onClick={() => toggleRow(e.id)}>
+                  {openRows.has(e.id) ? '▾' : '▸'}
+                </button>
                 <button className={`w-6 ${e.warlord ? 'text-accent' : 'text-muted/50'}`} aria-label={`Warlord: ${d?.name ?? 'unit'}`} aria-pressed={!!e.warlord} onClick={() => setWarlord(e.id)} title="Warlord">
                   ★
                 </button>
@@ -282,6 +296,14 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 <span className="w-14 text-xs text-muted" title={`${o.painted} of ${o.have} owned models painted`}>{o.have > 0 ? `🎨 ${o.painted}/${o.have}` : ''}</span>
                 <span className="w-12 text-right text-sm">{pts ?? '—'}</span>
                 <button className="btn px-2 py-0.5" aria-label={`Remove ${d?.name ?? 'unit'}`} onClick={() => onSave(removeEntry(list, e.id, ctx()))}>✕</button>
+                {openRows.has(e.id) && (
+                  <div className="flex basis-full flex-wrap items-center gap-2 pl-11 text-xs" aria-label={`${d?.name ?? 'Unit'} details`}>
+                    <label className="flex items-center gap-1">
+                      Scheme
+                      <UnitSchemeSelect list={list} entry={e} ctx={schemeCtx} onChange={(schemeId) => edit(e.id, { schemeId })} />
+                    </label>
+                  </div>
+                )}
               </div>
             )
           })}
@@ -301,8 +323,8 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 </button>
               ))
             )}
-        <CollectionPanel own={own} plan={plan} missingPaints={missingPaints} />
-        <BuyPanel list={list} rows={buyList(list, sheets, own, points)} paints={missingPaints} subtitle={[cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name].filter(Boolean).join(' · ')} />
+        <CollectionPanel own={own} plan={plan} missingPaints={missingPaints} toApply={schemesToApply(list, schemeCtx)} />
+        <BuyPanel list={list} rows={buyList(list, sheets, own, points)} paints={missingPaints} schemeCtx={schemeCtx} paintName={paintName} onSave={onSave} subtitle={[cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name].filter(Boolean).join(' · ')} />
           </section>
         )}
       </div>
@@ -502,9 +524,11 @@ function DetachmentBar({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; 
   )
 }
 
-function BuyPanel({ list, rows: b, paints, subtitle }: { list: ArmyList; rows: ReturnType<typeof buyList>; paints: BuyPaint[]; subtitle: string }) {
+function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintName, onSave }: { list: ArmyList; rows: ReturnType<typeof buyList>; paints: BuyPaint[]; subtitle: string; schemeCtx: SchemeContext; paintName: Map<string, string>; onSave: (l: ArmyList) => void }) {
+  const { paintStock } = useStore()
   const [copied, setCopied] = useState('')
-  const [printing, setPrinting] = useState(false)
+  const [asking, setAsking] = useState(false)
+  const [printing, setPrinting] = useState<ArmyList | null>(null)
   if (list.entries.length === 0) return null
   return (
     <section className="panel grid gap-2 p-3" aria-label="Buy list">
@@ -526,14 +550,33 @@ function BuyPanel({ list, rows: b, paints, subtitle }: { list: ArmyList; rows: R
             📋 Copy as text
           </button>
         )}
-        {(b.rows.length > 0 || paints.length > 0) && (
-          <button className="btn px-2 py-0.5 text-sm" title="Opens the print dialog: choose “Save as PDF”" onClick={() => setPrinting(true)}>
-            📄 PDF
-          </button>
+        <button className="btn px-2 py-0.5 text-sm" title="Asks for colour schemes, then opens the print dialog: choose “Save as PDF”" onClick={() => setAsking(true)}>
+          📄 PDF
+        </button>
+        {printing && (
+          <BuyListSheet
+            list={printing}
+            buy={b}
+            plan={paintPlan(printing, schemeCtx, paintStock)}
+            paintName={paintName}
+            subtitle={subtitle}
+            onDone={() => setPrinting(null)}
+          />
         )}
-        {printing && <BuyListSheet list={list} buy={b} paints={paints} subtitle={subtitle} onDone={() => setPrinting(false)} />}
         {copied && <span className="text-xs text-muted" role="status">{copied}</span>}
       </div>
+      {asking && (
+        <PdfDialog
+          list={list}
+          c={schemeCtx}
+          onCancel={() => setAsking(false)}
+          onMake={(l) => {
+            setAsking(false)
+            onSave({ ...l, updatedAt: ctx().now })
+            setPrinting(l)
+          }}
+        />
+      )}
       {b.rows.length > 0 && (
         <table className="text-sm">
           <thead className="text-left text-xs text-muted">
@@ -570,9 +613,14 @@ function BuyPanel({ list, rows: b, paints, subtitle }: { list: ArmyList; rows: R
 }
 
 /** What the collection still needs for this list: models to paint (with a "next up" shortcut) and missing paints. */
-function CollectionPanel({ own, plan, missingPaints }: { own: ReturnType<typeof listOwnership>; plan: ReturnType<typeof collectionPlan>; missingPaints: BuyPaint[] }) {
+function CollectionPanel({ own, plan, missingPaints, toApply }: { own: ReturnType<typeof listOwnership>; plan: ReturnType<typeof collectionPlan>; missingPaints: BuyPaint[]; toApply: ReturnType<typeof schemesToApply> }) {
   const { saveUnit } = useStore()
-  if (!plan.toPaint.length && !plan.missingPaints.length) return null
+  const apply = async () => {
+    let changes = toApply.set
+    if (toApply.change.length && confirm(`${toApply.change.length} of your models already have a different scheme. Change them too?\n\n${toApply.change.map((x) => x.unit.customName).join(', ')}`)) changes = [...changes, ...toApply.change]
+    for (const { unit, schemeId } of changes) await saveUnit({ ...unit, schemeId, updatedAt: ctx().now })
+  }
+  if (!plan.toPaint.length && !missingPaints.length && !toApply.set.length && !toApply.change.length) return null
   return (
     <section className="panel grid gap-2 p-3" aria-label="From my collection">
       <h2 className="font-semibold">From my collection</h2>
@@ -595,9 +643,14 @@ function CollectionPanel({ own, plan, missingPaints }: { own: ReturnType<typeof 
           ))}
         </div>
       )}
-      {plan.missingPaints.length > 0 && (
+      {(toApply.set.length > 0 || toApply.change.length > 0) && (
+        <button className="btn w-fit text-sm" onClick={() => void apply()}>
+          🎨 Use these schemes on my models ({toApply.set.length + toApply.change.length})
+        </button>
+      )}
+      {missingPaints.length > 0 && (
         <div className="grid gap-1 text-sm">
-          <p className="text-muted">Paints missing for their schemes</p>
+          <p className="text-muted">Paints missing for the list's schemes</p>
           <ul className="grid gap-0.5">
             {missingPaints.map((m) => (
               <li key={m.name}>{m.name} <span className="text-xs text-muted">({m.schemes.join(', ')})</span></li>
@@ -643,5 +696,68 @@ function ExportMenu({ list, cat }: { list: ArmyList; cat?: Catalogue }) {
         {msg && <span className="text-xs text-muted" role="status">{msg}</span>}
       </div>
     </details>
+  )
+}
+
+const SOURCE: Record<SchemeSource, string> = { list: 'chosen', model: 'from my model', variant: 'army scheme for this unit type', army: 'army scheme', default: 'faction default', none: '' }
+
+/** Scheme for one list unit: "Auto" shows what it gets without a choice. */
+function UnitSchemeSelect({ list, entry, ctx: c, onChange }: { list: ArmyList; entry: ListEntry; ctx: SchemeContext; onChange: (schemeId: string | undefined) => void }) {
+  const auto = resolveScheme(list, { ...entry, schemeId: undefined }, c)
+  const d = c.sheets.get(entry.datasheetId)
+  return (
+    <select className="input py-0.5 text-xs" aria-label={`${d?.name ?? 'Unit'} scheme`} value={entry.schemeId ?? ''} onChange={(ev) => onChange(ev.target.value || undefined)}>
+      <option value="">{auto.scheme ? `Auto: ${auto.scheme.name} (${SOURCE[auto.source]})` : 'Auto: no scheme'}</option>
+      {unitSchemeChoices(c.schemes, d, c.factionName, entry.schemeId).map((g) => (
+        <optgroup key={g.origin} label={g.origin}>
+          {g.schemes.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </optgroup>
+      ))}
+    </select>
+  )
+}
+
+function ArmySchemeSelect({ list, factionName, onChange, label = 'Army scheme' }: { list: ArmyList; factionName?: string; onChange: (schemeId: string | undefined) => void; label?: string }) {
+  const { schemes: mine, library, schemeDefaults } = useStore()
+  const schemes = [...mine, ...library]
+  const def = factionName ? schemes.find((s) => s.id === schemeDefaults[factionName]) : undefined
+  return (
+    <select className="input" aria-label={label} value={list.schemeId ?? ''} onChange={(e) => onChange(e.target.value || undefined)}>
+      <option value="">{def ? `Army scheme: faction default (${def.name})` : 'Army scheme: none'}</option>
+      {armySchemeChoices(schemes, factionName, list.schemeId).map((g) => (
+        <optgroup key={g.origin} label={g.origin}>
+          {g.schemes.map((s) => <option key={s.id} value={s.id}>🎨 {s.name}</option>)}
+        </optgroup>
+      ))}
+    </select>
+  )
+}
+
+/** Asked before making the PDF: army scheme, and optionally a scheme per unit. Choices are saved to the list. */
+function PdfDialog({ list, c, onCancel, onMake }: { list: ArmyList; c: SchemeContext; onCancel: () => void; onMake: (l: ArmyList) => void }) {
+  const [draft, setDraft] = useState(list)
+  const [perUnit, setPerUnit] = useState(list.entries.some((e) => e.schemeId))
+  return (
+    <div role="dialog" aria-label="Make PDF" className="panel grid gap-3 border-accent/60 p-3">
+      <h3 className="font-semibold">Colour schemes for the PDF</h3>
+      <ArmySchemeSelect list={draft} factionName={c.factionName} onChange={(schemeId) => setDraft({ ...draft, schemeId })} />
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={perUnit} onChange={(e) => setPerUnit(e.target.checked)} /> Choose a scheme per unit
+      </label>
+      {perUnit && (
+        <div className="grid gap-1 text-sm">
+          {draft.entries.map((e) => (
+            <div key={e.id} className="flex items-center gap-2">
+              <span className="min-w-0 flex-1 truncate">{c.sheets.get(e.datasheetId)?.name ?? 'Unknown unit'}</span>
+              <UnitSchemeSelect list={draft} entry={e} ctx={c} onChange={(schemeId) => setDraft({ ...draft, entries: draft.entries.map((x) => (x.id === e.id ? { ...x, schemeId } : x)) })} />
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="flex gap-2">
+        <button className="btn btn-primary" onClick={() => onMake(perUnit ? draft : { ...draft, entries: draft.entries.map((x) => ({ ...x, schemeId: undefined })) })}>📄 Make PDF</button>
+        <button className="btn" onClick={onCancel}>Cancel</button>
+      </div>
+    </div>
   )
 }

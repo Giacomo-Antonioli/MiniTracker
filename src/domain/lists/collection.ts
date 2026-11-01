@@ -8,10 +8,9 @@ import type { PaintScheme } from '../schemes/types'
 import { addEntry } from './list'
 import type { ListOwnership } from './ownership'
 import { legalUnits } from './rules'
+import { HAVE_PAINT } from './schemes'
 import type { ArmyList } from './types'
 
-/** Paint stages that mean "you have a usable pot". */
-const HAVE_PAINT = new Set(['sealed', 'in-use', 'low'])
 
 export interface CollectionPlan {
   /** Units used by the list with models still to paint, most first. */
