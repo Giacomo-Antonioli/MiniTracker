@@ -3,6 +3,7 @@ import type { Catalogue } from '../domain/catalogue/types'
 import type { OwnedUnit, StatusEvent } from '../domain/collection/types'
 import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Photo, PhotoFiles } from '../domain/photos/types'
+import type { PaintScheme } from '../domain/schemes/types'
 
 export interface SettingRow {
   key: string
@@ -10,7 +11,7 @@ export interface SettingRow {
 }
 
 /** Bump together with a new `version(n)` block and a test in migrations.test.ts. */
-export const DB_VERSION = 4
+export const DB_VERSION = 5
 
 export class MiniTrackerDb extends Dexie {
   units!: Table<OwnedUnit, string>
@@ -25,6 +26,7 @@ export class MiniTrackerDb extends Dexie {
   /** Photo metadata; image data is in photoFiles so listing stays fast. */
   photos!: Table<Photo, string>
   photoFiles!: Table<PhotoFiles, string>
+  schemes!: Table<PaintScheme, string>
 
   constructor(name = 'minitracker') {
     super(name)
@@ -40,5 +42,7 @@ export class MiniTrackerDb extends Dexie {
     this.version(3).stores({ paintStock: 'paintId, stage', customPaints: 'id, brand' })
     // v4: photos (#28). File names are unique.
     this.version(4).stores({ photos: 'id, unitId, &fileName, createdAt', photoFiles: 'id' })
+    // v5: paint schemes (#27).
+    this.version(5).stores({ schemes: 'id, origin, factionName, basedOn, stage' })
   }
 }

@@ -73,4 +73,21 @@ describe('schema migrations', () => {
     expect(await db.paintStock.get('c/nuln')).toBeDefined()
     await db.delete()
   })
+
+  it('v4 → v5 adds an empty schemes table and keeps photos', async () => {
+    const name = `mig-${Math.random()}`
+    const v4 = new Dexie(name)
+    v4.version(1).stores({ units: 'id, customName, lifecycle, factionId, updatedAt', statusEvents: 'id, unitId, date', settings: 'key' })
+    v4.version(2).stores({ catalogues: 'gameId' })
+    v4.version(3).stores({ paintStock: 'paintId, stage', customPaints: 'id, brand' })
+    v4.version(4).stores({ photos: 'id, unitId, &fileName, createdAt', photoFiles: 'id' })
+    await v4.table('photos').put({ id: 'p1', unitId: 'u1', fileName: 'a.jpg', createdAt: 't' })
+    v4.close()
+
+    const db = new MiniTrackerDb(name)
+    await db.open()
+    expect(await db.schemes.count()).toBe(0)
+    expect(await db.photos.get('p1')).toBeDefined()
+    await db.delete()
+  })
 })

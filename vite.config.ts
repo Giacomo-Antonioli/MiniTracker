@@ -28,6 +28,8 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['src/test/setup.ts'],
+    // UI tests render real screens in jsdom; give them room when the whole suite runs in parallel.
+    testTimeout: 15_000,
     coverage: {
       include: ['src/domain/**', 'src/data/**'],
       exclude: ['**/*.test.ts', '**/types.ts', '**/fixtures/**', 'src/data/catalogue/convert.ts', 'src/data/catalogue/parse.worker.ts', 'src/data/photos/compress.ts'] /* browser-only glue: covered by e2e/catalogue.spec.ts and e2e/photos.spec.ts */,

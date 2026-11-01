@@ -4,7 +4,9 @@ import { MiniTrackerDb } from '../data/db'
 import { convert } from '../data/catalogue/convert'
 import { BSDATA_40K, downloadDataFiles, latestCommit } from '../data/catalogue/fetch'
 import { extensionOf, makeDisplayCopy } from '../data/photos/compress'
-import { DexieCatalogueRepository, DexieEventRepository, DexiePaintRepository, DexiePhotoRepository, DexieSettingsRepository, DexieUnitRepository } from '../data/repositories/dexie'
+import { DexieCatalogueRepository, DexieEventRepository, DexiePaintRepository, DexiePhotoRepository, DexieSchemeRepository, DexieSettingsRepository, DexieUnitRepository } from '../data/repositories/dexie'
+import { parseSchemeFile } from '../domain/schemes/scheme'
+import type { PaintScheme } from '../domain/schemes/types'
 import { photoFileName } from '../domain/photos/naming'
 import type { Photo, PhotoOwner } from '../domain/photos/types'
 import { inventoryFromCsv } from '../domain/paints/csv'
@@ -23,6 +25,7 @@ const settingsRepo = new DexieSettingsRepository(db)
 const catalogueRepo = new DexieCatalogueRepository(db)
 const paintRepo = new DexiePaintRepository(db)
 const photoRepo = new DexiePhotoRepository(db)
+const schemeRepo = new DexieSchemeRepository(db)
 
 /** The bundled paint list is ~200 KB, so it is loaded only when needed. */
 async function loadSeedPaints(): Promise<PaintDef[]> {
@@ -95,6 +98,14 @@ interface State {
   updatePhoto(photo: Photo): Promise<void>
   deletePhoto(photo: Photo): Promise<void>
   photoUsage(): ReturnType<DexiePhotoRepository['usage']>
+  schemes: PaintScheme[]
+  /** Default scheme per faction name. */
+  schemeDefaults: Record<string, string>
+  saveScheme(s: PaintScheme): Promise<void>
+  deleteScheme(id: string): Promise<void>
+  setDefaultScheme(faction: string, schemeId: string | undefined): Promise<void>
+  /** Import a shared scheme file; returns the new schemes. */
+  importSchemes(text: string): Promise<PaintScheme[]>
   savePipeline(p: Pipeline): Promise<void>
   /** Backup zip; originals included only when asked. */
   exportBackup(includeOriginals: boolean): Promise<Blob>
@@ -166,13 +177,15 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogue, stock] = await Promise.all([
+    const [units, painting, paint, scheme, catalogue, stock, schemes, schemeDefaults] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
       settingsRepo.getPipeline('scheme'),
       catalogueRepo.current(),
       paintRepo.listStock(),
+      schemeRepo.list(),
+      settingsRepo.getValue<Record<string, string>>('schemeDefaults', {}),
     ])
     set({
       units,
@@ -180,6 +193,8 @@ export const useStore = create<State>((set, get) => ({
       pipelines: { painting, paint, scheme },
       catalogue: catalogue ?? null,
       paintStock: new Map(stock.map((s) => [s.paintId, s])),
+      schemes,
+      schemeDefaults,
       ready: true,
     })
     if (get().paints.length) await get().loadPaints()
@@ -316,6 +331,40 @@ export const useStore = create<State>((set, get) => ({
 
   photoUsage() {
     return photoRepo.usage()
+  },
+
+  schemes: [],
+  schemeDefaults: {},
+
+  async saveScheme(scheme) {
+    await schemeRepo.save(scheme)
+    set({ schemes: await schemeRepo.list() })
+  },
+
+  async deleteScheme(id) {
+    await schemeRepo.delete(id)
+    const defaults = Object.fromEntries(Object.entries(get().schemeDefaults).filter(([, v]) => v !== id))
+    await settingsRepo.setValue('schemeDefaults', defaults)
+    set({ schemes: await schemeRepo.list(), units: await unitsRepo.list(), schemeDefaults: defaults })
+  },
+
+  async setDefaultScheme(faction, schemeId) {
+    const defaults = { ...get().schemeDefaults }
+    if (schemeId) defaults[faction] = schemeId
+    else delete defaults[faction]
+    await settingsRepo.setValue('schemeDefaults', defaults)
+    set({ schemeDefaults: defaults })
+  },
+
+  async importSchemes(text) {
+    const { schemes, paints } = parseSchemeFile(text, ctx())
+    if (!get().paints.length) await get().loadPaints()
+    const known = new Set(get().paints.map((p) => p.id))
+    // A friend's custom paints come along so the recipe still shows names and colours.
+    for (const p of paints) if (!known.has(p.id) && p.custom) await get().saveCustomPaint(p)
+    await schemeRepo.saveMany(schemes)
+    set({ schemes: await schemeRepo.list() })
+    return schemes
   },
 
   savePipeline(p) {

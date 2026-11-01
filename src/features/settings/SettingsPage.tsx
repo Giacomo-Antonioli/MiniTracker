@@ -16,7 +16,7 @@ const SECTIONS: { id: SettingsSection; label: string }[] = [
 ]
 
 export function SettingsPage({ section }: { section?: SettingsSection }) {
-  const { theme, setTheme, pipelines, savePipelineFor, units, paintStock } = useStore()
+  const { theme, setTheme, pipelines, savePipelineFor, units, paintStock, schemes } = useStore()
 
   useEffect(() => {
     if (section) document.getElementById(`settings-${section}`)?.scrollIntoView?.({ block: 'start' })
@@ -78,7 +78,7 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
           description="Status of your paint schemes and recipes."
           pipeline={pipelines.scheme}
           defaults={DEFAULT_PIPELINES.scheme}
-          usedBy={() => 0}
+          usedBy={(id) => schemes.filter((s) => s.stage === id).length}
           usedLabel="schemes"
           onSave={(p) => savePipelineFor('scheme', p)}
         />

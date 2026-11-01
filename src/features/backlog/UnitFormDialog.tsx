@@ -37,7 +37,7 @@ export function UnitFormDialog({
   /** Start a new unit from a catalogue datasheet (e.g. "Add to collection"). */
   preset?: { datasheet: Datasheet; factionId?: string }
 }) {
-  const { pipeline, saveUnit, catalogue } = useStore()
+  const { pipeline, saveUnit, catalogue, schemes, schemeDefaults } = useStore()
   const presetFaction = preset && catalogue ? (preset.factionId && preset.datasheet.factionIds.includes(preset.factionId) ? preset.factionId : preset.datasheet.factionIds[0]) : undefined
   const [name, setName] = useState(unit?.customName ?? preset?.datasheet.name ?? '')
   const [faction, setFaction] = useState(unit?.factionName ?? (presetFaction ? catalogue!.factions.find((f) => f.id === presetFaction)?.name ?? '' : ''))
@@ -55,7 +55,11 @@ export function UnitFormDialog({
   const [favourite, setFavourite] = useState(unit?.favourite ?? false)
   const [nextUp, setNextUp] = useState(unit?.nextUp ?? false)
   const [lifecycle, setLifecycle] = useState<Lifecycle>(unit?.lifecycle ?? 'active')
+  const [schemeId, setSchemeId] = useState<string | undefined>(unit?.schemeId)
+  const [schemeTouched, setSchemeTouched] = useState(!!unit)
   const [error, setError] = useState('')
+  // New units get their faction's default scheme until you pick one yourself.
+  const effectiveScheme = schemeTouched ? schemeId : (schemeDefaults[faction.trim()] ?? schemeId)
 
   const datasheet = catalogue?.datasheets.find((d) => d.id === datasheetId)
   const totalModels = groups.reduce((n, g) => n + (Number(g.count) || 0), 0)
@@ -105,6 +109,7 @@ export function UnitFormDialog({
         factionName: faction.trim() || undefined,
         factionId: faction.trim() ? factionId : undefined,
         datasheetId,
+        schemeId: effectiveScheme,
         tutorials: tutorials.filter((t) => t.url.trim()),
         notes,
         tags: split(tags),
@@ -209,6 +214,29 @@ export function UnitFormDialog({
             + Add group
           </button>
         </fieldset>
+
+        <label className="grid gap-1">
+          <span className="text-sm text-muted">Paint scheme</span>
+          <select
+            className="input"
+            value={effectiveScheme ?? ''}
+            onChange={(e) => {
+              setSchemeTouched(true)
+              setSchemeId(e.target.value || undefined)
+            }}
+          >
+            <option value="">None</option>
+            {[...schemes]
+              .sort((a, b) => Number(b.factionName === faction.trim()) - Number(a.factionName === faction.trim()) || a.name.localeCompare(b.name))
+              .map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                  {s.factionName ? ` · ${s.factionName}` : ''}
+                  {schemeDefaults[s.factionName ?? ''] === s.id ? ' ⭐' : ''}
+                </option>
+              ))}
+          </select>
+        </label>
 
         <fieldset className="grid gap-2">
           <legend className="mb-1 text-sm text-muted">Tutorials and guides</legend>

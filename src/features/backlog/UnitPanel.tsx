@@ -7,12 +7,15 @@ import type { ModelGroup, OwnedUnit } from '../../domain/collection/types'
 import { PhotoGallery } from '../photos/PhotoGallery'
 import { PhotoThumb } from '../photos/PhotoThumb'
 import { PhotoViewer } from '../photos/PhotoViewer'
+import { ColourStrip } from '../schemes/ColourStrip'
+import { colourStrip, missingPaints } from '../../domain/schemes/scheme'
 import { MoveDialog } from './MoveDialog'
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
 
 export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: () => void; onClose: () => void }) {
-  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos } = useStore()
+  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, paints, paintStock, loadPaints } = useStore()
+  const scheme = unit.schemeId ? schemes.find((s) => s.id === unit.schemeId) : undefined
   const photos = allPhotos[unit.id] ?? []
   const [viewing, setViewing] = useState<string | null>(null)
   const datasheet = unit.datasheetId ? catalogue?.datasheets.find((d) => d.id === unit.datasheetId) : undefined
@@ -31,6 +34,10 @@ export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: 
     void loadEvents(unit.id)
     void loadPhotos(unit.id)
   }, [unit.id, loadEvents, loadPhotos])
+
+  useEffect(() => {
+    if (scheme && !paints.length) void loadPaints()
+  }, [scheme, paints.length, loadPaints])
 
   const toggle = (flag: 'favourite' | 'nextUp') => saveUnit(setFlags(unit, { [flag]: !unit[flag] }, ctx()))
 
@@ -90,6 +97,27 @@ export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: 
           ))}
         </ul>
       </section>
+
+      {scheme && (
+        <section className="border-b border-line p-4" aria-label="Scheme">
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Paint scheme</h3>
+          <ColourStrip colours={colourStrip(scheme, paints)} />
+          <p className="mt-2 text-sm">
+            🎨 <b>{scheme.name}</b>
+            {(() => {
+              const m = missingPaints(scheme, paintStock).length
+              return m ? <span className="text-danger"> · {m} paint{m > 1 ? 's' : ''} missing</span> : <span className="text-ok"> · all paints owned</span>
+            })()}
+          </p>
+          <ol className="mt-1 text-xs text-muted">
+            {scheme.sections.map((sec) => (
+              <li key={sec.id}>
+                <b>{sec.area}:</b> {sec.steps.map((st) => `${st.technique || 'step'} (${st.paints.map((p) => paints.find((x) => x.id === p.paintId)?.name ?? '?').join(' + ')})`).join(' → ')}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       <PhotoGallery unit={unit} photos={photos} />
 
