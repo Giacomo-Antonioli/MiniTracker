@@ -175,6 +175,21 @@ export class DexiePhotoRepository {
     })
   }
 
+  /** Deletes the originals (keeps the shown copies) to free space. Returns bytes freed. */
+  async dropOriginals(): Promise<number> {
+    let freed = 0
+    await this.db.transaction('rw', this.db.photos, this.db.photoFiles, async () => {
+      const withOriginal = (await this.db.photos.toArray()).filter((p) => p.hasOriginal)
+      for (const p of withOriginal) {
+        const f = await this.db.photoFiles.get(p.id)
+        if (f) await this.db.photoFiles.put({ id: f.id, display: f.display })
+        await this.db.photos.put({ ...p, hasOriginal: false })
+        freed += p.originalBytes
+      }
+    })
+    return freed
+  }
+
   /** Total bytes stored, split by copy. */
   async usage(): Promise<{ photos: number; displayBytes: number; originalBytes: number }> {
     const all = await this.db.photos.toArray()
