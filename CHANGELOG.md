@@ -7,3 +7,4 @@
 - Data: IndexedDB storage (Dexie) with unit, history and settings repositories; atomic status moves; migration test pattern (#3).
 - UI: backlog table with progress, filters and search; unit details panel with history; move-models dialog; add/edit unit form; pipeline settings; Grimdark and Forum 2005 themes (#4).
 - Backup: export all data to a versioned JSON file and restore it (all or nothing, with confirmation) (#5).
+- Testing: component tests (Testing Library + jsdom) and Playwright E2E on desktop and iPad viewports, both in CI (#6).

@@ -6,6 +6,8 @@ import { DEFAULT_PIPELINE, moveModels, type MoveOptions } from '../domain/collec
 import type { Ctx, OwnedUnit, Pipeline, StageId, StatusEvent } from '../domain/collection/types'
 
 const db = new MiniTrackerDb()
+/** Exposed for tests only. */
+export const appDb = db
 const unitsRepo = new DexieUnitRepository(db)
 const eventsRepo = new DexieEventRepository(db)
 const settingsRepo = new DexieSettingsRepository(db)
