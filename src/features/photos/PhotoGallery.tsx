@@ -6,7 +6,7 @@ import { PhotoThumb } from './PhotoThumb'
 import { PhotoViewer } from './PhotoViewer'
 
 /** Unit gallery: all photos of the unit (own and from history steps). */
-export function PhotoGallery({ unit, photos }: { unit: OwnedUnit; photos: Photo[] }) {
+export function PhotoGallery({ unit, photos, thumbSize }: { unit: OwnedUnit; photos: Photo[]; thumbSize?: string }) {
   const addPhotos = useStore((s) => s.addPhotos)
   const [open, setOpen] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -47,7 +47,7 @@ export function PhotoGallery({ unit, photos }: { unit: OwnedUnit; photos: Photo[
         <p className="text-sm text-muted">No photos yet.</p>
       ) : (
         <div className="flex flex-wrap gap-2">
-          {photos.map((p) => <PhotoThumb key={p.id} photo={p} onClick={() => setOpen(p.id)} />)}
+          {photos.map((p) => <PhotoThumb key={p.id} photo={p} size={thumbSize} onClick={() => setOpen(p.id)} />)}
         </div>
       )}
       {open && <PhotoViewer photos={photos} startId={open} onClose={() => setOpen(null)} />}

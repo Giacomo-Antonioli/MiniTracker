@@ -68,3 +68,14 @@ test('backup: export then restore after deleting', async ({ page }, info) => {
   await page.getByRole('button', { name: 'Backlog', exact: true }).click()
   await expect(page.getByRole('cell', { name: 'Backup Squad' })).toBeVisible()
 })
+
+test('double-click a unit opens its page even though the side panel reflows the list', async ({ page }) => {
+  await page.goto('./')
+  await addUnit(page, 'Crisis Battlesuits', "T'au Empire", [[3, 'sprue']])
+  await page.getByRole('cell', { name: 'Crisis Battlesuits' }).dblclick()
+  const unitPage = page.getByRole('article', { name: 'Unit page' })
+  await expect(unitPage.getByRole('heading', { name: 'Crisis Battlesuits' })).toBeVisible()
+  await expect(unitPage.getByLabel('Unit tag')).toContainText(/mt-[0-9a-f]{8}/)
+  await unitPage.getByRole('button', { name: '← Back to backlog' }).click()
+  await expect(page.getByRole('cell', { name: 'Crisis Battlesuits' })).toBeVisible()
+})

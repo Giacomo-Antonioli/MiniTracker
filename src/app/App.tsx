@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BacklogPage } from '../features/backlog/BacklogPage'
+import { UnitPage } from '../features/backlog/UnitPage'
 import { CatalogueBrowser } from '../features/catalogue/CatalogueBrowser'
 import { PaintsPage } from '../features/paints/PaintsPage'
 import { SchemesPage } from '../features/schemes/SchemesPage'
@@ -7,7 +8,7 @@ import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeIm
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { useStore } from './store'
 
-type Page = 'backlog' | 'browse' | 'paints' | 'schemes' | 'settings'
+type Page = 'backlog' | 'unit' | 'browse' | 'paints' | 'schemes' | 'settings'
 
 const SOON = ['Army lists', 'Games', 'Shopping']
 
@@ -17,6 +18,16 @@ export default function App() {
   const [recipe, setRecipe] = useState<RecipePayload | null>(() => readRecipeHash(location.hash))
   const [page, setPage] = useState<Page>(() => (readRecipeHash(location.hash) ? 'schemes' : 'backlog'))
   const [section, setSection] = useState<SettingsSection | undefined>()
+  const [unitId, setUnitId] = useState<string | null>(null)
+  const [datasheetId, setDatasheetId] = useState<string | undefined>()
+  const openUnit = (id: string) => {
+    setUnitId(id)
+    setPage('unit')
+  }
+  const openDatasheet = (id: string) => {
+    setDatasheetId(id)
+    setPage('browse')
+  }
 
   useEffect(() => {
     // Remove the recipe from the address bar so a reload doesn't import it again.
@@ -34,12 +45,13 @@ export default function App() {
   const go = (p: Page, s?: SettingsSection) => {
     setPage(p)
     setSection(s)
+    setDatasheetId(undefined)
   }
 
   const nav = (id: Page, label: string) => (
     <button
       className={`w-full rounded px-3 py-1.5 text-left ${page === id ? 'bg-panel-2 text-accent' : 'hover:bg-panel-2'}`}
-      aria-current={page === id ? 'page' : undefined}
+      aria-current={page === id || (id === 'backlog' && page === 'unit') ? 'page' : undefined}
       onClick={() => go(id)}
     >
       {label}
@@ -73,13 +85,15 @@ export default function App() {
         {!ready ? (
           <p className="text-muted">Loading…</p>
         ) : page === 'backlog' ? (
-          <BacklogPage />
+          <BacklogPage onOpenUnit={openUnit} onOpenDatasheet={openDatasheet} />
+        ) : page === 'unit' && unitId ? (
+          <UnitPage unitId={unitId} onBack={() => setPage('backlog')} onOpenDatasheet={openDatasheet} />
         ) : page === 'schemes' ? (
           <SchemesPage payload={recipe ?? undefined} onPayloadUsed={() => setRecipe(null)} />
         ) : page === 'paints' ? (
           <PaintsPage />
         ) : page === 'browse' ? (
-          <CatalogueBrowser onOpenSettings={() => go('settings', 'catalogue')} />
+          <CatalogueBrowser key={datasheetId ?? 'all'} openId={datasheetId} onOpenSettings={() => go('settings', 'catalogue')} />
         ) : (
           <SettingsPage section={section} />
         )}

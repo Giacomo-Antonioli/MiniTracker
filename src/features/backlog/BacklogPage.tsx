@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useStore } from '../../app/store'
 import { factionsOf, filterUnits, stageTotals, unitProgress, type BacklogFilter } from '../../domain/collection/backlog'
 import { progress } from '../../domain/collection/pipeline'
@@ -13,9 +13,8 @@ const ago = (iso: string) => {
   return d < 1 ? 'today' : d < 30 ? `${d} d` : d < 365 ? `${Math.floor(d / 30)} mo` : `${Math.floor(d / 365)} y`
 }
 
-export function BacklogPage() {
-  const { units, pipeline } = useStore()
-  const [filter, setFilter] = useState<BacklogFilter>({})
+export function BacklogPage({ onOpenUnit, onOpenDatasheet }: { onOpenUnit?: (id: string) => void; onOpenDatasheet?: (id: string) => void }) {
+  const { units, pipeline, backlogFilter: filter, setBacklogFilter: setFilter } = useStore()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<OwnedUnit | 'new' | null>(null)
 
@@ -24,10 +23,20 @@ export function BacklogPage() {
   const total = progress(units, pipeline, 'painted')
   const selected = units.find((u) => u.id === selectedId)
   const set = (patch: Partial<BacklogFilter>) => setFilter({ ...filter, ...patch })
+  // Double-click opens the unit page. The first click opens the side panel, which can reflow the list
+  // (filters wrap, rows move), so the second click may land elsewhere in the list: track the row instead.
+  const lastClick = useRef<{ id: string; at: number } | null>(null)
+  const onListClick = (e: React.MouseEvent) => {
+    const last = lastClick.current
+    if (e.detail < 2 || !last || e.timeStamp - last.at > 600 || !onOpenUnit) return
+    if ((e.target as HTMLElement).closest('input, select, button, textarea, label')) return
+    lastClick.current = null
+    onOpenUnit(last.id)
+  }
 
   return (
     <div className="flex h-full gap-4">
-      <div className="flex min-w-0 flex-1 flex-col gap-4">
+      <div className="flex min-w-0 flex-1 flex-col gap-4" onClick={onListClick}>
         <header className="flex items-center justify-between">
           <h1 className="font-display text-2xl text-accent">Backlog</h1>
           <button className="btn btn-primary" onClick={() => setEditing('new')}>+ Add unit</button>
@@ -82,8 +91,12 @@ export function BacklogPage() {
                 return (
                   <tr
                     key={u.id}
-                    onClick={() => setSelectedId(u.id)}
-                    className={`cursor-pointer border-b border-line/50 hover:bg-panel-2 ${u.id === selectedId ? 'bg-panel-2' : ''}`}
+                    onClick={(e) => {
+                      if (e.detail === 1) lastClick.current = { id: u.id, at: e.timeStamp }
+                      setSelectedId(u.id)
+                    }}
+                    title="Double-click to open the unit page"
+                    className={`cursor-pointer select-none border-b border-line/50 hover:bg-panel-2 ${u.id === selectedId ? 'bg-panel-2' : ''}`}
                   >
                     <td className="p-2 text-accent">{u.favourite ? '★' : ''}</td>
                     <td className="p-2">
@@ -111,7 +124,15 @@ export function BacklogPage() {
         </div>
       </div>
 
-      {selected && <UnitPanel unit={selected} onEdit={() => setEditing(selected)} onClose={() => setSelectedId(null)} />}
+      {selected && (
+        <UnitPanel
+          unit={selected}
+          onEdit={() => setEditing(selected)}
+          onClose={() => setSelectedId(null)}
+          onOpenPage={onOpenUnit && (() => onOpenUnit(selected.id))}
+          onOpenDatasheet={onOpenDatasheet}
+        />
+      )}
       {editing && <UnitFormDialog unit={editing === 'new' ? undefined : editing} factions={factions} onClose={() => setEditing(null)} />}
     </div>
   )
