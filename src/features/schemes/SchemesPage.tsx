@@ -12,7 +12,7 @@ import type { RecipePayload } from './recipeImport'
 
 const ORDER: SchemeOrigin[] = ['official', 'community', 'personal']
 
-export function SchemesPage({ openId, payload, onPayloadUsed }: { openId?: string; payload?: RecipePayload; onPayloadUsed?: () => void }) {
+export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { openId?: string; payload?: RecipePayload; onPayloadUsed?: () => void; onOpenUnit?: (id: string) => void }) {
   const { schemes: mine, library, loadLibrary, paints, paintStock, units, pipelines, schemeDefaults, loadPaints, saveScheme, importSchemes } = useStore()
   const [showLibrary, setShowLibrary] = useState(true)
   const schemes = useMemo(() => (showLibrary ? [...mine, ...library] : mine), [mine, library, showLibrary])
@@ -132,7 +132,7 @@ export function SchemesPage({ openId, payload, onPayloadUsed }: { openId?: strin
         (selected.id.startsWith('lib/') ? (
           <SchemeView key={selected.id} scheme={selected} onOpen={setSelectedId} onClose={() => setSelectedId(null)} />
         ) : (
-          <SchemeEditor key={selected.id} scheme={selected} onOpen={setSelectedId} onClose={() => setSelectedId(null)} />
+          <SchemeEditor key={selected.id} scheme={selected} onOpen={setSelectedId} onClose={() => setSelectedId(null)} onOpenUnit={onOpenUnit} />
         ))}
     </div>
   )

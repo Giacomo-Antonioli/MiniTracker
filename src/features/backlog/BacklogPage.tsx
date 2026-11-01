@@ -16,7 +16,7 @@ const ago = (iso: string) => {
   return d < 1 ? 'today' : d < 30 ? `${d} d` : d < 365 ? `${Math.floor(d / 30)} mo` : `${Math.floor(d / 365)} y`
 }
 
-export function BacklogPage({ onOpenUnit, onOpenDatasheet }: { onOpenUnit?: (id: string) => void; onOpenDatasheet?: (id: string) => void }) {
+export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onOpenUnit?: (id: string) => void; onOpenDatasheet?: (id: string) => void; onOpenScheme?: (id: string) => void }) {
   const { units, pipeline, backlogFilter: filter, setBacklogFilter: setFilter } = useStore()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<OwnedUnit | 'new' | null>(null)
@@ -131,6 +131,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet }: { onOpenUnit?: (id:
           onClose={() => setSelectedId(null)}
           onOpenPage={onOpenUnit && (() => onOpenUnit(selected.id))}
           onOpenDatasheet={onOpenDatasheet}
+          onOpenScheme={onOpenScheme}
         />
       )}
       {editing && <UnitFormDialog unit={editing === 'new' ? undefined : editing} factions={factions} onClose={() => setEditing(null)} />}
