@@ -15,7 +15,7 @@ No account, no server: your collection stays in your browser. Install it from th
 
 ## Features
 
-**Available now (v0.1)**
+**v0.1**
 
 - **Units with model groups.** "6 built + 4 painted" in one unit, each group with its own loadout and magnetised weapon slots.
 - **Painting pipeline.** Move models through your stages (sprue → built → primed → basecoated → painted → based → varnished). Rename, reorder or add your own stages.
@@ -26,9 +26,11 @@ No account, no server: your collection stays in your browser. Install it from th
 - **Backup.** Export everything to one JSON file; restore it on any device.
 - **Themes.** *Grimdark* (modern dark) and *Forum 2005* (old-school fantasy forum).
 
-**Coming in v0.2**
+**New in v0.2**
 
-- **Unit catalogue.** Download every Warhammer 40,000 datasheet (unit sizes, points, keywords, wargear, abilities) from BSData in Settings → Catalogue. The data is downloaded and converted on your device; MiniTracker never hosts it.
+- **Unit catalogue.** Download every Warhammer 40,000 datasheet (unit sizes, points, keywords, wargear, abilities) from BSData in Settings → Catalogue data. The data is downloaded and converted on your device; MiniTracker never hosts it.
+- **Searchable unit picker.** Type to find the exact datasheet when adding a unit; faction, size and live points fill in.
+- **Catalogue browser.** Every unit with points by size, abilities, wargear and keywords, plus how many you own.
 
 | Forum 2005 theme | Moving models |
 |---|---|
@@ -39,8 +41,8 @@ No account, no server: your collection stays in your browser. Install it from th
 | Version | Focus | Status |
 |---|---|---|
 | [v0.1](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/1) | Backlog tracker | ✅ released |
-| [v0.2](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/2) | Warhammer 40k catalogue from BSData, searchable unit picker, catalogue browser | 🔨 next |
-| [v0.3](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/3) | Paint inventory (pre-filled Citadel, Army Painter, Vallejo, Green Stuff World…), paint schemes and recipes, photos | planned |
+| [v0.2](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/2) | Warhammer 40k catalogue from BSData, searchable unit picker, catalogue browser | ✅ released |
+| [v0.3](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/3) | Paint inventory (pre-filled Citadel, Army Painter, Vallejo, Green Stuff World…), paint schemes and recipes, photos | 🔨 next |
 | [v0.4](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/4) | Army builder from owned models: points, rules, "what's missing", import/export BattleScribe `.rosz` and text lists | planned |
 | [v0.5](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/5) | Shopping list, game tracking, sharing via files | planned |
 | [v0.6](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/6) | Desktop app (Tauri), Google Drive sync | planned |
