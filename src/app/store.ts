@@ -3,7 +3,10 @@ import { exportBackup, importBackup, parseBackup } from '../data/backup'
 import { MiniTrackerDb } from '../data/db'
 import { convert } from '../data/catalogue/convert'
 import { BSDATA_40K, downloadDataFiles, latestCommit } from '../data/catalogue/fetch'
-import { DexieCatalogueRepository, DexieEventRepository, DexiePaintRepository, DexieSettingsRepository, DexieUnitRepository } from '../data/repositories/dexie'
+import { extensionOf, makeDisplayCopy } from '../data/photos/compress'
+import { DexieCatalogueRepository, DexieEventRepository, DexiePaintRepository, DexiePhotoRepository, DexieSettingsRepository, DexieUnitRepository } from '../data/repositories/dexie'
+import { photoFileName } from '../domain/photos/naming'
+import type { Photo, PhotoOwner } from '../domain/photos/types'
 import { inventoryFromCsv } from '../domain/paints/csv'
 import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Catalogue } from '../domain/catalogue/types'
@@ -19,6 +22,7 @@ const eventsRepo = new DexieEventRepository(db)
 const settingsRepo = new DexieSettingsRepository(db)
 const catalogueRepo = new DexieCatalogueRepository(db)
 const paintRepo = new DexiePaintRepository(db)
+const photoRepo = new DexiePhotoRepository(db)
 
 /** The bundled paint list is ~200 KB, so it is loaded only when needed. */
 async function loadSeedPaints(): Promise<PaintDef[]> {
@@ -81,7 +85,16 @@ interface State {
   saveUnit(unit: OwnedUnit): Promise<void>
   deleteUnit(id: string): Promise<void>
   loadEvents(unitId: string): Promise<void>
-  move(unit: OwnedUnit, groupId: string, count: number, to: StageId, opts: MoveOptions): Promise<void>
+  /** Move models; an optional photo file is attached to the history step. */
+  move(unit: OwnedUnit, groupId: string, count: number, to: StageId, opts: MoveOptions, photo?: File): Promise<void>
+  /** Photos per unit id (unit gallery + history photos), loaded on demand. */
+  photos: Record<string, Photo[]>
+  loadPhotos(unitId: string): Promise<void>
+  addPhotos(unit: OwnedUnit, files: File[], opts?: { owner?: PhotoOwner; stage?: string; id?: string }): Promise<Photo[]>
+  photoFiles(id: string): ReturnType<DexiePhotoRepository['files']>
+  updatePhoto(photo: Photo): Promise<void>
+  deletePhoto(photo: Photo): Promise<void>
+  photoUsage(): ReturnType<DexiePhotoRepository['usage']>
   savePipeline(p: Pipeline): Promise<void>
   /** JSON text of a full backup. */
   exportBackup(): Promise<string>
@@ -224,7 +237,9 @@ export const useStore = create<State>((set, get) => ({
     await unitsRepo.delete(id)
     const events = { ...get().events }
     delete events[id]
-    set({ units: await unitsRepo.list(), events })
+    const photos = { ...get().photos }
+    delete photos[id]
+    set({ units: await unitsRepo.list(), events, photos })
   },
 
   async loadEvents(unitId) {
@@ -232,11 +247,73 @@ export const useStore = create<State>((set, get) => ({
     set({ events: { ...get().events, [unitId]: list } })
   },
 
-  async move(unit, groupId, count, to, opts) {
-    const { unit: updated, event } = moveModels(unit, groupId, count, to, get().pipeline, ctx(), opts)
+  async move(unit, groupId, count, to, opts, photo) {
+    const photoId = photo ? crypto.randomUUID() : undefined
+    const { unit: updated, event } = moveModels(unit, groupId, count, to, get().pipeline, ctx(), { ...opts, photoId })
     await unitsRepo.recordMove(updated, event)
+    if (photo) await get().addPhotos(updated, [photo], { owner: { kind: 'event', unitId: unit.id, eventId: event.id }, stage: to, id: photoId })
     set({ units: await unitsRepo.list() })
     await get().loadEvents(unit.id)
+  },
+
+  photos: {},
+
+  async loadPhotos(unitId) {
+    set({ photos: { ...get().photos, [unitId]: await photoRepo.listForUnit(unitId) } })
+  },
+
+  async addPhotos(unit, files, opts = {}) {
+    const added: Photo[] = []
+    const stage = opts.stage ?? unit.groups[0]?.status
+    for (const file of files) {
+      const display = await makeDisplayCopy(file)
+      const now = new Date().toISOString()
+      const takenAt = file.lastModified ? new Date(file.lastModified).toISOString() : now
+      // Next free sequence number for this unit/stage/day.
+      let seq = 1
+      let fileName = ''
+      do {
+        fileName = photoFileName({ faction: unit.factionName, unitName: unit.customName, unitId: unit.id, stage, date: now, seq: seq++, ext: extensionOf(file) })
+      } while (await photoRepo.fileNameTaken(fileName))
+      const id = (added.length === 0 && opts.id) || crypto.randomUUID()
+      const photo: Photo = {
+        id,
+        owner: opts.owner ?? { kind: 'unit', unitId: unit.id },
+        unitId: unit.id,
+        fileName,
+        caption: '',
+        takenAt,
+        createdAt: now,
+        width: display.width,
+        height: display.height,
+        originalType: file.type || 'application/octet-stream',
+        originalBytes: file.size,
+        displayBytes: display.blob.size,
+        hasOriginal: true,
+      }
+      await photoRepo.add(photo, { id, display: display.blob, original: file })
+      added.push(photo)
+    }
+    await get().loadPhotos(unit.id)
+    return added
+  },
+
+  photoFiles(id) {
+    return photoRepo.files(id)
+  },
+
+  async updatePhoto(photo) {
+    await photoRepo.update(photo)
+    if (photo.unitId) await get().loadPhotos(photo.unitId)
+  },
+
+  async deletePhoto(photo) {
+    await photoRepo.delete(photo.id)
+    if (photo.unitId) await get().loadPhotos(photo.unitId)
+  },
+
+  photoUsage() {
+    return photoRepo.usage()
   },
 
   savePipeline(p) {
