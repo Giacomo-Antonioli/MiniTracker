@@ -199,3 +199,51 @@ describe('detachments and enhancements', () => {
     expect(codes(army('sf', []))).toEqual([])
   })
 })
+
+const attach = (l: ArmyList, from: number, to: number) => updateEntry(l, l.entries[from].id, { attachedTo: l.entries[to].id }, ctx)
+
+describe('leaders', () => {
+  const lcat: Catalogue = {
+    ...cat,
+    datasheets: [
+      ...cat.datasheets,
+      sheet('fireblade', { keywords: ['Character'], leads: { ids: [], keywords: ['Strike Team'] } }),
+      sheet('ethereal', { keywords: ['Character'], leads: { ids: ['strike'], keywords: [] } }),
+      sheet('strike', { name: 'Strike Team', maxLeaders: 2 }),
+      sheet('breacher', { name: 'Breacher Team' }),
+    ],
+  }
+  const lcodes = (l: ArmyList) => checkList(l, lcat).map((i) => i.message)
+
+  it('checks who can lead whom and how many Leaders a unit takes', () => {
+    let l = warlord(list('sf', [['fireblade'], ['ethereal'], ['strike'], ['breacher'], ['commander']]))
+    l = attach(attach(l, 0, 2), 1, 2)
+    expect(lcodes(l)).toEqual([])
+    expect(lcodes(attach(l, 1, 3))).toEqual(["ethereal can't lead Breacher Team"])
+    const three = attach(warlord(list('sf', [['fireblade'], ['ethereal'], ['fireblade'], ['strike']])), 0, 3)
+    expect(lcodes(attach(attach(three, 1, 3), 2, 3))).toEqual(['Strike Team has 3 Leaders, max 2'])
+    expect(lcodes(attach(warlord(list('sf', [['commander'], ['strike']])), 0, 1))).toEqual(['commander is not a Leader'])
+  })
+
+  it('catalogues without leader data skip the check', () => {
+    const l = warlord(list('sf', [['commander'], ['crisis', 3]]))
+    expect(codes(attach(l, 0, 1))).toEqual([])
+  })
+})
+
+describe('enhancements limited to some units', () => {
+  it("flags a unit the enhancement's data hides it from", () => {
+    const ecat: Catalogue = {
+      ...cat,
+      datasheets: [...cat.datasheets, sheet('shaper', { keywords: ['Character', 'Kroot'] })],
+      detachments: [{ id: 'pack', name: 'Pack', factionIds: ['tau'], detachmentPoints: 0, keywords: [] }],
+      enhancements: [{ id: 'gland', name: 'Gland', points: 15, detachmentId: 'pack', notFor: { any: [{ op: 'lessThan', value: 1, id: 'pack' }, { op: 'notInstanceOf', value: 1, keyword: 'Kroot', unit: true }] } }],
+    }
+    const make = (unit: string) => {
+      const l: ArmyList = { ...warlord(list('sf', [[unit]])), detachmentIds: ['pack'] }
+      return updateEntry(l, l.entries[0].id, { enhancementId: 'gland' }, ctx)
+    }
+    expect(checkList(make('shaper'), ecat)).toEqual([])
+    expect(checkList(make('commander'), ecat).map((i) => i.message)).toEqual(["commander can't take Gland"])
+  })
+})

@@ -13,7 +13,7 @@ import { isGone, setFlags } from '../../domain/collection/pipeline'
 import { BuyListSheet } from './BuyListSheet'
 import { listToJson, listToText } from '../../domain/lists/io'
 import { evalLimit } from '../../domain/lists/conditions'
-import { addUnit, battleSizes, checkList, legalUnits, listCounter } from '../../domain/lists/rules'
+import { addUnit, battleSizes, canLead, checkList, enhancementAllowed, legalUnits, listCounter } from '../../domain/lists/rules'
 import type { ArmyList, ListEntry, ListStatus } from '../../domain/lists/types'
 
 const ROLE_ORDER = ['Epic Hero', 'Character', 'Battleline']
@@ -166,6 +166,15 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   const edit = (id: string, patch: Partial<Omit<ListEntry, 'id'>>) => onSave(updateEntry(list, id, patch, ctx()))
   const setWarlord = (id: string) => onSave({ ...list, entries: list.entries.map((e) => ({ ...e, warlord: e.id === id ? !e.warlord : e.warlord })), updatedAt: ctx().now })
   const leadable = list.entries.filter((e) => !sheets.get(e.datasheetId)?.keywords.includes('Character'))
+  // With leader data (catalogue format 6) a Leader is offered only the units it can lead; older catalogues offer all.
+  const hasLeaderData = cat.datasheets.some((d) => d.leads)
+  const targetsFor = (e: ListEntry) => {
+    const d = sheets.get(e.datasheetId)
+    return leadable.filter((t) => {
+      const td = sheets.get(t.datasheetId)
+      return t.id === e.attachedTo || !hasLeaderData || (d && td && canLead(d, td))
+    })
+  }
 
   return (
     <div className="grid items-start gap-3 lg:grid-cols-[var(--add-w)_auto_minmax(0,1fr)] lg:gap-0" style={{ '--add-w': `${panelWidth}px` } as React.CSSProperties}>
@@ -220,15 +229,17 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                     {e.enhancementId && !offered.some((x) => x.id === e.enhancementId) && (
                       <option value={e.enhancementId}>{enhancements.get(e.enhancementId)?.name ?? 'Unknown enhancement'} (detachment not chosen)</option>
                     )}
-                    {offered.map((x) => (
-                      <option key={x.id} value={x.id}>{x.name} (+{x.points})</option>
-                    ))}
+                    {offered
+                      .filter((x) => x.id === e.enhancementId || enhancementAllowed(list, cat, e, x))
+                      .map((x) => (
+                        <option key={x.id} value={x.id}>{x.name} (+{x.points})</option>
+                      ))}
                   </select>
                 )}
-                {isChar && leadable.length > 0 && (
+                {isChar && (d && hasLeaderData ? !!d.leads : true) && targetsFor(e).length > 0 && (
                   <select className="input py-0.5 text-xs" aria-label={`${d?.name} leads`} value={e.attachedTo ?? ''} onChange={(ev) => edit(e.id, { attachedTo: ev.target.value || undefined })}>
                     <option value="">Leads: none</option>
-                    {leadable.map((t) => (
+                    {targetsFor(e).map((t) => (
                       <option key={t.id} value={t.id}>Leads: {sheets.get(t.datasheetId)?.name}</option>
                     ))}
                   </select>

@@ -55,7 +55,7 @@ describe('parseBsData edge cases', () => {
   })
 
   it('takes enhancements only from groups linked to a detachment, without hidden or non-upgrade entries', () => {
-    expect(c.enhancements).toEqual([{ id: 'gift', name: 'Gift', points: 0, detachmentId: 'a' }])
+    expect(c.enhancements).toEqual([{ id: 'gift', name: 'Gift', points: 0, detachmentId: 'a', notFor: { op: 'lessThan', value: 1, id: 'a' } }])
   })
 })
 
@@ -86,5 +86,43 @@ describe('unit sizes from real-data layouts', () => {
     expect(size('Hearthguard')).toEqual([5, 10])
     expect(size('Krieg')).toEqual([10, 20])
     expect(size('Jakhals')).toEqual([10, 10])
+  })
+})
+
+describe('leaders, wargear and named size options', () => {
+  const g = { gameSystem: { id: 'g', name: 'G', costTypes: [{ id: 'pts', name: 'pts' }] } }
+  const cat3 = {
+    catalogue: {
+      id: 'f3', name: 'Lead', library: false,
+      categoryEntries: [{ id: 'k-team', name: 'Strike Team' }],
+      entryLinks: ['boss', 'team', 'scouts'].map((id) => ({ id: `r-${id}`, name: id, type: 'selectionEntry', targetId: id })),
+      sharedSelectionEntries: [
+        {
+          type: 'model', id: 'boss', name: 'Boss',
+          associations: [{ name: 'Leading', label: 'Leader', conditionGroups: [{ type: 'or', conditions: [{ type: 'instanceOf', childId: 'k-team', value: 1 }, { type: 'instanceOf', childId: 'other-unit', value: 1 }] }] }],
+          selectionEntries: [{ type: 'upgrade', id: 'w1', name: 'Pistol' }, { type: 'upgrade', id: 'w2', name: 'Totemic Presence upgrade' }],
+          selectionEntryGroups: [{ id: 'cr', name: 'Crusade', selectionEntries: [{ type: 'upgrade', id: 'w3', name: 'Battle Scar' }] }],
+          entryLinks: [{ id: 'wl', name: 'Warlord', type: 'selectionEntry', targetId: 'x' }],
+        },
+        { type: 'unit', id: 'team', name: 'Strike Team', constraints: [{ id: 'a1', type: 'max', field: 'associations', scope: 'self', value: 2 }], selectionEntries: [{ type: 'model', id: 'tm', name: 'T', constraints: [{ id: 'm1', type: 'min', field: 'selections', scope: 'parent', value: 5 }, { id: 'm2', type: 'max', field: 'selections', scope: 'parent', value: 5 }] }] },
+        { type: 'unit', id: 'scouts', name: 'Scouts', selectionEntryGroups: [{ id: 'sz', name: 'Size', selectionEntries: [{ type: 'upgrade', id: 's6', name: '6 Models', selectionEntries: [{ type: 'model', id: 'sm' }] }, { type: 'upgrade', id: 's12', name: '12 Models' }] }] },
+      ],
+    },
+  }
+  const p3 = parseBsData([{ name: 'g.json', text: JSON.stringify(g) }, { name: 'c.json', text: JSON.stringify(cat3) }], { repo: 'r', commit: 'c', fetchedAt: 'f' })
+  const ds = (n: string) => p3.datasheets.find((d) => d.name === n)!
+
+  it('reads who a Leader can lead and how many Leaders a unit takes', () => {
+    expect(ds('Boss').leads).toEqual({ ids: ['other-unit'], keywords: ['Strike Team'] })
+    expect(ds('Strike Team').maxLeaders).toBe(2)
+    expect(ds('Strike Team').leads).toBeUndefined()
+  })
+
+  it('leaves Warlord, "… upgrade" and Crusade entries out of wargear', () => {
+    expect(ds('Boss').wargear).toEqual(['Pistol'])
+  })
+
+  it('reads size options named "N Models"', () => {
+    expect([ds('Scouts').minModels, ds('Scouts').maxModels]).toEqual([6, 12])
   })
 })

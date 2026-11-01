@@ -1,5 +1,5 @@
 import type { BattleSize, Catalogue, Datasheet, Enhancement } from '../catalogue/types'
-import { evalLimit, type Counter } from './conditions'
+import { evalCondition, evalLimit, type Counter } from './conditions'
 import type { Ctx } from '../collection/types'
 import { addEntry } from './list'
 import { listPoints } from './points'
@@ -39,6 +39,9 @@ export type IssueCode =
   | 'enhancement-twice'
   | 'enhancement-unit'
   | 'unknown-enhancement'
+  | 'not-a-leader'
+  | 'leader-target'
+  | 'leaders'
 
 export interface ListIssue {
   code: IssueCode
@@ -47,7 +50,13 @@ export interface ListIssue {
   entryIds: string[]
 }
 
-const hasKeyword = (d: Datasheet, k: string) => d.role === k || d.keywords.includes(k)
+// BSData also uses a keyword named after the unit itself (e.g. "Strike Team"), which datasheets don't list.
+const hasKeyword = (d: Datasheet, k: string) => d.role === k || d.keywords.includes(k) || d.name === k
+
+/** Can this Leader be attached to that unit? */
+export function canLead(leader: Datasheet, target: Datasheet): boolean {
+  return !!leader.leads && (leader.leads.ids.includes(target.id) || leader.leads.keywords.some((k) => hasKeyword(target, k)))
+}
 
 /** Most units of this datasheet allowed at this battle size; undefined = not checked. */
 export function unitLimit(d: Datasheet, battleSize: string): number | undefined {
@@ -97,6 +106,7 @@ export function checkList(l: ArmyList, cat: Catalogue): ListIssue[] {
     // Epic Heroes are Characters in the rules, even when the data leaves the keyword out (e.g. The Silent King).
     if (d && !hasKeyword(d, 'Character') && !hasKeyword(d, 'Epic Hero')) add('warlord-not-character', `${d.name} is not a Character and can't be the Warlord`, [e.id])
   }
+  checkLeaders(l, cat, sheets, add)
   if (cat.detachments) checkDetachments(l, cat, sheets, enh, add)
   return issues
 }
@@ -116,6 +126,45 @@ export function listCounter(l: ArmyList, cat: Catalogue): Counter {
     if (id === l.battleSize || id === cat.muster?.forceId) return 1
     return dets.filter((d) => d.id === id).length + l.entries.filter((e) => e.datasheetId === id || e.enhancementId === id).length
   }
+}
+
+function checkLeaders(l: ArmyList, cat: Catalogue, sheets: Map<string, Datasheet>, add: (code: IssueCode, message: string, entryIds?: string[]) => void) {
+  // Leader data comes with catalogue format 6; older catalogues have none, so nothing can be checked.
+  if (!cat.datasheets.some((d) => d.leads)) return
+  const byId = new Map(l.entries.map((e) => [e.id, e]))
+  const leadersOf = new Map<string, string[]>()
+  for (const e of l.entries) {
+    if (!e.attachedTo) continue
+    const leader = sheets.get(e.datasheetId)
+    const targetEntry = byId.get(e.attachedTo)
+    const target = targetEntry && sheets.get(targetEntry.datasheetId)
+    if (!leader || !target) continue
+    leadersOf.set(e.attachedTo, [...(leadersOf.get(e.attachedTo) ?? []), e.id])
+    if (!leader.leads) add('not-a-leader', `${leader.name} is not a Leader`, [e.id])
+    else if (!canLead(leader, target)) add('leader-target', `${leader.name} can't lead ${target.name}`, [e.id, e.attachedTo])
+  }
+  for (const [targetId, leaders] of leadersOf) {
+    const target = sheets.get(byId.get(targetId)!.datasheetId)!
+    const max = target.maxLeaders ?? 1
+    if (leaders.length > max) add('leaders', `${target.name} has ${leaders.length} Leaders, max ${max}`, [targetId, ...leaders])
+  }
+}
+
+/**
+ * Can this list entry take this enhancement, by the data's "hidden when" conditions seen from that unit?
+ * Characters-only / not-Epic-Hero and "is its detachment chosen" are checked separately.
+ */
+export function enhancementAllowed(l: ArmyList, cat: Catalogue, e: ArmyList['entries'][number], x: Enhancement): boolean {
+  if (!x.notFor) return true
+  const d = cat.datasheets.find((s) => s.id === e.datasheetId)
+  if (!d) return true
+  const army = listCounter(l, cat)
+  const bearer = { ...e, enhancementId: x.id }
+  const unit: Counter = (leaf) => (leaf.keyword ? Number(hasKeyword(d, leaf.keyword)) : Number(leaf.id === d.id || leaf.id === bearer.enhancementId))
+  // Asking "could it take this" for a unit that doesn't have it yet: count it as taken by this unit, not elsewhere.
+  const withIt = { ...l, entries: l.entries.map((y) => (y.id === e.id ? bearer : y)) }
+  const armyWith = listCounter(withIt, cat)
+  return !evalCondition(x.notFor, (leaf) => (leaf.unit ? unit(leaf) : e.enhancementId === x.id ? army(leaf) : armyWith(leaf)))
 }
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
@@ -159,6 +208,7 @@ function checkDetachments(
     seen.set(x.id, [...(seen.get(x.id) ?? []), e.id])
     if (!chosen.includes(x.detachmentId)) add('enhancement-detachment', `${x.name} needs its detachment (${all.get(x.detachmentId)?.name ?? 'not chosen'})`, [e.id])
     if (d && (!hasKeyword(d, 'Character') || hasKeyword(d, 'Epic Hero'))) add('enhancement-unit', `${d.name} can't take an enhancement (Characters only, not Epic Heroes)`, [e.id])
+    else if (d && chosen.includes(x.detachmentId) && !enhancementAllowed(l, cat, e, x)) add('enhancement-unit', `${d.name} can't take ${x.name}`, [e.id])
   }
   for (const [id, entryIds] of seen) if (entryIds.length > 1) add('enhancement-twice', `${enh.get(id)!.name} is taken ${entryIds.length} times`, entryIds)
 }

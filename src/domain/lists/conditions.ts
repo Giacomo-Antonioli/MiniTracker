@@ -1,7 +1,7 @@
 import type { Condition, DataLimit } from '../catalogue/types'
 
 /** How many of something the list has: by BSData id (battle size, detachment, unit, enhancement, force) or by keyword. */
-export type Counter = (leaf: { id?: string; keyword?: string }) => number
+export type Counter = (leaf: { id?: string; keyword?: string; unit?: true }) => number
 
 export function evalCondition(c: Condition, count: Counter): boolean {
   if ('all' in c) return c.all.every((x) => evalCondition(x, count))

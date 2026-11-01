@@ -172,7 +172,12 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
       .filter((rid) => rules.has(rid))
     const { keywords, stats, weapons } = readProfiles(e, linkable)
     const limit = armyLimit([e, rootLinks.get(id), ...ownCategory(e)].filter((x): x is Node => !!x), sizeIds)
-    return { ...d, ...(ruleIds.length ? { ruleIds: [...new Set(ruleIds)] } : {}), ...(keywords.length ? { weaponKeywords: keywords } : {}), ...(stats.length ? { stats } : {}), ...(weapons.length ? { weapons } : {}), ...(limit ? { armyLimit: limit } : {}) }
+    const leads = readLeads(e, categoryNames)
+    const maxLeaders = kids(e, 'constraints', 'constraint')
+      .filter((k) => attr(k, 'type') === 'max' && attr(k, 'field') === 'associations')
+      .map((k) => Number(attr(k, 'value')))
+      .reduce<number | undefined>((m, v) => (m === undefined ? v : Math.max(m, v)), undefined)
+    return { ...d, ...(ruleIds.length ? { ruleIds: [...new Set(ruleIds)] } : {}), ...(keywords.length ? { weaponKeywords: keywords } : {}), ...(stats.length ? { stats } : {}), ...(weapons.length ? { weapons } : {}), ...(limit ? { armyLimit: limit } : {}), ...(leads ? { leads } : {}), ...(maxLeaders !== undefined && maxLeaders !== 1 ? { maxLeaders } : {}) }
   })
   datasheets.sort((a, b) => a.name.localeCompare(b.name))
 
@@ -182,7 +187,7 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
 
   const ruleList = [...rules.values()].sort((a, b) => Number(a.kind === 'faction') - Number(b.kind === 'faction') || a.name.localeCompare(b.name))
   const det = readDetachments(parsed, factionCats, byId, cond, costIds, muster.forceId)
-  return { formatVersion: 5, gameId: attr(gst, 'id')!, gameName: attr(gst, 'name')!, source, factions, datasheets, rules: ruleList, muster, ...det }
+  return { formatVersion: 6, gameId: attr(gst, 'id')!, gameName: attr(gst, 'name')!, source, factions, datasheets, rules: ruleList, muster, ...det }
 }
 
 /** Conditions of a modifier, flattened; undefined when they are combined in a way we don't read (nested groups, 'or'). */
@@ -191,6 +196,23 @@ function simpleConditions(m: Node): Node[] | undefined {
   if (groups.length) return undefined
   if (kids(m, 'repeats', 'repeat').length) return undefined
   return kids(m, 'conditions', 'condition')
+}
+
+/** A Leader's "Leading" association: the units (ids) or keywords it may be attached to. */
+function readLeads(e: Node, categoryNames: Map<string, string>): { ids: string[]; keywords: string[] } | undefined {
+  const assoc = kids(e, 'associations', 'association').filter((a) => /lead/i.test(`${attr(a, 'name')} ${attr(a, 'label')}`))
+  if (!assoc.length) return undefined
+  const ids = new Set<string>()
+  const keywords = new Set<string>()
+  for (const a of assoc) {
+    walk(a, (tag, c) => {
+      if (tag !== 'condition' || attr(c, 'type') !== 'instanceOf') return
+      const id = attr(c, 'childId') ?? ''
+      if (categoryNames.has(id)) keywords.add(categoryNames.get(id)!)
+      else if (id) ids.add(id)
+    })
+  }
+  return { ids: [...ids].sort(), keywords: [...keywords].sort() }
 }
 
 /** Battle size a condition tests for ("this roster has Incursion selected"), if that is all it tests. */
@@ -248,6 +270,9 @@ function armyLimit(nodes: Node[], sizeIds: Set<string>): ArmyLimit | undefined {
   return { max: base, ...(diff.length ? { byBattleSize: Object.fromEntries(diff) } : {}) }
 }
 
+/** BattleScribe scopes that point at the unit an entry sits in, not at the army. */
+const UNIT_SCOPES = new Set(['parent', 'ancestor', 'root-entry', 'self', 'unit'])
+
 const OPS = new Set<ConditionOp>(['atLeast', 'atMost', 'equalTo', 'notEqualTo', 'lessThan', 'greaterThan', 'instanceOf', 'notInstanceOf'])
 
 /** Turns a modifier's conditions into a Condition (undefined when it uses something we don't read, e.g. repeats). */
@@ -257,7 +282,8 @@ function conditionReader(categoryNames: Map<string, string>) {
     if (!OPS.has(op)) return undefined
     const id = attr(c, 'childId') ?? ''
     const value = Number(attr(c, 'value') ?? 0)
-    return categoryNames.has(id) ? { op, value, keyword: categoryNames.get(id)! } : { op, value, id }
+    const unit = UNIT_SCOPES.has(attr(c, 'scope') ?? '') ? { unit: true as const } : {}
+    return categoryNames.has(id) ? { op, value, keyword: categoryNames.get(id)!, ...unit } : { op, value, id, ...unit }
   }
   const group = (n: Node, type: 'and' | 'or'): Condition | undefined => {
     const parts: (Condition | undefined)[] = [
@@ -432,7 +458,11 @@ function readDetachments(
         // Visibility conditions are skipped: besides "this detachment is chosen" they say which units may take it.
         // Boarding Actions enhancements drop out because their detachments are not in the list.
         if (!detachmentId) continue
-        enhancements.set(attr(e, 'id')!, { id: attr(e, 'id')!, name: attr(e, 'name')!, points: cost(e, 'pts'), detachmentId })
+        // "Hidden when …" of the group and the enhancement: tells which units can't take it.
+        const hides = [g, e].flatMap((n) => kids(n, 'modifiers', 'modifier').filter((m) => attr(m, 'field') === 'hidden' && attr(m, 'type') === 'set' && attr(m, 'value') === 'true'))
+        const conds = hides.map((m) => cond(m)).filter((x): x is Condition => !!x)
+        const notFor = conds.length === 0 ? undefined : conds.length === 1 ? conds[0] : { any: conds }
+        enhancements.set(attr(e, 'id')!, { id: attr(e, 'id')!, name: attr(e, 'name')!, points: cost(e, 'pts'), detachmentId, ...(notFor ? { notFor } : {}) })
       }
     })
   }
@@ -512,7 +542,8 @@ function modelCount(n: Node, isRoot: boolean, linkable: Map<string, Node>): [num
     }),
   ]
   for (const child of children) {
-    const [a, b] = modelCount(child, false, linkable)
+    const named = attr(child, 'type') === 'upgrade' ? /^(\d+)\s+models?$/i.exec(attr(child, 'name') ?? '') : null
+    const [a, b] = named ? [Number(named[1]), Number(named[1])] : modelCount(child, false, linkable)
     if (attr(child, 'type') === 'upgrade') {
       if (b > 0 && b < OPEN) options.push([a, b])
       continue
@@ -577,16 +608,20 @@ function pointsSteps(e: Node, ptsId: string | undefined, minModels: number, maxM
   return steps.sort((a, b) => a.fromModels - b.fromModels).filter((s, i, all) => i === 0 || s.fromModels !== all[i - 1].fromModels)
 }
 
+/** Not wargear: army-building and Crusade entries that sit among a unit's options. */
+const NOT_WARGEAR = (name: string) => name === 'Warlord' || /\bupgrade$/i.test(name)
+const NOT_WARGEAR_GROUP = /^(crusade|enhancements?\b)/i
+
 function collectWargear(n: Node): string[] {
   const out: string[] = []
   for (const s of kids(n, 'selectionEntries', 'selectionEntry')) {
     if (hidden(s)) continue
-    if (attr(s, 'type') === 'upgrade') out.push(attr(s, 'name')!)
+    if (attr(s, 'type') === 'upgrade' && !NOT_WARGEAR(attr(s, 'name')!)) out.push(attr(s, 'name')!)
     out.push(...collectWargear(s))
   }
-  for (const g of kids(n, 'selectionEntryGroups', 'selectionEntryGroup')) out.push(...collectWargear(g))
+  for (const g of kids(n, 'selectionEntryGroups', 'selectionEntryGroup')) if (!NOT_WARGEAR_GROUP.test(attr(g, 'name') ?? '')) out.push(...collectWargear(g))
   for (const l of kids(n, 'entryLinks', 'entryLink')) {
-    if (!hidden(l) && attr(l, 'type') === 'selectionEntry') out.push(attr(l, 'name')!)
+    if (!hidden(l) && attr(l, 'type') === 'selectionEntry' && !NOT_WARGEAR(attr(l, 'name')!)) out.push(attr(l, 'name')!)
   }
   return out
 }
