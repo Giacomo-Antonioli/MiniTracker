@@ -4,12 +4,17 @@ import { pointsFor } from '../../domain/catalogue/points'
 import { totalModels } from '../../domain/collection/ownedUnit'
 import { setFlags } from '../../domain/collection/pipeline'
 import type { ModelGroup, OwnedUnit } from '../../domain/collection/types'
+import { PhotoGallery } from '../photos/PhotoGallery'
+import { PhotoThumb } from '../photos/PhotoThumb'
+import { PhotoViewer } from '../photos/PhotoViewer'
 import { MoveDialog } from './MoveDialog'
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
 
 export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: () => void; onClose: () => void }) {
-  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue } = useStore()
+  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos } = useStore()
+  const photos = allPhotos[unit.id] ?? []
+  const [viewing, setViewing] = useState<string | null>(null)
   const datasheet = unit.datasheetId ? catalogue?.datasheets.find((d) => d.id === unit.datasheetId) : undefined
   const models = totalModels(unit)
   let points: number | undefined
@@ -24,7 +29,8 @@ export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: 
 
   useEffect(() => {
     void loadEvents(unit.id)
-  }, [unit.id, loadEvents])
+    void loadPhotos(unit.id)
+  }, [unit.id, loadEvents, loadPhotos])
 
   const toggle = (flag: 'favourite' | 'nextUp') => saveUnit(setFlags(unit, { [flag]: !unit[flag] }, ctx()))
 
@@ -85,6 +91,8 @@ export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: 
         </ul>
       </section>
 
+      <PhotoGallery unit={unit} photos={photos} />
+
       <section className="border-b border-line p-4">
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">History</h3>
         {history.length === 0 && <p className="text-sm text-muted">No changes yet.</p>}
@@ -95,6 +103,10 @@ export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: 
               <div>
                 {e.count} models {stageName(e.from)} {e.direction === 'forward' ? '→' : '↩'} {stageName(e.to)}
                 {e.note && <p className="text-muted italic">“{e.note}”</p>}
+                {(() => {
+                  const ph = e.photoId && photos.find((p) => p.id === e.photoId)
+                  return ph ? <div className="mt-1"><PhotoThumb photo={ph} size="h-14 w-14" onClick={() => setViewing(ph.id)} /></div> : null
+                })()}
               </div>
             </li>
           ))}
@@ -124,6 +136,7 @@ export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: 
         </section>
       )}
 
+      {viewing && <PhotoViewer photos={photos} startId={viewing} onClose={() => setViewing(null)} />}
       {moving && <MoveDialog unit={unit} group={moving} onClose={() => setMoving(null)} />}
     </aside>
   )

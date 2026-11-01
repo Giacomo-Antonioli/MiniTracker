@@ -41,7 +41,7 @@ export function BackupPage() {
       </p>
       <section className="panel grid gap-2 p-4">
         <h3 className="font-display text-lg">Export</h3>
-        <p className="text-sm text-muted">Saves units, history and settings to one JSON file.</p>
+        <p className="text-sm text-muted">Saves units, history, paints and settings to one JSON file. Photos are not included yet.</p>
         <button className="btn btn-primary w-fit" onClick={() => void download()}>⬇ Download backup</button>
       </section>
       <section className="panel grid gap-2 p-4">

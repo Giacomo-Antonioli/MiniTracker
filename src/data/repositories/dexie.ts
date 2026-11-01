@@ -1,3 +1,4 @@
+import type { Photo, PhotoFiles } from '../../domain/photos/types'
 import type { PaintDef, PaintStock } from '../../domain/paints/types'
 import type { Catalogue } from '../../domain/catalogue/types'
 import { validatePipeline } from '../../domain/collection/pipeline'
@@ -26,7 +27,10 @@ export class DexieUnitRepository implements UnitRepository {
   }
 
   async delete(id: string) {
-    await this.db.transaction('rw', this.db.units, this.db.statusEvents, async () => {
+    await this.db.transaction('rw', [this.db.units, this.db.statusEvents, this.db.photos, this.db.photoFiles], async () => {
+      const photoIds = (await this.db.photos.where('unitId').equals(id).primaryKeys()) as string[]
+      await this.db.photoFiles.bulkDelete(photoIds)
+      await this.db.photos.bulkDelete(photoIds)
       await this.db.statusEvents.where('unitId').equals(id).delete()
       await this.db.units.delete(id)
     })
@@ -129,5 +133,55 @@ export class DexiePaintRepository {
       await this.db.paintStock.delete(id)
       await this.db.customPaints.delete(id)
     })
+  }
+}
+
+export class DexiePhotoRepository {
+  private db: MiniTrackerDb
+  constructor(db: MiniTrackerDb) {
+    this.db = db
+  }
+
+  /** Saves metadata and image data together. Fails if the file name is already taken. */
+  async add(photo: Photo, files: PhotoFiles): Promise<void> {
+    if (photo.id !== files.id) throw new Error('Photo and files must share an id')
+    await this.db.transaction('rw', this.db.photos, this.db.photoFiles, async () => {
+      await this.db.photos.add(photo)
+      await this.db.photoFiles.put(files)
+    })
+  }
+
+  async listForUnit(unitId: string): Promise<Photo[]> {
+    const list = await this.db.photos.where('unitId').equals(unitId).toArray()
+    return list.sort((a, b) => a.takenAt.localeCompare(b.takenAt) || a.fileName.localeCompare(b.fileName))
+  }
+
+  files(id: string): Promise<PhotoFiles | undefined> {
+    return this.db.photoFiles.get(id)
+  }
+
+  async fileNameTaken(fileName: string): Promise<boolean> {
+    return (await this.db.photos.where('fileName').equals(fileName).count()) > 0
+  }
+
+  async update(photo: Photo): Promise<void> {
+    await this.db.photos.put(photo)
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.db.transaction('rw', this.db.photos, this.db.photoFiles, async () => {
+      await this.db.photoFiles.delete(id)
+      await this.db.photos.delete(id)
+    })
+  }
+
+  /** Total bytes stored, split by copy. */
+  async usage(): Promise<{ photos: number; displayBytes: number; originalBytes: number }> {
+    const all = await this.db.photos.toArray()
+    return {
+      photos: all.length,
+      displayBytes: all.reduce((n, p) => n + p.displayBytes, 0),
+      originalBytes: all.reduce((n, p) => n + (p.hasOriginal ? p.originalBytes : 0), 0),
+    }
   }
 }

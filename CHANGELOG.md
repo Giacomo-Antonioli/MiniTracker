@@ -13,6 +13,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 - Paint inventory: stage from the paint pipeline, pots with +/−, purchase date, price, shop, location, barcode, rating, favourite, notes; running low / empty shortcuts; stats (owned, pots, value, running low, wishlist, per brand) (#26).
 - Custom paints with colour picker; CSV import/export of the inventory (#26).
 - Backups include the paint inventory and custom paints (backup format v2; v1 files still import) (#26).
+- Photos for units and painting steps: original kept untouched, compressed copy (max 1600px, WebP/JPEG) shown in the app; gallery, viewer with captions, next/previous, download original, delete (#28).
+- Photo file names built from the mini: `<faction>_<unit>_<unit-tag>_<stage>_<date>_<nn>`, where the unit tag (`mt-xxxxxxxx`) is permanent and will be shared with QR/NFC tags (#28).
+- Settings → Storage shows photo usage and browser storage (#28).
 - Backlog banner when no unit catalogue is installed, with a one-click download and progress; can be hidden (#33).
 
 ## [0.2.0] - 2026-11-01

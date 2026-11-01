@@ -1,16 +1,17 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { THEMES, useStore, type Theme } from '../../app/store'
 import { DEFAULT_PIPELINES } from '../../domain/pipelines'
 import { BackupPage } from './BackupPage'
 import { CataloguePage } from './CataloguePage'
 import { PipelineEditor } from './PipelineEditor'
 
-export type SettingsSection = 'appearance' | 'pipelines' | 'catalogue' | 'backup'
+export type SettingsSection = 'appearance' | 'pipelines' | 'catalogue' | 'storage' | 'backup'
 
 const SECTIONS: { id: SettingsSection; label: string }[] = [
   { id: 'appearance', label: 'Appearance' },
   { id: 'pipelines', label: 'Pipelines' },
   { id: 'catalogue', label: 'Catalogue data' },
+  { id: 'storage', label: 'Storage' },
   { id: 'backup', label: 'Backup' },
 ]
 
@@ -87,9 +88,40 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
         <CataloguePage />
       </section>
 
+      <section id="settings-storage" className="grid scroll-mt-4 gap-3">
+        <h2 className="font-display text-xl text-accent">Storage</h2>
+        <StorageInfo />
+      </section>
+
       <section id="settings-backup" className="scroll-mt-4">
         <BackupPage />
       </section>
+    </div>
+  )
+}
+
+const mb = (b: number) => `${(b / 1024 / 1024).toFixed(1)} MB`
+
+function StorageInfo() {
+  const photoUsage = useStore((s) => s.photoUsage)
+  const [usage, setUsage] = useState<{ photos: number; displayBytes: number; originalBytes: number } | null>(null)
+  const [quota, setQuota] = useState<{ usage?: number; quota?: number } | null>(null)
+  useEffect(() => {
+    void photoUsage().then(setUsage)
+    void navigator.storage?.estimate?.().then(setQuota)
+  }, [photoUsage])
+  return (
+    <div className="panel grid gap-1 p-4 text-sm" aria-label="Storage usage">
+      <p>
+        Photos: <b>{usage?.photos ?? '…'}</b>
+        {usage && <> · shown copies {mb(usage.displayBytes)} · originals {mb(usage.originalBytes)}</>}
+      </p>
+      {quota?.quota !== undefined && (
+        <p className="text-muted">
+          This browser uses {mb(quota.usage ?? 0)} of about {mb(quota.quota)} available to MiniTracker.
+        </p>
+      )}
+      <p className="text-muted">Everything stays on this device. Photos are not in backups yet; that arrives next (light or full backups).</p>
     </div>
   )
 }

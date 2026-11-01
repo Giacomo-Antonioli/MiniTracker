@@ -13,6 +13,7 @@ export function MoveDialog({ unit, group, onClose }: { unit: OwnedUnit; group: M
   const [to, setTo] = useState(next.id)
   const [date, setDate] = useState(today())
   const [note, setNote] = useState('')
+  const [photo, setPhoto] = useState<File | null>(null)
   const [error, setError] = useState('')
   const from = pipeline.stages[currentIdx]?.name ?? group.status
 
@@ -25,7 +26,7 @@ export function MoveDialog({ unit, group, onClose }: { unit: OwnedUnit; group: M
           const dialog = (e.target as HTMLElement).closest('dialog')
           try {
             // Keep the real time when the date is today, so history stays in order within a day.
-            await move(unit, group.id, count, to, { date: date === today() ? new Date().toISOString() : date, note })
+            await move(unit, group.id, count, to, { date: date === today() ? new Date().toISOString() : date, note }, photo ?? undefined)
             dialog?.close()
           } catch (err) {
             setError((err as Error).message)
@@ -52,10 +53,21 @@ export function MoveDialog({ unit, group, onClose }: { unit: OwnedUnit; group: M
           <span className="text-sm text-muted">Date</span>
           <input className="input" type="date" value={date} max={today()} onChange={(e) => setDate(e.target.value)} required />
         </label>
-        <label className="grid gap-1">
-          <span className="text-sm text-muted">Photo</span>
-          <button type="button" className="btn w-fit" disabled title="Photos arrive in a later sprint">📷 Add photo (soon)</button>
-        </label>
+        <div className="grid gap-1">
+          <span className="text-sm text-muted">Photo (optional)</span>
+          <span className="flex flex-wrap items-center gap-2">
+            <label className="btn w-fit">
+              📷 {photo ? 'Change photo' : 'Add photo'}
+              <input type="file" accept="image/*" className="sr-only" aria-label="Photo for this step" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+            </label>
+            {photo && (
+              <>
+                <span className="max-w-48 truncate text-sm text-muted">{photo.name}</span>
+                <button type="button" className="text-sm text-muted underline" onClick={() => setPhoto(null)}>remove</button>
+              </>
+            )}
+          </span>
+        </div>
         <label className="grid gap-1">
           <span className="text-sm text-muted">Note</span>
           <input className="input" value={note} onChange={(e) => setNote(e.target.value)} />
