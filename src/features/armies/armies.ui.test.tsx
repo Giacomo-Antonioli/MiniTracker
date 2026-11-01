@@ -170,6 +170,39 @@ describe('Armies', () => {
     expect(localStorage.getItem('builderPanelWidth')).toBe('240')
   })
 
+  it('builds from my collection, links units, shows painting and sets next up', async () => {
+    const user = await start()
+    let n = 100
+    const id = () => `x${++n}`
+    await appDb.units.put({ ...createUnit({ customName: 'Second walker', datasheetId: 'u-walker', groups: [{ count: 1, status: 'painted' }] }, { now: 't', newId: id }) })
+    await useStore.getState().load()
+    await user.click(screen.getByRole('button', { name: '+ New list' }))
+    await user.type(screen.getByLabelText('Name'), 'Mine')
+    const check = screen.getByLabelText('Start with all the units I own')
+    expect(check).toBeDisabled()
+    await user.selectOptions(screen.getByLabelText('Faction'), 'Testers')
+    await user.click(check)
+    await user.click(screen.getByRole('button', { name: 'Create' }))
+
+    const entries = await screen.findAllByTestId('entry')
+    expect(entries).toHaveLength(2)
+    expect(entries[0]).toHaveTextContent('🎨 0/1')
+    expect(entries[1]).toHaveTextContent('🎨 1/1')
+    // Each unit can be linked once: the other entry's unit is not offered.
+    const pick = screen.getAllByLabelText('Big Walker from my collection')[0]
+    expect(within(pick).getAllByRole('option').map((o) => o.textContent)).toEqual(['My models: auto', 'My walker (1)'])
+
+    const mine = screen.getByRole('region', { name: 'From my collection' })
+    expect(mine).toHaveTextContent('1 model not painted yet')
+    await user.click(within(mine).getByRole('button', { name: 'Next up: My walker' }))
+    expect(within(mine).getByRole('button', { name: 'Next up: My walker' })).toHaveAttribute('aria-pressed', 'true')
+    expect((await appDb.units.toArray()).find((u) => u.customName === 'My walker')!.nextUp).toBe(true)
+
+    // "Add all my units" skips what is already in.
+    await user.click(screen.getByRole('button', { name: '⤵ Add all my units' }))
+    expect(screen.getAllByTestId('entry')).toHaveLength(2)
+  })
+
   it('asks to download again when the catalogue has no rule data', async () => {
     const { muster: _, ...old } = catalogue
     const user = await start({ ...old, formatVersion: 2 })

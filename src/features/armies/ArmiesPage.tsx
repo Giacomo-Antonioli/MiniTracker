@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { catalogueFor, ctx, useStore } from '../../app/store'
 import { EDITIONS } from '../../data/catalogue/fetch'
+import { addFromCollection } from '../../domain/lists/collection'
 import { createList } from '../../domain/lists/list'
 import { battleSizes } from '../../domain/lists/rules'
 import type { EditionKey } from '../../domain/lists/types'
@@ -85,7 +86,8 @@ export function ArmiesPage({ onOpenList, onOpenSettings }: { onOpenList: (id: st
 }
 
 function NewListForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: (id: string) => void }) {
-  const { catalogues, catalogue: active, saveList } = useStore()
+  const { catalogues, catalogue: active, saveList, units } = useStore()
+  const [fromCollection, setFromCollection] = useState(false)
   const installed = EDITIONS.filter((e) => catalogueFor(catalogues, e.key))
   const activeKey = installed.find((e) => catalogueFor(catalogues, e.key) === active)?.key
   const [edition, setEdition] = useState<EditionKey | undefined>(activeKey ?? installed[0]?.key)
@@ -99,7 +101,8 @@ function NewListForm({ onCancel, onCreated }: { onCancel: () => void; onCreated:
 
   const create = async () => {
     const b = sizes.find((x) => x.id === size)!
-    const l = createList({ name: name.trim(), edition: edition!, battleSize: b.id, pointsLimit: b.pointsLimit, ...(factionId ? { factionId } : {}) }, ctx())
+    let l = createList({ name: name.trim(), edition: edition!, battleSize: b.id, pointsLimit: b.pointsLimit, ...(factionId ? { factionId } : {}) }, ctx())
+    if (fromCollection && cat) l = addFromCollection(l, cat, units, ctx())
     await saveList(l)
     onCreated(l.id)
   }
@@ -152,6 +155,13 @@ function NewListForm({ onCancel, onCreated }: { onCancel: () => void; onCreated:
           ))}
         </select>
       </label>
+      <label className="flex items-center gap-2 text-sm sm:col-span-2">
+        <input type="checkbox" checked={fromCollection} disabled={!factionId} onChange={(e) => setFromCollection(e.target.checked)} />
+        Start with all the units I own
+      </label>
+      <p className="-mt-2 text-xs text-muted sm:col-span-2">
+        {factionId ? 'Every unit of this army you own is added, linked to your collection.' : 'Pick the army above to use this.'}
+      </p>
       <div className="flex gap-2 sm:col-span-2">
         <button className="btn btn-primary" type="submit" disabled={!name.trim()}>Create</button>
         <button className="btn" type="button" onClick={onCancel}>Cancel</button>
