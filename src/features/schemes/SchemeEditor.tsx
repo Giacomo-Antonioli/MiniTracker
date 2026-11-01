@@ -14,7 +14,7 @@ import { RecipeCard } from './RecipeCard'
 import { SchemePhotos } from './SchemePhotos'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
 
-export function SchemeEditor({ scheme, onOpen, onClose }: { scheme: PaintScheme; onOpen: (id: string) => void; onClose: () => void }) {
+export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: PaintScheme; onOpen: (id: string) => void; onClose: () => void; onOpenUnit?: (id: string) => void }) {
   const { paints, paintStock, schemes, units, pipelines, schemeDefaults, saveScheme, deleteScheme, setDefaultScheme } = useStore()
   const [draft, setDraft] = useState(scheme)
   const [error, setError] = useState('')
@@ -74,7 +74,21 @@ export function SchemeEditor({ scheme, onOpen, onClose }: { scheme: PaintScheme;
             {base && (
               <button className="underline" onClick={() => onOpen(base.id)}>↳ variant of {base.name}</button>
             )}
-            {usedBy.length > 0 && <span className="text-ok">used by {usedBy.map((u) => u.customName).join(', ')}</span>}
+            {usedBy.length > 0 && (
+              <span className="text-ok">
+                used by{' '}
+                {usedBy.map((u, i) => (
+                  <span key={u.id}>
+                    {i > 0 && ', '}
+                    {onOpenUnit ? (
+                      <button className="underline" onClick={() => onOpenUnit(u.id)}>{u.customName}</button>
+                    ) : (
+                      u.customName
+                    )}
+                  </span>
+                ))}
+              </span>
+            )}
           </span>
         </div>
         <div className="flex flex-wrap gap-2">

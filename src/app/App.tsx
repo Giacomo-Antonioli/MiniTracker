@@ -25,6 +25,11 @@ export default function App() {
     setUnitId(id)
     setPage('unit')
   }
+  const [schemeId, setSchemeId] = useState<string | undefined>()
+  const openScheme = (id: string) => {
+    setSchemeId(id)
+    setPage('schemes')
+  }
   const openDatasheet = (id: string) => {
     setDatasheetId(id)
     setPage('browse')
@@ -47,6 +52,7 @@ export default function App() {
     setPage(p)
     setSection(s)
     setDatasheetId(undefined)
+    setSchemeId(undefined)
   }
 
   const nav = (id: Page, label: string) => (
@@ -87,11 +93,11 @@ export default function App() {
         {!ready ? (
           <p className="text-muted">Loading…</p>
         ) : page === 'backlog' ? (
-          <BacklogPage onOpenUnit={openUnit} onOpenDatasheet={openDatasheet} />
+          <BacklogPage onOpenUnit={openUnit} onOpenDatasheet={openDatasheet} onOpenScheme={openScheme} />
         ) : page === 'unit' && unitId ? (
-          <UnitPage unitId={unitId} onBack={() => setPage('backlog')} onOpenDatasheet={openDatasheet} />
+          <UnitPage unitId={unitId} onBack={() => setPage('backlog')} onOpenDatasheet={openDatasheet} onOpenScheme={openScheme} />
         ) : page === 'schemes' ? (
-          <SchemesPage payload={recipe ?? undefined} onPayloadUsed={() => setRecipe(null)} />
+          <SchemesPage key={schemeId ?? 'all'} openId={schemeId} payload={recipe ?? undefined} onPayloadUsed={() => setRecipe(null)} onOpenUnit={openUnit} />
         ) : page === 'rules' ? (
           <RulesPage onOpenSettings={() => go('settings', 'catalogue')} onOpenDatasheet={openDatasheet} />
         ) : page === 'paints' ? (

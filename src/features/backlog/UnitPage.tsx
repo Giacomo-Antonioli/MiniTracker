@@ -5,7 +5,7 @@ import { UnitFormDialog } from './UnitFormDialog'
 import { UnitPanel } from './UnitPanel'
 
 /** Full page for one unit (double-click in the backlog). */
-export function UnitPage({ unitId, onBack, onOpenDatasheet }: { unitId: string; onBack: () => void; onOpenDatasheet: (id: string) => void }) {
+export function UnitPage({ unitId, onBack, onOpenDatasheet, onOpenScheme }: { unitId: string; onBack: () => void; onOpenDatasheet: (id: string) => void; onOpenScheme: (id: string) => void }) {
   const { units } = useStore()
   const [editing, setEditing] = useState(false)
   const unit = units.find((u) => u.id === unitId)
@@ -20,7 +20,7 @@ export function UnitPage({ unitId, onBack, onOpenDatasheet }: { unitId: string; 
   }
   return (
     <>
-      <UnitPanel unit={unit} variant="page" onEdit={() => setEditing(true)} onClose={onBack} onOpenDatasheet={onOpenDatasheet} />
+      <UnitPanel unit={unit} variant="page" onEdit={() => setEditing(true)} onClose={onBack} onOpenDatasheet={onOpenDatasheet} onOpenScheme={onOpenScheme} />
       {editing && <UnitFormDialog unit={unit} factions={factionsOf(units)} onClose={() => setEditing(false)} />}
     </>
   )

@@ -7,8 +7,7 @@ import type { ModelGroup, OwnedUnit } from '../../domain/collection/types'
 import { PhotoGallery } from '../photos/PhotoGallery'
 import { PhotoThumb } from '../photos/PhotoThumb'
 import { PhotoViewer } from '../photos/PhotoViewer'
-import { ColourStrip } from '../schemes/ColourStrip'
-import { colourStrip, missingPaints } from '../../domain/schemes/scheme'
+import { SchemeCardLink } from '../schemes/SchemeCardLink'
 import { unitTag } from '../../domain/photos/naming'
 import { MoveDialog } from './MoveDialog'
 
@@ -23,11 +22,12 @@ interface Props {
   variant?: 'panel' | 'page'
   onOpenPage?: () => void
   onOpenDatasheet?: (datasheetId: string) => void
+  onOpenScheme?: (schemeId: string) => void
 }
 
-export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage, onOpenDatasheet }: Props) {
+export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage, onOpenDatasheet, onOpenScheme }: Props) {
   const page = variant === 'page'
-  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, paints, paintStock, loadPaints } = useStore()
+  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, paints, loadPaints } = useStore()
   const scheme = unit.schemeId ? schemes.find((s) => s.id === unit.schemeId) : undefined
   const photos = allPhotos[unit.id] ?? []
   const [viewing, setViewing] = useState<string | null>(null)
@@ -128,26 +128,38 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
         </ul>
       </section>
 
-      {scheme && (
-        <section className="border-b border-line p-4" aria-label="Scheme">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Paint scheme</h3>
-          <ColourStrip colours={colourStrip(scheme, paints)} />
-          <p className="mt-2 text-sm">
-            🎨 <b>{scheme.name}</b>
-            {(() => {
-              const m = missingPaints(scheme, paintStock).length
-              return m ? <span className="text-danger"> · {m} paint{m > 1 ? 's' : ''} missing</span> : <span className="text-ok"> · all paints owned</span>
-            })()}
-          </p>
-          <ol className="mt-1 text-xs text-muted">
-            {scheme.sections.map((sec) => (
-              <li key={sec.id}>
-                <b>{sec.area}:</b> {sec.steps.map((st) => `${st.technique || 'step'} (${st.paints.map((p) => paints.find((x) => x.id === p.paintId)?.name ?? '?').join(' + ')})`).join(' → ')}
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
+      <section className="grid gap-2 border-b border-line p-4" aria-label="Scheme">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">Paint scheme</h3>
+          <select
+            className="input max-w-52 py-0.5 text-xs"
+            aria-label="Choose scheme"
+            value={unit.schemeId ?? ''}
+            onChange={(e) => void saveUnit({ ...unit, schemeId: e.target.value || undefined, updatedAt: new Date().toISOString() })}
+          >
+            <option value="">No scheme</option>
+            {[...schemes]
+              .sort((a, b) => Number(b.factionName === unit.factionName) - Number(a.factionName === unit.factionName) || a.name.localeCompare(b.name))
+              .map((s) => (
+                <option key={s.id} value={s.id}>{s.name}{s.factionName ? ` · ${s.factionName}` : ''}</option>
+              ))}
+          </select>
+        </div>
+        {scheme ? (
+          <>
+            <SchemeCardLink scheme={scheme} large={page} onOpen={onOpenScheme && (() => onOpenScheme(scheme.id))} />
+            <ol className="text-xs text-muted">
+              {scheme.sections.map((sec) => (
+                <li key={sec.id}>
+                  <b>{sec.area}:</b> {sec.steps.map((st) => `${st.technique || 'step'} (${st.paints.map((p) => paints.find((x) => x.id === p.paintId)?.name ?? '?').join(' + ')})`).join(' → ')}
+                </li>
+              ))}
+            </ol>
+          </>
+        ) : (
+          <p className="text-sm text-muted">{schemes.length ? 'No scheme yet: pick one above.' : 'No schemes yet. Create one in Schemes.'}</p>
+        )}
+      </section>
 
       <PhotoGallery unit={unit} photos={photos} thumbSize={page ? 'h-40 w-40' : undefined} />
 
