@@ -53,7 +53,7 @@ describe('Add from link', () => {
     const s = useStore.getState().schemes[0]
     expect(s).toMatchObject({ name: "Vior'la quick", origin: 'community', factionName: "T'au Empire", source: { url: 'https://example.com/tau-guide', author: 'Jane' } })
     expect(s.sections.map((x) => [x.area, x.steps.map((st) => st.technique)])).toEqual([['Armour', ['basecoat', 'shade']], ['Red markings', ['layer']]])
-    expect(useStore.getState().recipeLinks[0]).toMatchObject({ url: 'https://example.com/tau-guide', schemeId: s.id })
+    await waitFor(() => expect(useStore.getState().recipeLinks[0]).toMatchObject({ url: 'https://example.com/tau-guide', schemeId: s.id }))
   })
 
   it('creates an empty scheme from a bare link, and needs a link', async () => {
@@ -76,5 +76,17 @@ describe('Add from link', () => {
     await waitFor(() => expect(within(d).getByRole('region', { name: 'Draft preview' })).toHaveTextContent('2 steps in 1 areas'))
     expect(location.hash).toBe('')
     expect(within(d).getByLabelText('Title')).toHaveValue('Farsight red')
+  })
+
+  it('overlapping saves of the same link keep the scheme mark', async () => {
+    await openDialog()
+    const { rememberLink } = useStore.getState()
+    await Promise.all([
+      rememberLink({ url: 'https://x.example/a', title: 'A', schemeId: 's1' }),
+      rememberLink({ url: 'https://x.example/a', title: 'A again' }),
+    ])
+    expect(useStore.getState().recipeLinks).toEqual([expect.objectContaining({ url: 'https://x.example/a', title: 'A again', schemeId: 's1' })])
+    const saved = (await appDb.settings.get('recipeLinks'))!.value as { schemeId?: string }[]
+    expect(saved[0].schemeId).toBe('s1')
   })
 })
