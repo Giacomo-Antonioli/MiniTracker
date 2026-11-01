@@ -10,7 +10,7 @@ test('import catalogue from local files', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', (e) => errors.push(e.message))
   await page.goto('./')
-  await page.getByRole('button', { name: 'Catalogue' }).click()
+  await page.getByRole('button', { name: 'Catalogue data' }).click()
   await expect(page.getByText('No catalogue installed yet')).toBeVisible()
 
   await page.locator('input[type=file]').setInputFiles(files)
@@ -19,7 +19,7 @@ test('import catalogue from local files', async ({ page }) => {
   await expect(status).toContainText('5 units in 2 factions')
 
   await page.reload()
-  await page.getByRole('button', { name: 'Catalogue' }).click()
+  await page.getByRole('button', { name: 'Catalogue data' }).click()
   await expect(status).toContainText('5 units in 2 factions')
   expect(errors).toEqual([])
 })
