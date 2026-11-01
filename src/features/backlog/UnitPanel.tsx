@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { pointsFor } from '../../domain/catalogue/points'
 import { totalModels } from '../../domain/collection/ownedUnit'
@@ -9,11 +9,24 @@ import { PhotoThumb } from '../photos/PhotoThumb'
 import { PhotoViewer } from '../photos/PhotoViewer'
 import { ColourStrip } from '../schemes/ColourStrip'
 import { colourStrip, missingPaints } from '../../domain/schemes/scheme'
+import { unitTag } from '../../domain/photos/naming'
 import { MoveDialog } from './MoveDialog'
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
 
-export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: () => void; onClose: () => void }) {
+interface Props {
+  unit: OwnedUnit
+  onEdit: () => void
+  /** Panel: close it. Page: go back. */
+  onClose: () => void
+  /** 'panel' (side panel next to the backlog) or 'page' (full unit page). */
+  variant?: 'panel' | 'page'
+  onOpenPage?: () => void
+  onOpenDatasheet?: (datasheetId: string) => void
+}
+
+export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage, onOpenDatasheet }: Props) {
+  const page = variant === 'page'
   const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, paints, paintStock, loadPaints } = useStore()
   const scheme = unit.schemeId ? schemes.find((s) => s.id === unit.schemeId) : undefined
   const photos = allPhotos[unit.id] ?? []
@@ -42,22 +55,39 @@ export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: 
   const toggle = (flag: 'favourite' | 'nextUp') => saveUnit(setFlags(unit, { [flag]: !unit[flag] }, ctx()))
 
   return (
-    <aside className="panel flex h-full w-[420px] shrink-0 flex-col overflow-y-auto" aria-label="Unit details">
+    <Container
+      className={page ? 'panel mx-auto flex w-full max-w-4xl flex-col' : 'panel flex h-full w-[420px] shrink-0 flex-col overflow-y-auto'}
+      aria-label={page ? 'Unit page' : 'Unit details'}
+    >
       <header className="border-b border-line p-4">
+        {page && (
+          <button className="mb-3 text-sm text-muted hover:text-accent" onClick={onClose}>
+            ← Back to backlog
+          </button>
+        )}
         <div className="flex items-start justify-between gap-2">
-          <h2 className="font-display text-xl text-accent">{unit.customName}</h2>
+          <h2 className={`font-display text-accent ${page ? 'text-3xl' : 'text-xl'}`}>{unit.customName}</h2>
           <div className="flex gap-1">
             <button className="btn" aria-pressed={unit.favourite} title="Favourite" onClick={() => toggle('favourite')}>{unit.favourite ? '★' : '☆'}</button>
             <button className="btn" aria-pressed={unit.nextUp} title="Next up" onClick={() => toggle('nextUp')}>{unit.nextUp ? '⏭' : '⏵'}</button>
-            <button className="btn" aria-label="Close details" onClick={onClose}>✕</button>
+            {!page && onOpenPage && (
+              <button className="btn" title="Open the full unit page" onClick={onOpenPage}>⤢ Open page</button>
+            )}
+            {!page && <button className="btn" aria-label="Close details" onClick={onClose}>✕</button>}
           </div>
         </div>
         <p className="mt-1 text-sm text-muted">
-          {unit.factionName ?? 'No faction'} · {unit.lifecycle}
+          {unit.factionName ?? 'No faction'} · {unit.lifecycle} ·{' '}
+          <span title="Permanent unit tag, used in photo names and future QR/NFC tags" aria-label="Unit tag">🏷 {unitTag(unit.id)}</span>
         </p>
         {datasheet && (
           <p className="mt-1 text-sm" aria-label="Datasheet">
-            📜 {datasheet.name}
+            📜{' '}
+            {onOpenDatasheet ? (
+              <button className="text-accent underline" onClick={() => onOpenDatasheet(datasheet.id)}>{datasheet.name}</button>
+            ) : (
+              datasheet.name
+            )}
             {datasheet.role && <span className="text-muted"> · {datasheet.role}</span>}
             <span className="text-muted"> · {models} models</span>
             {points !== undefined ? (
@@ -119,7 +149,7 @@ export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: 
         </section>
       )}
 
-      <PhotoGallery unit={unit} photos={photos} />
+      <PhotoGallery unit={unit} photos={photos} thumbSize={page ? 'h-40 w-40' : undefined} />
 
       <section className="border-b border-line p-4">
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">History</h3>
@@ -166,6 +196,14 @@ export function UnitPanel({ unit, onEdit, onClose }: { unit: OwnedUnit; onEdit: 
 
       {viewing && <PhotoViewer photos={photos} startId={viewing} onClose={() => setViewing(null)} />}
       {moving && <MoveDialog unit={unit} group={moving} onClose={() => setMoving(null)} />}
-    </aside>
+    </Container>
+  )
+}
+
+function Container({ className, children, ...rest }: { className: string; children: ReactNode; 'aria-label': string }) {
+  return rest['aria-label'] === 'Unit page' ? (
+    <article className={className} {...rest}>{children}</article>
+  ) : (
+    <aside className={className} {...rest}>{children}</aside>
   )
 }

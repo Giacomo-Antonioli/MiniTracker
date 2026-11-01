@@ -6,14 +6,14 @@ import type { Catalogue, Datasheet } from '../../domain/catalogue/types'
 import { factionsOf } from '../../domain/collection/backlog'
 import { UnitFormDialog } from '../backlog/UnitFormDialog'
 
-export function CatalogueBrowser({ onOpenSettings }: { onOpenSettings: () => void }) {
+export function CatalogueBrowser({ onOpenSettings, openId }: { onOpenSettings: () => void; openId?: string }) {
   const { catalogue, units } = useStore()
   const [text, setText] = useState('')
   const [factionId, setFactionId] = useState('')
   const [role, setRole] = useState('')
   const [ownedOnly, setOwnedOnly] = useState(false)
   const [legends, setLegends] = useState(false)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(openId ?? null)
   const [adding, setAdding] = useState<Datasheet | null>(null)
 
   const owned = useMemo(() => ownedByDatasheet(units), [units])

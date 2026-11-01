@@ -12,6 +12,7 @@ import type { Photo, PhotoOwner } from '../domain/photos/types'
 import { inventoryFromCsv } from '../domain/paints/csv'
 import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Catalogue } from '../domain/catalogue/types'
+import type { BacklogFilter } from '../domain/collection/backlog'
 import { DEFAULT_PIPELINES, type PipelineKey } from '../domain/pipelines'
 import { DEFAULT_PIPELINE, moveModels, type MoveOptions } from '../domain/collection/pipeline'
 import type { Ctx, OwnedUnit, Pipeline, StageId, StatusEvent } from '../domain/collection/types'
@@ -98,6 +99,9 @@ interface State {
   move(unit: OwnedUnit, groupId: string, count: number, to: StageId, opts: MoveOptions, photo?: File): Promise<void>
   /** Photos per unit id (unit gallery + history photos), loaded on demand. */
   photos: Record<string, Photo[]>
+  /** Backlog filters, kept while you visit other pages. */
+  backlogFilter: BacklogFilter
+  setBacklogFilter(f: BacklogFilter): void
   loadPhotos(unitId: string): Promise<void>
   addPhotos(unit: OwnedUnit, files: File[], opts?: { owner?: PhotoOwner; stage?: string; id?: string }): Promise<Photo[]>
   /** Photos of a scheme (cover, gallery, steps), stored under photos[schemeId]. */
@@ -300,6 +304,10 @@ export const useStore = create<State>((set, get) => ({
   },
 
   photos: {},
+  backlogFilter: {},
+  setBacklogFilter(f) {
+    set({ backlogFilter: f })
+  },
 
   async loadPhotos(unitId) {
     set({ photos: { ...get().photos, [unitId]: await photoRepo.listForUnit(unitId) } })
