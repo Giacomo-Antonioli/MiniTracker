@@ -37,6 +37,10 @@ export interface Datasheet {
   stats?: StatLine[]
   /** Weapon profiles of the unit and its wargear options (catalogue format 5). */
   weapons?: WeaponProfile[]
+  /** For Leaders: the units (datasheet ids) or keywords this unit can lead. */
+  leads?: { ids: string[]; keywords: string[] }
+  /** Most Leaders this unit can have attached (default 1). */
+  maxLeaders?: number
   /** How many of this unit an army may include (e.g. 3, Epic Heroes 1); some battle sizes change it. */
   armyLimit?: ArmyLimit
 }
@@ -74,11 +78,12 @@ export interface KeywordMinimum {
 /**
  * A BSData condition, kept so it can be checked against a list later.
  * Leaves count what the list has: a battle size, detachment, unit or enhancement by id, or units/detachments with a keyword.
+ * `unit` leaves look at one unit instead (BattleScribe scopes parent / ancestor / root-entry / self / unit).
  */
 export type Condition =
   | { all: Condition[] }
   | { any: Condition[] }
-  | { op: ConditionOp; value: number; id?: string; keyword?: string }
+  | { op: ConditionOp; value: number; id?: string; keyword?: string; unit?: true }
 
 export type ConditionOp = 'atLeast' | 'atMost' | 'equalTo' | 'notEqualTo' | 'lessThan' | 'greaterThan' | 'instanceOf' | 'notInstanceOf'
 
@@ -122,6 +127,8 @@ export interface Enhancement {
   name: string
   points: number
   detachmentId: string
+  /** Hidden for a unit when this holds, i.e. which units can't take it (e.g. Kroot-only enhancements). */
+  notFor?: Condition
 }
 
 /** How many detachments a faction's army takes. */
@@ -149,7 +156,7 @@ export interface CatalogueSource {
 }
 
 export interface Catalogue {
-  /** 2 = includes rules and ability texts; 3 = muster rules and army limits; 4 = detachments and enhancements; 5 = stat lines and weapon profiles. Older catalogues have none. */
+  /** 2 = includes rules and ability texts; 3 = muster rules and army limits; 4 = detachments and enhancements; 5 = stat lines and weapon profiles; 6 = leaders and enhancement restrictions. Older catalogues have none. */
   formatVersion?: number
   gameId: string
   gameName: string

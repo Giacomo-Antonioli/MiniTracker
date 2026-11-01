@@ -77,7 +77,7 @@ describe('parseBsData', () => {
 
 describe('rules', () => {
   it('reads core rules from the game system and faction rules from catalogues', () => {
-    expect(cat.formatVersion).toBe(5)
+    expect(cat.formatVersion).toBe(6)
     expect(cat.rules!.map((r) => [r.name, r.kind])).toEqual([
       ['Assault', 'core'],
       ['Deep Strike', 'core'],
@@ -106,7 +106,7 @@ describe('pointsFor', () => {
   })
 
   it('reads battle sizes and keyword minimums from the main force', () => {
-    expect(cat.formatVersion).toBe(5)
+    expect(cat.formatVersion).toBe(6)
     expect(cat.muster).toMatchObject({
       battleSizes: [
         { id: 'bs-inc', name: 'Incursion', pointsLimit: 1000 },
@@ -154,10 +154,12 @@ describe('detachments and enhancements', () => {
   })
 
   it('links each enhancement to its detachment from the group or its own condition', () => {
-    expect(cat.enhancements).toEqual([
+    expect(cat.enhancements).toMatchObject([
       { id: 'enh-banner', name: 'Big Banner', points: 20, detachmentId: 'det-heavy' },
       { id: 'enh-charm', name: 'Lucky Charm', points: 15, detachmentId: 'det-line' },
     ])
+    // Their "hidden unless the detachment is chosen" conditions are kept, to check which units may take them.
+    expect(cat.enhancements![1].notFor).toEqual({ op: 'lessThan', value: 1, id: 'det-line' })
   })
 })
 
