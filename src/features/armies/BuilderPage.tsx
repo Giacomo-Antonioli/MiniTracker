@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { catalogueFor, ctx, useStore } from '../../app/store'
 import { EDITIONS } from '../../data/catalogue/fetch'
 import { ownedByDatasheet } from '../../domain/catalogue/owned'
@@ -7,6 +7,9 @@ import { removeEntry, updateEntry } from '../../domain/lists/list'
 import { listOwnership } from '../../domain/lists/ownership'
 import { listPoints } from '../../domain/lists/points'
 import { buyList, buyListText } from '../../domain/lists/buy'
+import { addFromCollection, collectionPlan } from '../../domain/lists/collection'
+import { totalModels } from '../../domain/collection/ownedUnit'
+import { isGone, setFlags } from '../../domain/collection/pipeline'
 import { BuyListSheet } from './BuyListSheet'
 import { evalLimit } from '../../domain/lists/conditions'
 import { addUnit, battleSizes, checkList, legalUnits, listCounter } from '../../domain/lists/rules'
@@ -139,7 +142,7 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
 }
 
 function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave: (l: ArmyList) => void }) {
-  const { units } = useStore()
+  const { units, pipeline } = useStore()
   const [highlight, setHighlight] = useState<string[]>([])
   const [choose, setChoose] = useState<Datasheet | null>(null)
   const [dropping, setDropping] = useState(false)
@@ -153,7 +156,8 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   const enhancements = useMemo(() => new Map((cat.enhancements ?? []).map((x) => [x.id, x])), [cat])
   const points = useMemo(() => listPoints(list, sheets, enhancements), [list, sheets, enhancements])
   const offered = (cat.enhancements ?? []).filter((x) => list.detachmentIds?.includes(x.detachmentId))
-  const own = useMemo(() => listOwnership(list, units), [list, units])
+  const own = useMemo(() => listOwnership(list, units, pipeline), [list, units, pipeline])
+  const linkedElsewhere = (entryId: string) => new Set(list.entries.filter((x) => x.id !== entryId && x.ownedUnitId).map((x) => x.ownedUnitId))
   const issues = useMemo(() => (cat.muster ? checkList(list, cat) : []), [list, cat])
   const flagged = new Set(issues.flatMap((i) => i.entryIds))
 
@@ -163,7 +167,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
 
   return (
     <div className="grid items-start gap-3 lg:grid-cols-[var(--add-w)_auto_minmax(0,1fr)] lg:gap-0" style={{ '--add-w': `${panelWidth}px` } as React.CSSProperties}>
-      <AddPanel list={list} cat={cat} onAdd={add} choose={choose} onCancelChoose={() => setChoose(null)} />
+      <AddPanel list={list} cat={cat} onAdd={add} choose={choose} onCancelChoose={() => setChoose(null)} onSave={onSave} />
       <ResizeHandle width={panelWidth} onChange={setPanelWidth} />
       {/* The whole column takes drops, down to the bottom of the screen, not just the list box. */}
       <div
@@ -227,6 +231,21 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                     ))}
                   </select>
                 )}
+                {units.some((u) => u.datasheetId === e.datasheetId && !isGone(u.lifecycle)) && (
+                  <select
+                    className="input py-0.5 text-xs"
+                    aria-label={`${d?.name ?? 'Unit'} from my collection`}
+                    value={e.ownedUnitId ?? ''}
+                    onChange={(ev) => edit(e.id, { ownedUnitId: ev.target.value || undefined })}
+                  >
+                    <option value="">My models: auto</option>
+                    {units
+                      .filter((u) => u.datasheetId === e.datasheetId && !isGone(u.lifecycle) && !linkedElsewhere(e.id).has(u.id))
+                      .map((u) => (
+                        <option key={u.id} value={u.id}>{u.customName} ({totalModels(u)})</option>
+                      ))}
+                  </select>
+                )}
                 {d && d.maxModels > d.minModels ? (
                   <select className="input py-0.5" aria-label={`${d.name} models`} value={e.models} onChange={(ev) => edit(e.id, { models: Number(ev.target.value) })}>
                     {Array.from({ length: d.maxModels - d.minModels + 1 }, (_, i) => d.minModels + i).map((n) => (
@@ -239,6 +258,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 <span className={`w-16 text-sm ${o.state === 'missing' ? 'text-muted' : ''}`} title={`${o.have} of ${o.need} models owned`}>
                   {o.state === 'owned' ? '✅' : o.state === 'partial' ? `🟡 ${o.have}/${o.need}` : `✖ 0/${o.need}`}
                 </span>
+                <span className="w-14 text-xs text-muted" title={`${o.painted} of ${o.have} owned models painted`}>{o.have > 0 ? `🎨 ${o.painted}/${o.have}` : ''}</span>
                 <span className="w-12 text-right text-sm">{pts ?? '—'}</span>
                 <button className="btn px-2 py-0.5" aria-label={`Remove ${d?.name ?? 'unit'}`} onClick={() => onSave(removeEntry(list, e.id, ctx()))}>✕</button>
               </div>
@@ -260,6 +280,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 </button>
               ))
             )}
+        <CollectionPanel own={own} />
         <BuyPanel list={list} rows={buyList(list, sheets, own, points)} subtitle={[cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name].filter(Boolean).join(' · ')} />
           </section>
         )}
@@ -332,7 +353,7 @@ function ResizeHandle({ width, onChange }: { width: number; onChange: (w: number
 /** Data type used when dragging a unit from the add panel onto the list. */
 const DRAG_TYPE = 'application/x-minitracker-datasheet'
 
-function AddPanel({ list, cat, onAdd, choose, onCancelChoose }: { list: ArmyList; cat: Catalogue; onAdd: (d: Datasheet, factionId?: string) => void; choose: Datasheet | null; onCancelChoose: () => void }) {
+function AddPanel({ list, cat, onAdd, choose, onCancelChoose, onSave }: { list: ArmyList; cat: Catalogue; onAdd: (d: Datasheet, factionId?: string) => void; choose: Datasheet | null; onCancelChoose: () => void; onSave: (l: ArmyList) => void }) {
   const { units } = useStore()
   const [text, setText] = useState('')
   const [notOwned, setNotOwned] = useState(false)
@@ -359,6 +380,15 @@ function AddPanel({ list, cat, onAdd, choose, onCancelChoose }: { list: ArmyList
   return (
     <section className="panel grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2 p-3 lg:sticky lg:top-0 lg:max-h-[calc(100vh-6rem)] lg:overflow-auto" aria-label="Add units">
       <input className="input" placeholder="🔍 Search units" aria-label="Search units" value={text} onChange={(e) => setText(e.target.value)} />
+      {list.factionId && (
+        <button
+          className="btn text-sm"
+          title="Adds every unit you own of this faction that isn't in the list yet"
+          onClick={() => onSave(addFromCollection(list, cat, units, ctx(), { legends }))}
+        >
+          ⤵ Add all my units
+        </button>
+      )}
       <div className="flex flex-wrap gap-3 text-sm">
         <label className="flex items-center gap-1">
           <input type="checkbox" checked={notOwned} onChange={(e) => setNotOwned(e.target.checked)} /> Not owned
@@ -496,6 +526,51 @@ function BuyPanel({ list, rows: b, subtitle }: { list: ArmyList; rows: ReturnTyp
             ))}
           </tbody>
         </table>
+      )}
+    </section>
+  )
+}
+
+/** What the collection still needs for this list: models to paint (with a "next up" shortcut) and missing paints. */
+function CollectionPanel({ own }: { own: ReturnType<typeof listOwnership> }) {
+  const { units, schemes, paintStock, schemeDefaults, paints, loadPaints, saveUnit } = useStore()
+  useEffect(() => {
+    if (!paints.length) void loadPaints()
+  }, [paints.length, loadPaints])
+  const plan = useMemo(() => collectionPlan(own, units, schemes, paintStock, schemeDefaults), [own, units, schemes, paintStock, schemeDefaults])
+  const paintName = new Map(paints.map((p) => [p.id, `${p.brand} ${p.name}`]))
+  if (!plan.toPaint.length && !plan.missingPaints.length) return null
+  return (
+    <section className="panel grid gap-2 p-3" aria-label="From my collection">
+      <h2 className="font-semibold">From my collection</h2>
+      {plan.toPaint.length > 0 && (
+        <div className="grid gap-1 text-sm">
+          <p className="text-muted">{own.unpaintedModels} model{own.unpaintedModels === 1 ? '' : 's'} not painted yet</p>
+          {plan.toPaint.map(({ unit, models }) => (
+            <div key={unit.id} className="flex items-center gap-2">
+              <span className="min-w-0 flex-1 truncate">{unit.customName}</span>
+              <span className="text-muted">{models} to paint</span>
+              <button
+                className={`btn px-2 py-0.5 text-xs ${unit.nextUp ? 'btn-primary' : ''}`}
+                aria-pressed={unit.nextUp}
+                aria-label={`Next up: ${unit.customName}`}
+                onClick={() => void saveUnit(setFlags(unit, { nextUp: !unit.nextUp }, ctx()))}
+              >
+                ⏭ Next up
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      {plan.missingPaints.length > 0 && (
+        <div className="grid gap-1 text-sm">
+          <p className="text-muted">Paints missing for their schemes</p>
+          <ul className="grid gap-0.5">
+            {plan.missingPaints.map((m) => (
+              <li key={m.paintId}>{paintName.get(m.paintId) ?? m.paintId} <span className="text-xs text-muted">({m.schemes.join(', ')})</span></li>
+            ))}
+          </ul>
+        </div>
       )}
     </section>
   )
