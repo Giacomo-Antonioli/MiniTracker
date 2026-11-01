@@ -21,6 +21,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 - "Make my variant" copies any scheme with a link to the original and shows paints added/dropped; default scheme per faction (pre-selected for new units); scheme shown on units; share/import scheme files (friends' custom paints come along); schemes in backups (#27).
 - Scheme library: 40 T'au Empire community schemes (Paint Pad, Tale of Painters) bundled read-only with credit and links; "Save a copy" or "Make my variant" to make them yours; extra paints they use are added to the paint list.
 - Recipe extractor (`src/domain/schemes/extract.ts`): turns recipe pages into areas and steps matched to our paints (techniques, mix ratios, spelling slips); scraper tool `npm run schemes:scrape` with Paint Pad and blog adapters.
+- Official T'au studio schemes in the library (T'au Sept, Vior'la, Farsight Enclaves): official colours with a simple recipe written by MiniTracker, linked to the Warhammer Community videos (#27).
+- Scheme photos: gallery, cover photo (shown on cards and in the editor), photos per step; names like `scheme_<name>_sc-xxxxxxxx_<date>_<nn>`; deleted with the scheme; in backups (#27).
+- Printable recipe cards (print or save as PDF): colour strip, credit, paint checklist with owned marks, steps per area, tips (#27).
 - "Add from link": paste any recipe link (always remembered in Saved links) and optionally its text; the app drafts the scheme (areas, steps, paints) for review and keeps the link as source.
 - "Send to MiniTracker" bookmarklet: on any recipe page you are reading (Goonhammer, blogs, Paint Pad…), one click opens MiniTracker with the steps read from that page; nothing goes through a server.
 - Backlog banner when no unit catalogue is installed, with a one-click download and progress; can be hidden (#33).

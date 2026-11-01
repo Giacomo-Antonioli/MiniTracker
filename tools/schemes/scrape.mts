@@ -95,8 +95,11 @@ for (const file of readdirSync(new URL('./manual/', import.meta.url))) {
   }))
   if (missing.length) throw new Error(`${file}: unknown paints ${missing.join(', ')}`)
   schemes.push({
-    id: m.id, name: m.name, factionName: m.factionName, origin: 'community', stage: 'final', tags: m.tags, tips: '', tutorials: [], source: m.source,
-    description: `Community recipe${m.source.author ? ` by ${m.source.author}` : ''}. Steps and paints only; see the source for the full guide.`,
+    id: m.id, name: m.name, factionName: m.factionName, origin: m.origin ?? 'community', stage: 'final', tags: m.tags, tips: m.tips ?? '', tutorials: [], source: m.source,
+    description:
+      m.origin === 'official'
+        ? 'Official studio colours with a simple recipe written by MiniTracker; see the official video for the full method.'
+        : `Community recipe${m.source.author ? ` by ${m.source.author}` : ''}. Steps and paints only; see the source for the full guide.`,
     sections, createdAt: new Date(m.date).toISOString(), updatedAt: '2026-11-02T00:00:00.000Z',
   })
   report.push(`MANUAL ${m.id}  "${m.name}"`)

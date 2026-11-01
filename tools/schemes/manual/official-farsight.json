@@ -1,0 +1,29 @@
+{
+  "id": "lib/official-farsight-enclaves",
+  "name": "Farsight Enclaves (studio colours)",
+  "origin": "official",
+  "factionName": "T'au Empire",
+  "tags": ["Farsight"],
+  "source": { "title": "How to paint the T'au Empire Combat Patrol (Warhammer Community video)", "url": "https://www.warhammer-community.com/en-gb/videos/spOsG99e/how-to-paint-tau-empire-combat-patrol-intermediate-warhammer-40000/", "author": "Games Workshop" },
+  "tips": "Official studio colours. The steps are a simple standard recipe written by MiniTracker for these colours; watch the linked Warhammer Community video for Games Workshop's own method.",
+  "date": "2026-11-02",
+  "sections": [
+    { "area": "Preparation", "steps": [{ "technique": "prime", "paints": [{ "name": "Abaddon Black" }] }] },
+    { "area": "Armour (red)", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "Mephiston Red" }] },
+      { "technique": "shade", "paints": [{ "name": "Carroburg Crimson" }] },
+      { "technique": "layer", "paints": [{ "name": "Evil Sunz Scarlet" }] },
+      { "technique": "edge highlight", "paints": [{ "name": "Wild Rider Red" }] }
+    ] },
+    { "area": "Undersuit", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "Mechanicus Standard Grey" }] },
+      { "technique": "shade", "paints": [{ "name": "Nuln Oil" }] },
+      { "technique": "highlight", "paints": [{ "name": "Dawnstone" }] }
+    ] },
+    { "area": "Markings (white)", "steps": [{ "technique": "details", "paints": [{ "name": "White Scar" }] }] },
+    { "area": "Lenses", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "Caledor Sky" }] },
+      { "technique": "highlight", "paints": [{ "name": "Temple Guard Blue" }] }
+    ] }
+  ]
+}

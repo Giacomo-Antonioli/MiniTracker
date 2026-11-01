@@ -90,4 +90,23 @@ describe('schema migrations', () => {
     expect(await db.photos.get('p1')).toBeDefined()
     await db.delete()
   })
+
+  it('v5 → v6 indexes photos by scheme and keeps existing photos', async () => {
+    const name = `mig-${Math.random()}`
+    const v5 = new Dexie(name)
+    v5.version(1).stores({ units: 'id, customName, lifecycle, factionId, updatedAt', statusEvents: 'id, unitId, date', settings: 'key' })
+    v5.version(2).stores({ catalogues: 'gameId' })
+    v5.version(3).stores({ paintStock: 'paintId, stage', customPaints: 'id, brand' })
+    v5.version(4).stores({ photos: 'id, unitId, &fileName, createdAt', photoFiles: 'id' })
+    v5.version(5).stores({ schemes: 'id, origin, factionName, basedOn, stage' })
+    await v5.table('photos').put({ id: 'p1', unitId: 'u1', fileName: 'a.jpg', createdAt: 't' })
+    v5.close()
+
+    const db = new MiniTrackerDb(name)
+    await db.open()
+    expect(await db.photos.get('p1')).toBeDefined()
+    await db.photos.put({ id: 'p2', schemeId: 's1', fileName: 'b.jpg', createdAt: 't' } as never)
+    expect(await db.photos.where('schemeId').equals('s1').count()).toBe(1)
+    await db.delete()
+  })
 })

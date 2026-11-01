@@ -6,13 +6,20 @@ import {
 } from '../../domain/schemes/scheme'
 import type { PaintScheme, SchemeOrigin, SchemeStep } from '../../domain/schemes/types'
 import { Combobox } from '../../ui/Combobox'
+import { PhotoThumb } from '../photos/PhotoThumb'
+import { PhotoViewer } from '../photos/PhotoViewer'
+import { usePhotoUrl } from '../photos/usePhotoUrl'
 import { ColourStrip } from './ColourStrip'
+import { RecipeCard } from './RecipeCard'
+import { SchemePhotos } from './SchemePhotos'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
 
 export function SchemeEditor({ scheme, onOpen, onClose }: { scheme: PaintScheme; onOpen: (id: string) => void; onClose: () => void }) {
   const { paints, paintStock, schemes, units, pipelines, schemeDefaults, saveScheme, deleteScheme, setDefaultScheme } = useStore()
   const [draft, setDraft] = useState(scheme)
   const [error, setError] = useState('')
+  const [printing, setPrinting] = useState(false)
+  const coverUrl = usePhotoUrl(draft.coverPhotoId)
   const dirty = JSON.stringify(draft) !== JSON.stringify(scheme)
   const byId = useMemo(() => new Map(paints.map((p) => [p.id, p])), [paints])
   const { library } = useStore()
@@ -53,8 +60,11 @@ export function SchemeEditor({ scheme, onOpen, onClose }: { scheme: PaintScheme;
 
   return (
     <section className="panel flex min-w-0 flex-1 flex-col overflow-y-auto" aria-label="Scheme editor">
-      <div className="p-4 pb-0">
-        <ColourStrip colours={colourStrip(draft, paints)} height="h-6" />
+      <div className="flex gap-3 p-4 pb-0">
+        {coverUrl && <img src={coverUrl} alt="Cover" className="h-20 w-20 shrink-0 rounded object-cover" />}
+        <div className="flex-1 self-end">
+          <ColourStrip colours={colourStrip(draft, paints)} height="h-6" />
+        </div>
       </div>
       <header className="flex flex-wrap items-start justify-between gap-2 border-b border-line p-4">
         <div className="grid min-w-0 flex-1 gap-1">
@@ -85,6 +95,7 @@ export function SchemeEditor({ scheme, onOpen, onClose }: { scheme: PaintScheme;
           )
         )}
         <button className="btn" onClick={share}>⬇ Share file</button>
+        <button className="btn" onClick={() => setPrinting(true)}>🖨 Recipe card</button>
         <button
           className="btn btn-danger ml-auto"
           onClick={() => confirm(`Delete "${scheme.name}"?${usedBy.length ? ` ${usedBy.length} unit(s) will be unlinked.` : ''}`) && void deleteScheme(scheme.id).then(onClose)}
@@ -152,6 +163,8 @@ export function SchemeEditor({ scheme, onOpen, onClose }: { scheme: PaintScheme;
         </label>
       </div>
 
+      <SchemePhotos scheme={scheme} cover={draft.coverPhotoId} onCover={(id) => patch({ coverPhotoId: id })} />
+
       {(missing.length > 0 || base) && (
         <div className="grid gap-2 border-b border-line p-4 text-sm">
           {missing.length > 0 && (
@@ -186,6 +199,7 @@ export function SchemeEditor({ scheme, onOpen, onClose }: { scheme: PaintScheme;
             <ol className="divide-y divide-line">
               {sec.steps.map((st, i) => (
                 <StepRow
+                  scheme={scheme}
                   key={st.id}
                   n={i + 1}
                   step={st}
@@ -205,11 +219,13 @@ export function SchemeEditor({ scheme, onOpen, onClose }: { scheme: PaintScheme;
         ))}
         <button className="btn w-fit" onClick={() => setDraft(addSection(draft, draft.sections.length ? '' : 'Armour', c()))}>+ Area</button>
       </div>
+      {printing && <RecipeCard scheme={draft} onDone={() => setPrinting(false)} />}
     </section>
   )
 }
 
 function StepRow(props: {
+  scheme: PaintScheme
   n: number
   step: SchemeStep
   first: boolean
@@ -219,9 +235,11 @@ function StepRow(props: {
   onDuplicate: () => void
   onRemove: () => void
 }) {
-  const { paints, paintStock } = useStore()
+  const { paints, paintStock, photos: allPhotos, addSchemePhotos } = useStore()
   const { step } = props
   const [search, setSearch] = useState('')
+  const [viewing, setViewing] = useState<string | null>(null)
+  const stepPhotos = (allPhotos[props.scheme.id] ?? []).filter((p) => p.owner.kind === 'scheme' && p.owner.stepId === step.id)
   const byId = useMemo(() => new Map(paints.map((p) => [p.id, p])), [paints])
   const options = useMemo(() => {
     const words = search.toLowerCase().split(/\s+/).filter(Boolean)
@@ -244,6 +262,20 @@ function StepRow(props: {
         <span className="ml-auto flex gap-1">
           <button className="btn" aria-label="Move step up" disabled={props.first} onClick={() => props.onMove(-1)}>↑</button>
           <button className="btn" aria-label="Move step down" disabled={props.last} onClick={() => props.onMove(1)}>↓</button>
+          <label className="btn" title="Photo of this step">
+            📷
+            <input
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              aria-label={`Photo for step ${props.n}`}
+              onChange={(e) => {
+                const f = e.target.files?.[0]
+                e.target.value = ''
+                if (f) void addSchemePhotos(props.scheme, [f], step.id)
+              }}
+            />
+          </label>
           <button className="btn" aria-label="Duplicate step" onClick={props.onDuplicate}>⧉</button>
           <button className="btn btn-danger" aria-label="Remove step" onClick={props.onRemove}>✕</button>
         </span>
@@ -286,6 +318,12 @@ function StepRow(props: {
         {step.paints.length > 1 && <span className="text-xs text-muted">mix {step.paints.map((x) => x.parts ?? 1).join(':')}</span>}
       </div>
       <input className="input ml-8" placeholder="note" aria-label="Step note" value={step.note} onChange={(e) => props.onChange({ note: e.target.value })} />
+      {stepPhotos.length > 0 && (
+        <div className="ml-8 flex gap-2">
+          {stepPhotos.map((p) => <PhotoThumb key={p.id} photo={p} size="h-14 w-14" onClick={() => setViewing(p.id)} />)}
+        </div>
+      )}
+      {viewing && <PhotoViewer photos={stepPhotos} startId={viewing} onClose={() => setViewing(null)} />}
     </li>
   )
 }

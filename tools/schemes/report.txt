@@ -43,4 +43,7 @@ OK    lib/paint-pad-75  "T'au troops: green undersuit" by andypearson  steps=41 
 OK    lib/paint-pad-66  "T'au Stealth Suits" by andypearson  steps=19 paints=19 matched=95%  
 OK    lib/paint-pad-14  "T’au fusion weapons" by andypearson  steps=7 paints=6 matched=100%  
 OK    lib/paint-pad-6  "T’au troops: red undersuit" by andypearson  steps=32 paints=24 matched=100%  
+MANUAL lib/official-farsight-enclaves  "Farsight Enclaves (studio colours)"
+MANUAL lib/official-tau-sept  "T'au Sept (studio colours)"
+MANUAL lib/official-viorla  "Vior'la (studio colours)"
 MANUAL lib/tale-of-painters-tau-sept-fire-warriors  "T'au Sept Fire Warriors"

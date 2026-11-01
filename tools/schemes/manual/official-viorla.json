@@ -1,0 +1,32 @@
+{
+  "id": "lib/official-viorla",
+  "name": "Vior'la (studio colours)",
+  "origin": "official",
+  "factionName": "T'au Empire",
+  "tags": ["Vior'la"],
+  "source": { "title": "How to paint T'au Stealth Suits (Warhammer Community video, Vior'la scheme)", "url": "https://www.warhammer-community.com/en-gb/videos/tina5pbo/how-to-paint-tau-stealth-suits-warhammer-40000/", "author": "Games Workshop" },
+  "tips": "Official studio colours. The steps are a simple standard recipe written by MiniTracker for these colours; watch the linked Warhammer Community video for Games Workshop's own method.",
+  "date": "2026-11-02",
+  "sections": [
+    { "area": "Preparation", "steps": [{ "technique": "prime", "paints": [{ "name": "Grey Seer" }] }] },
+    { "area": "Armour (white)", "steps": [
+      { "technique": "contrast", "paints": [{ "name": "Apothecary White" }] },
+      { "technique": "layer", "paints": [{ "name": "Ulthuan Grey" }], "note": "raised areas" },
+      { "technique": "edge highlight", "paints": [{ "name": "White Scar" }] }
+    ] },
+    { "area": "Undersuit", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "Abaddon Black" }] },
+      { "technique": "highlight", "paints": [{ "name": "Eshin Grey" }] },
+      { "technique": "edge highlight", "paints": [{ "name": "Dawnstone" }] }
+    ] },
+    { "area": "Markings (red)", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "Mephiston Red" }] },
+      { "technique": "edge highlight", "paints": [{ "name": "Evil Sunz Scarlet" }] }
+    ] },
+    { "area": "Lenses", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "Caledor Sky" }] },
+      { "technique": "highlight", "paints": [{ "name": "Temple Guard Blue" }] },
+      { "technique": "details", "paints": [{ "name": "White Scar" }], "note": "tiny dot" }
+    ] }
+  ]
+}

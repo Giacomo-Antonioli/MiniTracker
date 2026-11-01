@@ -25,6 +25,12 @@ describe('SchemeRepository', () => {
     expect((await repo.list())[0].basedOn).toBeUndefined()
     expect((await units.get(u.id))?.schemeId).toBeUndefined()
     await expect(repo.save({ ...variant, name: '' })).rejects.toThrow(/name/)
+
+    await db.photos.put({ id: 'ph', schemeId: variant.id, fileName: 'x.jpg', createdAt: 't' } as never)
+    await db.photoFiles.put({ id: 'ph', display: new Blob(['d']) })
+    await repo.delete(variant.id)
+    expect(await db.photos.count()).toBe(0)
+    expect(await db.photoFiles.count()).toBe(0)
     await db.delete()
   })
 })
