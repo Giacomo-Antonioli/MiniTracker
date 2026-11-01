@@ -106,6 +106,14 @@ describe('SettingsRepository', () => {
     expect(await settings.getPipeline()).toEqual(p)
   })
 
+  it('keeps separate pipelines for paints and schemes, with their own defaults', async () => {
+    expect((await settings.getPipeline('paint')).stages[0].id).toBe('wishlist')
+    expect((await settings.getPipeline('scheme')).stages[0].id).toBe('idea')
+    await settings.savePipeline({ stages: [{ id: 'mine', name: 'Mine' }] }, 'paint')
+    expect((await settings.getPipeline('paint')).stages).toEqual([{ id: 'mine', name: 'Mine' }])
+    expect(await settings.getPipeline()).toEqual(DEFAULT_PIPELINE)
+  })
+
   it('refuses to save an invalid pipeline', async () => {
     await expect(settings.savePipeline({ stages: [] })).rejects.toThrow(/at least one/)
   })

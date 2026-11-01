@@ -5,6 +5,7 @@ import { convert } from '../data/catalogue/convert'
 import { BSDATA_40K, downloadDataFiles, latestCommit } from '../data/catalogue/fetch'
 import { DexieCatalogueRepository, DexieEventRepository, DexieSettingsRepository, DexieUnitRepository } from '../data/repositories/dexie'
 import type { Catalogue } from '../domain/catalogue/types'
+import { DEFAULT_PIPELINES, type PipelineKey } from '../domain/pipelines'
 import { DEFAULT_PIPELINE, moveModels, type MoveOptions } from '../domain/collection/pipeline'
 import type { Ctx, OwnedUnit, Pipeline, StageId, StatusEvent } from '../domain/collection/types'
 
@@ -23,6 +24,18 @@ export interface CatalogueJob {
   error?: string
 }
 
+export const THEMES = { grimdark: 'Grimdark', forum2005: 'Forum 2005' } as const
+export type Theme = keyof typeof THEMES
+
+function readTheme(): Theme {
+  try {
+    const t = localStorage.getItem('theme')
+    return t && t in THEMES ? (t as Theme) : 'grimdark'
+  } catch {
+    return 'grimdark'
+  }
+}
+
 export const ctx = (): Ctx => ({ now: new Date().toISOString(), newId: () => crypto.randomUUID() })
 
 interface State {
@@ -33,6 +46,11 @@ interface State {
   events: Record<string, StatusEvent[]>
   catalogue: Catalogue | null
   catalogueJob: CatalogueJob
+  /** All editable pipelines; `pipeline` above is the same as pipelines.painting. */
+  pipelines: Record<PipelineKey, Pipeline>
+  savePipelineFor(key: PipelineKey, p: Pipeline): Promise<void>
+  theme: Theme
+  setTheme(theme: Theme): void
   load(): Promise<void>
   /** Download the latest BSData files and convert them on this device. */
   downloadCatalogue(): Promise<void>
@@ -59,10 +77,32 @@ export const useStore = create<State>((set, get) => ({
   events: {},
   catalogue: null,
   catalogueJob: { phase: 'idle', done: 0, total: 0 },
+  pipelines: DEFAULT_PIPELINES,
+  theme: readTheme(),
+
+  setTheme(theme) {
+    try {
+      localStorage.setItem('theme', theme)
+    } catch {
+      /* storage unavailable: theme just isn't remembered */
+    }
+    set({ theme })
+  },
 
   async load() {
-    const [units, pipeline, catalogue] = await Promise.all([unitsRepo.list(), settingsRepo.getPipeline(), catalogueRepo.current()])
-    set({ units, pipeline, catalogue: catalogue ?? null, ready: true })
+    const [units, painting, paint, scheme, catalogue] = await Promise.all([
+      unitsRepo.list(),
+      settingsRepo.getPipeline('painting'),
+      settingsRepo.getPipeline('paint'),
+      settingsRepo.getPipeline('scheme'),
+      catalogueRepo.current(),
+    ])
+    set({ units, pipeline: painting, pipelines: { painting, paint, scheme }, catalogue: catalogue ?? null, ready: true })
+  },
+
+  async savePipelineFor(key, p) {
+    await settingsRepo.savePipeline(p, key)
+    set({ pipelines: { ...get().pipelines, [key]: p }, ...(key === 'painting' ? { pipeline: p } : {}) })
   },
 
   async downloadCatalogue() {
@@ -129,9 +169,8 @@ export const useStore = create<State>((set, get) => ({
     await get().loadEvents(unit.id)
   },
 
-  async savePipeline(p) {
-    await settingsRepo.savePipeline(p)
-    set({ pipeline: p })
+  savePipeline(p) {
+    return get().savePipelineFor('painting', p)
   },
 
   async exportBackup() {

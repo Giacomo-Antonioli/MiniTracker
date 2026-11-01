@@ -6,6 +6,7 @@ import {
   moveModels,
   progress,
   removeStage,
+  removeUnusedStage,
   renameStage,
   reorderStages,
   setFlags,
@@ -64,6 +65,11 @@ describe('editing the pipeline', () => {
   it('refuses to remove a stage still used by models', () => {
     expect(() => removeStage(DEFAULT_PIPELINE, 'built', [squad()])).toThrow(/in use/)
     expect(removeStage(DEFAULT_PIPELINE, 'varnished', [squad()]).stages).toHaveLength(6)
+  })
+
+  it('removeUnusedStage works for any pipeline given a usage count', () => {
+    expect(() => removeUnusedStage(DEFAULT_PIPELINE, 'primed', 3)).toThrow(/in use/)
+    expect(removeUnusedStage(DEFAULT_PIPELINE, 'primed', 0).stages).toHaveLength(6)
   })
 
   it('refuses to remove the last stage', () => {

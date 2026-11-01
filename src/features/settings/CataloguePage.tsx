@@ -25,8 +25,8 @@ export function CataloguePage() {
   }[job.phase]
 
   return (
-    <div className="grid max-w-2xl gap-4">
-      <h1 className="font-display text-2xl text-accent">Unit catalogue</h1>
+    <div className="grid gap-4">
+      <h2 className="font-display text-xl text-accent">Unit catalogue</h2>
       <p className="text-muted">
         Unit, points and wargear data comes from the community{' '}
         <a className="text-accent underline" href={`https://github.com/${BSDATA_40K.repo}`} target="_blank" rel="noreferrer">BSData</a>{' '}
@@ -36,7 +36,7 @@ export function CataloguePage() {
       <section className="panel grid gap-2 p-4" aria-label="Catalogue status">
         {catalogue ? (
           <>
-            <h2 className="font-display text-lg">{catalogue.gameName}</h2>
+            <h3 className="font-display text-lg">{catalogue.gameName}</h3>
             <p className="text-sm">
               {catalogue.datasheets.length} units in {catalogue.factions.length} factions
             </p>
@@ -73,7 +73,7 @@ export function CataloguePage() {
       </section>
 
       <section className="panel grid gap-2 p-4">
-        <h2 className="font-display text-lg">Import from files</h2>
+        <h3 className="font-display text-lg">Import from files</h3>
         <p className="text-sm text-muted">
           If GitHub can't be reached, download the repository as a zip elsewhere, unzip it, and pick all its <code>.gst</code> and <code>.cat</code> files.
         </p>
@@ -83,6 +83,7 @@ export function CataloguePage() {
             type="file"
             multiple
             accept=".gst,.cat"
+            aria-label="Catalogue files"
             className="sr-only"
             onChange={(e) => {
               const files = [...(e.target.files ?? [])]

@@ -1,3 +1,4 @@
+import type { PipelineKey } from '../../domain/pipelines'
 import type { OwnedUnit, Pipeline, StatusEvent } from '../../domain/collection/types'
 
 /** The only way the app reads or writes units. Swappable (IndexedDB now, sync later). */
@@ -17,6 +18,6 @@ export interface EventRepository {
 }
 
 export interface SettingsRepository {
-  getPipeline(): Promise<Pipeline>
-  savePipeline(pipeline: Pipeline): Promise<void>
+  getPipeline(key?: PipelineKey): Promise<Pipeline>
+  savePipeline(pipeline: Pipeline, key?: PipelineKey): Promise<void>
 }

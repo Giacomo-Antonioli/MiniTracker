@@ -4,6 +4,7 @@ import { factionsOf, filterUnits, stageTotals, unitProgress, type BacklogFilter 
 import { progress } from '../../domain/collection/pipeline'
 import type { OwnedUnit } from '../../domain/collection/types'
 import { ProgressBar } from '../../ui/Dialog'
+import { CatalogueBanner } from './CatalogueBanner'
 import { UnitFormDialog } from './UnitFormDialog'
 import { UnitPanel } from './UnitPanel'
 
@@ -31,6 +32,8 @@ export function BacklogPage() {
           <h1 className="font-display text-2xl text-accent">Backlog</h1>
           <button className="btn btn-primary" onClick={() => setEditing('new')}>+ Add unit</button>
         </header>
+
+        <CatalogueBanner />
 
         <section className="panel grid gap-2 p-4" aria-label="Summary">
           <div className="flex items-baseline justify-between">

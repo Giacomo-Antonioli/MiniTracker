@@ -9,7 +9,7 @@ import { DEFAULT_PIPELINE } from '../../domain/collection/pipeline'
 beforeEach(async () => {
   await appDb.delete()
   await appDb.open()
-  useStore.setState({ ready: false, units: [], events: {}, pipeline: DEFAULT_PIPELINE })
+  useStore.setState({ ready: false, units: [], events: {}, pipeline: DEFAULT_PIPELINE, catalogue: null })
   vi.spyOn(window, 'confirm').mockReturnValue(true)
 })
 
@@ -102,19 +102,63 @@ describe('Backlog UI', () => {
   })
 })
 
-describe('Pipeline settings UI', () => {
-  it('adds a stage and blocks deleting one in use', async () => {
+describe('Settings page', () => {
+  it('edits the painting pipeline and blocks deleting a stage in use', async () => {
     const user = userEvent.setup()
     render(<App />)
     await screen.findByText(/Your backlog is empty/)
     await addUnit(user, 'Rhino', 'Ultramarines', 1, 'built')
-    await user.click(screen.getByRole('button', { name: 'Pipeline' }))
-    await user.type(screen.getByPlaceholderText(/New stage name/), 'Washed')
-    await user.click(screen.getByRole('button', { name: 'Add stage' }))
-    expect(await screen.findByDisplayValue('Washed')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Settings/ }))
+    const painting = screen.getByRole('region', { name: 'Painting pipeline' })
+    await user.type(within(painting).getByPlaceholderText('New stage name'), 'Washed')
+    await user.click(within(painting).getByRole('button', { name: 'Add stage' }))
+    expect(await within(painting).findByDisplayValue('Washed')).toBeInTheDocument()
 
-    const builtRow = screen.getByDisplayValue('Built').closest('li')!
+    const builtRow = within(painting).getByDisplayValue('Built').closest('li')!
     await user.click(within(builtRow).getByRole('button', { name: 'Delete stage' }))
-    expect(await screen.findByRole('alert')).toHaveTextContent(/in use/)
+    expect(await within(painting).findByRole('alert')).toHaveTextContent(/in use/)
+  })
+
+  it('has separate paint and scheme pipelines', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await screen.findByText(/Your backlog is empty/)
+    await user.click(screen.getByRole('button', { name: /Settings/ }))
+    const paint = screen.getByRole('region', { name: 'Paint pipeline' })
+    expect(within(paint).getByDisplayValue('Wishlist')).toBeInTheDocument()
+    await user.type(within(paint).getByPlaceholderText('New stage name'), 'Gifted')
+    await user.click(within(paint).getByRole('button', { name: 'Add stage' }))
+    expect(await within(paint).findByDisplayValue('Gifted')).toBeInTheDocument()
+    expect(within(screen.getByRole('region', { name: 'Scheme pipeline' })).getByDisplayValue('Idea')).toBeInTheDocument()
+    expect(useStore.getState().pipelines.paint.stages.at(-1)?.name).toBe('Gifted')
+  })
+
+  it('switches theme from Appearance', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await screen.findByText(/Your backlog is empty/)
+    await user.click(screen.getByRole('button', { name: /Settings/ }))
+    await user.selectOptions(screen.getByLabelText('Theme'), 'forum2005')
+    expect(document.documentElement.dataset.theme).toBe('forum2005')
+  })
+})
+
+describe('Catalogue banner', () => {
+  it('shows on the backlog without a catalogue and can be hidden', async () => {
+    const user = userEvent.setup()
+    localStorage.removeItem('catalogueBannerDismissed')
+    render(<App />)
+    const banner = await screen.findByRole('region', { name: 'Catalogue missing' })
+    expect(within(banner).getByRole('button', { name: /Download/ })).toBeEnabled()
+    await user.click(within(banner).getByRole('button', { name: 'Hide this message' }))
+    expect(screen.queryByRole('region', { name: 'Catalogue missing' })).not.toBeInTheDocument()
+  })
+
+  it('is not shown when a catalogue is installed', async () => {
+    localStorage.removeItem('catalogueBannerDismissed')
+    await appDb.catalogues.put({ gameId: 'g', gameName: 'G', source: { repo: 'r', commit: 'c', fetchedAt: 't' }, factions: [], datasheets: [] })
+    render(<App />)
+    await screen.findByText(/Your backlog is empty/)
+    expect(screen.queryByRole('region', { name: 'Catalogue missing' })).not.toBeInTheDocument()
   })
 })
