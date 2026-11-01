@@ -1,0 +1,34 @@
+{
+  "id": "lib/official-tau-sept",
+  "name": "T'au Sept (studio colours)",
+  "origin": "official",
+  "factionName": "T'au Empire",
+  "tags": ["T'au Sept"],
+  "source": { "title": "How to paint T'au Stealth Suits (Warhammer Community video, includes the classic T'au Sept)", "url": "https://www.warhammer-community.com/en-gb/videos/tina5pbo/how-to-paint-tau-stealth-suits-warhammer-40000/", "author": "Games Workshop" },
+  "tips": "Official studio colours. The steps are a simple standard recipe written by MiniTracker for these colours; watch the linked Warhammer Community video for Games Workshop's own method.",
+  "date": "2026-11-02",
+  "sections": [
+    { "area": "Preparation", "steps": [{ "technique": "prime", "paints": [{ "name": "Wraithbone" }] }] },
+    { "area": "Armour (ochre)", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "Zandri Dust" }] },
+      { "technique": "shade", "paints": [{ "name": "Seraphim Sepia" }], "note": "recesses" },
+      { "technique": "layer", "paints": [{ "name": "Ushabti Bone" }] },
+      { "technique": "edge highlight", "paints": [{ "name": "Screaming Skull" }] }
+    ] },
+    { "area": "Undersuit", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "Rhinox Hide" }] },
+      { "technique": "layer", "paints": [{ "name": "Gorthor Brown" }] },
+      { "technique": "highlight", "paints": [{ "name": "Baneblade Brown" }] }
+    ] },
+    { "area": "Markings", "steps": [{ "technique": "details", "paints": [{ "name": "White Scar" }], "note": "sept and cadre symbols" }] },
+    { "area": "Weapons", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "Abaddon Black" }] },
+      { "technique": "edge highlight", "paints": [{ "name": "Dawnstone" }] }
+    ] },
+    { "area": "Lenses", "steps": [
+      { "technique": "basecoat", "paints": [{ "name": "Mephiston Red" }] },
+      { "technique": "highlight", "paints": [{ "name": "Troll Slayer Orange" }], "note": "lower half" },
+      { "technique": "details", "paints": [{ "name": "White Scar" }], "note": "tiny dot" }
+    ] }
+  ]
+}

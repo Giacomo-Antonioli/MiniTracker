@@ -122,3 +122,27 @@ body {
 dialog::backdrop {
   background: rgb(0 0 0 / 0.6);
 }
+
+/* Printable recipe cards: only the card is printed. */
+.print-only {
+  display: none;
+}
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-only,
+  .print-only * {
+    visibility: visible;
+  }
+  .print-only {
+    display: block;
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    padding: 12mm;
+    background: #fff;
+    color: #000;
+    font-family: Georgia, serif;
+  }
+}

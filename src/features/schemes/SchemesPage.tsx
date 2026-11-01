@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { colourStrip, createScheme, missingPaints } from '../../domain/schemes/scheme'
 import type { PaintScheme, SchemeOrigin } from '../../domain/schemes/types'
+import { usePhotoUrl } from '../photos/usePhotoUrl'
 import { ColourStrip } from './ColourStrip'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
 import { SchemeEditor } from './SchemeEditor'
@@ -149,9 +150,11 @@ function SchemeCard(props: {
   onOpen: () => void
 }) {
   const { s } = props
+  const cover = usePhotoUrl(s.coverPhotoId)
   return (
     <li>
       <button className={`panel grid w-full gap-2 p-3 text-left hover:border-accent ${props.active ? 'border-accent' : ''}`} onClick={props.onOpen} aria-label={`Scheme ${s.name}`}>
+        {cover && <img src={cover} alt="" className="h-28 w-full rounded object-cover" />}
         <ColourStrip colours={props.strip} />
         <span className="flex items-start justify-between gap-2">
           <span className="font-semibold">{s.name}{props.isDefault && <span title="Default for this faction"> ⭐</span>}</span>

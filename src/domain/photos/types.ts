@@ -1,5 +1,5 @@
 /** What a photo belongs to. Scheme owners arrive with #27. */
-export type PhotoOwner = { kind: 'unit'; unitId: string } | { kind: 'event'; unitId: string; eventId: string } | { kind: 'scheme'; schemeId: string }
+export type PhotoOwner = { kind: 'unit'; unitId: string } | { kind: 'event'; unitId: string; eventId: string } | { kind: 'scheme'; schemeId: string; stepId?: string }
 
 /** Photo metadata (small, listed often). The image data lives in PhotoFiles. */
 export interface Photo {
@@ -7,6 +7,8 @@ export interface Photo {
   owner: PhotoOwner
   /** Indexed copy of the unit id for unit and event photos. */
   unitId?: string
+  /** Indexed copy of the scheme id for scheme and step photos. */
+  schemeId?: string
   /** Meaningful, permanent file name, e.g. ultramarines_intercessor-squad_mt-3f9a2c1b_painted_20261102_01.jpg */
   fileName: string
   caption: string

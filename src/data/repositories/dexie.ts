@@ -166,6 +166,11 @@ export class DexiePhotoRepository {
     return list.sort((a, b) => a.takenAt.localeCompare(b.takenAt) || a.fileName.localeCompare(b.fileName))
   }
 
+  async listForScheme(schemeId: string): Promise<Photo[]> {
+    const list = await this.db.photos.where('schemeId').equals(schemeId).toArray()
+    return list.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.fileName.localeCompare(b.fileName))
+  }
+
   files(id: string): Promise<PhotoFiles | undefined> {
     return this.db.photoFiles.get(id)
   }
@@ -231,9 +236,12 @@ export class DexieSchemeRepository {
     await this.db.schemes.bulkPut(list)
   }
 
-  /** Deletes a scheme; units using it are unlinked and variants lose their link. */
+  /** Deletes a scheme and its photos; units using it are unlinked and variants lose their link. */
   async delete(id: string): Promise<void> {
-    await this.db.transaction('rw', this.db.schemes, this.db.units, async () => {
+    await this.db.transaction('rw', [this.db.schemes, this.db.units, this.db.photos, this.db.photoFiles], async () => {
+      const photoIds = (await this.db.photos.where('schemeId').equals(id).primaryKeys()) as string[]
+      await this.db.photoFiles.bulkDelete(photoIds)
+      await this.db.photos.bulkDelete(photoIds)
       await this.db.schemes.delete(id)
       await this.db.schemes.where('basedOn').equals(id).modify((s) => {
         delete s.basedOn

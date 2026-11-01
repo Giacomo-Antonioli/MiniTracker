@@ -100,6 +100,9 @@ interface State {
   photos: Record<string, Photo[]>
   loadPhotos(unitId: string): Promise<void>
   addPhotos(unit: OwnedUnit, files: File[], opts?: { owner?: PhotoOwner; stage?: string; id?: string }): Promise<Photo[]>
+  /** Photos of a scheme (cover, gallery, steps), stored under photos[schemeId]. */
+  loadSchemePhotos(schemeId: string): Promise<void>
+  addSchemePhotos(scheme: PaintScheme, files: File[], stepId?: string): Promise<Photo[]>
   photoFiles(id: string): ReturnType<DexiePhotoRepository['files']>
   updatePhoto(photo: Photo): Promise<void>
   deletePhoto(photo: Photo): Promise<void>
@@ -338,6 +341,43 @@ export const useStore = create<State>((set, get) => ({
     return added
   },
 
+  async loadSchemePhotos(schemeId) {
+    set({ photos: { ...get().photos, [schemeId]: await photoRepo.listForScheme(schemeId) } })
+  },
+
+  async addSchemePhotos(scheme, files, stepId) {
+    const added: Photo[] = []
+    for (const file of files) {
+      const display = await makeDisplayCopy(file)
+      const now = new Date().toISOString()
+      let seq = 1
+      let fileName = ''
+      do {
+        fileName = photoFileName({ scheme: scheme.name, schemeId: scheme.id, date: now, seq: seq++, ext: extensionOf(file) })
+      } while (await photoRepo.fileNameTaken(fileName))
+      const id = crypto.randomUUID()
+      const photo: Photo = {
+        id,
+        owner: { kind: 'scheme', schemeId: scheme.id, ...(stepId ? { stepId } : {}) },
+        schemeId: scheme.id,
+        fileName,
+        caption: '',
+        takenAt: file.lastModified ? new Date(file.lastModified).toISOString() : now,
+        createdAt: now,
+        width: display.width,
+        height: display.height,
+        originalType: file.type || 'application/octet-stream',
+        originalBytes: file.size,
+        displayBytes: display.blob.size,
+        hasOriginal: true,
+      }
+      await photoRepo.add(photo, { id, display: display.blob, original: file })
+      added.push(photo)
+    }
+    await get().loadSchemePhotos(scheme.id)
+    return added
+  },
+
   photoFiles(id) {
     return photoRepo.files(id)
   },
@@ -345,11 +385,17 @@ export const useStore = create<State>((set, get) => ({
   async updatePhoto(photo) {
     await photoRepo.update(photo)
     if (photo.unitId) await get().loadPhotos(photo.unitId)
+    if (photo.schemeId) await get().loadSchemePhotos(photo.schemeId)
   },
 
   async deletePhoto(photo) {
     await photoRepo.delete(photo.id)
     if (photo.unitId) await get().loadPhotos(photo.unitId)
+    if (photo.schemeId) {
+      await get().loadSchemePhotos(photo.schemeId)
+      const s = get().schemes.find((x) => x.id === photo.schemeId)
+      if (s?.coverPhotoId === photo.id) await get().saveScheme({ ...s, coverPhotoId: undefined })
+    }
   },
 
   photoUsage() {

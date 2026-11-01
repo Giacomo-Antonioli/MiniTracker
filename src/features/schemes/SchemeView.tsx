@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { colourStrip, makeVariant, missingPaints } from '../../domain/schemes/scheme'
 import type { PaintScheme } from '../../domain/schemes/types'
 import { ColourStrip } from './ColourStrip'
+import { RecipeCard } from './RecipeCard'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
 
 /** Read-only view of a library scheme, with ways to make it your own. */
@@ -10,6 +11,7 @@ export function SchemeView({ scheme, onOpen, onClose }: { scheme: PaintScheme; o
   const { paints, paintStock, saveScheme } = useStore()
   const byId = useMemo(() => new Map(paints.map((p) => [p.id, p])), [paints])
   const missing = missingPaints(scheme, paintStock)
+  const [printing, setPrinting] = useState(false)
 
   async function copy(asVariant: boolean) {
     const v = makeVariant(scheme, ctx())
@@ -51,6 +53,7 @@ export function SchemeView({ scheme, onOpen, onClose }: { scheme: PaintScheme; o
       <div className="flex flex-wrap gap-2 border-b border-line p-4">
         <button className="btn btn-primary" onClick={() => void copy(false)}>+ Save a copy</button>
         <button className="btn" onClick={() => void copy(true)}>⑂ Make my variant</button>
+        <button className="btn" onClick={() => setPrinting(true)}>🖨 Recipe card</button>
       </div>
       {missing.length > 0 && (
         <p className="border-b border-line p-4 text-sm">
@@ -59,6 +62,7 @@ export function SchemeView({ scheme, onOpen, onClose }: { scheme: PaintScheme; o
       )}
       <div className="grid gap-4 p-4">
         <p className="text-sm text-muted">{scheme.description}</p>
+        {scheme.tips && <p className="text-sm"><b>Note:</b> {scheme.tips}</p>}
         {scheme.sections.map((sec) => (
           <section key={sec.id} aria-label={`Area ${sec.area}`}>
             <h3 className="mb-1 font-semibold">{sec.area}</h3>
@@ -86,6 +90,7 @@ export function SchemeView({ scheme, onOpen, onClose }: { scheme: PaintScheme; o
           </section>
         ))}
       </div>
+      {printing && <RecipeCard scheme={scheme} onDone={() => setPrinting(false)} />}
     </section>
   )
 }

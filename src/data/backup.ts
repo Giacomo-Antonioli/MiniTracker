@@ -138,7 +138,8 @@ export async function importBackupFile(db: MiniTrackerDb, file: Blob): Promise<B
     const backup = parseBackup(await file.text())
     // Older backups have no photos: keep photos of units that still exist, drop the rest.
     const unitIds = new Set(backup.data.units.map((u) => u.id))
-    const keep = (await db.photos.toArray()).filter((p) => p.unitId && unitIds.has(p.unitId))
+    const schemeIds = new Set((backup.data.schemes ?? []).map((s) => s.id))
+    const keep = (await db.photos.toArray()).filter((p) => (p.unitId && unitIds.has(p.unitId)) || (p.schemeId && schemeIds.has(p.schemeId)))
     const files = (await db.photoFiles.bulkGet(keep.map((p) => p.id))).filter((f): f is PhotoFiles => !!f)
     await importBackup(db, backup, { photos: keep, files })
     return backup

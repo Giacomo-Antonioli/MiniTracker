@@ -11,7 +11,7 @@ export interface SettingRow {
 }
 
 /** Bump together with a new `version(n)` block and a test in migrations.test.ts. */
-export const DB_VERSION = 5
+export const DB_VERSION = 6
 
 export class MiniTrackerDb extends Dexie {
   units!: Table<OwnedUnit, string>
@@ -44,5 +44,7 @@ export class MiniTrackerDb extends Dexie {
     this.version(4).stores({ photos: 'id, unitId, &fileName, createdAt', photoFiles: 'id' })
     // v5: paint schemes (#27).
     this.version(5).stores({ schemes: 'id, origin, factionName, basedOn, stage' })
+    // v6: photos can belong to schemes (#27).
+    this.version(6).stores({ photos: 'id, unitId, schemeId, &fileName, createdAt' })
   }
 }
