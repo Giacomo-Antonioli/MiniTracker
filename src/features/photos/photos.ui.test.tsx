@@ -94,6 +94,17 @@ describe('Photos', () => {
     expect(photo.owner).toEqual({ kind: 'event', unitId, eventId: event.id })
     expect(photo.fileName).toMatch(/_built_\d{8}_01\.jpg$/)
     expect(within(panel).getAllByRole('button', { name: /Open photo/ }).length).toBe(2) // gallery + history
+
+    // Timeline: photos by date with the stage each shows; the choice is remembered.
+    await user.upload(within(panel).getByLabelText('Add photos'), jpg('before.jpg'))
+    const gallery = within(panel).getByRole('region', { name: 'Photos' })
+    await within(gallery).findByText('Photos (2)')
+    await user.click(within(gallery).getByRole('button', { name: 'Timeline' }))
+    const items = within(within(gallery).getByRole('list', { name: 'Photo timeline' })).getAllByRole('listitem')
+    expect(items.map((li) => li.textContent?.replace(/^[^A-Za-z]*/, '').split(/(?=[A-Z])/).at(-1))).toEqual(['Built', 'Before tracking'])
+    expect(localStorage.getItem('photos.view')).toBe('timeline')
+    await user.click(within(gallery).getByRole('button', { name: 'Grid' }))
+    expect(within(gallery).queryByRole('list', { name: 'Photo timeline' })).toBeNull()
   })
 
   it('deleting the unit deletes its photos', async () => {
