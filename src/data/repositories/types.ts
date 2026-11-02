@@ -15,6 +15,8 @@ export interface UnitRepository {
 export interface EventRepository {
   /** Oldest first. */
   listForUnit(unitId: string): Promise<StatusEvent[]>
+  /** Every move of every unit, for stats. */
+  listAll(): Promise<StatusEvent[]>
 }
 
 export interface SettingsRepository {

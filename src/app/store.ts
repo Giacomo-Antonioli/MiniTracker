@@ -126,6 +126,8 @@ interface State {
   saveUnit(unit: OwnedUnit): Promise<void>
   deleteUnit(id: string): Promise<void>
   loadEvents(unitId: string): Promise<void>
+  /** Every move of every unit, for stats. */
+  allEvents(): Promise<StatusEvent[]>
   /** Move models; an optional photo file is attached to the history step. */
   move(unit: OwnedUnit, groupId: string, count: number, to: StageId, opts: MoveOptions, photo?: File): Promise<void>
   /** Photos per unit id (unit gallery + history photos), loaded on demand. */
@@ -377,6 +379,10 @@ export const useStore = create<State>((set, get) => ({
     const photos = { ...get().photos }
     delete photos[id]
     set({ units: await unitsRepo.list(), events, photos, lists: await listRepo.list() })
+  },
+
+  allEvents() {
+    return eventsRepo.listAll()
   },
 
   async loadEvents(unitId) {

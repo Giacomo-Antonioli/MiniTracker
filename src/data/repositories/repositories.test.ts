@@ -72,6 +72,7 @@ describe('recordMove', () => {
     await units.recordMove(unit, event)
     expect(await units.get(u.id)).toEqual(unit)
     expect(await events.listForUnit(u.id)).toEqual([event])
+    expect(await events.listAll()).toEqual([event])
   })
 
   it('saves nothing if the event is invalid', async () => {
