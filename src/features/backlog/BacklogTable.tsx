@@ -125,12 +125,12 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
       >
         <td className="p-2">
           <span className={child ? 'pl-6 text-muted' : ''}>{child ? '└ ' : ''}</span>
-          <button
+          {u.groups.length > 1 ? <button
             className="mr-1 inline-block w-4 text-muted"
             aria-label={`${openUnits.includes(u.id) ? 'Hide' : 'Show'} models of ${u.customName}`}
             aria-expanded={openUnits.includes(u.id)}
             onClick={(e) => { e.stopPropagation(); setOpenUnits(openUnits.includes(u.id) ? openUnits.filter((x) => x !== u.id) : [...openUnits, u.id]) }}
-          >{openUnits.includes(u.id) ? '▾' : '▸'}</button>
+          >{openUnits.includes(u.id) ? '▾' : '▸'}</button> : <span className="mr-1 inline-block w-4" />}
           {u.customName}
           {u.lifecycle !== 'active' && <span className="text-muted"> ({u.lifecycle})</span>}
         </td>
@@ -149,7 +149,7 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
     )
   }
   const groupRows = (u: OwnedUnit, child: boolean) =>
-    openUnits.includes(u.id)
+    u.groups.length > 1 && openUnits.includes(u.id)
       ? u.groups.map((g) => {
           const scheme = u.schemeId ? schemeById.get(u.schemeId) : undefined
           return (
@@ -199,7 +199,7 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
                         : c === 'models' ? <>{g.models}{g.wishlisted ? <span className="text-muted"> (+{g.wishlisted} wishlisted)</span> : null}</>
                         : c === 'stages' ? <StageBar stages={g.stages} pipeline={pipeline} />
                         : c === 'painted' ? <div className="flex items-center gap-2"><ProgressBar ratio={g.painted.ratio} /><span className="w-12 text-right text-xs">{g.painted.done}/{g.painted.total}</span></div>
-                        : c === 'schemes' ? <span className="flex gap-1">{strips(g.schemeIds)}</span>
+                        : c === 'schemes' ? <span className="flex gap-1">{g.schemeIds.length === 1 && g.units.every((u) => u.schemeId === g.schemeIds[0]) ? strips(g.schemeIds) : null}</span>
                         : c === 'flags' ? flags(g)
                         : <span className="text-muted">{ago(g.updatedAt)}</span>}
                     </td>

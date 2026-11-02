@@ -221,6 +221,7 @@ describe('Catalogue banner', () => {
     expect(JSON.parse(localStorage.getItem('backlog.hidden')!)).toEqual(['stages'])
     await user.click(screen.getByRole('button', { name: 'Show models of Squad B' }))
     expect(screen.getByRole('row', { name: '2 × Wishlisted' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Show models of Squad A' })).toBeNull()
     expect(screen.getByRole('row', { name: '3 × Built' })).toHaveTextContent('—')
     expect(screen.getByRole('region', { name: 'Summary' })).toHaveTextContent('Units3Models owned9Wishlisted2Painted56%')
   })
