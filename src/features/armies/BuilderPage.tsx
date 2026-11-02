@@ -542,6 +542,7 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
   const { paintStock } = useStore()
   const [withCards, setWithCards] = useState(true)
   const [withPaints, setWithPaints] = useState(true)
+  const [withBuy, setWithBuy] = useState(true)
   const [copied, setCopied] = useState('')
   const [asking, setAsking] = useState(false)
   const [printing, setPrinting] = useState<ArmyList | null>(null)
@@ -584,6 +585,7 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
             subtitle={subtitle}
             cards={withCards ? unitCards(printing, cat, linkedTo) : undefined}
             paints={withPaints}
+            buyRows={withBuy}
             onDone={() => setPrinting(null)}
           />
         )}
@@ -597,6 +599,8 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
           onCards={setWithCards}
           withPaints={withPaints}
           onPaints={setWithPaints}
+          withBuy={withBuy}
+          onBuy={setWithBuy}
           onCancel={() => setAsking(false)}
           onMake={(l) => {
             setAsking(false)
@@ -605,36 +609,43 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
           }}
         />
       )}
-      {b.rows.length > 0 && (
-        <table className="text-sm">
-          <thead className="text-left text-xs text-muted">
-            <tr><th className="font-normal">Unit</th><th className="text-right font-normal">Models</th><th className="text-right font-normal">Points in list</th></tr>
-          </thead>
-          <tbody>
-            {b.rows.map((r) => (
-              <tr key={r.datasheetId}>
-                <td>{r.name}{r.units > 1 ? <span className="text-muted"> ×{r.units}</span> : null}</td>
-                <td className="text-right">{r.missingModels}</td>
-                <td className="text-right">{r.points}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-      {paints.length > 0 && (
-        <table className="text-sm" aria-label="Paints to buy">
-          <thead className="text-left text-xs text-muted">
-            <tr><th className="font-normal">Paint</th><th className="text-right font-normal">For schemes</th></tr>
-          </thead>
-          <tbody>
-            {paints.map((x) => (
-              <tr key={x.name}>
-                <td>{x.name}</td>
-                <td className="text-right text-muted">{x.schemes.join(', ')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {(b.rows.length > 0 || paints.length > 0) && (
+        <details className="text-sm">
+          <summary className="cursor-pointer text-muted hover:text-accent">Show what to buy</summary>
+          <div className="mt-1 grid gap-2">
+            {b.rows.length > 0 && (
+              <table className="text-sm">
+                <thead className="text-left text-xs text-muted">
+                  <tr><th className="font-normal">Unit</th><th className="text-right font-normal">Models</th><th className="text-right font-normal">Points in list</th></tr>
+                </thead>
+                <tbody>
+                  {b.rows.map((r) => (
+                    <tr key={r.datasheetId}>
+                      <td>{r.name}{r.units > 1 ? <span className="text-muted"> ×{r.units}</span> : null}</td>
+                      <td className="text-right">{r.missingModels}</td>
+                      <td className="text-right">{r.points}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {paints.length > 0 && (
+              <table className="text-sm" aria-label="Paints to buy">
+                <thead className="text-left text-xs text-muted">
+                  <tr><th className="font-normal">Paint</th><th className="text-right font-normal">For schemes</th></tr>
+                </thead>
+                <tbody>
+                  {paints.map((x) => (
+                    <tr key={x.name}>
+                      <td>{x.name}</td>
+                      <td className="text-right text-muted">{x.schemes.join(', ')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </details>
       )}
     </section>
   )
@@ -762,7 +773,7 @@ function ArmySchemeSelect({ list, factionName, onChange, label = 'Army scheme' }
 }
 
 /** Asked before making the PDF: army scheme, and optionally a scheme per unit. Choices are saved to the list. */
-function PdfDialog({ list, c, withCards, onCards, withPaints, onPaints, onCancel, onMake }: { list: ArmyList; c: SchemeContext; withCards: boolean; onCards: (v: boolean) => void; withPaints: boolean; onPaints: (v: boolean) => void; onCancel: () => void; onMake: (l: ArmyList) => void }) {
+function PdfDialog({ list, c, withCards, onCards, withPaints, onPaints, withBuy, onBuy, onCancel, onMake }: { list: ArmyList; c: SchemeContext; withCards: boolean; onCards: (v: boolean) => void; withPaints: boolean; onPaints: (v: boolean) => void; withBuy: boolean; onBuy: (v: boolean) => void; onCancel: () => void; onMake: (l: ArmyList) => void }) {
   const [draft, setDraft] = useState(list)
   const [perUnit, setPerUnit] = useState(list.entries.some((e) => e.schemeId))
   return (
@@ -782,6 +793,9 @@ function PdfDialog({ list, c, withCards, onCards, withPaints, onPaints, onCancel
           ))}
         </div>
       )}
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={withBuy} onChange={(e) => onBuy(e.target.checked)} /> Include the models to buy
+      </label>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={withCards} onChange={(e) => onCards(e.target.checked)} /> Include datasheet cards
       </label>

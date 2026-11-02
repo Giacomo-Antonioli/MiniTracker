@@ -11,7 +11,7 @@ import { DatasheetCards } from './DatasheetCards'
 /** Printable buy list. Rendered off-screen and printed (or saved as PDF from the print dialog), like recipe cards. */
 const STATUS: Record<PaintStatus, string> = { buy: 'to buy', unpainted: 'to paint', painted: 'painted ✓' }
 
-export function BuyListSheet({ list, buy, plan, paintById, subtitle, cards, paints = true, onDone }: { list: ArmyList; buy: BuyList; plan: PaintPlan; paintById: Map<string, PaintDef>; subtitle: string; cards?: UnitCard[]; paints?: boolean; onDone: () => void }) {
+export function BuyListSheet({ list, buy, plan, paintById, subtitle, cards, paints = true, buyRows = true, onDone }: { list: ArmyList; buy: BuyList; plan: PaintPlan; paintById: Map<string, PaintDef>; subtitle: string; cards?: UnitCard[]; paints?: boolean; buyRows?: boolean; onDone: () => void }) {
   const [date] = useState(() => new Date().toLocaleDateString())
   useEffect(() => {
     const done = () => onDone()
@@ -27,7 +27,7 @@ export function BuyListSheet({ list, buy, plan, paintById, subtitle, cards, pain
     <div className="print-only" aria-label="Buy list sheet">
       <h1 className="text-2xl font-bold">Buy list – {list.name}</h1>
       <p className="text-sm">{subtitle}</p>
-      {buy.rows.length > 0 && (
+      {buyRows && buy.rows.length > 0 && (
       <table className="mt-4 w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-black text-left">

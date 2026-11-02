@@ -5,7 +5,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Added
-- Datasheet cards in the army PDF (#98): one card per unit type with points, stat lines, the ranged and melee weapons its loadout carries, core rules, abilities with their text and keywords. Checkboxes in the Make PDF dialog turn the cards and the scheme paints on or off. The list's missing paints are now a collapsible section.
+- Datasheet cards in the army PDF (#98): one card per unit type with points, stat lines, the ranged and melee weapons its loadout carries, core rules, abilities with their text and keywords. Checkboxes in the Make PDF dialog turn the models to buy, the scheme paints and the cards on or off. The buy list and the list's missing paints are now collapsible.
 
 ## [0.6.0] - 2026-11-02
 
