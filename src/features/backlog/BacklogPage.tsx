@@ -1,20 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../app/store'
-import { factionsOf, filterUnits, stageTotals, unitProgress, type BacklogFilter } from '../../domain/collection/backlog'
+import { factionsOf, filterUnits, stageTotals, type BacklogFilter } from '../../domain/collection/backlog'
 import { progress } from '../../domain/collection/pipeline'
 import type { OwnedUnit } from '../../domain/collection/types'
 import { ProgressBar } from '../../ui/Dialog'
 import { CatalogueBanner } from './CatalogueBanner'
 import { UnitFormDialog } from './UnitFormDialog'
 import { UnitPanel } from './UnitPanel'
+import { BacklogTable } from './BacklogTable'
 
 /** How long a single click waits for a possible second click. */
 const DOUBLE_CLICK_MS = 250
-
-const ago = (iso: string) => {
-  const d = Math.floor((Date.now() - Date.parse(iso)) / 86_400_000)
-  return d < 1 ? 'today' : d < 30 ? `${d} d` : d < 365 ? `${Math.floor(d / 30)} mo` : `${Math.floor(d / 365)} y`
-}
 
 export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onOpenUnit?: (id: string) => void; onOpenDatasheet?: (id: string) => void; onOpenScheme?: (id: string) => void }) {
   const { units, pipeline, backlogFilter: filter, setBacklogFilter: setFilter } = useStore()
@@ -78,44 +74,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
         </section>
 
         <div className="panel overflow-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-line text-xs uppercase tracking-wider text-muted">
-              <tr>
-                <th className="w-8 p-2" aria-label="Favourite" />
-                <th className="p-2">Unit</th>
-                <th className="p-2">Faction</th>
-                <th className="w-48 p-2">Painted</th>
-                <th className="p-2">Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shown.map((u) => {
-                const p = unitProgress(u, pipeline)
-                return (
-                  <tr
-                    key={u.id}
-                    onClick={(e) => onRowClick(u.id, e.detail)}
-                    title="Double-click to open the unit page"
-                    className={`cursor-pointer select-none border-b border-line/50 hover:bg-panel-2 ${u.id === selectedId ? 'bg-panel-2' : ''}`}
-                  >
-                    <td className="p-2 text-accent">{u.favourite ? '★' : ''}</td>
-                    <td className="p-2">
-                      {u.customName} {u.nextUp && <span title="Next up">⏭</span>}
-                      {u.lifecycle !== 'active' && <span className="text-muted"> ({u.lifecycle})</span>}
-                    </td>
-                    <td className="p-2 text-muted">{u.factionName ?? '—'}</td>
-                    <td className="p-2">
-                      <div className="flex items-center gap-2">
-                        <ProgressBar ratio={p.ratio} />
-                        <span className="w-12 text-right text-xs">{p.done}/{p.total}{p.total > 0 && p.done === p.total ? ' ✓' : ''}</span>
-                      </div>
-                    </td>
-                    <td className="p-2 text-muted">{ago(u.updatedAt)}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+          <BacklogTable units={shown} selectedId={selectedId} onRowClick={onRowClick} />
           {shown.length === 0 && (
             <p className="p-6 text-center text-muted">
               {units.length === 0 ? 'Your backlog is empty. Add your first unit!' : 'No units match these filters.'}

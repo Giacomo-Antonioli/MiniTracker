@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../app/App'
 import { appDb, useStore } from '../../app/store'
 import { DEFAULT_PIPELINE } from '../../domain/collection/pipeline'
+import { createUnit } from '../../domain/collection/ownedUnit'
 
 beforeEach(async () => {
   await appDb.delete()
@@ -182,5 +183,40 @@ describe('Catalogue banner', () => {
     render(<App />)
     await screen.findByText(/Your backlog is empty/)
     expect(screen.queryByRole('region', { name: 'Catalogue missing' })).not.toBeInTheDocument()
+  })
+
+  it('groups entries of the same unit type; expands, sorts and hides columns', async () => {
+    localStorage.clear()
+    let n = 0
+    const c = { now: '2026-01-01T00:00:00.000Z', newId: () => `g${++n}` }
+    await appDb.units.bulkPut([
+      createUnit({ customName: 'Squad A', datasheetId: 'int', factionName: 'UM', groups: [{ count: 5, status: 'painted' }] }, c),
+      createUnit({ customName: 'Squad B', datasheetId: 'int', factionName: 'UM', groups: [{ count: 3, status: 'built' }, { count: 2, status: 'wishlisted' }] }, c),
+      createUnit({ customName: 'Alpha tank', groups: [{ count: 1, status: 'sprue' }] }, c),
+    ])
+    const user = userEvent.setup()
+    render(<App />)
+    const group = await screen.findByRole('row', { name: /Squad A ×2/ })
+    expect(group).toHaveTextContent('8 (+2 wishlisted)')
+    expect(within(group).getByLabelText(/Stages: Wishlisted 2 · Built 3 · Painted 5/)).toBeInTheDocument()
+    expect(screen.queryByRole('cell', { name: /Squad B/ })).toBeNull()
+    await user.click(group)
+    expect(screen.getByRole('cell', { name: /Squad B/ })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Collapse all' }))
+    expect(screen.queryByRole('cell', { name: /Squad B/ })).toBeNull()
+    await user.click(screen.getByRole('button', { name: 'Expand all' }))
+    expect(screen.getByRole('cell', { name: /Squad B/ })).toBeInTheDocument()
+
+    const names = () => screen.getAllByRole('row').slice(1).map((r) => r.textContent!.split(/\s{0}(?=UM|—)/)[0].trim().slice(0, 9))
+    expect(names()[0]).toMatch(/Alpha tan/)
+    await user.click(screen.getByRole('button', { name: /^Unit/ }))
+    expect(names()[0]).toMatch(/Squad A/)
+    await user.click(screen.getByRole('button', { name: /^Models/ }))
+    expect(screen.getByRole('columnheader', { name: /Models/ })).toHaveAttribute('aria-sort', 'ascending')
+
+    await user.click(screen.getByRole('button', { name: 'Columns' }))
+    await user.click(within(screen.getByRole('group', { name: 'Columns' })).getByLabelText('Stages'))
+    expect(screen.queryByRole('columnheader', { name: 'Stages' })).toBeNull()
+    expect(JSON.parse(localStorage.getItem('backlog.hidden')!)).toEqual(['stages'])
   })
 })
