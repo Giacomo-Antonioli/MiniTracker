@@ -4,7 +4,9 @@ import { pointsFor } from '../../domain/catalogue/points'
 import { factionsOf } from '../../domain/collection/backlog'
 import { ownedModels } from '../../domain/collection/ownedUnit'
 import type { OwnedUnit, StatusEvent } from '../../domain/collection/types'
-import { MonthArea, MonthBars } from './charts'
+import { stageColour } from '../backlog/BacklogTable'
+import { activityByDay, byRole, paintUsage, pileAge, pointsOverTime, records, spending, stageFlow, stageTimes } from '../../domain/stats/more'
+import { ActivityCalendar, HBars, MonthArea, MonthBars, monthLabel } from './charts'
 import { byMonth, byWeek, lastWeeks, monthsSince, byFaction, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileFlow, pileLevel, pileNow, streakWeeks } from '../../domain/stats/stats'
 
 /** "about 14 months", "about 2 years", or a dash when there is no pace yet. */
@@ -48,14 +50,18 @@ export function usePointsOf() {
         return undefined
       }
     }
-    return { pointsOf, factionName: (id: string) => names.get(id) ?? id }
+    const roleOf = (u: OwnedUnit) => (u.datasheetId ? sheets.get(u.datasheetId)?.role : undefined)
+    return { pointsOf, roleOf, factionName: (id: string) => names.get(id) ?? id }
   }, [catalogue])
 }
 
 export function StatsPage() {
-  const { units, pipeline } = useStore()
+  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints } = useStore()
+  useEffect(() => {
+    void loadPaints()
+  }, [loadPaints])
   const all = useAllEvents()
-  const { pointsOf, factionName } = usePointsOf()
+  const { pointsOf, roleOf, factionName } = usePointsOf()
   const [faction, setFaction] = useState('')
   const [range, setRange] = useState<number | 'all'>(12)
   const now = new Date().toISOString()
@@ -77,6 +83,17 @@ export function StatsPage() {
   const streak = streakWeeks(events, pipeline, now)
   const flow = pileFlow(shown, events, pipeline, months, 'painted', keyOf)
   const armies = byFaction(shown, events, pipeline, now, pointsOf, factionName)
+  const best = records(events, pipeline)
+  const times = stageTimes(shown, events, pipeline)
+  const age = pileAge(shown, pipeline, now)
+  const flowByStage = stageFlow(events, pipeline, months, keyOf)
+  const roles = byRole(shown, pipeline, roleOf)
+  const pointsLine = pointsOverTime(shown, events, pipeline, months, keyOf, pointsOf)
+  const spent = spending(shopItems, months, keyOf)
+  const usage = paintUsage(schemes.filter((x) => shown.some((u) => u.schemeId === x.id)), shown, paintStock)
+  const paintById = new Map(paints.map((x) => [x.id, x]))
+  const bucketName = (k: string | undefined) => (k ? (k.length === 10 ? `week of ${k.slice(5)}` : monthLabel(k) + ' ' + k.slice(0, 4)) : '—')
+  const euro = (v: number) => `€${v.toFixed(v % 1 ? 2 : 0)}`
 
   return (
     <div className="grid gap-4">
@@ -106,6 +123,19 @@ export function StatsPage() {
         <Tile label="Finish" value={forecast(finishMonths(pile, perMonth))} hint="At this pace" />
       </section>
 
+      <section className="panel grid grid-cols-2 gap-2 p-4 sm:grid-cols-3 lg:grid-cols-5" aria-label="Records">
+        <Tile label="Best month" value={best.bestMonth?.count ?? 0} hint={bucketName(best.bestMonth?.key)} />
+        <Tile label="Best week" value={best.bestWeek?.count ?? 0} hint={bucketName(best.bestWeek?.key)} />
+        <Tile label="Best day" value={best.bestDay?.count ?? 0} hint={best.bestDay?.key ?? '—'} />
+        <Tile label="Longest streak" value={`${best.longestStreak} wk`} />
+        <Tile label="Built → Painted" value={times.toPaint.days === undefined ? '—' : `${times.toPaint.days} d`} hint={`Average over ${times.toPaint.units} unit${times.toPaint.units === 1 ? '' : 's'}`} />
+      </section>
+
+      <section className="panel grid gap-2 p-4" aria-label="Activity">
+        <h2 className="font-display text-lg">Activity</h2>
+        <ActivityCalendar counts={activityByDay(events)} now={now} />
+      </section>
+
       <section className="panel grid gap-2 p-4" aria-label="Painted per month">
         <h2 className="font-display text-lg">Models painted per {weekly ? 'week' : 'month'}</h2>
         <MonthBars label="Models painted per month" months={months} series={[{ name: 'Painted', values: paintedPerMonth(events, pipeline, months, 'painted', keyOf), fill: 'fill-accent', swatch: 'bg-accent' }]} />
@@ -127,6 +157,39 @@ export function StatsPage() {
         <section className="panel grid gap-2 p-4" aria-label="Pile size">
           <h2 className="font-display text-lg">Pile size</h2>
           <MonthArea label="Unpainted models over time" name="Pile" months={months} values={flow.map((r) => r.pile)} />
+        </section>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <section className="panel grid gap-2 p-4" aria-label="Where the work goes">
+          <h2 className="font-display text-lg">Where the work goes</h2>
+          <p className="text-xs text-muted">Models moved into each stage</p>
+          <MonthBars stacked label="Models moved into each stage" months={months} series={flowByStage.filter((x) => x.values.some((v) => v)).map((x) => ({ name: x.stage.name, values: x.values, color: stageColour(pipeline, x.stage.id) }))} />
+        </section>
+
+        <section className="panel grid content-start gap-3 p-4" aria-label="Time per stage">
+          <h2 className="font-display text-lg">Time per stage</h2>
+          {times.stages.length ? (
+            <HBars label="Average days in each stage" format={(v) => `${v} d`} rows={times.stages.map((x) => ({ key: x.stage.id, name: x.stage.name, value: x.days!, hint: `Average over ${x.units} unit${x.units === 1 ? '' : 's'}` }))} />
+          ) : <p className="text-sm text-muted">Move models through a few stages to see how long each takes.</p>}
+        </section>
+
+        <section className="panel grid gap-2 p-4" aria-label="Points painted">
+          <h2 className="font-display text-lg">Points painted</h2>
+          <MonthArea label="Painted points over time" name="Points" months={months} values={pointsLine} />
+        </section>
+
+        <section className="panel grid content-start gap-3 p-4" aria-label="Pile age">
+          <h2 className="font-display text-lg">Pile age</h2>
+          <HBars label="Unpainted models by age" rows={age.buckets.map((b) => ({ key: b.label, name: b.label, value: b.models }))} />
+          {age.oldest.length > 0 && (
+            <div className="grid gap-1 text-sm">
+              <div className="text-xs uppercase tracking-wider text-muted">Oldest in the pile</div>
+              {age.oldest.map((o) => (
+                <div key={o.unit.id} className="flex justify-between gap-2"><span className="truncate">{o.unit.customName}</span><span className="shrink-0 text-muted">{o.models} models · {o.months < 1 ? 'this month' : o.months < 24 ? `${o.months} mo` : `${Math.floor(o.months / 12)} yr`}</span></div>
+              ))}
+            </div>
+          )}
         </section>
       </div>
 
@@ -158,6 +221,29 @@ export function StatsPage() {
           </table>
         )}
       </section>
+      <div className="grid gap-4 xl:grid-cols-3">
+        <section className="panel grid content-start gap-3 p-4" aria-label="By role">
+          <h2 className="font-display text-lg">By role</h2>
+          {roles.length ? <HBars label="Models painted by role" rows={roles.map((r) => ({ key: r.role, name: r.role, value: r.painted, of: r.models }))} /> : <p className="text-sm text-muted">No models yet</p>}
+        </section>
+
+        <section className="panel grid content-start gap-3 p-4" aria-label="Spending">
+          <header className="flex items-baseline justify-between"><h2 className="font-display text-lg">Spending</h2><span className="text-sm text-muted">{euro(spent.total)} in this range</span></header>
+          <MonthBars label="Money spent" months={months} format={euro} series={[{ name: 'Spent', values: spent.values, fill: 'fill-accent', swatch: 'bg-accent' }]} />
+          <p className="text-xs text-muted">Priced items ticked as bought on the shopping list.</p>
+        </section>
+
+        <section className="panel grid content-start gap-3 p-4" aria-label="Paint usage">
+          <h2 className="font-display text-lg">Paint usage</h2>
+          <p className="text-sm text-muted">{usage.ownedUsed} of your {usage.owned} paints are in your units' schemes</p>
+          {usage.top.length ? (
+            <HBars label="Paints used by most units" rows={usage.top.map((x) => {
+              const paint = paintById.get(x.paintId)
+              return { key: x.paintId, value: x.units, name: <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 shrink-0 rounded-full border border-line" style={{ background: paint?.hex }} />{paint?.name ?? x.paintId}</span> }
+            })} format={(v) => `${v} unit${v === 1 ? '' : 's'}`} />
+          ) : <p className="text-sm text-muted">Give your units a paint scheme to see which paints they use most.</p>}
+        </section>
+      </div>
     </div>
   )
 }

@@ -17,7 +17,7 @@ const catalogue = parseBsData(Object.entries(raw).map(([p, text]) => ({ name: p.
 beforeEach(async () => {
   await appDb.delete()
   await appDb.open()
-  useStore.setState({ ready: false, units: [], events: {}, pipeline: DEFAULT_PIPELINE, pipelines: DEFAULT_PIPELINES, catalogue: null })
+  useStore.setState({ ready: false, units: [], events: {}, pipeline: DEFAULT_PIPELINE, pipelines: DEFAULT_PIPELINES, catalogue: null, shopItems: [], shopLists: [] })
 })
 
 describe('Stats', () => {
@@ -27,6 +27,7 @@ describe('Stats', () => {
     const unit = createUnit({ customName: 'Squad', factionName: 'Testers', datasheetId: 'u-troopers', groups: [{ count: 4, status: 'painted' }, { count: 6, status: 'built' }] }, { now, newId: () => `id${++n}` })
     await appDb.units.put(unit)
     await appDb.statusEvents.put({ id: 'e1', unitId: unit.id, groupId: unit.groups[0].id, from: 'built', to: 'painted', count: 4, date: now, direction: 'forward', note: '' })
+    await appDb.shopItems.put({ id: 's1', kind: 'other', name: 'Glue', qty: 1, price: 12, bought: true, sources: [], listIds: ['main'], createdAt: now, updatedAt: now } as never)
     await appDb.units.put(createUnit({ customName: 'Other', factionName: 'Orks', groups: [{ count: 2, status: 'built' }] }, { now, newId: () => `o${++n}` }))
     const user = userEvent.setup()
     render(<App />)
@@ -43,6 +44,14 @@ describe('Stats', () => {
     expect(await factions.findByText('64 / 160 pts')).toBeTruthy()
     expect(factions.getByText('4 / 10 (40%)')).toBeTruthy()
 
+    const records = within(screen.getByRole('region', { name: 'Records' }))
+    expect(records.getByText('Best month').nextSibling?.textContent).toBe('4')
+    expect(screen.getByRole('img', { name: 'Models moved per day over the last year' }).querySelectorAll(`[data-day="${now.slice(0, 10)}"].fill-accent`)).toHaveLength(1)
+    expect(screen.getByRole('img', { name: 'Models moved into each stage' }).querySelectorAll('[data-bar]')).toHaveLength(1)
+    expect(within(screen.getByRole('region', { name: 'Pile age' })).getByText('Squad')).toBeTruthy()
+    expect(within(screen.getByRole('region', { name: 'By role' })).getByText('4 / 10')).toBeTruthy()
+    expect(within(screen.getByRole('region', { name: 'Spending' })).getByText('€12 in this range')).toBeTruthy()
+    expect(within(screen.getByRole('region', { name: 'Paint usage' })).getByText(/0 of your 0 paints/)).toBeTruthy()
     const pile = screen.getByRole('img', { name: 'Unpainted models over time' })
     await user.hover(pile.querySelectorAll('rect')[pile.querySelectorAll('rect').length - 1])
     expect(screen.getByRole('tooltip').textContent).toContain('Pile8')

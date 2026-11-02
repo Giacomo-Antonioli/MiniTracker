@@ -13,6 +13,7 @@ import { inventoryFromCsv } from '../domain/paints/csv'
 import { newStock } from '../domain/paints/inventory'
 import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Catalogue } from '../domain/catalogue/types'
+import { DEFAULT_LAYOUT, parseLayout, type CardLayout } from '../domain/home/layout'
 import type { ArmyList, EditionKey } from '../domain/lists/types'
 import { addItems, newList, syncWishlisted, withoutList } from '../domain/shopping/shopping'
 import type { NewShopItem, ShopItem, ShopList } from '../domain/shopping/types'
@@ -167,6 +168,9 @@ interface State {
   loadLibrary(): Promise<void>
   /** Default scheme per faction name. */
   schemeDefaults: Record<string, string>
+  /** Cards on Home, in order, with sizes (saved in the backup). */
+  homeLayout: CardLayout[]
+  saveHomeLayout(l: CardLayout[]): Promise<void>
   saveScheme(s: PaintScheme): Promise<void>
   deleteScheme(id: string): Promise<void>
   setDefaultScheme(faction: string, schemeId: string | undefined): Promise<void>
@@ -302,7 +306,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping] = await Promise.all([
+    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
@@ -315,6 +319,7 @@ export const useStore = create<State>((set, get) => ({
       settingsRepo.getValue<string | null>('activeCatalogue', null),
       listRepo.list(),
       shopRepo.load(),
+      settingsRepo.getValue<CardLayout[] | null>('homeLayout', null),
     ])
     const catalogue = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
     set({
@@ -330,6 +335,7 @@ export const useStore = create<State>((set, get) => ({
       lists,
       shopItems: shopping.items,
       shopLists: shopping.lists,
+      homeLayout: homeLayout ? parseLayout(JSON.stringify(homeLayout)) : DEFAULT_LAYOUT,
       ready: true,
     })
     if (get().paints.length) await get().loadPaints()
@@ -526,6 +532,11 @@ export const useStore = create<State>((set, get) => ({
 
   schemes: [],
   schemeDefaults: {},
+  homeLayout: DEFAULT_LAYOUT,
+  async saveHomeLayout(l) {
+    set({ homeLayout: l })
+    await settingsRepo.setValue('homeLayout', l)
+  },
 
   async saveScheme(scheme) {
     await schemeRepo.save(scheme)
