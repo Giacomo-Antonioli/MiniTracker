@@ -64,6 +64,19 @@ describe('loadout from my models', () => {
     expect(loadoutFromModels({ ...d, models: [] }, [u])).toBeUndefined()
   })
 
+  it('merges groups with the same model type and picks; matches a group by model name; fills required choices', () => {
+    const u = mine([[3, ['Bolt Rifle']], [2, ['Bolt Rifle']], [1, ['Intercessor Sergeant']]])
+    expect(loadoutFromModels(d, [u])).toEqual([
+      { modelId: 'int', count: 5, picks: [] },
+      { modelId: 'sgt', count: 1, picks: ['rifle', 'knives'] },
+    ])
+  })
+
+  it('reports model types the catalogue no longer has, and nothing for units without model types', () => {
+    expect(loadoutProblems(d, 1, [{ modelId: 'gone', count: 1, picks: [] }])).toContain('Intercessor Squad: a model type is not in the catalogue')
+    expect(loadoutProblems({ ...d, models: undefined }, 5, [])).toEqual([])
+  })
+
   it('effective loadout: the list\'s own, else my models\' when the size matches, else the default', () => {
     const entry = { id: 'e', datasheetId: 'squad', models: 10, wargear: [] }
     const u = mine([[1, ['Bolt pistol', 'Chainsword', 'Power fist']], [9, ['Bolt Rifle']]])
