@@ -1,20 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../app/store'
-import { factionsOf, filterUnits, stageTotals, unitProgress, type BacklogFilter } from '../../domain/collection/backlog'
-import { progress } from '../../domain/collection/pipeline'
+import { factionsOf, filterUnits, stageTotals, type BacklogFilter } from '../../domain/collection/backlog'
+import { isGone, progress, WISHLISTED } from '../../domain/collection/pipeline'
 import type { OwnedUnit } from '../../domain/collection/types'
-import { ProgressBar } from '../../ui/Dialog'
 import { CatalogueBanner } from './CatalogueBanner'
 import { UnitFormDialog } from './UnitFormDialog'
 import { UnitPanel } from './UnitPanel'
+import { BacklogTable, StageBar } from './BacklogTable'
 
 /** How long a single click waits for a possible second click. */
 const DOUBLE_CLICK_MS = 250
-
-const ago = (iso: string) => {
-  const d = Math.floor((Date.now() - Date.parse(iso)) / 86_400_000)
-  return d < 1 ? 'today' : d < 30 ? `${d} d` : d < 365 ? `${Math.floor(d / 30)} mo` : `${Math.floor(d / 365)} y`
-}
 
 export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onOpenUnit?: (id: string) => void; onOpenDatasheet?: (id: string) => void; onOpenScheme?: (id: string) => void }) {
   const { units, pipeline, backlogFilter: filter, setBacklogFilter: setFilter } = useStore()
@@ -24,6 +19,10 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
   const shown = useMemo(() => filterUnits(units, filter), [units, filter])
   const factions = useMemo(() => factionsOf(units), [units])
   const total = progress(units, pipeline, 'painted')
+  const live = units.filter((u) => !isGone(u.lifecycle))
+  const stats = stageTotals(units, pipeline).map((s) => ({ id: s.stage.id, name: s.stage.name, count: s.count }))
+  const wished = stats.find((s) => s.id === WISHLISTED)?.count ?? 0
+  const owned = stats.reduce((n, s) => n + s.count, 0) - wished
   const selected = units.find((u) => u.id === selectedId)
   const set = (patch: Partial<BacklogFilter>) => setFilter({ ...filter, ...patch })
   // Single click opens the side panel, double-click opens the unit page. Opening the panel reflows the
@@ -47,15 +46,18 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
 
         <CatalogueBanner />
 
-        <section className="panel grid gap-2 p-4" aria-label="Summary">
-          <div className="flex items-baseline justify-between">
-            <span>Painted <b>{total.done}</b> / {total.total} models</span>
-            <span className="font-display text-xl text-accent">{Math.round(total.ratio * 100)}%</span>
+        <section className="panel grid gap-3 p-4" aria-label="Summary">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              ['Units', live.length],
+              ['Models owned', owned],
+              ['Wishlisted', wished],
+              ['Painted', `${Math.round(total.ratio * 100)}%`],
+            ].map(([k, v]) => (
+              <div key={k} className="rounded border border-line p-2"><div className="text-xs uppercase tracking-wider text-muted">{k}</div><div className="font-display text-xl text-accent">{v}</div></div>
+            ))}
           </div>
-          <ProgressBar ratio={total.ratio} />
-          <p className="text-sm text-muted">
-            {stageTotals(units, pipeline).map((s) => `${s.stage.name} ${s.count}`).join(' · ') || 'No models yet'}
-          </p>
+          {stats.length ? <StageBar stages={stats} pipeline={pipeline} legend wide /> : <p className="text-sm text-muted">No models yet</p>}
         </section>
 
         <section className="flex flex-wrap items-center gap-2" aria-label="Filters">
@@ -78,44 +80,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
         </section>
 
         <div className="panel overflow-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-line text-xs uppercase tracking-wider text-muted">
-              <tr>
-                <th className="w-8 p-2" aria-label="Favourite" />
-                <th className="p-2">Unit</th>
-                <th className="p-2">Faction</th>
-                <th className="w-48 p-2">Painted</th>
-                <th className="p-2">Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shown.map((u) => {
-                const p = unitProgress(u, pipeline)
-                return (
-                  <tr
-                    key={u.id}
-                    onClick={(e) => onRowClick(u.id, e.detail)}
-                    title="Double-click to open the unit page"
-                    className={`cursor-pointer select-none border-b border-line/50 hover:bg-panel-2 ${u.id === selectedId ? 'bg-panel-2' : ''}`}
-                  >
-                    <td className="p-2 text-accent">{u.favourite ? '★' : ''}</td>
-                    <td className="p-2">
-                      {u.customName} {u.nextUp && <span title="Next up">⏭</span>}
-                      {u.lifecycle !== 'active' && <span className="text-muted"> ({u.lifecycle})</span>}
-                    </td>
-                    <td className="p-2 text-muted">{u.factionName ?? '—'}</td>
-                    <td className="p-2">
-                      <div className="flex items-center gap-2">
-                        <ProgressBar ratio={p.ratio} />
-                        <span className="w-12 text-right text-xs">{p.done}/{p.total}{p.total > 0 && p.done === p.total ? ' ✓' : ''}</span>
-                      </div>
-                    </td>
-                    <td className="p-2 text-muted">{ago(u.updatedAt)}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+          <BacklogTable units={shown} selectedId={selectedId} onRowClick={onRowClick} />
           {shown.length === 0 && (
             <p className="p-6 text-center text-muted">
               {units.length === 0 ? 'Your backlog is empty. Add your first unit!' : 'No units match these filters.'}

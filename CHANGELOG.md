@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Changed
+- Backlog table: entries of the same unit type and faction share one summary row (models, Wishlisted, a stage bar, painted, schemes, flags, last update) that expands into each entry with its own stages, scheme, tags and state. Columns sort on click and can be hidden; your choices are remembered.
+
 ## [0.5.4] - 2026-11-02
 
 ### Added

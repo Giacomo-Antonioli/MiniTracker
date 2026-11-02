@@ -9,7 +9,7 @@ import { PhotoGallery } from '../photos/PhotoGallery'
 import { PhotoThumb } from '../photos/PhotoThumb'
 import { PhotoViewer } from '../photos/PhotoViewer'
 import { SchemeCardLink } from '../schemes/SchemeCardLink'
-import { ORIGIN_LABEL } from '../schemes/origin'
+import { SchemePicker } from '../schemes/SchemePicker'
 import { schemesForUnit } from '../../domain/schemes/match'
 import { missingForSchemes } from '../../domain/paints/missing'
 import { AddToShoppingButton } from '../shopping/AddToShoppingDialog'
@@ -145,19 +145,16 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
       <section className="grid gap-2 border-b border-line p-4" aria-label="Scheme">
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">Paint scheme</h3>
-          <select
-            className="input max-w-52 py-0.5 text-xs"
-            aria-label="Choose scheme"
-            value={unit.schemeId ?? ''}
-            onChange={(e) => void saveUnit({ ...unit, schemeId: e.target.value || undefined, updatedAt: new Date().toISOString() })}
-          >
-            <option value="">No scheme</option>
-            {schemesForUnit(allSchemes, unit, datasheet).map((g) => (
-              <optgroup key={g.origin} label={ORIGIN_LABEL[g.origin]}>
-                {g.schemes.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </optgroup>
-            ))}
-          </select>
+          <div className="w-56">
+            <SchemePicker
+              label="Choose scheme"
+              chosenColours={false}
+              value={unit.schemeId}
+              paints={paints}
+              groups={schemesForUnit(allSchemes, unit, datasheet)}
+              onChange={(id) => void saveUnit({ ...unit, schemeId: id, updatedAt: new Date().toISOString() })}
+            />
+          </div>
         </div>
         {scheme ? (
           <>

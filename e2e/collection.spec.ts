@@ -22,7 +22,7 @@ test('collector flow: add units, paint some, data survives reload', async ({ pag
 
   await addUnit(page, 'Intercessor Squad', 'Ultramarines', [[6, 'built'], [4, 'painted']])
   await addUnit(page, 'Termagants', 'Tyranids', [[20, 'sprue']])
-  await expect(page.getByRole('region', { name: 'Summary' })).toContainText('Painted 4 / 30 models')
+  await expect(page.getByRole('region', { name: 'Summary' })).toContainText('Painted13%')
 
   await page.getByRole('cell', { name: 'Intercessor Squad' }).click()
   await page.getByRole('button', { name: 'Move with date, note or photo…' }).first().click()
@@ -32,11 +32,11 @@ test('collector flow: add units, paint some, data survives reload', async ({ pag
   await move.getByLabel('Note').fill('Squad done!')
   await move.getByRole('button', { name: 'Move', exact: true }).click()
   await expect(page.getByText('Squad done!')).toBeVisible()
-  await expect(page.getByRole('region', { name: 'Summary' })).toContainText('Painted 10 / 30 models')
+  await expect(page.getByRole('region', { name: 'Summary' })).toContainText('Painted33%')
 
   await page.reload()
   await expect(page.getByRole('cell', { name: 'Termagants' })).toBeVisible()
-  await expect(page.getByRole('region', { name: 'Summary' })).toContainText('Painted 10 / 30 models')
+  await expect(page.getByRole('region', { name: 'Summary' })).toContainText('Painted33%')
   expect(errors).toEqual([])
 })
 

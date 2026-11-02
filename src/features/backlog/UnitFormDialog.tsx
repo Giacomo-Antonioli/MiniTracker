@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { firstOwnedStage } from '../../domain/collection/pipeline'
 import { ctx, useStore } from '../../app/store'
 import { pointsFor } from '../../domain/catalogue/points'
@@ -7,7 +7,7 @@ import type { Datasheet } from '../../domain/catalogue/types'
 import { createUnit } from '../../domain/collection/ownedUnit'
 import type { Lifecycle, Link, OwnedUnit } from '../../domain/collection/types'
 import { schemesForUnit } from '../../domain/schemes/match'
-import { ORIGIN_LABEL } from '../schemes/origin'
+import { SchemePicker } from '../schemes/SchemePicker'
 import { Combobox, type ComboOption } from '../../ui/Combobox'
 import { Dialog } from '../../ui/Dialog'
 import { InfoTip } from '../../ui/InfoTip'
@@ -40,7 +40,7 @@ export function UnitFormDialog({
   /** Start a new unit from a catalogue datasheet (e.g. "Add to collection"). */
   preset?: { datasheet: Datasheet; factionId?: string }
 }) {
-  const { pipeline, saveUnit, catalogue, schemes: mySchemes, library, schemeDefaults } = useStore()
+  const { pipeline, saveUnit, catalogue, schemes: mySchemes, library, schemeDefaults, paints, loadPaints } = useStore()
   const schemes = [...mySchemes, ...library]
   const presetFaction = preset && catalogue ? (preset.factionId && preset.datasheet.factionIds.includes(preset.factionId) ? preset.factionId : preset.datasheet.factionIds[0]) : undefined
   const [name, setName] = useState(unit?.customName ?? preset?.datasheet.name ?? '')
@@ -64,6 +64,10 @@ export function UnitFormDialog({
   const [error, setError] = useState('')
   // New units get their faction's default scheme until you pick one yourself.
   const effectiveScheme = schemeTouched ? schemeId : (schemeDefaults[faction.trim()] ?? schemeId)
+  const chosen = effectiveScheme ? schemes.find((s) => s.id === effectiveScheme) : undefined
+  useEffect(() => {
+    if (chosen && !paints.length) void loadPaints()
+  }, [chosen, paints.length, loadPaints])
 
   const datasheet = catalogue?.datasheets.find((d) => d.id === datasheetId)
   const totalModels = groups.reduce((n, g) => n + (Number(g.count) || 0), 0)
@@ -219,33 +223,24 @@ export function UnitFormDialog({
           </button>
         </fieldset>
 
-        <label className="grid gap-1">
+        <div className="grid gap-1">
           <span className="text-sm text-muted">Paint scheme</span>
-          <select
-            className="input"
-            value={effectiveScheme ?? ''}
-            onChange={(e) => {
-              setSchemeTouched(true)
-              setSchemeId(e.target.value || undefined)
-            }}
-          >
-            <option value="">None</option>
-            {schemesForUnit(
+          <SchemePicker
+            label="Paint scheme"
+            value={effectiveScheme}
+            paints={paints}
+            isDefault={(x) => schemeDefaults[x.factionName ?? ''] === x.id}
+            groups={schemesForUnit(
               schemes,
               { ...(unit ?? createUnit({ customName: name.trim() || 'unit', groups: [] }, { now: '', newId: () => '' })), customName: name, factionName: faction.trim() || undefined, schemeId: effectiveScheme },
               datasheet,
-            ).map((g) => (
-              <optgroup key={g.origin} label={ORIGIN_LABEL[g.origin]}>
-                {g.schemes.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                    {schemeDefaults[s.factionName ?? ''] === s.id ? ' ⭐' : ''}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
+            )}
+            onChange={(id) => {
+              setSchemeTouched(true)
+              setSchemeId(id)
+            }}
+          />
+        </div>
 
         <fieldset className="grid gap-2">
           <legend className="mb-1 text-sm text-muted">Tutorials and guides</legend>

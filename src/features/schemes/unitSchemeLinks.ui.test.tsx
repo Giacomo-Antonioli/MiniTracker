@@ -38,7 +38,8 @@ describe('Unit ↔ scheme links', () => {
     const { user, panel } = await unitOpen()
     const section = within(panel).getByRole('region', { name: 'Scheme' })
     expect(section).toHaveTextContent('No scheme yet')
-    await user.selectOptions(within(section).getByLabelText('Choose scheme'), within(section).getByRole('option', { name: /Vior'la white/ }))
+    await user.click(within(section).getByRole('button', { name: 'Choose scheme' }))
+    await user.click(within(section).getByRole('option', { name: /Vior'la white/ }))
     await waitFor(() => expect(useStore.getState().units[0].schemeId).toBe(useStore.getState().schemes.find((s) => s.name === "Vior'la white")!.id))
 
     await user.click(await within(section).findByRole('button', { name: "Open scheme Vior'la white" }))
@@ -52,10 +53,12 @@ describe('Unit ↔ scheme links', () => {
   it('the dropdown only lists schemes that fit the unit, from every origin', async () => {
     const { panel } = await unitOpen()
     await waitFor(() => expect(useStore.getState().library.length).toBeGreaterThan(40))
-    const select = within(within(panel).getByRole('region', { name: 'Scheme' })).getByLabelText('Choose scheme')
-    const groups = [...select.querySelectorAll('optgroup')].map((g) => g.label)
+    const section = within(panel).getByRole('region', { name: 'Scheme' })
+    await userEvent.setup().click(within(section).getByRole('button', { name: 'Choose scheme' }))
+    const list = within(section).getByRole('listbox')
+    const groups = within(list).getAllByRole('group').map((g) => g.getAttribute('aria-label'))
     expect(groups).toEqual(['Official', 'Community', 'Mine'])
-    const names = [...select.querySelectorAll('option')].map((o) => o.textContent)
+    const names = within(list).getAllByRole('option').map((o) => o.firstElementChild?.textContent ?? o.textContent)
     expect(names).toContain("Vior'la (studio colours)") // official, army-wide
     expect(names).toContain("Fal'shia Sept Fire Warrior") // community, made for Fire Warriors
     expect(names).toContain("Vior'la white") // mine
@@ -67,7 +70,8 @@ describe('Unit ↔ scheme links', () => {
     const { user, panel } = await unitOpen()
     await waitFor(() => expect(useStore.getState().library.length).toBeGreaterThan(40))
     const section = within(panel).getByRole('region', { name: 'Scheme' })
-    await user.selectOptions(within(section).getByLabelText('Choose scheme'), "Vior'la (studio colours)")
+    await user.click(within(section).getByRole('button', { name: 'Choose scheme' }))
+    await user.click(within(section).getByRole('option', { name: /^Vior'la \(studio colours\)/ }))
     await waitFor(() => expect(useStore.getState().units[0].schemeId).toBe('lib/official-viorla'))
     await user.click(await within(section).findByRole('button', { name: /Open scheme Vior'la \(studio colours\)/ }))
     const view = await screen.findByRole('region', { name: 'Library scheme' })
