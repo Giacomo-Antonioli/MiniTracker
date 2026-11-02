@@ -4,6 +4,7 @@ import { inventoryToCsv } from '../../domain/paints/csv'
 import { filterPaints, paintStats, type PaintFilter } from '../../domain/paints/inventory'
 import type { PaintDef } from '../../domain/paints/types'
 import { CustomPaintDialog } from './CustomPaintDialog'
+import { MissingPaintsDialog } from './MissingPaintsDialog'
 import { PaintPanel } from './PaintPanel'
 
 const PAGE = 240
@@ -17,6 +18,7 @@ export function PaintsPage() {
   const [filter, setFilter] = useState<PaintFilter>({})
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
+  const [buying, setBuying] = useState(false)
   const [limit, setLimit] = useState(PAGE)
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export function PaintsPage() {
                 }}
               />
             </label>
+            <button className="btn" onClick={() => setBuying(true)}>Paints to buy…</button>
             <button className="btn btn-primary" onClick={() => setAdding(true)}>+ Custom paint</button>
           </div>
         </header>
@@ -148,6 +151,7 @@ export function PaintsPage() {
       </div>
 
       {selected && <PaintPanel paint={selected} onClose={() => setSelectedId(null)} />}
+      {buying && <MissingPaintsDialog onClose={() => setBuying(false)} />}
       {adding && <CustomPaintDialog onClose={() => setAdding(false)} onCreated={(id) => setSelectedId(id)} />}
     </div>
   )

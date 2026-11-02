@@ -3,11 +3,13 @@ import { createPortal } from 'react-dom'
 import type { BuyList } from '../../domain/lists/buy'
 import type { PaintPlan, PaintStatus } from '../../domain/lists/schemes'
 import type { ArmyList } from '../../domain/lists/types'
+import type { PaintDef } from '../../domain/paints/types'
+import { PaintRows } from '../paints/MissingPaintsSheet'
 
 /** Printable buy list. Rendered off-screen and printed (or saved as PDF from the print dialog), like recipe cards. */
 const STATUS: Record<PaintStatus, string> = { buy: 'to buy', unpainted: 'to paint', painted: 'painted ✓' }
 
-export function BuyListSheet({ list, buy, plan, paintName, subtitle, onDone }: { list: ArmyList; buy: BuyList; plan: PaintPlan; paintName: Map<string, string>; subtitle: string; onDone: () => void }) {
+export function BuyListSheet({ list, buy, plan, paintById, subtitle, onDone }: { list: ArmyList; buy: BuyList; plan: PaintPlan; paintById: Map<string, PaintDef>; subtitle: string; onDone: () => void }) {
   const [date] = useState(() => new Date().toLocaleDateString())
   useEffect(() => {
     const done = () => onDone()
@@ -57,17 +59,7 @@ export function BuyListSheet({ list, buy, plan, paintName, subtitle, onDone }: {
         <section key={g.scheme.id} className="mt-6" style={{ breakInside: 'avoid' }}>
           <h2 className="text-lg font-bold">Scheme: {g.scheme.name}</h2>
           <p className="text-sm">{g.units.map((u) => `${u.name} (${STATUS[u.status]})`).join(' · ')}</p>
-          <table className="mt-2 w-full border-collapse text-sm">
-            <tbody>
-              {g.paints.map((p) => (
-                <tr key={p.paintId} className="border-b border-black/30">
-                  <td className="w-8 py-1">{p.have ? '☑' : '☐'}</td>
-                  <td className="py-1">{paintName.get(p.paintId) ?? p.paintId}</td>
-                  <td className="py-1 text-right text-xs">{p.have ? 'have' : 'buy'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <PaintRows rows={g.paints.map((p) => ({ paintId: p.paintId, paint: paintById.get(p.paintId), have: p.have, usedBy: p.have ? 'have' : 'buy' }))} />
         </section>
       ))}
       {plan.withoutScheme.length > 0 && <p className="mt-6 text-sm">No scheme: {plan.withoutScheme.map((u) => u.name).join(', ')}</p>}
