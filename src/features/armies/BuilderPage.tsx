@@ -18,6 +18,7 @@ import { listToJson, listToText } from '../../domain/lists/io'
 import { evalLimit } from '../../domain/lists/conditions'
 import { addUnit, battleSizes, canLead, checkList, enhancementAllowed, legalUnits, listCounter } from '../../domain/lists/rules'
 import type { ArmyList, ListEntry, ListStatus, LoadoutRow } from '../../domain/lists/types'
+import type { PaintDef } from '../../domain/paints/types'
 
 const ROLE_ORDER = ['Epic Hero', 'Character', 'Battleline']
 const roleRank = (r: string) => (ROLE_ORDER.includes(r) ? ROLE_ORDER.indexOf(r) : ROLE_ORDER.length)
@@ -176,6 +177,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   const schemeCtx = useMemo((): SchemeContext => ({ schemes, sheets, units, own, factionName, defaults: schemeDefaults }), [schemes, sheets, units, own, factionName, schemeDefaults])
   const pplan = useMemo(() => paintPlan(list, schemeCtx, paintStock), [list, schemeCtx, paintStock])
   const paintName = useMemo(() => new Map(paints.map((x) => [x.id, `${x.brand} ${x.name}`])), [paints])
+  const paintById = useMemo(() => new Map(paints.map((x) => [x.id, x])), [paints])
   // Paints come from every unit's scheme, owned or not.
   const missingPaints = useMemo((): BuyPaint[] => pplan.missing.map((m) => ({ name: paintName.get(m.paintId) ?? m.paintId, schemes: m.schemes })), [pplan, paintName])
   const [openRows, setOpenRows] = useState<Set<string>>(new Set())
@@ -334,7 +336,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
               ))
             )}
         <CollectionPanel own={own} plan={plan} missingPaints={missingPaints} toApply={schemesToApply(list, schemeCtx)} />
-        <BuyPanel list={list} rows={buyList(list, sheets, own, points)} paints={missingPaints} schemeCtx={schemeCtx} paintName={paintName} onSave={onSave} subtitle={[cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name].filter(Boolean).join(' · ')} />
+        <BuyPanel list={list} rows={buyList(list, sheets, own, points)} paints={missingPaints} schemeCtx={schemeCtx} paintById={paintById} onSave={onSave} subtitle={[cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name].filter(Boolean).join(' · ')} />
           </section>
         )}
       </div>
@@ -534,7 +536,7 @@ function DetachmentBar({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; 
   )
 }
 
-function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintName, onSave }: { list: ArmyList; rows: ReturnType<typeof buyList>; paints: BuyPaint[]; subtitle: string; schemeCtx: SchemeContext; paintName: Map<string, string>; onSave: (l: ArmyList) => void }) {
+function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSave }: { list: ArmyList; rows: ReturnType<typeof buyList>; paints: BuyPaint[]; subtitle: string; schemeCtx: SchemeContext; paintById: Map<string, PaintDef>; onSave: (l: ArmyList) => void }) {
   const { paintStock } = useStore()
   const [copied, setCopied] = useState('')
   const [asking, setAsking] = useState(false)
@@ -568,7 +570,7 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintName, onSav
             list={printing}
             buy={b}
             plan={paintPlan(printing, schemeCtx, paintStock)}
-            paintName={paintName}
+            paintById={paintById}
             subtitle={subtitle}
             onDone={() => setPrinting(null)}
           />

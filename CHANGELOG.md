@@ -4,6 +4,12 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Paints to buy: on the Paints page, pick schemes (yours to start with) and print or save as PDF the paints they use that you don't own, with brand, swatch, the schemes that use each one and tick boxes (#86).
+
+### Changed
+- The buy list PDF shows each paint's brand and swatch (#86).
+
 ## [0.5.0] - 2026-11-02
 
 ### Added

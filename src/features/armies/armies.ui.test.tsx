@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../app/App'
@@ -257,7 +257,8 @@ describe('Armies', () => {
 
     const buy = await screen.findByRole('region', { name: 'Buy list' })
     expect(buy).toHaveTextContent('You own every model · 1 paint')
-    expect(await within(buy).findByRole('table', { name: 'Paints to buy' })).toHaveTextContent('AK Interactive 3B Au/Zb AuSept')
+    const paintTable = await within(buy).findByRole('table', { name: 'Paints to buy' })
+    await waitFor(() => expect(paintTable).toHaveTextContent('AK Interactive 3B Au/Zb AuSept'))
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
     await user.click(within(buy).getByRole('button', { name: '📋 Copy as text' }))
@@ -270,7 +271,7 @@ describe('Armies', () => {
     await user.click(within(dialog).getByRole('button', { name: '📄 Make PDF' }))
     const sheet = screen.getByLabelText('Buy list sheet')
     expect(sheet).toHaveTextContent('Scheme: SeptBig Walker (to paint)')
-    expect(sheet).toHaveTextContent('☐AK Interactive 3B Au/Zb Aubuy')
+    expect(sheet).toHaveTextContent('☐AK Interactive3B Au/Zb Aubuy')
     expect(within(screen.getByRole('region', { name: 'From my collection' })).getByText('AK Interactive 3B Au/Zb Au')).toBeInTheDocument()
   })
 
