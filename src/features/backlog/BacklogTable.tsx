@@ -46,8 +46,9 @@ export function StageBar({ stages, pipeline, legend = false, wide = false }: { s
   const total = stages.reduce((n, s) => n + s.count, 0)
   const pct = (n: number) => Math.round((100 * n) / Math.max(1, total))
   const text = stages.map((s) => `${s.name} ${s.count}`).join(' · ')
+  const hover = stages.map((s) => `${s.name}: ${s.count} (${pct(s.count)}%)`).join('\n')
   return (
-    <div className={legend ? 'grid gap-2' : 'flex items-center gap-2'} title={text} aria-label={`Stages: ${text}`}>
+    <div className={legend ? 'grid gap-2' : 'flex items-center gap-2'} title={hover} aria-label={`Stages: ${text}`}>
       <div className={`flex overflow-hidden rounded border border-line ${wide ? 'h-4 w-full' : 'h-3 w-28 shrink-0'}`}>
         {stages.map((s) => <div key={s.id} style={{ width: `${(100 * s.count) / Math.max(1, total)}%`, background: stageColour(pipeline, s.id) }} />)}
       </div>
@@ -57,9 +58,7 @@ export function StageBar({ stages, pipeline, legend = false, wide = false }: { s
             <li key={s.id} className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-sm border border-line" style={{ background: stageColour(pipeline, s.id) }} />{s.name} <b>{s.count}</b> <span className="text-muted">{pct(s.count)}%</span></li>
           ))}
         </ul>
-      ) : (
-        <span className="whitespace-nowrap text-xs text-muted">{stages.map((s) => `${s.name} ${pct(s.count)}%`).join(' · ')}</span>
-      )}
+      ) : null}
     </div>
   )
 }
