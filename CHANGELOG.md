@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-02
+
 ### Added
 - Wargear loadouts for army list units: in a unit's details (▸) set how many models of each type it has and the weapons each one takes. A unit starts from the loadout of your linked models, or the datasheet default, and keeps your own changes once you edit it. Rule checks flag loadouts that break the datasheet's limits (#78).
 - Importing a BattleScribe or New Recruit roster (`.rosz`, `.ros`) also reads each unit's wargear (#78).
@@ -110,7 +112,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.4.2
 [0.4.1]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.4.1
 [0.4.0]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.4.0

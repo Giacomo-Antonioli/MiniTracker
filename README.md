@@ -38,6 +38,10 @@ No account, no server: your collection stays in your browser. Install it from th
 - **Schemes.** Official, community and personal paint schemes with variants; a bundled library of community recipes (credited); "Add from link" and a **Send to MiniTracker** bookmarklet that turns any recipe page you're reading into a draft scheme.
 - **Paints.** ~1,500 Citadel, Army Painter, Vallejo and AK paints with colour swatches; inventory with stages (wishlist → in use → running low → empty), pots, price, shop, storage location, barcode, rating and notes; custom paints; CSV import/export.
 
+**New in v0.5**
+
+- **Wargear loadouts.** Set the models and weapons of each list unit; starts from your linked models or the datasheet default, checked against the datasheet limits, and read from imported rosters.
+
 **New in v0.4**
 
 - **Army lists.** Build lists for 10th or 11th edition, Combat Patrol to Onslaught, from legal units of your faction; owned / partly owned / missing per unit, painted progress, "Add all my units".
@@ -58,7 +62,7 @@ No account, no server: your collection stays in your browser. Install it from th
 | [v0.2](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/2) | Warhammer 40k catalogue from BSData, searchable unit picker, catalogue browser | ✅ released |
 | [v0.3](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/3) | Paint inventory (pre-filled Citadel, Army Painter, Vallejo, Green Stuff World…), paint schemes and recipes, photos | ✅ released |
 | [v0.4](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/4) | Army builder from owned models: points, rules, "what's missing", import/export BattleScribe `.rosz` and text lists | ✅ released |
-| [v0.5](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/5) | Shopping list, game tracking, sharing via files | 🔨 next |
+| [v0.5](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/5) | Wargear loadouts (v0.5.0 ✅), shopping list, game tracking, sharing via files | 🔨 in progress |
 | [v0.6](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/6) | Desktop app (Tauri), Google Drive sync | planned |
 
 Later ideas: QR/NFC tags under bases linking each mini to its page ([#10](https://github.com/Giacomo-Antonioli/MiniTracker/issues/10)), storage boxes with pick and put-back lists ([#18](https://github.com/Giacomo-Antonioli/MiniTracker/issues/18)), Age of Sigmar and Kill Team.
