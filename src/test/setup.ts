@@ -1,7 +1,12 @@
 import 'fake-indexeddb/auto'
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach } from 'vitest'
+import { afterEach, beforeEach } from 'vitest'
+
+// Most UI tests start on the Backlog; the Home tests switch this back.
+beforeEach(() => {
+  if (typeof localStorage !== 'undefined') localStorage.setItem('startPage', 'backlog')
+})
 
 afterEach(() => {
   if (typeof document !== 'undefined') cleanup()

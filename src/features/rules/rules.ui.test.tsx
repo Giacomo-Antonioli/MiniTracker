@@ -21,7 +21,10 @@ async function start(cat: object | null = catalogue, mode: 'collapsed' | 'expand
   return user
 }
 
-beforeEach(() => localStorage.clear())
+beforeEach(() => {
+  localStorage.clear()
+  localStorage.setItem('startPage', 'backlog')
+})
 
 describe('Rules page', () => {
   it('lists core and faction rules, searches, and shows which units have a rule', async () => {

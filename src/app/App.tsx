@@ -11,9 +11,10 @@ import { StatsPage } from '../features/stats/StatsPage'
 import { ShoppingPage } from '../features/shopping/ShoppingPage'
 import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeImport'
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
-import { useStore } from './store'
+import { readStartPage, useStore } from './store'
+import { HomePage } from '../features/home/HomePage'
 
-type Page = 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'stats' | 'settings'
+type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'stats' | 'settings'
 
 const SOON = ['Games']
 
@@ -21,7 +22,7 @@ export default function App() {
   const { ready, load, theme } = useStore()
   // A recipe sent by the bookmarklet arrives in the URL (#recipe=…): start on Schemes with it.
   const [recipe, setRecipe] = useState<RecipePayload | null>(() => readRecipeHash(location.hash))
-  const [page, setPage] = useState<Page>(() => (readRecipeHash(location.hash) ? 'schemes' : 'backlog'))
+  const [page, setPage] = useState<Page>(() => (readRecipeHash(location.hash) ? 'schemes' : readStartPage()))
   const [section, setSection] = useState<SettingsSection | undefined>()
   const [unitId, setUnitId] = useState<string | null>(null)
   const [datasheetId, setDatasheetId] = useState<string | undefined>()
@@ -78,6 +79,7 @@ export default function App() {
     <div className="flex h-screen">
       <nav className="panel m-2 mr-0 flex w-52 shrink-0 flex-col gap-1 p-3" aria-label="Main">
         <div className="mb-4 font-display text-lg tracking-wide text-accent">MiniTracker</div>
+        {nav('home', 'Home')}
         {nav('backlog', 'Backlog')}
         {nav('armies', 'Armies')}
         {nav('browse', 'Catalogue')}
@@ -104,6 +106,8 @@ export default function App() {
       <main className="min-w-0 flex-1 overflow-auto p-4">
         {!ready ? (
           <p className="text-muted">Loading…</p>
+        ) : page === 'home' ? (
+          <HomePage onOpenUnit={openUnit} onGo={(p) => go(p)} onAddUnit={() => go('backlog')} />
         ) : page === 'backlog' ? (
           <BacklogPage onOpenUnit={openUnit} onOpenDatasheet={openDatasheet} onOpenScheme={openScheme} />
         ) : page === 'unit' && unitId ? (

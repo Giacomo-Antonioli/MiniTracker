@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_PIPELINE } from '../collection/pipeline'
 import type { OwnedUnit, StatusEvent } from '../collection/types'
-import { byWeek, lastWeeks, monthsSince, byFaction, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileFlow, pileLevel, pileNow, streakWeeks } from './stats'
+import { recentMoves, recentUnits, byWeek, lastWeeks, monthsSince, byFaction, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileFlow, pileLevel, pileNow, streakWeeks } from './stats'
 
 const p = DEFAULT_PIPELINE
 let n = 0
@@ -99,5 +99,24 @@ describe('byFaction', () => {
       { faction: 'Space Marines', models: 1, painted: 1, points: 0, pointsPainted: 0, finishMonths: 0 },
       { faction: 'No faction', models: 1, painted: 0, points: 0, pointsPainted: 0, finishMonths: undefined },
     ])
+  })
+})
+
+describe('home lists', () => {
+  it('recent units: last moved first, skipping gone and fully painted units', () => {
+    const us = [
+      unit('a', [[3, 'built']], { updatedAt: '2026-01-01' }),
+      unit('b', [[3, 'built']], { updatedAt: '2026-02-01' }),
+      unit('c', [[3, 'painted']], { updatedAt: '2026-03-01' }),
+      unit('d', [[3, 'built']], { updatedAt: '2026-03-01', lifecycle: 'sold' }),
+      unit('e', [[3, 'wishlisted']], { updatedAt: '2026-03-01' }),
+    ]
+    const events = [ev('2026-03-05', 'sprue', 'built', 3, 'a')]
+    expect(recentUnits(us, events, p, 2).map((u) => u.id)).toEqual(['a', 'b'])
+  })
+
+  it('recent moves: newest first', () => {
+    const events = [ev('2026-03-01', 'a', 'b'), ev('2026-03-05', 'a', 'b'), ev('2026-02-01', 'a', 'b')]
+    expect(recentMoves(events, 2).map((e) => e.date)).toEqual(['2026-03-05', '2026-03-01'])
   })
 })

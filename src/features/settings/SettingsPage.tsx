@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { THEMES, useStore, type RuleDisplay, type Theme } from '../../app/store'
+import { readStartPage, saveStartPage, THEMES, useStore, type RuleDisplay, type StartPage, type Theme } from '../../app/store'
 import { DEFAULT_PIPELINES } from '../../domain/pipelines'
 import { BackupPage } from './BackupPage'
 import { CataloguePage } from './CataloguePage'
@@ -16,6 +16,7 @@ const SECTIONS: { id: SettingsSection; label: string }[] = [
 ]
 
 export function SettingsPage({ section }: { section?: SettingsSection }) {
+  const [start, setStart] = useState<StartPage>(readStartPage)
   const { theme, setTheme, ruleDisplay, setRuleDisplay, pipelines, savePipelineFor, units, paintStock, schemes } = useStore()
 
   useEffect(() => {
@@ -50,6 +51,13 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
               <option value="collapsed">Collapsed (open with the ▸ arrow)</option>
               <option value="expanded">Always expanded</option>
               <option value="hover">Show on hover</option>
+            </select>
+          </label>
+          <label className="flex items-center gap-3">
+            Start page
+            <select className="input" value={start} onChange={(e) => { setStart(e.target.value as StartPage); saveStartPage(e.target.value as StartPage) }}>
+              <option value="home">Home</option>
+              <option value="backlog">Backlog</option>
             </select>
           </label>
           <label className="flex items-center gap-3">
