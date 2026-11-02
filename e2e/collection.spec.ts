@@ -25,7 +25,7 @@ test('collector flow: add units, paint some, data survives reload', async ({ pag
   await expect(page.getByRole('region', { name: 'Summary' })).toContainText('Painted 4 / 30 models')
 
   await page.getByRole('cell', { name: 'Intercessor Squad' }).click()
-  await page.getByRole('button', { name: 'Move…' }).first().click()
+  await page.getByRole('button', { name: 'Move with date, note or photo…' }).first().click()
   const move = page.getByRole('dialog', { name: 'Move models' })
   await move.getByLabel('How many', { exact: true }).fill('6')
   await move.getByLabel('To stage').selectOption('painted')

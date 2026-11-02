@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Unit models: move one, a number, or all models of a stage in one click, to the next stage by default or any stage you pick. The full move dialog (date, note, photo) is still there.
+
 ## [0.5.3] - 2026-11-02
 
 ### Changed
