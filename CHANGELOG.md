@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-03
+
 ### Changed
 - Add to shopping list: when models and paints come together (an army's buy list), checkboxes let you add only the models or only the paints.
 - One Warlord per army, and only a Character: ★ is disabled on other units, moves the Warlord to the unit you click (click again to clear), and until one is chosen the Characters' stars are highlighted with a hint above the list. Characters are starred in the Add units list too. Hovering a list warning explains the rule behind it.
@@ -161,7 +163,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.5...v0.6.0
 [0.5.5]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.3...v0.5.4
