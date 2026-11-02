@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { useStore } from '../../app/store'
 import { groupUnits, sortGroups, type GroupSort } from '../../domain/collection/groups'
 import { unitProgress } from '../../domain/collection/backlog'
@@ -65,7 +65,14 @@ export function StageBar({ stages, pipeline, legend = false, wide = false }: { s
 
 /** Backlog as summary rows per datasheet + faction, each expanding into its entries. */
 export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUnit[]; selectedId: string | null; onRowClick: (id: string, clicks: number) => void }) {
-  const { pipeline, catalogue, schemes, library, paints } = useStore()
+  const { pipeline, catalogue, schemes, library, paints, loadPaints, loadLibrary } = useStore()
+  // Scheme strips need the paint colours (and the bundled schemes) loaded.
+  const hasSchemes = units.some((u) => u.schemeId)
+  useEffect(() => {
+    if (!hasSchemes) return
+    if (!paints.length) void loadPaints()
+    void loadLibrary()
+  }, [hasSchemes, paints.length, loadPaints, loadLibrary])
   const [sort, setSort] = useState<{ by: GroupSort; desc: boolean }>(() => read('backlog.sort', { by: 'name', desc: false }))
   const [hidden, setHidden] = useState<Column[]>(() => read('backlog.hidden', []))
   const [open, setOpen] = useState<string[]>(() => read('backlog.open', []))

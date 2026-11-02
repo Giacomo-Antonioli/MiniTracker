@@ -226,3 +226,15 @@ describe('Catalogue banner', () => {
     expect(screen.getByRole('region', { name: 'Summary' })).toHaveTextContent('Units3Models owned9Wishlisted2Painted56%')
   })
 })
+
+describe('Backlog schemes', () => {
+  it('shows the scheme paint colours on entries', async () => {
+    useStore.setState({ backlogFilter: {}, paints: [] })
+    await appDb.schemes.put({ id: 'sc1', name: 'Sept', description: '', origin: 'personal', stage: 'final', tags: [], tips: '', tutorials: [], createdAt: 't', updatedAt: 't', sections: [{ id: 's', area: 'Armour', steps: [{ id: 'p', technique: 'Basecoat', paints: [{ paintId: 'ak_interactive/3b-au-zb-au' }], notes: '' }] }] } as never)
+    await appDb.units.put({ ...createUnit({ customName: 'Crisis', groups: [{ count: 3, status: 'built' }] }, { now: 't', newId: () => 'c1' }), schemeId: 'sc1' })
+    render(<App />)
+    const strip = await screen.findByLabelText('1 paint colours')
+    expect(strip.closest('[title]')).toHaveAttribute('title', 'Sept')
+    expect((strip.firstElementChild as HTMLElement).style.background).toMatch(/#1f2211|rgb\(31, 34, 17\)/)
+  })
+})
