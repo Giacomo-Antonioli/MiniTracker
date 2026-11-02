@@ -7,11 +7,12 @@ import { CatalogueBrowser } from '../features/catalogue/CatalogueBrowser'
 import { PaintsPage } from '../features/paints/PaintsPage'
 import { RulesPage } from '../features/rules/RulesPage'
 import { SchemesPage } from '../features/schemes/SchemesPage'
+import { ShoppingPage } from '../features/shopping/ShoppingPage'
 import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeImport'
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { useStore } from './store'
 
-type Page = 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'settings'
+type Page = 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'settings'
 
 const SOON = ['Games', 'Shopping']
 
@@ -82,6 +83,7 @@ export default function App() {
         {nav('rules', 'Rules')}
         {nav('paints', 'Paints')}
         {nav('schemes', 'Schemes')}
+        {nav('shopping', 'Shopping')}
         {SOON.map((s) => (
           <span key={s} className="px-3 py-1.5 text-muted/60" title="Coming in a later sprint">{s} ⌛</span>
         ))}
@@ -114,6 +116,8 @@ export default function App() {
           <RulesPage onOpenSettings={() => go('settings', 'catalogue')} onOpenDatasheet={openDatasheet} />
         ) : page === 'paints' ? (
           <PaintsPage />
+        ) : page === 'shopping' ? (
+          <ShoppingPage />
         ) : page === 'browse' ? (
           <CatalogueBrowser key={datasheetId ?? 'all'} openId={datasheetId} onOpenSettings={() => go('settings', 'catalogue')} />
         ) : (

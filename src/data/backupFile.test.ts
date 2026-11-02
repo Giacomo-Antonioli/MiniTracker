@@ -37,7 +37,7 @@ describe('backup files with photos', () => {
   it('zip export lists photos and their files in backup.json (light vs full)', async () => {
     await seed()
     const full = JSON.parse((await readBackupZip(await exportBackupZip(db, 'now', true))).json)
-    expect(full.version).toBe(4)
+    expect(full.version).toBe(5)
     expect(full.data.photos.map((p: Photo) => [p.id, p.hasOriginal])).toEqual([['p1', true], ['p2', true]])
     expect(full.data.photoFiles[0]).toEqual({ id: 'p1', shown: 'photos/shown/f_p1.webp', original: 'photos/original/f_p1.jpg' })
 

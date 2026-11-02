@@ -4,15 +4,18 @@ import { MiniTrackerDb } from '../data/db'
 import { convert } from '../data/catalogue/convert'
 import { CURRENT_EDITION, downloadDataFiles, editionOfRepo, latestCommit } from '../data/catalogue/fetch'
 import { extensionOf, makeDisplayCopy } from '../data/photos/compress'
-import { DexieCatalogueRepository, DexieEventRepository, DexieListRepository, DexiePaintRepository, DexiePhotoRepository, DexieSchemeRepository, DexieSettingsRepository, DexieUnitRepository } from '../data/repositories/dexie'
+import { DexieCatalogueRepository, DexieEventRepository, DexieListRepository, DexiePaintRepository, DexiePhotoRepository, DexieSchemeRepository, DexieSettingsRepository, DexieShoppingRepository, DexieUnitRepository } from '../data/repositories/dexie'
 import { parseSchemeFile } from '../domain/schemes/scheme'
 import type { PaintScheme } from '../domain/schemes/types'
 import { photoFileName } from '../domain/photos/naming'
 import type { Photo, PhotoOwner } from '../domain/photos/types'
 import { inventoryFromCsv } from '../domain/paints/csv'
+import { newStock } from '../domain/paints/inventory'
 import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Catalogue } from '../domain/catalogue/types'
 import type { ArmyList, EditionKey } from '../domain/lists/types'
+import { addItems, newList, withoutList } from '../domain/shopping/shopping'
+import type { NewShopItem, ShopItem, ShopList } from '../domain/shopping/types'
 import type { BacklogFilter } from '../domain/collection/backlog'
 import { DEFAULT_PIPELINES, type PipelineKey } from '../domain/pipelines'
 import { DEFAULT_PIPELINE, moveModels, type MoveOptions } from '../domain/collection/pipeline'
@@ -29,6 +32,7 @@ const paintRepo = new DexiePaintRepository(db)
 const photoRepo = new DexiePhotoRepository(db)
 const schemeRepo = new DexieSchemeRepository(db)
 const listRepo = new DexieListRepository(db)
+const shopRepo = new DexieShoppingRepository(db)
 
 /** Installed catalogue of an edition (by its BSData repo); undefined when that edition is not installed. */
 export function catalogueFor(catalogues: Catalogue[], edition: EditionKey): Catalogue | undefined {
@@ -163,6 +167,19 @@ interface State {
   lists: ArmyList[]
   saveList(l: ArmyList): Promise<void>
   deleteList(id: string): Promise<void>
+  /** Shopping (#87): every item is on the main list; named lists hold some of them. */
+  shopItems: ShopItem[]
+  shopLists: ShopList[]
+  /** Add items to the main list and the given lists; `newListName` first creates a list and adds to it too. */
+  addToShopping(items: NewShopItem[], listIds: string[], newListName?: string): Promise<void>
+  saveShopItem(item: ShopItem): Promise<void>
+  deleteShopItem(id: string): Promise<void>
+  /** Tick an item bought (or not). A bought paint goes to the inventory as 'ordered', or 'owned' (a sealed pot more). */
+  setBought(id: string, bought: boolean, paint?: 'ordered' | 'owned'): Promise<void>
+  createShopList(name: string): Promise<ShopList>
+  renameShopList(id: string, name: string): Promise<void>
+  /** Delete a named list; its items stay on the main list. */
+  deleteShopList(id: string): Promise<void>
 }
 
 /** Save a catalogue and keep the in-memory list in sync; the first one installed becomes active. */
@@ -260,7 +277,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists] = await Promise.all([
+    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
@@ -272,6 +289,7 @@ export const useStore = create<State>((set, get) => ({
       settingsRepo.getValue<State['recipeLinks']>('recipeLinks', []),
       settingsRepo.getValue<string | null>('activeCatalogue', null),
       listRepo.list(),
+      shopRepo.load(),
     ])
     const catalogue = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
     set({
@@ -285,6 +303,8 @@ export const useStore = create<State>((set, get) => ({
       schemeDefaults,
       recipeLinks,
       lists,
+      shopItems: shopping.items,
+      shopLists: shopping.lists,
       ready: true,
     })
     if (get().paints.length) await get().loadPaints()
@@ -548,6 +568,64 @@ export const useStore = create<State>((set, get) => ({
   async deleteList(id) {
     set({ lists: get().lists.filter((x) => x.id !== id) })
     await listRepo.delete(id)
+  },
+
+  shopItems: [],
+  shopLists: [],
+
+  async addToShopping(incoming, listIds, newListName) {
+    const ids = [...listIds]
+    if (newListName?.trim()) ids.push((await get().createShopList(newListName)).id)
+    const { items, changed } = addItems(get().shopItems, incoming, ids, ctx())
+    set({ shopItems: items })
+    await shopRepo.saveItems(changed)
+  },
+
+  async saveShopItem(item) {
+    set({ shopItems: get().shopItems.map((x) => (x.id === item.id ? item : x)) })
+    await shopRepo.saveItems([item])
+  },
+
+  async deleteShopItem(id) {
+    set({ shopItems: get().shopItems.filter((x) => x.id !== id) })
+    await shopRepo.deleteItem(id)
+  },
+
+  async setBought(id, bought, paint) {
+    const item = get().shopItems.find((x) => x.id === id)
+    if (!item) return
+    const c = ctx()
+    await get().saveShopItem({ ...item, bought, updatedAt: c.now })
+    if (!bought || item.kind !== 'paint' || !item.refId || !paint) return
+    const old = get().paintStock.get(item.refId)
+    const base = old ?? newStock(item.refId, 'wishlist', c)
+    await get().saveStock(
+      paint === 'owned'
+        ? { ...base, stage: 'sealed', quantity: base.quantity + item.qty, purchaseDate: c.now.slice(0, 10), updatedAt: c.now }
+        : { ...base, stage: 'ordered', updatedAt: c.now },
+    )
+  },
+
+  async createShopList(name) {
+    const l = newList(name, ctx())
+    set({ shopLists: [...get().shopLists, l] })
+    await shopRepo.saveList(l)
+    return l
+  },
+
+  async renameShopList(id, name) {
+    const l = get().shopLists.find((x) => x.id === id)
+    if (!l || !name.trim()) return
+    const n = { ...l, name: name.trim() }
+    set({ shopLists: get().shopLists.map((x) => (x.id === id ? n : x)) })
+    await shopRepo.saveList(n)
+  },
+
+  async deleteShopList(id) {
+    const changed = withoutList(get().shopItems, id, ctx())
+    const byId = new Map(changed.map((x) => [x.id, x]))
+    set({ shopLists: get().shopLists.filter((x) => x.id !== id), shopItems: get().shopItems.map((x) => byId.get(x.id) ?? x) })
+    await Promise.all([shopRepo.deleteList(id), shopRepo.saveItems(changed)])
   },
 
   async dropOriginals() {

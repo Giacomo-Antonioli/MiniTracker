@@ -128,4 +128,24 @@ describe('schema migrations', () => {
     expect(await db.lists.count()).toBe(0)
     await db.delete()
   })
+
+  it('v7 → v8 adds empty shopping tables and keeps lists', async () => {
+    const name = `mig-${Math.random()}`
+    const v7 = new Dexie(name)
+    v7.version(1).stores({ units: 'id, customName, lifecycle, factionId, updatedAt', statusEvents: 'id, unitId, date', settings: 'key' })
+    v7.version(2).stores({ catalogues: 'gameId' })
+    v7.version(3).stores({ paintStock: 'paintId, stage', customPaints: 'id, brand' })
+    v7.version(4).stores({ photos: 'id, unitId, &fileName, createdAt', photoFiles: 'id' })
+    v7.version(5).stores({ schemes: 'id, origin, factionName, basedOn, stage' })
+    v7.version(6).stores({ photos: 'id, unitId, schemeId, &fileName, createdAt' })
+    v7.version(7).stores({ lists: 'id, factionId, edition, updatedAt' })
+    await v7.table('lists').put({ id: 'l1', name: 'A', updatedAt: 't' })
+    v7.close()
+
+    const db = new MiniTrackerDb(name)
+    await db.open()
+    expect(await db.lists.get('l1')).toBeDefined()
+    expect([await db.shopItems.count(), await db.shopLists.count()]).toEqual([0, 0])
+    await db.delete()
+  })
 })

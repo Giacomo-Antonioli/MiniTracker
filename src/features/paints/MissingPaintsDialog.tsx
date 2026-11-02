@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../../app/store'
 import { missingForSchemes } from '../../domain/paints/missing'
 import { Dialog } from '../../ui/Dialog'
+import { AddToShoppingButton } from '../shopping/AddToShoppingDialog'
 import { MissingPaintsSheet } from './MissingPaintsSheet'
 
 /** Pick schemes, then print the paints they use that you don't own. Your own schemes are picked to start with. */
@@ -31,7 +32,8 @@ export function MissingPaintsDialog({ onClose }: { onClose: () => void }) {
         ))}
       </ul>
       <p className="mt-2 text-sm">{rows.length} paint{rows.length === 1 ? '' : 's'} to buy from {chosen.length} scheme{chosen.length === 1 ? '' : 's'}</p>
-      <div className="mt-3 flex justify-end">
+      <div className="mt-3 flex justify-end gap-2">
+        <AddToShoppingButton items={rows.map((r) => ({ kind: 'paint' as const, name: r.paint ? `${r.paint.brand} ${r.paint.name}` : r.paintId, refId: r.paintId, qty: 1, sources: r.schemes.map((x) => `Scheme: ${x}`) }))} />
         <button className="btn btn-primary" disabled={!chosen.length} onClick={() => setPrinting(true)}>Print / save PDF</button>
       </div>
       {printing && <MissingPaintsSheet rows={rows} schemes={chosen.map((s) => s.name)} onDone={() => setPrinting(false)} />}
