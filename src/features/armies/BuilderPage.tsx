@@ -147,7 +147,8 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
         <option value="playable">Playable</option>
       </select>
       {cat && list.factionId && <ArmySchemeSelect list={list} factionName={cat.factions.find((f) => f.id === list.factionId)?.name} onChange={(schemeId) => set({ schemeId })} />}
-      <ExportMenu list={list} cat={cat} onPrint={cat && list.entries.length ? () => setPrintAsk(true) : undefined} />
+      {cat && list.entries.length > 0 && <button className="btn" title="Roster and datasheet cards, no paints. Choose “Save as PDF” in the print dialog." onClick={() => setPrintAsk(true)}>📄 Army PDF</button>}
+      <ExportMenu list={list} cat={cat} />
       {printAsk && cat && (
         <div className="relative">
           <ArmyPrintDialog
@@ -202,6 +203,8 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   const linkedElsewhere = (entryId: string) => new Set(list.entries.filter((x) => x.id !== entryId && x.ownedUnitId).map((x) => x.ownedUnitId))
   const issues = useMemo(() => (cat.muster ? checkList(list, cat) : []), [list, cat])
   const flagged = new Set(issues.flatMap((i) => i.entryIds))
+  const noWarlord = !list.entries.some((e) => e.warlord)
+  const characters = list.entries.filter((e) => sheets.get(e.datasheetId)?.keywords.includes('Character')).length
 
   const edit = (id: string, patch: Partial<Omit<ListEntry, 'id'>>) => onSave(updateEntry(list, id, patch, ctx()))
   // One Warlord per army: choosing a unit moves the ★ there; clicking it again clears it.
@@ -244,6 +247,9 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
         {cat.detachments && <DetachmentBar list={list} cat={cat} onSave={onSave} />}
         <section className={`panel grid gap-1 p-3 ${dropping ? 'border-accent' : ''}`} aria-label="List">
           {list.entries.length === 0 && <p className="text-muted">No units yet. Add them from the left: +, double-click, or drag them here.</p>}
+          {list.entries.length > 0 && noWarlord && (
+            <p className="text-sm text-accent" role="status">{characters ? '★ Choose your Warlord: click the star of a highlighted Character.' : '★ Add a Character to choose your Warlord.'}</p>
+          )}
           {list.entries.map((e) => {
             const d = sheets.get(e.datasheetId)
             const o = own.byEntry.get(e.id)!
@@ -258,9 +264,23 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 <button className="w-5 text-muted" aria-label={`Details: ${d?.name ?? 'unit'}`} aria-expanded={openRows.has(e.id)} onClick={() => toggleRow(e.id)}>
                   {openRows.has(e.id) ? '▾' : '▸'}
                 </button>
-                <button className={`w-6 ${e.warlord ? 'text-accent' : 'text-muted/50'}`} aria-label={`Warlord: ${d?.name ?? 'unit'}`} aria-pressed={!!e.warlord} onClick={() => setWarlord(e.id)} title={d && !d.keywords.includes('Character') ? 'Warlord (must be a Character)' : 'Warlord'}>
-                  ★
-                </button>
+                {(() => {
+                  // Only Characters can be the Warlord; until one is chosen, the candidates are highlighted.
+                  const can = !d || d.keywords.includes('Character')
+                  const look = e.warlord ? 'text-accent' : !can ? 'cursor-not-allowed text-muted/20' : noWarlord ? 'rounded text-accent ring-1 ring-accent/70' : 'text-muted/50 hover:text-accent'
+                  return (
+                    <button
+                      className={`w-6 ${look}`}
+                      aria-label={`Warlord: ${d?.name ?? 'unit'}`}
+                      aria-pressed={!!e.warlord}
+                      disabled={!can && !e.warlord}
+                      onClick={() => setWarlord(e.id)}
+                      title={e.warlord ? 'Warlord (click to clear)' : can ? 'Make Warlord' : 'Only a Character can be the Warlord'}
+                    >
+                      ★
+                    </button>
+                  )
+                })()}
                 <span className="min-w-0 flex-1 truncate">{d?.name ?? 'Unknown unit'}</span>
                 {isChar && !d?.keywords.includes('Epic Hero') && cat.detachments && (offered.length > 0 || e.enhancementId) && (
                   <select
@@ -728,7 +748,7 @@ function download(name: string, text: string, type: string) {
 }
 
 /** Export as text (copy or .txt) or as a MiniTracker .json file. */
-function ExportMenu({ list, cat, onPrint }: { list: ArmyList; cat?: Catalogue; onPrint?: () => void }) {
+function ExportMenu({ list, cat }: { list: ArmyList; cat?: Catalogue }) {
   const [msg, setMsg] = useState('')
   const label = EDITIONS.find((e) => e.key === list.edition)?.label ?? list.edition
   const file = list.name.replace(/[^\w\- ]+/g, '').trim() || 'list'
@@ -749,10 +769,6 @@ function ExportMenu({ list, cat, onPrint }: { list: ArmyList; cat?: Catalogue; o
         </button>
         <button className="btn text-left text-sm" onClick={() => download(`${file}.txt`, listToText(list, cat, label), 'text/plain')}>📄 Text file (.txt)</button>
         <button className="btn text-left text-sm" onClick={() => download(`${file}.json`, listToJson(list), 'application/json')}>🗂 MiniTracker file (.json)</button>
-        {onPrint && <button className="btn text-left text-sm" onClick={(e) => {
-          e.currentTarget.closest('details')?.removeAttribute('open')
-          onPrint()
-        }}>🖨 Print army (PDF)…</button>}
         {msg && <span className="text-xs text-muted" role="status">{msg}</span>}
       </div>
     </details>

@@ -32,7 +32,8 @@ beforeEach(() => {
 
 describe('Armies', () => {
   it('creates a list, adds owned units, flags rules and ownership, and shows it in the overview', async () => {
-    const user = await start()
+    // Big Walker made a Character here, so it can be the Warlord.
+    const user = await start({ ...catalogue, datasheets: catalogue.datasheets.map((d) => (d.name === 'Big Walker' ? { ...d, keywords: [...d.keywords, 'Character'] } : d)) })
     expect(screen.getByText(/No army lists yet/)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '+ New list' }))
     const form = screen.getByRole('form', { name: 'New list' })
@@ -54,7 +55,7 @@ describe('Armies', () => {
     expect(screen.getByLabelText('Faction')).toBeDisabled()
 
     const issues = screen.getByRole('region', { name: 'Issues' })
-    expect(within(issues).getByText('⚠ Needs at least 1 Character')).toBeInTheDocument()
+    expect(within(issues).queryByText('⚠ Needs at least 1 Character')).toBeNull()
     expect(within(issues).getByText('⚠ Choose a Warlord')).toBeInTheDocument()
 
     for (let i = 0; i < 3; i++) await user.click(within(add).getByRole('button', { name: 'Add Big Walker' }))
@@ -69,9 +70,9 @@ describe('Armies', () => {
     expect(within(issues).getByText('⚠ Big Walker: 4, max 2')).toBeInTheDocument()
     expect(screen.getByLabelText('Points limit')).toHaveValue(1000)
 
-    await user.click(screen.getAllByRole('button', { name: 'Warlord: Big Walker' })[0])
-    expect(within(issues).getByText(/is not a Character/)).toBeInTheDocument()
-    expect(within(issues).getByText(/is not a Character/).closest('button')).toHaveAttribute('title', 'The Warlord must be a Character model.')
+    // Only Characters can be the Warlord; until one is chosen they are highlighted.
+    expect(within(issues).getByText('⚠ Choose a Warlord').closest('button')).toHaveAttribute('title', expect.stringContaining('exactly one Warlord'))
+    expect(screen.getByRole('status', { name: '' })).toHaveTextContent('★ Choose your Warlord: click the star of a highlighted Character.')
     // One Warlord: choosing another unit moves the star; clicking it again clears it.
     const stars = () => screen.getAllByRole('button', { name: 'Warlord: Big Walker' })
     await user.click(stars()[1])
@@ -79,7 +80,7 @@ describe('Armies', () => {
     await user.click(stars()[1])
     expect(within(issues).getByText('⚠ Choose a Warlord')).toBeInTheDocument()
     await user.click(stars()[0])
-    expect(stars()[0]).toHaveAttribute('title', 'Warlord (must be a Character)')
+    expect(stars()[0]).toHaveAttribute('title', 'Warlord (click to clear)')
 
     const buy = screen.getByRole('region', { name: 'Buy list' })
     expect(buy).toHaveTextContent('3 models to buy')
@@ -107,8 +108,7 @@ describe('Armies', () => {
     await vi.waitFor(() => expect(screen.queryByLabelText('Buy list sheet')).toBeNull())
 
     // The whole army, without owned/painted counts unless asked for.
-    await user.click(screen.getByText('⬇ Export'))
-    await user.click(screen.getByRole('button', { name: '🖨 Print army (PDF)…' }))
+    await user.click(screen.getByRole('button', { name: '📄 Army PDF' }))
     const ask = screen.getByRole('dialog', { name: 'Print army' })
     expect(within(ask).getByLabelText('Datasheet cards')).toBeChecked()
     expect(within(ask).getByLabelText('Owned and painted models')).not.toBeChecked()
@@ -121,7 +121,7 @@ describe('Armies', () => {
     expect(within(army).getByLabelText('Big Walker card')).toBeInTheDocument()
     window.dispatchEvent(new Event('afterprint'))
     await vi.waitFor(() => expect(screen.queryByLabelText('Army sheet')).toBeNull())
-    await user.click(screen.getByRole('button', { name: '🖨 Print army (PDF)…' }))
+    await user.click(screen.getByRole('button', { name: '📄 Army PDF' }))
     const ask2 = screen.getByRole('dialog', { name: 'Print army' })
     await user.click(within(ask2).getByLabelText('Datasheet cards'))
     await user.click(within(ask2).getByLabelText('Owned and painted models'))
@@ -131,7 +131,7 @@ describe('Armies', () => {
     expect(within(screen.getByLabelText('Army sheet')).queryByLabelText('Datasheet cards')).toBeNull()
     window.dispatchEvent(new Event('afterprint'))
     await vi.waitFor(() => expect(screen.queryByLabelText('Army sheet')).toBeNull())
-    await user.click(screen.getByRole('button', { name: '🖨 Print army (PDF)…' }))
+    await user.click(screen.getByRole('button', { name: '📄 Army PDF' }))
     await user.click(within(screen.getByRole('dialog', { name: 'Print army' })).getByRole('button', { name: 'Cancel' }))
     expect(screen.queryByRole('dialog', { name: 'Print army' })).toBeNull()
 
@@ -143,7 +143,7 @@ describe('Armies', () => {
     expect(row).toHaveTextContent('450 / 1000 pts')
     expect(row).toHaveTextContent('Testers · 11th edition · Incursion')
     expect(row).toHaveTextContent('🟡 Missing 2 models')
-    expect(row).toHaveTextContent('⚠ 4 rule issues')
+    expect(row).toHaveTextContent('⚠ 2 rule issues')
     await user.click(screen.getByRole('button', { name: 'Complete' }))
     expect(screen.getByText('No lists match this filter.')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Rule issues' }))
@@ -331,6 +331,21 @@ describe('Armies', () => {
     expect(screen.getByLabelText('Buy list sheet')).not.toHaveTextContent('Models to buy')
     expect(sheet).toHaveTextContent('☐AK Interactive3B Au/Zb Aubuy')
     expect(within(screen.getByRole('region', { name: 'From my collection' })).getByText('AK Interactive 3B Au/Zb Au')).toBeInTheDocument()
+  })
+
+  it('only lets Characters be the Warlord', async () => {
+    const user = await start()
+    await user.click(screen.getByRole('button', { name: '+ New list' }))
+    const form = screen.getByRole('form', { name: 'New list' })
+    await user.type(within(form).getByLabelText('Name'), 'No heroes')
+    await user.click(within(form).getByRole('button', { name: 'Create' }))
+    const add = await screen.findByRole('region', { name: 'Add units' })
+    await user.click(within(add).getByRole('button', { name: 'Add Big Walker' }))
+    await user.click(within(screen.getByRole('dialog', { name: 'Choose faction' })).getByRole('button', { name: 'Testers' }))
+    const star = screen.getByRole('button', { name: 'Warlord: Big Walker' })
+    expect(star).toBeDisabled()
+    expect(star).toHaveAttribute('title', 'Only a Character can be the Warlord')
+    expect(screen.getByRole('status')).toHaveTextContent('★ Add a Character to choose your Warlord.')
   })
 
   it('chooses an army scheme, shows it per unit, and applies it to my models', async () => {

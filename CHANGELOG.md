@@ -5,10 +5,10 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Changed
-- One Warlord per army: ★ moves the Warlord to the unit you click (click again to clear). Hovering a list warning explains the rule behind it.
+- One Warlord per army, and only a Character: ★ is disabled on other units, moves the Warlord to the unit you click (click again to clear), and until one is chosen the Characters' stars are highlighted with a hint above the list. Hovering a list warning explains the rule behind it.
 
 ### Added
-- Print the whole army (Export → 🖨 Print army): roster with points, Warlord, enhancements and leaders, plus datasheet cards. Owned and painted counts are added only if you tick them.
+- Print the whole army (📄 Army PDF in the list header, no paints): roster with points, Warlord, enhancements and leaders, plus datasheet cards. Owned and painted counts are added only if you tick them.
 - Datasheet cards in the army PDF (#98): one card per unit type with points, stat lines, the ranged and melee weapons its loadout carries, core rules, abilities with their text and keywords. Checkboxes in the Make PDF dialog turn the models to buy, the scheme paints and the cards on or off. The buy list and the list's missing paints are now collapsible.
 
 ## [0.6.0] - 2026-11-02
