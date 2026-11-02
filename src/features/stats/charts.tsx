@@ -196,9 +196,9 @@ export function ActivityCalendar({ counts, now, weeks = 53 }: { counts: Record<s
   const total = days.reduce((t, d) => t + (counts[d] ?? 0), 0)
   const active = days.filter((d) => counts[d]).length
   return (
-    <figure className="grid gap-2">
+    <figure className="mx-auto grid w-fit max-w-full gap-2">
       <div className="overflow-x-auto">
-        <svg role="img" aria-label="Models moved per day over the last year" width={weeks * step + 24} height={7 * step + 16}>
+        <svg role="img" aria-label="Models moved per day over the last year" className="mx-auto block" width={weeks * step + 24} height={7 * step + 16}>
           {['Mon', 'Wed', 'Fri'].map((d, i) => <text key={d} x={0} y={16 + i * 2 * step + cell - 2} className="fill-current text-[9px] text-muted">{d}</text>)}
           {days.map((d, i) => {
             const col = Math.floor(i / 7)
