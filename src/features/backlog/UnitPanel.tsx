@@ -148,6 +148,7 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
           <div className="w-56">
             <SchemePicker
               label="Choose scheme"
+              chosenColours={false}
               value={unit.schemeId}
               paints={paints}
               groups={schemesForUnit(allSchemes, unit, datasheet)}

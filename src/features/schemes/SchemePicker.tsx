@@ -6,13 +6,15 @@ import { ColourStrip } from './ColourStrip'
 import { ORIGIN_LABEL } from './origin'
 
 /** Scheme dropdown that shows each scheme's colours (a native select can't). */
-export function SchemePicker({ label, value, groups, paints, isDefault, onChange }: {
+export function SchemePicker({ label, value, groups, paints, isDefault, onChange, chosenColours = true }: {
   label: string
   value?: string
   groups: { origin: SchemeOrigin; schemes: PaintScheme[] }[]
   paints: PaintDef[]
   isDefault?: (s: PaintScheme) => boolean
   onChange: (id: string | undefined) => void
+  /** Off when the page already shows the chosen scheme's colours next to the picker. */
+  chosenColours?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const box = useRef<HTMLDivElement>(null)
@@ -44,7 +46,7 @@ export function SchemePicker({ label, value, groups, paints, isDefault, onChange
     <div className="relative" ref={box}>
       <button type="button" className="input flex w-full flex-col items-stretch gap-1 text-left" aria-label={label} aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(!open)}>
         <span>{chosen ? `${chosen.name}${isDefault?.(chosen) ? ' ⭐' : ''}` : 'None'} <span className="float-right text-muted">▾</span></span>
-        {chosen && <ColourStrip colours={colourStrip(chosen, paints)} height="h-2" />}
+        {chosen && chosenColours && <ColourStrip colours={colourStrip(chosen, paints)} height="h-2" />}
       </button>
       {open && (
         <ul role="listbox" aria-label={label} className="panel absolute z-20 mt-1 max-h-80 w-full overflow-y-auto p-1">
