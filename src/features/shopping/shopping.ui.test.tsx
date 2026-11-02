@@ -130,4 +130,15 @@ describe('Shopping', () => {
     await user.click(screen.getByLabelText('Bought Line Troopers'))
     await waitFor(() => expect(useStore.getState().units.find((u) => u.customName === 'Line Troopers')?.groups).toMatchObject([{ count: 5, status: 'sprue' }]))
   })
+
+  it('adds the missing paints of a backlog unit\'s scheme', async () => {
+    await appDb.schemes.put({ id: 'sc1', name: 'Sept', description: '', origin: 'personal', stage: 'final', tags: [], tips: '', tutorials: [], createdAt: 't', updatedAt: 't', sections: [{ id: 's', area: 'Armour', steps: [{ id: 'p', technique: 'Basecoat', paints: [{ paintId: PAINT }], notes: '' }] }] } as never)
+    await appDb.units.put({ ...createUnit({ customName: 'Crisis', groups: [{ count: 3, status: 'built' }] }, { now: 't', newId: () => 'c1' }), schemeId: 'sc1' })
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(await screen.findByText('Crisis'))
+    await user.click(await screen.findByRole('button', { name: 'Add missing paints to shopping list…' }))
+    await user.click(within(screen.getByRole('dialog', { name: 'Add to shopping list' })).getByRole('button', { name: 'Add' }))
+    await waitFor(() => expect(useStore.getState().shopItems.map((x) => [x.name, x.sources])).toEqual([['AK Interactive 3B Au/Zb Au', ['Scheme: Sept']]]))
+  })
 })
