@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../app/store'
 import { factionsOf, filterUnits, stageTotals, type BacklogFilter } from '../../domain/collection/backlog'
-import { progress } from '../../domain/collection/pipeline'
+import { isGone, progress, WISHLISTED } from '../../domain/collection/pipeline'
 import type { OwnedUnit } from '../../domain/collection/types'
-import { ProgressBar } from '../../ui/Dialog'
 import { CatalogueBanner } from './CatalogueBanner'
 import { UnitFormDialog } from './UnitFormDialog'
 import { UnitPanel } from './UnitPanel'
-import { BacklogTable } from './BacklogTable'
+import { BacklogTable, StageBar } from './BacklogTable'
 
 /** How long a single click waits for a possible second click. */
 const DOUBLE_CLICK_MS = 250
@@ -20,6 +19,10 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
   const shown = useMemo(() => filterUnits(units, filter), [units, filter])
   const factions = useMemo(() => factionsOf(units), [units])
   const total = progress(units, pipeline, 'painted')
+  const live = units.filter((u) => !isGone(u.lifecycle))
+  const stats = stageTotals(units, pipeline).map((s) => ({ id: s.stage.id, name: s.stage.name, count: s.count }))
+  const wished = stats.find((s) => s.id === WISHLISTED)?.count ?? 0
+  const owned = stats.reduce((n, s) => n + s.count, 0) - wished
   const selected = units.find((u) => u.id === selectedId)
   const set = (patch: Partial<BacklogFilter>) => setFilter({ ...filter, ...patch })
   // Single click opens the side panel, double-click opens the unit page. Opening the panel reflows the
@@ -43,15 +46,18 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
 
         <CatalogueBanner />
 
-        <section className="panel grid gap-2 p-4" aria-label="Summary">
-          <div className="flex items-baseline justify-between">
-            <span>Painted <b>{total.done}</b> / {total.total} models</span>
-            <span className="font-display text-xl text-accent">{Math.round(total.ratio * 100)}%</span>
+        <section className="panel grid gap-3 p-4" aria-label="Summary">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              ['Units', live.length],
+              ['Models owned', owned],
+              ['Wishlisted', wished],
+              ['Painted', `${Math.round(total.ratio * 100)}%`],
+            ].map(([k, v]) => (
+              <div key={k} className="rounded border border-line p-2"><div className="text-xs uppercase tracking-wider text-muted">{k}</div><div className="font-display text-xl text-accent">{v}</div></div>
+            ))}
           </div>
-          <ProgressBar ratio={total.ratio} />
-          <p className="text-sm text-muted">
-            {stageTotals(units, pipeline).map((s) => `${s.stage.name} ${s.count}`).join(' · ') || 'No models yet'}
-          </p>
+          {stats.length ? <StageBar stages={stats} pipeline={pipeline} legend wide /> : <p className="text-sm text-muted">No models yet</p>}
         </section>
 
         <section className="flex flex-wrap items-center gap-2" aria-label="Filters">

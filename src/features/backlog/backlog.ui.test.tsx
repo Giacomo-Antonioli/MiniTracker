@@ -39,7 +39,7 @@ describe('Backlog UI', () => {
     await screen.findByText(/Your backlog is empty/)
     await addUnit(user, 'Intercessors', 'Ultramarines', 5, 'painted')
     const summary = screen.getByRole('region', { name: 'Summary' })
-    expect(summary).toHaveTextContent('Painted 5 / 5 models')
+    expect(summary).toHaveTextContent('Units1Models owned5Wishlisted0Painted100%')
     expect(summary).toHaveTextContent('100%')
   })
 
@@ -208,7 +208,7 @@ describe('Catalogue banner', () => {
     await user.click(screen.getByRole('button', { name: 'Expand all' }))
     expect(screen.getByRole('cell', { name: /Squad B/ })).toBeInTheDocument()
 
-    const names = () => screen.getAllByRole('row').slice(1).map((r) => r.textContent!.split(/\s{0}(?=UM|—)/)[0].trim().slice(0, 9))
+    const names = () => screen.getAllByRole('row').slice(1).map((r) => r.textContent!.split(/\s{0}(?=UM|—)/)[0].replace(/^[▸▾]/, '').trim().slice(0, 9))
     expect(names()[0]).toMatch(/Alpha tan/)
     await user.click(screen.getByRole('button', { name: /^Unit/ }))
     expect(names()[0]).toMatch(/Squad A/)
@@ -219,5 +219,9 @@ describe('Catalogue banner', () => {
     await user.click(within(screen.getByRole('group', { name: 'Columns' })).getByLabelText('Stages'))
     expect(screen.queryByRole('columnheader', { name: 'Stages' })).toBeNull()
     expect(JSON.parse(localStorage.getItem('backlog.hidden')!)).toEqual(['stages'])
+    await user.click(screen.getByRole('button', { name: 'Show models of Squad B' }))
+    expect(screen.getByRole('row', { name: '2 × Wishlisted' })).toBeInTheDocument()
+    expect(screen.getByRole('row', { name: '3 × Built' })).toHaveTextContent('—')
+    expect(screen.getByRole('region', { name: 'Summary' })).toHaveTextContent('Units3Models owned9Wishlisted2Painted56%')
   })
 })

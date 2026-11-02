@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useState } from 'react'
 import { useStore } from '../../app/store'
-import { groupUnits, sortGroups, type GroupSort, type UnitGroup } from '../../domain/collection/groups'
+import { groupUnits, sortGroups, type GroupSort } from '../../domain/collection/groups'
 import { unitProgress } from '../../domain/collection/backlog'
 import { WISHLISTED } from '../../domain/collection/pipeline'
 import { colourStrip } from '../../domain/schemes/scheme'
@@ -33,22 +33,33 @@ const write = (k: string, v: unknown) => {
   }
 }
 
-/** Shades from light (early stages) to the accent (last stage). */
-const shade = (p: Pipeline, id: string) => {
-  if (id === WISHLISTED) return 'transparent'
-  const i = p.stages.findIndex((s) => s.id === id)
-  return `color-mix(in srgb, var(--color-accent) ${Math.round(15 + (85 * i) / Math.max(1, p.stages.length - 1))}%, transparent)`
+/** A distinct colour per stage, in pipeline order; Wishlisted is hatched. */
+const PALETTE = ['#9aa5b1', '#b07d4f', '#8e6bbf', '#4f86c6', '#d9a441', '#3fa37a', '#c75f8a', '#5bb8c4', '#e07b39', '#7a9c3a']
+export function stageColour(p: Pipeline, id: string): string {
+  if (id === WISHLISTED) return 'repeating-linear-gradient(45deg, transparent 0 3px, var(--color-muted, #888) 3px 4px)'
+  const i = p.stages.filter((s) => s.id !== WISHLISTED).findIndex((s) => s.id === id)
+  return PALETTE[Math.max(0, i) % PALETTE.length]
 }
 
-function StageBar({ stages, pipeline }: { stages: UnitGroup['stages']; pipeline: Pipeline }) {
+/** Bar of every stage's share, with each stage in its own colour. `legend` lists them with counts and percentages. */
+export function StageBar({ stages, pipeline, legend = false, wide = false }: { stages: { id: string; name: string; count: number }[]; pipeline: Pipeline; legend?: boolean; wide?: boolean }) {
   const total = stages.reduce((n, s) => n + s.count, 0)
+  const pct = (n: number) => Math.round((100 * n) / Math.max(1, total))
   const text = stages.map((s) => `${s.name} ${s.count}`).join(' · ')
   return (
-    <div className="flex items-center gap-2" title={text} aria-label={`Stages: ${text}`}>
-      <div className="flex h-3 w-28 overflow-hidden rounded border border-line">
-        {stages.map((s) => <div key={s.id} style={{ width: `${(100 * s.count) / Math.max(1, total)}%`, background: shade(pipeline, s.id) }} className={s.id === WISHLISTED ? 'border-r border-dashed border-line' : ''} />)}
+    <div className={legend ? 'grid gap-2' : 'flex items-center gap-2'} title={text} aria-label={`Stages: ${text}`}>
+      <div className={`flex overflow-hidden rounded border border-line ${wide ? 'h-4 w-full' : 'h-3 w-28 shrink-0'}`}>
+        {stages.map((s) => <div key={s.id} style={{ width: `${(100 * s.count) / Math.max(1, total)}%`, background: stageColour(pipeline, s.id) }} />)}
       </div>
-      <span className="whitespace-nowrap text-xs text-muted">{stages.map((s) => `${s.name} ${Math.round((100 * s.count) / Math.max(1, total))}%`).join(' · ')}</span>
+      {legend ? (
+        <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          {stages.map((s) => (
+            <li key={s.id} className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-sm border border-line" style={{ background: stageColour(pipeline, s.id) }} />{s.name} <b>{s.count}</b> <span className="text-muted">{pct(s.count)}%</span></li>
+          ))}
+        </ul>
+      ) : (
+        <span className="whitespace-nowrap text-xs text-muted">{stages.map((s) => `${s.name} ${pct(s.count)}%`).join(' · ')}</span>
+      )}
     </div>
   )
 }
@@ -60,6 +71,7 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
   const [hidden, setHidden] = useState<Column[]>(() => read('backlog.hidden', []))
   const [open, setOpen] = useState<string[]>(() => read('backlog.open', []))
   const [picking, setPicking] = useState(false)
+  const [openUnits, setOpenUnits] = useState<string[]>([])
   const show = COLUMNS.filter((c) => !hidden.includes(c))
   const names = useMemo(() => new Map(catalogue?.datasheets.map((d) => [d.id, d.name]) ?? []), [catalogue])
   const groups = useMemo(() => sortGroups(groupUnits(units, pipeline, (id) => names.get(id)), sort.by, sort.desc), [units, pipeline, names, sort])
@@ -113,6 +125,12 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
       >
         <td className="p-2">
           <span className={child ? 'pl-6 text-muted' : ''}>{child ? '└ ' : ''}</span>
+          <button
+            className="mr-1 inline-block w-4 text-muted"
+            aria-label={`${openUnits.includes(u.id) ? 'Hide' : 'Show'} models of ${u.customName}`}
+            aria-expanded={openUnits.includes(u.id)}
+            onClick={(e) => { e.stopPropagation(); setOpenUnits(openUnits.includes(u.id) ? openUnits.filter((x) => x !== u.id) : [...openUnits, u.id]) }}
+          >{openUnits.includes(u.id) ? '▾' : '▸'}</button>
           {u.customName}
           {u.lifecycle !== 'active' && <span className="text-muted"> ({u.lifecycle})</span>}
         </td>
@@ -130,6 +148,24 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
       </tr>
     )
   }
+  const groupRows = (u: OwnedUnit, child: boolean) =>
+    openUnits.includes(u.id)
+      ? u.groups.map((g) => {
+          const scheme = u.schemeId ? schemeById.get(u.schemeId) : undefined
+          return (
+            <tr key={g.id} className="border-b border-line/30 text-xs" aria-label={`${g.count} × ${pipeline.stages.find((s) => s.id === g.status)?.name ?? g.status}`}>
+              <td className={`p-1 ${child ? 'pl-16' : 'pl-10'}`}>
+                <span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm border border-line align-middle" style={{ background: stageColour(pipeline, g.status) }} />
+                <b>{g.count} ×</b> {pipeline.stages.find((s) => s.id === g.status)?.name ?? g.status}
+              </td>
+              <td className="p-1 text-muted" colSpan={show.length}>
+                {[g.loadout.length ? g.loadout.join(', ') : '', ...g.magnetised.map((m) => `🧲 ${m.slot}: ${m.optionIds.join(' | ')}`), scheme ? `Scheme: ${scheme.name}` : ''].filter(Boolean).join(' · ') || '—'}
+              </td>
+            </tr>
+          )
+        })
+      : []
+  const entry = (u: OwnedUnit, child: boolean) => [entryRow(u, child), ...groupRows(u, child)]
 
   return (
     <>
@@ -151,7 +187,7 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
         </thead>
         <tbody>
           {groups.map((g) => {
-            if (g.units.length === 1) return entryRow(g.units[0], false)
+            if (g.units.length === 1) return <Fragment key={g.key}>{entry(g.units[0], false)}</Fragment>
             const isOpen = open.includes(g.key)
             return (
               <Fragment key={g.key}>
@@ -169,7 +205,7 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
                     </td>
                   ))}
                 </tr>
-                {isOpen && g.units.map((u) => entryRow(u, true))}
+                {isOpen && g.units.map((u) => <Fragment key={u.id}>{entry(u, true)}</Fragment>)}
               </Fragment>
             )
           })}
