@@ -8,6 +8,7 @@ import { parseBsData } from '../../data/catalogue/bsdata'
 import { createUnit } from '../../domain/collection/ownedUnit'
 import { DEFAULT_PIPELINE } from '../../domain/collection/pipeline'
 import { DEFAULT_PIPELINES } from '../../domain/pipelines'
+import { ticks } from './charts'
 import { forecast } from './StatsPage'
 
 const raw = import.meta.glob('../../data/catalogue/fixtures/*', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
@@ -42,11 +43,21 @@ describe('Stats', () => {
     expect(await factions.findByText('64 / 160 pts')).toBeTruthy()
     expect(factions.getByText('4 / 10 (40%)')).toBeTruthy()
 
+    const pile = screen.getByRole('img', { name: 'Unpainted models at each month end' })
+    await user.hover(pile.querySelectorAll('rect')[pile.querySelectorAll('rect').length - 1])
+    expect(screen.getByRole('tooltip').textContent).toContain('Pile8')
+    await user.hover(screen.getByRole('img', { name: 'Models painted per month' }).querySelectorAll('rect')[11])
+    expect(screen.getByRole('tooltip').textContent).toContain('Painted4')
+    await user.unhover(screen.getByRole('img', { name: 'Models painted per month' }))
     await user.selectOptions(screen.getByLabelText('Faction'), 'Orks')
     expect(tiles.getByText('+2')).toBeTruthy()
     expect(factions.queryByText('Testers')).toBeNull()
     await user.selectOptions(screen.getByLabelText('Range'), '6')
-    expect(screen.getByRole('img', { name: 'Models painted per month' }).querySelectorAll('rect')).toHaveLength(6)
+    expect(screen.getByRole('img', { name: 'Models painted per month' }).querySelectorAll('[data-bar]')).toHaveLength(6)
+  })
+
+  it('picks round axis ticks', () => {
+    expect([ticks(0), ticks(7), ticks(40), ticks(130)]).toEqual([[0, 1], [0, 2, 4, 6, 8], [0, 10, 20, 30, 40], [0, 50, 100, 150]])
   })
 
   it('words the finish estimate', () => {

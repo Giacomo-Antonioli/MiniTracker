@@ -4,10 +4,8 @@ import { pointsFor } from '../../domain/catalogue/points'
 import { factionsOf } from '../../domain/collection/backlog'
 import { ownedModels } from '../../domain/collection/ownedUnit'
 import type { OwnedUnit, StatusEvent } from '../../domain/collection/types'
+import { MonthArea, MonthBars } from './charts'
 import { byFaction, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileFlow, pileLevel, pileNow, streakWeeks } from '../../domain/stats/stats'
-
-const MONTH = new Intl.DateTimeFormat(undefined, { month: 'short', timeZone: 'UTC' })
-const monthLabel = (m: string) => MONTH.format(new Date(`${m}-01T00:00:00Z`))
 
 /** "about 14 months", "about 2 years", or a dash when there is no pace yet. */
 export function forecast(months: number | undefined): string {
@@ -23,42 +21,6 @@ export function Tile({ label, value, hint, tone }: { label: string; value: strin
       <div className={`font-display text-xl ${tone === 'good' ? 'text-green-500' : tone === 'bad' ? 'text-red-400' : 'text-accent'}`}>{value}</div>
       {hint && <div className="text-xs text-muted">{hint}</div>}
     </div>
-  )
-}
-
-/** Plain SVG bars, one per month; an optional line drawn on top. */
-export function MonthBars({ months, series, line, label }: { months: string[]; series: { name: string; values: number[]; className: string }[]; line?: { name: string; values: number[] }; label: string }) {
-  const W = 40 * months.length
-  const H = 140
-  const max = Math.max(1, ...series.flatMap((s) => s.values), ...(line?.values ?? []))
-  const bw = 30 / series.length
-  const y = (v: number) => H - (Math.max(0, v) / max) * (H - 10)
-  return (
-    <figure className="grid gap-1">
-      <svg role="img" aria-label={label} viewBox={`0 0 ${W} ${H + 16}`} className="h-44 w-full" preserveAspectRatio="none">
-        {months.map((m, i) => (
-          <g key={m}>
-            {series.map((s, j) => (
-              <rect key={s.name} x={i * 40 + 5 + j * bw} y={y(s.values[i])} width={bw - 1} height={H - y(s.values[i])} className={s.className}>
-                <title>{`${monthLabel(m)} ${m.slice(0, 4)} · ${s.name}: ${s.values[i]}`}</title>
-              </rect>
-            ))}
-            <text x={i * 40 + 20} y={H + 12} textAnchor="middle" className="fill-current text-[9px] text-muted">{monthLabel(m)}</text>
-          </g>
-        ))}
-        {line && (
-          <polyline fill="none" strokeWidth={2} className="stroke-current text-accent" points={line.values.map((v, i) => `${i * 40 + 20},${y(v)}`).join(' ')}>
-            <title>{line.name}</title>
-          </polyline>
-        )}
-      </svg>
-      <figcaption className="flex flex-wrap gap-3 text-xs text-muted">
-        {series.map((s) => (
-          <span key={s.name} className="flex items-center gap-1"><svg width="10" height="10"><rect width="10" height="10" className={s.className} /></svg>{s.name}</span>
-        ))}
-        {line && <span className="flex items-center gap-1"><span className="inline-block h-0.5 w-3 bg-accent" />{line.name}</span>}
-      </figcaption>
-    </figure>
   )
 }
 
@@ -137,22 +99,28 @@ export function StatsPage() {
       </section>
 
       <section className="panel grid gap-2 p-4" aria-label="Painted per month">
-        <h2 className="font-display text-lg">Painted per month</h2>
-        <MonthBars label="Models painted per month" months={months} series={[{ name: 'Painted', values: paintedPerMonth(events, pipeline, months), className: 'fill-accent' }]} />
+        <h2 className="font-display text-lg">Models painted per month</h2>
+        <MonthBars label="Models painted per month" months={months} series={[{ name: 'Painted', values: paintedPerMonth(events, pipeline, months), fill: 'fill-accent', swatch: 'bg-accent' }]} />
       </section>
 
-      <section className="panel grid gap-2 p-4" aria-label="Pile in and out">
-        <h2 className="font-display text-lg">Pile in vs out</h2>
-        <MonthBars
-          label="Models added and finished per month"
-          months={months}
-          series={[
-            { name: 'Added', values: flow.map((r) => r.added), className: 'fill-red-400' },
-            { name: 'Finished', values: flow.map((r) => r.finished), className: 'fill-green-500' },
-          ]}
-          line={{ name: 'Pile', values: flow.map((r) => r.pile) }}
-        />
-      </section>
+      <div className="grid gap-4 xl:grid-cols-2">
+        <section className="panel grid gap-2 p-4" aria-label="Pile in and out">
+          <h2 className="font-display text-lg">Pile in vs out</h2>
+          <MonthBars
+            label="Models added and finished per month"
+            months={months}
+            series={[
+              { name: 'Added', values: flow.map((r) => r.added), fill: 'fill-muted/60', swatch: 'bg-muted/60' },
+              { name: 'Finished', values: flow.map((r) => r.finished), fill: 'fill-accent', swatch: 'bg-accent' },
+            ]}
+          />
+        </section>
+
+        <section className="panel grid gap-2 p-4" aria-label="Pile size">
+          <h2 className="font-display text-lg">Pile size</h2>
+          <MonthArea label="Unpainted models at each month end" name="Pile" months={months} values={flow.map((r) => r.pile)} />
+        </section>
+      </div>
 
       <section className="panel grid gap-2 p-4" aria-label="By faction">
         <h2 className="font-display text-lg">By faction</h2>
@@ -169,7 +137,7 @@ export function StatsPage() {
                     <td className="py-1.5">{a.faction}</td>
                     <td>
                       <div className="flex items-center gap-2">
-                        <div className="h-2 w-32 overflow-hidden rounded bg-panel-2"><div className="h-full bg-accent" style={{ width: `${pct * 100}%` }} /></div>
+                        <div className="h-2 w-32 overflow-hidden rounded-full bg-panel-2"><div className="h-full rounded-full bg-accent" style={{ width: `${pct * 100}%` }} /></div>
                         {a.points ? `${a.pointsPainted} / ${a.points} pts` : '—'}
                       </div>
                     </td>
