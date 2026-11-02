@@ -11,6 +11,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ### Changed
 - The buy list PDF shows each paint's brand and swatch (#86).
 
+### Fixed
+- The old greyed-out "Shopping (soon)" item no longer shows next to the Shopping tab.
+
 ## [0.5.0] - 2026-11-02
 
 ### Added
