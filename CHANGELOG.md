@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Changed
+- Wishlisted models in the backlog are always on the shopping list: the item's quantity follows the Wishlisted count (also in units with models at several stages), and it is ticked bought when none are left.
+
 ## [0.5.2] - 2026-11-02
 
 ### Added

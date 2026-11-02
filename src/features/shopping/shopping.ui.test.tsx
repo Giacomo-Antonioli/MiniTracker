@@ -126,7 +126,7 @@ describe('Shopping', () => {
     await user.click(await screen.findByRole('button', { name: 'Add AK Interactive 3B Au/Zb Au' }))
     await waitFor(() => expect(useStore.getState().paintStock.get(PAINT)).toMatchObject({ stage: 'wishlist', quantity: 0 }))
 
-    expect(screen.getByRole('status')).toHaveTextContent('3 to buy')
+    expect(screen.getByRole('status')).toHaveTextContent('4 to buy')
     await user.click(screen.getByLabelText('Bought Line Troopers'))
     await waitFor(() => expect(useStore.getState().units.find((u) => u.customName === 'Line Troopers')?.groups).toMatchObject([{ count: 5, status: 'sprue' }]))
   })

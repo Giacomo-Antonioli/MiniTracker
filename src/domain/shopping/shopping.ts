@@ -1,4 +1,5 @@
-import type { Ctx } from '../collection/types'
+import { isGone, WISHLISTED } from '../collection/pipeline'
+import type { Ctx, OwnedUnit } from '../collection/types'
 import type { NewShopItem, ShopItem, ShopList } from './types'
 
 /** The main list holds every item. */
@@ -75,4 +76,19 @@ export function shoppingText(title: string, items: ShopItem[]): string {
   const t = totals(items)
   out.push('', `Total: ${money(t.price)}${t.unpriced ? ` (+${t.unpriced} without price)` : ''}`)
   return out.join('\n')
+}
+
+/**
+ * Keeps a backlog unit's Wishlisted models on the shopping list: the open item for the unit follows the
+ * Wishlisted count, is created when there is none, and is ticked bought when no Wishlisted models are left.
+ */
+export function syncWishlisted(items: ShopItem[], unit: OwnedUnit, ctx: Ctx): ShopItem | undefined {
+  const want = isGone(unit.lifecycle) ? 0 : unit.groups.reduce((n, g) => n + (g.status === WISHLISTED ? g.count : 0), 0)
+  const open = items.find((x) => !x.bought && x.unitId === unit.id)
+  if (open) {
+    if (want === 0) return { ...open, bought: true, updatedAt: ctx.now }
+    return open.qty === want ? undefined : { ...open, qty: want, updatedAt: ctx.now }
+  }
+  if (want === 0) return undefined
+  return { id: ctx.newId(), kind: 'model', name: unit.customName, refId: unit.datasheetId, unitId: unit.id, qty: want, bought: false, sources: ['Backlog'], listIds: [], createdAt: ctx.now, updatedAt: ctx.now }
 }

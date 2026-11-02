@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { addItems, itemsOn, MAIN, newList, shoppingText, totals, withoutList } from './shopping'
+import { createUnit } from '../collection/ownedUnit'
+import { addItems, itemsOn, MAIN, newList, shoppingText, syncWishlisted, totals, withoutList } from './shopping'
 import type { ShopItem } from './types'
 
 let n = 0
@@ -38,5 +39,18 @@ describe('shopping list', () => {
     ], [], ctx).items
     expect(shoppingText('Shopping', items)).toBe('Shopping\n\nAmazon\n- Blue – 3.50\n\nGW\n- 2× Walker – 100.00\n\nAny shop\n- Red\n\nTotal: 103.50 (+1 without price)')
     expect(shoppingText('Shopping', [])).toBe('Shopping: nothing to buy')
+  })
+
+  it('keeps Wishlisted backlog models on the list, for mixed-stage units too', () => {
+    const u = createUnit({ customName: 'Crisis', datasheetId: 'd1', groups: [{ count: 2, status: 'wishlisted' }, { count: 1, status: 'built' }, { count: 1, status: 'wishlisted' }] }, ctx)
+    const made = syncWishlisted([], u, ctx)!
+    expect(made).toMatchObject({ kind: 'model', name: 'Crisis', refId: 'd1', unitId: u.id, qty: 3, bought: false, sources: ['Backlog'] })
+    expect(syncWishlisted([made], u, ctx)).toBeUndefined()
+    const fewer = { ...u, groups: u.groups.slice(0, 2) }
+    expect(syncWishlisted([made], fewer, ctx)).toMatchObject({ id: made.id, qty: 2 })
+    const none = { ...u, groups: [u.groups[1]] }
+    expect(syncWishlisted([made], none, ctx)).toMatchObject({ id: made.id, bought: true })
+    expect(syncWishlisted([], none, ctx)).toBeUndefined()
+    expect(syncWishlisted([made], { ...u, lifecycle: 'sold' }, ctx)).toMatchObject({ bought: true })
   })
 })

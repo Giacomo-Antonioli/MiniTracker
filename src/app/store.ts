@@ -14,7 +14,7 @@ import { newStock } from '../domain/paints/inventory'
 import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Catalogue } from '../domain/catalogue/types'
 import type { ArmyList, EditionKey } from '../domain/lists/types'
-import { addItems, newList, withoutList } from '../domain/shopping/shopping'
+import { addItems, newList, syncWishlisted, withoutList } from '../domain/shopping/shopping'
 import type { NewShopItem, ShopItem, ShopList } from '../domain/shopping/types'
 import type { BacklogFilter } from '../domain/collection/backlog'
 import { DEFAULT_PIPELINES, type PipelineKey } from '../domain/pipelines'
@@ -365,10 +365,13 @@ export const useStore = create<State>((set, get) => ({
   async saveUnit(unit) {
     await unitsRepo.save(unit)
     set({ units: await unitsRepo.list() })
+    await syncShopping(unit)
   },
 
   async deleteUnit(id) {
     await unitsRepo.delete(id)
+    const open = useStore.getState().shopItems.find((x) => !x.bought && x.unitId === id)
+    if (open) await useStore.getState().deleteShopItem(open.id)
     const events = { ...get().events }
     delete events[id]
     const photos = { ...get().photos }
@@ -387,6 +390,7 @@ export const useStore = create<State>((set, get) => ({
     await unitsRepo.recordMove(updated, event)
     if (photo) await get().addPhotos(updated, [photo], { owner: { kind: 'event', unitId: unit.id, eventId: event.id }, stage: to, id: photoId })
     set({ units: await unitsRepo.list() })
+    await syncShopping(updated)
     await get().loadEvents(unit.id)
   },
 
@@ -671,3 +675,12 @@ export const useStore = create<State>((set, get) => ({
     return freed
   },
 }))
+
+/** Wishlisted backlog models follow onto the shopping list (see syncWishlisted). */
+async function syncShopping(unit: OwnedUnit) {
+  const item = syncWishlisted(useStore.getState().shopItems, unit, ctx())
+  if (!item) return
+  const items = useStore.getState().shopItems
+  useStore.setState({ shopItems: items.some((x) => x.id === item.id) ? items.map((x) => (x.id === item.id ? item : x)) : [...items, item] })
+  await shopRepo.saveItems([item])
+}
