@@ -79,7 +79,7 @@ describe('Photos', () => {
 
   it('attaches a photo to a painting step and shows it in the history', async () => {
     const { user, panel } = await unitWithPanel()
-    await user.click(within(panel).getByRole('button', { name: 'Move…' }))
+    await user.click(within(panel).getByRole('button', { name: 'Move with date, note or photo…' }))
     const d = screen.getByRole('dialog', { name: 'Move models' })
     await user.upload(within(d).getByLabelText('Photo for this step'), jpg('step.jpg'))
     expect(within(d).getByText('step.jpg')).toBeInTheDocument()

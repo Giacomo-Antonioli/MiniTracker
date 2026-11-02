@@ -15,6 +15,7 @@ import { missingForSchemes } from '../../domain/paints/missing'
 import { AddToShoppingButton } from '../shopping/AddToShoppingDialog'
 import { unitTag } from '../../domain/photos/naming'
 import { MoveDialog } from './MoveDialog'
+import { QuickMove } from './QuickMove'
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
 
@@ -132,7 +133,10 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
                   <div key={m.slot} className="text-xs text-muted">🧲 {m.slot}: {m.optionIds.join(' | ')}</div>
                 ))}
               </div>
-              <button className="btn" onClick={() => setMoving(g)}>Move…</button>
+              <div className="flex flex-col items-end gap-1">
+                <QuickMove key={`${g.id}-${g.count}-${g.status}`} unit={unit} group={g} />
+                <button className="text-xs text-muted underline" onClick={() => setMoving(g)}>Move with date, note or photo…</button>
+              </div>
             </li>
           ))}
         </ul>
