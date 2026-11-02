@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { catalogueFor, ctx, useStore } from '../../app/store'
 import { EDITIONS } from '../../data/catalogue/fetch'
+import { unitCards } from '../../domain/lists/cards'
 import { ownedByDatasheet } from '../../domain/catalogue/owned'
 import type { Catalogue, Datasheet } from '../../domain/catalogue/types'
 import type { OwnedUnit } from '../../domain/collection/types'
@@ -337,7 +338,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
               ))
             )}
         <CollectionPanel own={own} plan={plan} missingPaints={missingPaints} toApply={schemesToApply(list, schemeCtx)} />
-        <BuyPanel list={list} rows={buyList(list, sheets, own, points)} paints={missingPaints} schemeCtx={schemeCtx} paintById={paintById} onSave={onSave} subtitle={[cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name].filter(Boolean).join(' · ')} />
+        <BuyPanel list={list} cat={cat} linkedTo={(e) => (own.byEntry.get(e.id)?.from ?? []).map((f) => units.find((u) => u.id === f.unitId)).filter((u): u is NonNullable<typeof u> => !!u)} rows={buyList(list, sheets, own, points)} paints={missingPaints} schemeCtx={schemeCtx} paintById={paintById} onSave={onSave} subtitle={[cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name].filter(Boolean).join(' · ')} />
           </section>
         )}
       </div>
@@ -537,8 +538,9 @@ function DetachmentBar({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; 
   )
 }
 
-function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSave }: { list: ArmyList; rows: ReturnType<typeof buyList>; paints: BuyPaint[]; subtitle: string; schemeCtx: SchemeContext; paintById: Map<string, PaintDef>; onSave: (l: ArmyList) => void }) {
+function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSave, cat, linkedTo }: { list: ArmyList; rows: ReturnType<typeof buyList>; paints: BuyPaint[]; subtitle: string; schemeCtx: SchemeContext; paintById: Map<string, PaintDef>; onSave: (l: ArmyList) => void; cat: Catalogue; linkedTo: (e: ListEntry) => OwnedUnit[] }) {
   const { paintStock } = useStore()
+  const [withCards, setWithCards] = useState(true)
   const [copied, setCopied] = useState('')
   const [asking, setAsking] = useState(false)
   const [printing, setPrinting] = useState<ArmyList | null>(null)
@@ -579,6 +581,7 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
             plan={paintPlan(printing, schemeCtx, paintStock)}
             paintById={paintById}
             subtitle={subtitle}
+            cards={withCards ? unitCards(printing, cat, linkedTo) : undefined}
             onDone={() => setPrinting(null)}
           />
         )}
@@ -588,6 +591,8 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
         <PdfDialog
           list={list}
           c={schemeCtx}
+          withCards={withCards}
+          onCards={setWithCards}
           onCancel={() => setAsking(false)}
           onMake={(l) => {
             setAsking(false)
@@ -753,7 +758,7 @@ function ArmySchemeSelect({ list, factionName, onChange, label = 'Army scheme' }
 }
 
 /** Asked before making the PDF: army scheme, and optionally a scheme per unit. Choices are saved to the list. */
-function PdfDialog({ list, c, onCancel, onMake }: { list: ArmyList; c: SchemeContext; onCancel: () => void; onMake: (l: ArmyList) => void }) {
+function PdfDialog({ list, c, withCards, onCards, onCancel, onMake }: { list: ArmyList; c: SchemeContext; withCards: boolean; onCards: (v: boolean) => void; onCancel: () => void; onMake: (l: ArmyList) => void }) {
   const [draft, setDraft] = useState(list)
   const [perUnit, setPerUnit] = useState(list.entries.some((e) => e.schemeId))
   return (
@@ -773,6 +778,9 @@ function PdfDialog({ list, c, onCancel, onMake }: { list: ArmyList; c: SchemeCon
           ))}
         </div>
       )}
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={withCards} onChange={(e) => onCards(e.target.checked)} /> Include datasheet cards
+      </label>
       <div className="flex gap-2">
         <button className="btn btn-primary" onClick={() => onMake(perUnit ? draft : { ...draft, entries: draft.entries.map((x) => ({ ...x, schemeId: undefined })) })}>📄 Make PDF</button>
         <button className="btn" onClick={onCancel}>Cancel</button>

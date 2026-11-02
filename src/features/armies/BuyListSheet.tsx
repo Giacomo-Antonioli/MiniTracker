@@ -5,11 +5,13 @@ import type { PaintPlan, PaintStatus } from '../../domain/lists/schemes'
 import type { ArmyList } from '../../domain/lists/types'
 import type { PaintDef } from '../../domain/paints/types'
 import { PaintRows } from '../paints/MissingPaintsSheet'
+import type { UnitCard } from '../../domain/lists/cards'
+import { DatasheetCards } from './DatasheetCards'
 
 /** Printable buy list. Rendered off-screen and printed (or saved as PDF from the print dialog), like recipe cards. */
 const STATUS: Record<PaintStatus, string> = { buy: 'to buy', unpainted: 'to paint', painted: 'painted ✓' }
 
-export function BuyListSheet({ list, buy, plan, paintById, subtitle, onDone }: { list: ArmyList; buy: BuyList; plan: PaintPlan; paintById: Map<string, PaintDef>; subtitle: string; onDone: () => void }) {
+export function BuyListSheet({ list, buy, plan, paintById, subtitle, cards, onDone }: { list: ArmyList; buy: BuyList; plan: PaintPlan; paintById: Map<string, PaintDef>; subtitle: string; cards?: UnitCard[]; onDone: () => void }) {
   const [date] = useState(() => new Date().toLocaleDateString())
   useEffect(() => {
     const done = () => onDone()
@@ -63,6 +65,12 @@ export function BuyListSheet({ list, buy, plan, paintById, subtitle, onDone }: {
         </section>
       ))}
       {plan.withoutScheme.length > 0 && <p className="mt-6 text-sm">No scheme: {plan.withoutScheme.map((u) => u.name).join(', ')}</p>}
+      {cards && cards.length > 0 && (
+        <section style={{ breakBefore: 'page' }}>
+          <h1 className="text-2xl font-bold">Datasheets – {list.name}</h1>
+          <DatasheetCards cards={cards} />
+        </section>
+      )}
       <p className="mt-6 text-xs">MiniTracker · {date}</p>
     </div>,
     document.body,

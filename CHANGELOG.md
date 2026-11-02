@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Datasheet cards in the army PDF (#98): one card per unit type with points, stat lines, the ranged and melee weapons its loadout carries, core rules, abilities with their text and keywords. A checkbox in the Make PDF dialog turns them off.
+
 ## [0.6.0] - 2026-11-02
 
 ### Added
