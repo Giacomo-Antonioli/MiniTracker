@@ -6,6 +6,10 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ### Added
 - Stratagem cards (#98): import Wahapedia's Stratagems.csv and Detachment_abilities.csv in Settings → Catalogue (links there; kept in your data and backups). The Army PDF can add the rules and stratagem cards of the list's detachments plus the core stratagems; a detachment whose name differs is picked once from a list. Powered by Wahapedia.
+- Running low (#92): marking a paint "Running low" puts it on the shopping list. New Supplies page (primer, glue, brushes…) with stock and an alert level: reaching it flags the supply, adds it to the shopping list and shows a ⚠ count in the menu. A "Running low" card on Home lists both.
+
+### Fixed
+- Home no longer breaks when a unit has no valid creation date.
 
 ## [0.6.1] - 2026-11-03
 

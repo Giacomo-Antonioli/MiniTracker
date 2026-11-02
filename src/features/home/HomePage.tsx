@@ -5,6 +5,7 @@ import { WISHLISTED } from '../../domain/collection/pipeline'
 import { addCard, CARDS, DEFAULT_LAYOUT, hiddenCards, moveCard, optionOf, removeCard, setOption, setSize, type CardLayout, type CardSize } from '../../domain/home/layout'
 import { missingForSchemes } from '../../domain/paints/missing'
 import { totals } from '../../domain/shopping/shopping'
+import { isLow, lowPaints } from '../../domain/supplies/supplies'
 import { activityByDay, byRole, paintUsage, pileAge, pointsOverTime, records, spending, stageFlow } from '../../domain/stats/more'
 import { byFaction, byMonth, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileLevel, pileNow, recentMoves, recentUnits, streakWeeks } from '../../domain/stats/stats'
 import { QuickMove } from '../backlog/QuickMove'
@@ -12,7 +13,7 @@ import { StageBar, stageColour } from '../backlog/BacklogTable'
 import { ActivityCalendar, HBars, MonthArea, MonthBars } from '../stats/charts'
 import { forecast, Tile, useAllEvents, usePointsOf } from '../stats/StatsPage'
 
-type Go = 'backlog' | 'stats' | 'shopping' | 'paints'
+type Go = 'backlog' | 'stats' | 'shopping' | 'paints' | 'supplies'
 
 const AGO = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
 /** "today", "yesterday", "3 days ago", "2 months ago". */
@@ -29,7 +30,7 @@ const Link = ({ onClick, children }: { onClick?: () => void; children: ReactNode
   onClick ? <button className="text-sm text-muted hover:text-accent" onClick={onClick}>{children}</button> : null
 
 export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: string) => void; onGo?: (p: Go) => void; onAddUnit?: () => void }) {
-  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints, homeLayout, saveHomeLayout } = useStore()
+  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints, homeLayout, saveHomeLayout, supplies } = useStore()
   const events = useAllEvents()
   const { pointsOf, roleOf, factionName } = usePointsOf()
   const [editing, setEditing] = useState(false)
@@ -187,6 +188,25 @@ export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: st
             </div>
           ),
         } : null
+      }
+      case 'low': {
+        const paintsLow = lowPaints(paintStock, paints)
+        const suppliesLow = supplies.filter(isLow)
+        if (!paintsLow.length && !suppliesLow.length) return null
+        const onList = (ref?: string) => shopItems.some((x) => !x.bought && x.refId === ref)
+        return {
+          action: <Link onClick={onGo && (() => onGo('supplies'))}>Supplies →</Link>,
+          content: (
+            <ul className="grid gap-1 text-sm">
+              {[...paintsLow.map((p) => ({ key: p.refId!, name: p.name, kind: 'Paint' })), ...suppliesLow.map((s) => ({ key: `supply:${s.id}`, name: `${s.name} (${s.quantity} left)`, kind: s.category }))].map((x) => (
+                <li key={x.key} className="flex justify-between gap-2">
+                  <span className="truncate">⚠ {x.name}</span>
+                  <span className="shrink-0 text-xs text-muted">{x.kind}{onList(x.key) ? ' · on list' : ''}</span>
+                </li>
+              ))}
+            </ul>
+          ),
+        }
       }
       case 'points': {
         const months = lastMonths(now, opt('months'))

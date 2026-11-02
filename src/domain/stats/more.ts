@@ -90,7 +90,9 @@ export function pileAge(units: OwnedUnit[], p: Pipeline, now: string, n = 5, pai
   const rows = live(units)
     .map((unit) => {
       const c = owned(unit, p, t)
-      return { unit, months: Math.max(0, months(unit.createdAt)), models: c.models - c.painted }
+      const m = months(unit.createdAt)
+      // A missing or broken date counts as new rather than breaking the buckets.
+      return { unit, months: Number.isFinite(m) ? Math.max(0, m) : 0, models: c.models - c.painted }
     })
     .filter((r) => r.models > 0)
   const buckets = AGE.map((b) => ({ label: b.label, models: 0 }))
