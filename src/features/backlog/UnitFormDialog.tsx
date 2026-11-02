@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { firstOwnedStage } from '../../domain/collection/pipeline'
 import { ctx, useStore } from '../../app/store'
 import { pointsFor } from '../../domain/catalogue/points'
 import { factionLabel, searchDatasheets } from '../../domain/catalogue/search'
@@ -49,7 +50,7 @@ export function UnitFormDialog({
   const [showLegends, setShowLegends] = useState(false)
   const [groups, setGroups] = useState<GroupDraft[]>(
     unit?.groups.map((g) => ({ ...g, loadout: g.loadout.join(', ') })) ?? [
-      { count: preset?.datasheet.minModels ?? 1, status: pipeline.stages[0].id, loadout: '', magnetised: [] },
+      { count: preset?.datasheet.minModels ?? 1, status: firstOwnedStage(pipeline), loadout: '', magnetised: [] },
     ],
   )
   const [tutorials, setTutorials] = useState<Link[]>(unit?.tutorials ?? [])
@@ -213,7 +214,7 @@ export function UnitFormDialog({
             </div>
           ))}
           {datasheet && <datalist id="wargear-options">{datasheet.wargear.map((w) => <option key={w} value={w} />)}</datalist>}
-          <button type="button" className="btn w-fit" onClick={() => setGroups([...groups, { count: 1, status: pipeline.stages[0].id, loadout: '', magnetised: [] }])}>
+          <button type="button" className="btn w-fit" onClick={() => setGroups([...groups, { count: 1, status: firstOwnedStage(pipeline), loadout: '', magnetised: [] }])}>
             + Add group
           </button>
         </fieldset>

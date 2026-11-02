@@ -6,6 +6,11 @@ import App from '../../app/App'
 import { appDb, useStore } from '../../app/store'
 import { DEFAULT_PIPELINE } from '../../domain/collection/pipeline'
 import { DEFAULT_PIPELINES } from '../../domain/pipelines'
+import { parseBsData } from '../../data/catalogue/bsdata'
+import { createUnit } from '../../domain/collection/ownedUnit'
+
+const raw = import.meta.glob('../../data/catalogue/fixtures/*', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
+const catalogue = parseBsData(Object.entries(raw).map(([p, text]) => ({ name: p.split('/').pop()!, text })), { repo: 'BSData/wh40k-11e', commit: 'c', fetchedAt: 'f' })
 
 const PAINT = 'ak_interactive/3b-au-zb-au'
 
@@ -90,5 +95,39 @@ describe('Shopping', () => {
     await user.click(screen.getByRole('button', { name: 'Remove Sand' }))
     expect(useStore.getState().shopItems).toEqual([])
     expect(await appDb.shopLists.count()).toBe(0)
+  })
+
+  it('adds catalogue units and paints; units go to the backlog as Wishlisted, asking when entries exist; bought models become owned', async () => {
+    await appDb.catalogues.put(catalogue as never)
+    await appDb.units.put(createUnit({ customName: 'My walker', datasheetId: 'u-walker', groups: [{ count: 1, status: 'built' }] }, { now: 't', newId: () => 'w1' }))
+    const user = userEvent.setup()
+    render(<App />)
+    await screen.findByText('My walker')
+    await user.click(screen.getByRole('button', { name: 'Shopping' }))
+
+    await user.type(screen.getByLabelText('Search catalogue'), 'troopers')
+    await user.click(await screen.findByRole('button', { name: 'Add Line Troopers' }))
+    await waitFor(() => expect(useStore.getState().units.find((u) => u.customName === 'Line Troopers')?.groups).toMatchObject([{ count: 5, status: 'wishlisted' }]))
+
+    await user.clear(screen.getByLabelText('Search catalogue'))
+    await user.type(screen.getByLabelText('Search catalogue'), 'big walker')
+    await user.click(await screen.findByRole('button', { name: 'Add Big Walker' }))
+    const ask = screen.getByRole('dialog', { name: 'Big Walker is in your backlog' })
+    await user.click(within(ask).getByRole('button', { name: 'My walker (1 models)' }))
+    await waitFor(() => expect(useStore.getState().units.find((u) => u.id === 'w1')!.groups.map((g) => [g.count, g.status])).toEqual([[1, 'built'], [1, 'wishlisted']]))
+    await user.click(screen.getByRole('button', { name: 'Add Big Walker' }))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: /Shopping list only/ }))
+    await user.click(screen.getByRole('button', { name: 'Add Big Walker' }))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'A new backlog entry' }))
+    await waitFor(() => expect(useStore.getState().units.filter((u) => u.datasheetId === 'u-walker')).toHaveLength(2))
+
+    await user.clear(screen.getByLabelText('Search catalogue'))
+    await user.type(screen.getByLabelText('Search catalogue'), '3b au')
+    await user.click(await screen.findByRole('button', { name: 'Add AK Interactive 3B Au/Zb Au' }))
+    await waitFor(() => expect(useStore.getState().paintStock.get(PAINT)).toMatchObject({ stage: 'wishlist', quantity: 0 }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('3 to buy')
+    await user.click(screen.getByLabelText('Bought Line Troopers'))
+    await waitFor(() => expect(useStore.getState().units.find((u) => u.customName === 'Line Troopers')?.groups).toMatchObject([{ count: 5, status: 'sprue' }]))
   })
 })

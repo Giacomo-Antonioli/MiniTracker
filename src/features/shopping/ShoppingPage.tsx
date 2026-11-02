@@ -4,6 +4,7 @@ import { useStore } from '../../app/store'
 import { itemsOn, MAIN, shoppingText, totals } from '../../domain/shopping/shopping'
 import type { ShopItem } from '../../domain/shopping/types'
 import { Dialog } from '../../ui/Dialog'
+import { CatalogueSearch } from './CatalogueSearch'
 
 const KIND = { model: 'Model', paint: 'Paint', other: 'Other' }
 const money = (n: number) => n.toFixed(2)
@@ -56,6 +57,8 @@ export function ShoppingPage() {
           <input className="input flex-1" aria-label="New item" placeholder="Add anything: brushes, basing sand…" value={draft} onChange={(e) => setDraft(e.target.value)} />
           <button className="btn btn-primary">Add</button>
         </form>
+
+        <CatalogueSearch listIds={list ? [list.id] : []} />
 
         {items.length === 0 ? (
           <p className="mt-6 text-muted">Nothing here yet. Add items above, or from an army's buy list, "Paints to buy" or your paint wishlist.</p>

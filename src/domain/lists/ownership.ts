@@ -1,4 +1,4 @@
-import { totalModels } from '../collection/ownedUnit'
+import { ownedModels } from '../collection/ownedUnit'
 import { isGone } from '../collection/pipeline'
 import type { OwnedUnit, Pipeline, StageId } from '../collection/types'
 import type { ArmyList } from './types'
@@ -37,7 +37,7 @@ export function listOwnership(l: ArmyList, units: OwnedUnit[], pipeline?: Pipeli
   const paintedOf = (u: OwnedUnit) =>
     pipeline ? u.groups.filter((g) => pipeline.stages.findIndex((s) => s.id === g.status) >= target).reduce((n, g) => n + g.count, 0) : 0
 
-  const left = new Map(live.map((u) => [u.id, totalModels(u)]))
+  const left = new Map(live.map((u) => [u.id, ownedModels(u)]))
   const paintedLeft = new Map(live.map((u) => [u.id, paintedOf(u)]))
   const linkedTo = new Map<string, string>()
   for (const e of l.entries) {

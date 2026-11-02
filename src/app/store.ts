@@ -18,7 +18,8 @@ import { addItems, newList, withoutList } from '../domain/shopping/shopping'
 import type { NewShopItem, ShopItem, ShopList } from '../domain/shopping/types'
 import type { BacklogFilter } from '../domain/collection/backlog'
 import { DEFAULT_PIPELINES, type PipelineKey } from '../domain/pipelines'
-import { DEFAULT_PIPELINE, moveModels, type MoveOptions } from '../domain/collection/pipeline'
+import { DEFAULT_PIPELINE, firstOwnedStage, moveModels, WISHLISTED, type MoveOptions } from '../domain/collection/pipeline'
+import { createUnit, mergeGroups } from '../domain/collection/ownedUnit'
 import type { Ctx, OwnedUnit, Pipeline, StageId, StatusEvent } from '../domain/collection/types'
 
 const db = new MiniTrackerDb()
@@ -176,6 +177,11 @@ interface State {
   deleteShopItem(id: string): Promise<void>
   /** Tick an item bought (or not). A bought paint goes to the inventory as 'ordered', or 'owned' (a sealed pot more). */
   setBought(id: string, bought: boolean, paint?: 'ordered' | 'owned'): Promise<void>
+  /**
+   * Add a catalogue unit or paint you don't own yet. A unit also goes to the backlog as Wishlisted: a new entry,
+   * more models on an existing one (`unitId`), or nothing (`backlog: 'none'`). A paint not in the inventory goes on the wishlist.
+   */
+  addFromCatalogue(item: NewShopItem, listIds: string[], backlog?: 'new' | 'none' | { unitId: string }): Promise<void>
   createShopList(name: string): Promise<ShopList>
   renameShopList(id: string, name: string): Promise<void>
   /** Delete a named list; its items stay on the main list. */
@@ -596,6 +602,18 @@ export const useStore = create<State>((set, get) => ({
     if (!item) return
     const c = ctx()
     await get().saveShopItem({ ...item, bought, updatedAt: c.now })
+    const unit = bought && item.kind === 'model' && item.unitId ? get().units.find((u) => u.id === item.unitId) : undefined
+    if (unit) {
+      // Bought models leave the wishlist: move up to the item's quantity to the first owned stage.
+      let left = item.qty
+      for (const g of unit.groups.filter((x) => x.status === WISHLISTED)) {
+        if (left <= 0) break
+        const n = Math.min(left, g.count)
+        left -= n
+        const fresh = get().units.find((u) => u.id === unit.id)!
+        await get().move(fresh, g.id, n, firstOwnedStage(get().pipeline), { note: 'Bought' })
+      }
+    }
     if (!bought || item.kind !== 'paint' || !item.refId || !paint) return
     const old = get().paintStock.get(item.refId)
     const base = old ?? newStock(item.refId, 'wishlist', c)
@@ -604,6 +622,25 @@ export const useStore = create<State>((set, get) => ({
         ? { ...base, stage: 'sealed', quantity: base.quantity + item.qty, purchaseDate: c.now.slice(0, 10), updatedAt: c.now }
         : { ...base, stage: 'ordered', updatedAt: c.now },
     )
+  },
+
+  async addFromCatalogue(item, listIds, backlog = 'none') {
+    const c = ctx()
+    let unitId: string | undefined
+    if (item.kind === 'model' && backlog === 'new') {
+      const d = get().catalogue?.datasheets.find((x) => x.id === item.refId)
+      const u = createUnit({ customName: item.name, datasheetId: item.refId, factionId: d?.factionIds[0], groups: [{ count: item.qty, status: WISHLISTED }] }, c)
+      await get().saveUnit(u)
+      unitId = u.id
+    } else if (item.kind === 'model' && typeof backlog === 'object') {
+      const u = get().units.find((x) => x.id === backlog.unitId)
+      if (u) {
+        await get().saveUnit(mergeGroups({ ...u, groups: [...u.groups, { id: c.newId(), count: item.qty, status: WISHLISTED, loadout: [], magnetised: [] }] }, c))
+        unitId = u.id
+      }
+    }
+    if (item.kind === 'paint' && item.refId && !get().paintStock.has(item.refId)) await get().saveStock(newStock(item.refId, 'wishlist', c))
+    await get().addToShopping([{ ...item, unitId }], listIds)
   },
 
   async createShopList(name) {

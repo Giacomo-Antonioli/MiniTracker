@@ -1,8 +1,12 @@
 import { splitGroup } from './ownedUnit'
 import type { Ctx, Lifecycle, OwnedUnit, Pipeline, Stage, StageId, StatusEvent } from './types'
 
+/** Fixed first stage for models you don't own yet (#107): not counted as owned or in painting progress. */
+export const WISHLISTED: StageId = 'wishlisted'
+
 export const DEFAULT_PIPELINE: Pipeline = {
   stages: [
+    { id: WISHLISTED, name: 'Wishlisted' },
     { id: 'sprue', name: 'On sprue' },
     { id: 'built', name: 'Built' },
     { id: 'primed', name: 'Primed' },
@@ -29,6 +33,17 @@ export function validatePipeline(p: Pipeline): void {
   }
 }
 
+/** The pipeline with the Wishlisted stage first (added to pipelines saved before it existed). */
+export function withWishlisted(p: Pipeline): Pipeline {
+  const w = p.stages.find((s) => s.id === WISHLISTED) ?? { id: WISHLISTED, name: 'Wishlisted' }
+  return { stages: [w, ...p.stages.filter((s) => s.id !== WISHLISTED)] }
+}
+
+/** The stage new owned models start in: the first after Wishlisted. */
+export function firstOwnedStage(p: Pipeline): StageId {
+  return (p.stages.find((s) => s.id !== WISHLISTED) ?? p.stages[0]).id
+}
+
 function indexOf(p: Pipeline, id: StageId): number {
   const i = p.stages.findIndex((s) => s.id === id)
   if (i < 0) throw new Error(`Unknown stage: ${id}`)
@@ -52,7 +67,8 @@ export function renameStage(p: Pipeline, id: StageId, name: string): Pipeline {
 export function reorderStages(p: Pipeline, ids: StageId[]): Pipeline {
   const same = ids.length === p.stages.length && new Set(ids).size === ids.length && ids.every((id) => p.stages.some((s) => s.id === id))
   if (!same) throw new Error('Reorder must list the same stages exactly once')
-  return { stages: ids.map((id) => p.stages[indexOf(p, id)]) }
+  const stages = ids.map((id) => p.stages[indexOf(p, id)])
+  return p.stages.some((s) => s.id === WISHLISTED) ? withWishlisted({ stages }) : { stages }
 }
 
 /** Remove a stage, unless some unit still has models in it. */
@@ -63,6 +79,7 @@ export function removeStage(p: Pipeline, id: StageId, units: OwnedUnit[]): Pipel
 /** Remove a stage from any pipeline, unless `usedBy` items are still in it. */
 export function removeUnusedStage(p: Pipeline, id: StageId, usedBy: number): Pipeline {
   indexOf(p, id)
+  if (id === WISHLISTED) throw new Error('The Wishlisted stage cannot be removed')
   if (p.stages.length === 1) throw new Error('Pipeline needs at least one stage')
   if (usedBy > 0) throw new Error(`Stage "${id}" is in use`)
   return { stages: p.stages.filter((s) => s.id !== id) }
@@ -117,6 +134,7 @@ export function progress(units: OwnedUnit[], pipeline: Pipeline, target: StageId
   for (const u of units) {
     if (isGone(u.lifecycle)) continue
     for (const g of u.groups) {
+      if (g.status === WISHLISTED) continue
       total += g.count
       if (pipeline.stages.findIndex((s) => s.id === g.status) >= t) done += g.count
     }

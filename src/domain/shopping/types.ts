@@ -8,6 +8,8 @@ export interface ShopItem {
   name: string
   /** Paint id (kind 'paint') or datasheet id (kind 'model'). */
   refId?: string
+  /** Backlog unit holding these models as Wishlisted; ticking bought moves them to the first owned stage. */
+  unitId?: string
   /** Models for a kit, pots for a paint. */
   qty: number
   shop?: string
@@ -28,4 +30,4 @@ export interface ShopList {
   createdAt: string
 }
 
-export type NewShopItem = Pick<ShopItem, 'kind' | 'name' | 'qty'> & Partial<Pick<ShopItem, 'refId' | 'shop' | 'price' | 'sources'>>
+export type NewShopItem = Pick<ShopItem, 'kind' | 'name' | 'qty'> & Partial<Pick<ShopItem, 'refId' | 'unitId' | 'shop' | 'price' | 'sources'>>
