@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Stats page (#88): painted this month, weekly streak, pile size and level, net pile this year, pace and finish estimate; charts of models painted per month and pile in vs out; points and models painted per faction with a finish estimate each. Filter by faction and 6, 12 or 24 months.
+
 ## [0.5.5] - 2026-11-02
 
 ### Changed

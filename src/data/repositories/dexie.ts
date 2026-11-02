@@ -71,6 +71,10 @@ export class DexieEventRepository implements EventRepository {
     const events = await this.db.statusEvents.where('unitId').equals(unitId).toArray()
     return events.sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
   }
+
+  listAll() {
+    return this.db.statusEvents.toArray()
+  }
 }
 
 // 'pipeline' is the original (v0.1) key of the painting pipeline; keep it so saved data still loads.
