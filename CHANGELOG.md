@@ -5,6 +5,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Added
+- Home page (#117), the new start page: painted this month and streak, pile, net pile this year and finish estimate; cards to continue painting the last units you worked on (with a quick move), factions closest to done, recent activity, the last 6 months, and what's left to buy. New users get a prompt to add their first unit. Settings → Appearance → Start page switches back to the Backlog.
 - Stats page (#88): painted this month, weekly streak, pile size and level, net pile this year, pace and finish estimate; charts of models painted per month and pile in vs out; points and models painted per faction with a finish estimate each. Filter by faction and time range (1, 3, 6 months, 1 or 2 years, or all time; 1 and 3 months are drawn by week). Charts have gridlines, rounded bars and hover tooltips.
 
 ## [0.5.5] - 2026-11-02

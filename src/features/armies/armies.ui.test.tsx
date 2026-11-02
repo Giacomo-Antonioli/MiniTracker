@@ -25,7 +25,10 @@ async function start(cat: object = catalogue) {
   return user
 }
 
-beforeEach(() => localStorage.clear())
+beforeEach(() => {
+  localStorage.clear()
+  localStorage.setItem('startPage', 'backlog')
+})
 
 describe('Armies', () => {
   it('creates a list, adds owned units, flags rules and ownership, and shows it in the overview', async () => {

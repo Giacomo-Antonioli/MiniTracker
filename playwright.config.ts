@@ -6,7 +6,12 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
-  use: { baseURL: 'http://localhost:4173/MiniTracker/', trace: 'retain-on-failure' },
+  use: {
+    baseURL: 'http://localhost:4173/MiniTracker/',
+    trace: 'retain-on-failure',
+    // The flows start on the Backlog (the app's default start page is Home).
+    storageState: { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: 'startPage', value: 'backlog' }] }] },
+  },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
     // iPad-sized screen in Chromium (keeps CI to one browser for now).
