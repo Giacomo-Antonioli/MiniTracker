@@ -11,6 +11,8 @@ import { PhotoViewer } from '../photos/PhotoViewer'
 import { SchemeCardLink } from '../schemes/SchemeCardLink'
 import { ORIGIN_LABEL } from '../schemes/origin'
 import { schemesForUnit } from '../../domain/schemes/match'
+import { missingForSchemes } from '../../domain/paints/missing'
+import { AddToShoppingButton } from '../shopping/AddToShoppingDialog'
 import { unitTag } from '../../domain/photos/naming'
 import { MoveDialog } from './MoveDialog'
 
@@ -30,7 +32,7 @@ interface Props {
 
 export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage, onOpenDatasheet, onOpenScheme }: Props) {
   const page = variant === 'page'
-  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, library, loadLibrary, paints, loadPaints } = useStore()
+  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, library, loadLibrary, paints, loadPaints, paintStock } = useStore()
   const allSchemes = [...schemes, ...library]
   const scheme = unit.schemeId ? allSchemes.find((s) => s.id === unit.schemeId) : undefined
   const photos = allPhotos[unit.id] ?? []
@@ -163,6 +165,10 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
                 </li>
               ))}
             </ol>
+            <AddToShoppingButton
+              label="Add missing paints to shopping list…"
+              items={missingForSchemes([scheme], paints, paintStock).map((m) => ({ kind: 'paint' as const, name: m.paint ? `${m.paint.brand} ${m.paint.name}` : m.paintId, refId: m.paintId, qty: 1, sources: [`Scheme: ${scheme.name}`] }))}
+            />
           </>
         ) : (
           <p className="text-sm text-muted">
