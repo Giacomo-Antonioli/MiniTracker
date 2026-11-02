@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.5.4] - 2026-11-02
+
 ### Added
 - Unit models: move one, a number, or all models of a stage in one click, to the next stage by default or any stage you pick. The full move dialog (date, note, photo) is still there.
 
@@ -139,7 +141,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.3...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.4...HEAD
+[0.5.4]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.0...v0.5.1
