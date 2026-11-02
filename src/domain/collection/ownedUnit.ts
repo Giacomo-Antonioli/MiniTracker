@@ -1,4 +1,5 @@
 import type { Ctx, MagnetSlot, ModelGroup, OwnedUnit, StageId } from './types'
+import { WISHLISTED } from './pipeline'
 
 export interface NewGroup {
   count: number
@@ -60,6 +61,11 @@ export function createUnit(input: NewUnit, ctx: Ctx): OwnedUnit {
 
 export function totalModels(unit: OwnedUnit): number {
   return unit.groups.reduce((sum, g) => sum + g.count, 0)
+}
+
+/** Models you own: all but the Wishlisted ones. */
+export function ownedModels(unit: OwnedUnit): number {
+  return unit.groups.reduce((sum, g) => sum + (g.status === WISHLISTED ? 0 : g.count), 0)
 }
 
 export function modelsByStatus(unit: OwnedUnit): Record<StageId, number> {

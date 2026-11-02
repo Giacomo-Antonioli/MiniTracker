@@ -8,6 +8,7 @@ import type { PaintDef, PaintStock } from '../../domain/paints/types'
 import type { Catalogue } from '../../domain/catalogue/types'
 import { validatePipeline } from '../../domain/collection/pipeline'
 import { DEFAULT_PIPELINES, type PipelineKey } from '../../domain/pipelines'
+import { withWishlisted } from '../../domain/collection/pipeline'
 import type { OwnedUnit, Pipeline, StatusEvent } from '../../domain/collection/types'
 import type { MiniTrackerDb } from '../db'
 import type { EventRepository, SettingsRepository, UnitRepository } from './types'
@@ -83,7 +84,8 @@ export class DexieSettingsRepository implements SettingsRepository {
 
   async getPipeline(key: PipelineKey = 'painting') {
     const row = await this.db.settings.get(storageKey(key))
-    return (row?.value as Pipeline | undefined) ?? structuredClone(DEFAULT_PIPELINES[key])
+    const p = (row?.value as Pipeline | undefined) ?? structuredClone(DEFAULT_PIPELINES[key])
+    return key === 'painting' ? withWishlisted(p) : p
   }
 
   async getValue<T>(key: string, fallback: T): Promise<T> {

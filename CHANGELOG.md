@@ -4,6 +4,10 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Shopping: search the whole catalogue (units, and paints with a colour swatch) and add to the shopping list without owning them. A unit also goes to the backlog as Wishlisted (a new entry, or more models on an entry you choose); a paint not in your inventory goes on the paint wishlist. Ticking a unit bought moves its Wishlisted models to the first painting stage.
+- Backlog: a fixed first stage, Wishlisted, for models you don't own yet. They don't count as owned in army lists or in painting progress.
+
 ## [0.5.1] - 2026-11-02
 
 ### Added

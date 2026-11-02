@@ -21,9 +21,9 @@ describe('unitProgress', () => {
 describe('stageTotals', () => {
   it('sums models per stage in pipeline order, skipping gone units', () => {
     expect(stageTotals(all, DEFAULT_PIPELINE)).toEqual([
-      { stage: DEFAULT_PIPELINE.stages[0], count: 20 },
-      { stage: DEFAULT_PIPELINE.stages[1], count: 6 },
-      { stage: DEFAULT_PIPELINE.stages[4], count: 4 },
+      { stage: DEFAULT_PIPELINE.stages[1], count: 20 },
+      { stage: DEFAULT_PIPELINE.stages[2], count: 6 },
+      { stage: DEFAULT_PIPELINE.stages[5], count: 4 },
     ])
   })
 })

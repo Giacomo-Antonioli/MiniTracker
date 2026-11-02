@@ -20,8 +20,8 @@ export function addItems(items: ShopItem[], incoming: NewShopItem[], listIds: st
     const i = out.findIndex((x) => !x.bought && same(x, n))
     const item: ShopItem =
       i >= 0
-        ? { ...out[i], qty: Math.max(out[i].qty, n.qty), sources: union(out[i].sources, n.sources ?? []), listIds: union(out[i].listIds, lists), shop: out[i].shop ?? n.shop, price: out[i].price ?? n.price, updatedAt: ctx.now }
-        : { id: ctx.newId(), kind: n.kind, name: n.name.trim(), refId: n.refId, qty: Math.max(1, n.qty), shop: n.shop, price: n.price, bought: false, sources: n.sources ?? [], listIds: lists, createdAt: ctx.now, updatedAt: ctx.now }
+        ? { ...out[i], qty: Math.max(out[i].qty, n.qty), sources: union(out[i].sources, n.sources ?? []), listIds: union(out[i].listIds, lists), unitId: out[i].unitId ?? n.unitId, shop: out[i].shop ?? n.shop, price: out[i].price ?? n.price, updatedAt: ctx.now }
+        : { id: ctx.newId(), kind: n.kind, name: n.name.trim(), refId: n.refId, unitId: n.unitId, qty: Math.max(1, n.qty), shop: n.shop, price: n.price, bought: false, sources: n.sources ?? [], listIds: lists, createdAt: ctx.now, updatedAt: ctx.now }
     if (i >= 0) out[i] = item
     else out.push(item)
     changed.push(item)

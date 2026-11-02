@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { createUnit } from './ownedUnit'
+import { createUnit, ownedModels } from './ownedUnit'
 import {
+  WISHLISTED,
+  firstOwnedStage,
+  withWishlisted,
   DEFAULT_PIPELINE,
   addStage,
   moveModels,
@@ -27,7 +30,7 @@ function squad(): OwnedUnit {
 describe('DEFAULT_PIPELINE', () => {
   it('has the agreed stages in order', () => {
     expect(DEFAULT_PIPELINE.stages.map((s) => s.id)).toEqual([
-      'sprue', 'built', 'primed', 'basecoated', 'painted', 'based', 'varnished',
+      'wishlisted', 'sprue', 'built', 'primed', 'basecoated', 'painted', 'based', 'varnished',
     ])
     expect(() => validatePipeline(DEFAULT_PIPELINE)).not.toThrow()
   })
@@ -36,7 +39,7 @@ describe('DEFAULT_PIPELINE', () => {
 describe('editing the pipeline', () => {
   it('adds a stage after a given one', () => {
     const p = addStage(DEFAULT_PIPELINE, { id: 'washed', name: 'Washed' }, 'basecoated')
-    expect(p.stages.map((s) => s.id).slice(3, 5)).toEqual(['basecoated', 'washed'])
+    expect(p.stages.map((s) => s.id).slice(4, 6)).toEqual(['basecoated', 'washed'])
   })
 
   it('adds at the end when no anchor is given', () => {
@@ -57,19 +60,22 @@ describe('editing the pipeline', () => {
 
   it('reorders stages when given the same set of ids', () => {
     const ids = DEFAULT_PIPELINE.stages.map((s) => s.id)
-    const swapped = [ids[1], ids[0], ...ids.slice(2)]
-    expect(reorderStages(DEFAULT_PIPELINE, swapped).stages.map((s) => s.id)).toEqual(swapped)
+    const swapped = [ids[2], ids[1], ids[0], ...ids.slice(3)]
+    // Wishlisted always stays first.
+    expect(reorderStages(DEFAULT_PIPELINE, swapped).stages.map((s) => s.id)).toEqual([ids[0], ids[2], ids[1], ...ids.slice(3)])
+    expect(reorderStages({ stages: DEFAULT_PIPELINE.stages.slice(1, 3) }, [ids[2], ids[1]]).stages.map((s) => s.id)).toEqual([ids[2], ids[1]])
     expect(() => reorderStages(DEFAULT_PIPELINE, ids.slice(1))).toThrow(/same stages/)
   })
 
   it('refuses to remove a stage still used by models', () => {
     expect(() => removeStage(DEFAULT_PIPELINE, 'built', [squad()])).toThrow(/in use/)
-    expect(removeStage(DEFAULT_PIPELINE, 'varnished', [squad()]).stages).toHaveLength(6)
+    expect(removeStage(DEFAULT_PIPELINE, 'varnished', [squad()]).stages).toHaveLength(7)
+    expect(() => removeStage(DEFAULT_PIPELINE, 'wishlisted', [])).toThrow(/cannot be removed/)
   })
 
   it('removeUnusedStage works for any pipeline given a usage count', () => {
     expect(() => removeUnusedStage(DEFAULT_PIPELINE, 'primed', 3)).toThrow(/in use/)
-    expect(removeUnusedStage(DEFAULT_PIPELINE, 'primed', 0).stages).toHaveLength(6)
+    expect(removeUnusedStage(DEFAULT_PIPELINE, 'primed', 0).stages).toHaveLength(7)
   })
 
   it('refuses to remove the last stage', () => {
@@ -152,5 +158,21 @@ describe('lifecycle and flags', () => {
   it('sets lifecycle and flags', () => {
     const u = setFlags(setLifecycle(squad(), 'on-hold', ctx()), { favourite: true, nextUp: true }, ctx())
     expect(u).toMatchObject({ lifecycle: 'on-hold', favourite: true, nextUp: true, updatedAt: T1 })
+  })
+})
+
+describe('Wishlisted stage', () => {
+  it('is put first in older pipelines, and new owned models start after it', () => {
+    const old = { stages: [{ id: 'built', name: 'Built' }, { id: WISHLISTED, name: 'Want' }] }
+    expect(withWishlisted(old).stages.map((s) => s.name)).toEqual(['Want', 'Built'])
+    expect(withWishlisted({ stages: [{ id: 'built', name: 'Built' }] }).stages[0]).toEqual({ id: WISHLISTED, name: 'Wishlisted' })
+    expect(firstOwnedStage(DEFAULT_PIPELINE)).toBe('sprue')
+    expect(firstOwnedStage({ stages: [{ id: WISHLISTED, name: 'W' }] })).toBe(WISHLISTED)
+  })
+
+  it('does not count as owned or in progress', () => {
+    const u = createUnit({ customName: 'Mixed', groups: [{ count: 3, status: WISHLISTED }, { count: 2, status: 'painted' }] }, ctx(T0))
+    expect(ownedModels(u)).toBe(2)
+    expect(progress([u], DEFAULT_PIPELINE, 'painted')).toEqual({ done: 2, total: 2, ratio: 1 })
   })
 })
