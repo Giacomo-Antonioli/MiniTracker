@@ -126,3 +126,46 @@ describe('leaders, wargear and named size options', () => {
     expect([ds('Scouts').minModels, ds('Scouts').maxModels]).toEqual([6, 12])
   })
 })
+
+describe('model types and wargear choices', () => {
+  const lim = (min?: number, max?: number) => [
+    ...(min !== undefined ? [{ id: `n${Math.random()}`, type: 'min', field: 'selections', scope: 'parent', value: min }] : []),
+    ...(max !== undefined ? [{ id: `x${Math.random()}`, type: 'max', field: 'selections', scope: 'parent', value: max }] : []),
+  ]
+  const up = (id: string, name: string, constraints: object[] = []) => ({ type: 'upgrade', id, name, constraints })
+  const squad = {
+    type: 'unit', id: 'sq', name: 'Squad',
+    selectionEntryGroups: [{
+      id: 'grp', name: 'Squad', constraints: lim(5, 10), selectionEntries: [
+        {
+          type: 'model', id: 'sgt', name: 'Sergeant', constraints: lim(1, 1),
+          selectionEntryGroups: [
+            { id: 'w1', name: 'Weapon 1', constraints: lim(1, 1), defaultSelectionEntryId: 'l-rifle', entryLinks: [{ id: 'l-rifle', name: 'Rifle', type: 'selectionEntry', targetId: 'rifle' }, { id: 'l-sword', name: 'Sword', type: 'selectionEntry', targetId: 'sword' }] },
+            { id: 'only', name: 'Pistol slot', constraints: lim(1, 1), selectionEntries: [up('pistol2', 'Pistol')] },
+            { id: 'gear', name: 'Wargear', selectionEntries: [up('nade', 'Grenades', lim(1, 1)), up('banner', 'Banner', lim(0, 1)), up('wl', 'Warlord')] },
+          ],
+        },
+        { type: 'model', id: 'trooper', name: 'Trooper', constraints: lim(4, 9), entryLinks: [{ id: 'l2', name: 'Rifle', type: 'selectionEntry', targetId: 'rifle', constraints: lim(1, 1) }] },
+      ],
+    }],
+  }
+  const hero = { type: 'model', id: 'hero', name: 'Hero', selectionEntries: [up('blade', 'Blade', lim(1, 1))] }
+  const g = { gameSystem: { id: 'g', name: 'G', costTypes: [{ id: 'pts', name: 'pts' }] } }
+  const c = { catalogue: { id: 'f4', name: 'Models', library: false, entryLinks: ['sq', 'hero'].map((id) => ({ id: `r${id}`, name: id, type: 'selectionEntry', targetId: id })), sharedSelectionEntries: [squad, hero, up('rifle', 'Rifle'), up('sword', 'Sword')] } }
+  const parsed = parseBsData([{ name: 'g.json', text: JSON.stringify(g) }, { name: 'c.json', text: JSON.stringify(c) }], { repo: 'r', commit: 'c', fetchedAt: 'f' })
+  const ds = (n: string) => parsed.datasheets.find((d) => d.name === n)!
+
+  it('reads model types, fixed wargear and choices with defaults', () => {
+    expect(ds('Squad').models).toEqual([
+      {
+        id: 'sgt', name: 'Sergeant', min: 1, max: 1, fixed: ['Grenades', 'Pistol'],
+        choices: [
+          { id: 'w1', name: 'Weapon 1', min: 1, max: 1, defaultId: 'l-rifle', options: [{ id: 'l-rifle', targetId: 'rifle', name: 'Rifle', max: 1 }, { id: 'l-sword', targetId: 'sword', name: 'Sword', max: 1 }] },
+          { id: 'banner', name: 'Banner', min: 0, max: 1, options: [{ id: 'banner', name: 'Banner', max: 1 }] },
+        ],
+      },
+      { id: 'trooper', name: 'Trooper', min: 4, max: 9, fixed: ['Rifle'], choices: [] },
+    ])
+    expect(ds('Hero').models).toEqual([{ id: 'hero', name: 'Hero', min: 1, max: 1, fixed: ['Blade'], choices: [] }])
+  })
+})

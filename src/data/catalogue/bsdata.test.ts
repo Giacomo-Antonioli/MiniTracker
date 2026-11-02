@@ -77,7 +77,7 @@ describe('parseBsData', () => {
 
 describe('rules', () => {
   it('reads core rules from the game system and faction rules from catalogues', () => {
-    expect(cat.formatVersion).toBe(6)
+    expect(cat.formatVersion).toBe(7)
     expect(cat.rules!.map((r) => [r.name, r.kind])).toEqual([
       ['Assault', 'core'],
       ['Deep Strike', 'core'],
@@ -106,7 +106,7 @@ describe('pointsFor', () => {
   })
 
   it('reads battle sizes and keyword minimums from the main force', () => {
-    expect(cat.formatVersion).toBe(6)
+    expect(cat.formatVersion).toBe(7)
     expect(cat.muster).toMatchObject({
       battleSizes: [
         { id: 'bs-inc', name: 'Incursion', pointsLimit: 1000 },
@@ -160,6 +160,14 @@ describe('detachments and enhancements', () => {
     ])
     // Their "hidden unless the detachment is chosen" conditions are kept, to check which units may take them.
     expect(cat.enhancements![1].notFor).toEqual({ op: 'lessThan', value: 1, id: 'det-line' })
+  })
+})
+
+describe('model wargear', () => {
+  it('follows links to wargear nested inside the same unit', () => {
+    // The Sergeant's Flamer links to the Trooper's own Flamer entry, not a shared one.
+    const sgt = ds('Line Troopers').models!.find((m) => m.id === 'm-sgt')!
+    expect(sgt.choices.map((c) => c.options[0])).toContainEqual({ id: 'el4', targetId: 'w-flamer', name: 'Flamer', max: 1 })
   })
 })
 

@@ -27,6 +27,38 @@ describe('rosters (.ros / .rosz)', () => {
     expect(warnings).toEqual(['Not in the catalogue: Mystery Unit'])
   })
 
+  it('reads the wargear each model carries into the loadout', () => {
+    const { list } = listFromRoster(readRoster(strToU8(ros)), cat, '11e', ctx)
+    expect(list.entries.map((e) => e.loadout)).toEqual([
+      [{ modelId: 'u-walker', count: 1, picks: [] }],
+      [
+        { modelId: 'm-sgt', count: 1, picks: [] },
+        { modelId: 'm-trooper', count: 7, picks: ['w-flamer'] },
+      ],
+    ])
+  })
+
+  it('matches models and options by name when ids differ, and merges models with the same picks', () => {
+    const other = ros
+      .replace('<selection id="s9" name="Sergeant" entryId="m-sgt" number="1" type="model"/>', '<selection id="s9" name="Sergeant" entryId="old-sgt" number="1" type="model"><selections><selection id="s9b" name="Flamer" entryId="old-fl" number="1" type="upgrade"/></selections></selection>')
+      .replace('number="7" type="model">', 'number="4" type="model">')
+      .replace('</selection>\n          </selections>\n        </selection>\n        <selection id="s12"', '</selection>\n            <selection id="s13" name="Trooper" entryId="m-trooper" number="3" type="model"><selections><selection id="s14" name="Flamer" entryId="w-flamer" number="1" type="upgrade"/></selections></selection>\n          </selections>\n        </selection>\n        <selection id="s12"')
+    const { list } = listFromRoster(readRoster(strToU8(other)), cat, '11e', ctx)
+    expect(list.entries[1].loadout).toEqual([
+      { modelId: 'm-sgt', count: 1, picks: ['el4'] },
+      { modelId: 'm-trooper', count: 7, picks: ['w-flamer'] },
+    ])
+  })
+
+  it('leaves the loadout out when the roster models do not match the datasheet', () => {
+    const odd = ros.replace('name="Sergeant" entryId="m-sgt"', 'name="Captain" entryId="m-nope"')
+    const { list } = listFromRoster(readRoster(strToU8(odd)), cat, '11e', ctx)
+    expect(list.entries[1].loadout).toBeUndefined()
+    // An older catalogue without model types: no loadouts.
+    const old = { ...cat, datasheets: cat.datasheets.map((x) => ({ ...x, models: undefined })) }
+    expect(listFromRoster(readRoster(strToU8(ros)), old, '11e', ctx).list.entries.map((e) => e.loadout)).toEqual([undefined, undefined])
+  })
+
   it('warns about a detachment the catalogue does not know', () => {
     const old = parseRosterXml(ros.replace('name="Line Doctrine" entryId="el-det::det-line"', 'name="Oathband" entryId="el-det::det-gone"'))
     const { list, warnings } = listFromRoster(old, cat, '11e', ctx)
@@ -98,8 +130,8 @@ describe('text lists', () => {
     expect(text).toContain('  • Enhancement: Lucky Charm (+15)')
     const { list: back, warnings } = listFromText(text, cat, '11e', ctx)
     expect(warnings).toEqual([])
-    // Text groups units by role, so compare without order.
-    const shape = (l: typeof list) => ({ ...l, id: '', createdAt: '', updatedAt: '', entries: l.entries.map((e) => JSON.stringify({ ...e, id: '' })).sort() })
+    // Text groups units by role, so compare without order; text carries no loadout (rosters do).
+    const shape = (l: typeof list) => ({ ...l, id: '', createdAt: '', updatedAt: '', entries: l.entries.map((e) => JSON.stringify({ ...e, id: '', loadout: undefined })).sort() })
     expect(shape(back)).toEqual(shape(list))
   })
 })

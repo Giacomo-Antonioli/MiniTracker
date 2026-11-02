@@ -3,14 +3,23 @@ export type EditionKey = '11e' | '10e'
 
 export type ListStatus = 'planned' | 'playable'
 
+/** Some models of one type in a list unit, with the options each of them picked (option ids; repeats allowed). */
+export interface LoadoutRow {
+  modelId: string
+  count: number
+  picks: string[]
+}
+
 /** One unit in an army list. */
 export interface ListEntry {
   id: string
   datasheetId: string
   /** Number of models; sets the points step. */
   models: number
-  /** Chosen wargear options. */
+  /** Chosen wargear options (older lists; the loadout below replaces it). */
   wargear: string[]
+  /** Models by type with their wargear choices; unset = default loadout (or your models' loadout when linked). */
+  loadout?: LoadoutRow[]
   /** Enhancement given to this unit (#54). */
   enhancementId?: string
   warlord?: boolean

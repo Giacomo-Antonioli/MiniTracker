@@ -303,6 +303,40 @@ describe('Armies', () => {
     expect((await appDb.lists.toArray())[0].schemeId).toBe('army')
   })
 
+  it('edits a unit loadout in its details: counts, choices, checks and reset', async () => {
+    const user = await start()
+    await user.click(screen.getByRole('button', { name: '+ New list' }))
+    await user.type(screen.getByLabelText('Name'), 'Troops')
+    await user.selectOptions(screen.getByLabelText('Faction'), 'Testers')
+    await user.click(screen.getByRole('button', { name: 'Create' }))
+    const add = await screen.findByRole('region', { name: 'Add units' })
+    await user.click(within(add).getByLabelText('Not owned'))
+    await user.click(within(add).getByRole('button', { name: 'Add Line Troopers' }))
+    await user.click(screen.getByRole('button', { name: 'Details: Line Troopers' }))
+
+    const lo = screen.getByLabelText('Line Troopers loadout')
+    expect(lo).toHaveTextContent('Loadout · default')
+    expect(within(lo).getAllByTestId('loadout-row').map((r) => (within(r).getAllByRole('spinbutton')[0] as HTMLInputElement).value)).toEqual(['1', '4'])
+    await user.selectOptions(within(lo).getByLabelText('Sergeant: Rifle'), 'Rifle')
+    expect(screen.getByLabelText('Line Troopers loadout')).toHaveTextContent('Loadout · set in this list')
+    const troopers = within(screen.getByLabelText('Line Troopers loadout')).getByLabelText('Trooper count')
+    await user.clear(troopers)
+    await user.type(troopers, '9')
+    expect(screen.getByLabelText('Line Troopers models')).toHaveValue('10')
+    let saved = (await appDb.lists.toArray())[0].entries[0]
+    expect(saved.loadout).toEqual([{ modelId: 'm-sgt', count: 1, picks: ['el1'] }, { modelId: 'm-trooper', count: 9, picks: [] }])
+
+    const sgt = within(screen.getByLabelText('Line Troopers loadout')).getByLabelText('Sergeant count')
+    await user.clear(sgt)
+    await user.type(sgt, '2')
+    expect(within(screen.getByRole('region', { name: 'Issues' })).getByText('⚠ Line Troopers: 2 × Sergeant, allowed 1')).toBeInTheDocument()
+
+    await user.click(within(screen.getByLabelText('Line Troopers loadout')).getByRole('button', { name: 'Reset' }))
+    saved = (await appDb.lists.toArray())[0].entries[0]
+    expect(saved.loadout).toBeUndefined()
+    expect(screen.getByLabelText('Line Troopers loadout')).toHaveTextContent('Loadout · default')
+  })
+
   it('asks to download again when the catalogue has no rule data', async () => {
     const { muster: _, ...old } = catalogue
     const user = await start({ ...old, formatVersion: 2 })
