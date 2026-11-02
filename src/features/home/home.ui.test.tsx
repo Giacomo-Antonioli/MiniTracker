@@ -7,13 +7,14 @@ import { appDb, useStore } from '../../app/store'
 import { createUnit } from '../../domain/collection/ownedUnit'
 import { DEFAULT_PIPELINE } from '../../domain/collection/pipeline'
 import { DEFAULT_PIPELINES } from '../../domain/pipelines'
+import { DEFAULT_LAYOUT } from '../../domain/home/layout'
 import { ago } from './HomePage'
 
 beforeEach(async () => {
   localStorage.setItem('startPage', 'home')
   await appDb.delete()
   await appDb.open()
-  useStore.setState({ ready: false, units: [], events: {}, pipeline: DEFAULT_PIPELINE, pipelines: DEFAULT_PIPELINES, catalogue: null, shopItems: [], shopLists: [] })
+  useStore.setState({ ready: false, units: [], events: {}, homeLayout: DEFAULT_LAYOUT, pipeline: DEFAULT_PIPELINE, pipelines: DEFAULT_PIPELINES, catalogue: null, shopItems: [], shopLists: [] })
 })
 
 describe('Home', () => {
@@ -50,6 +51,40 @@ describe('Home', () => {
     await user.click(cont.getByRole('button', { name: 'All' }))
     expect(await recent.findByText('6 × Squad → Primed')).toBeTruthy()
 
+  })
+
+  it('customises the cards: order, size, options, remove, add, reset; saved with the data', async () => {
+    const now = new Date().toISOString()
+    let n = 0
+    const squad = createUnit({ customName: 'Squad', factionName: 'Testers', groups: [{ count: 2, status: 'built' }] }, { now, newId: () => `id${++n}` })
+    await appDb.units.put(squad)
+    await appDb.statusEvents.put({ id: 'e1', unitId: squad.id, groupId: squad.groups[0].id, from: 'sprue', to: 'built', count: 2, date: now, direction: 'forward', note: '' })
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(await screen.findByRole('button', { name: '✎ Customise' }))
+    const order = () => [...document.querySelectorAll('main section[aria-label]')].map((x) => x.getAttribute('aria-label'))
+    expect(order().slice(0, 3)).toEqual(['Summary', 'Activity', 'Continue painting'])
+    await user.click(screen.getByRole('button', { name: 'Move Activity up' }))
+    await user.click(screen.getByRole('button', { name: 'Move Summary down' }))
+    expect(order().slice(0, 3)).toEqual(['Activity', 'Continue painting', 'Summary'])
+    await user.click(within(screen.getByRole('group', { name: 'Recent activity size' })).getByRole('button', { name: 'L' }))
+    expect(screen.getByRole('region', { name: 'Recent activity' }).className).toContain('lg:col-span-6')
+    await user.selectOptions(screen.getByLabelText('Recent activity: Moves'), '10')
+    await user.click(screen.getByRole('button', { name: 'Remove Shopping' }))
+    expect(screen.queryByRole('region', { name: 'Shopping' })).toBeNull()
+    await user.selectOptions(screen.getByLabelText('Add card'), 'spending')
+    expect(within(screen.getByRole('region', { name: 'Spending' })).getByText(/Nothing to show yet/)).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: 'Done' }))
+    expect(screen.queryByRole('region', { name: 'Spending' })).toBeNull()
+
+    const saved = (await appDb.settings.get('homeLayout'))!.value as { id: string; size: string; options?: object }[]
+    expect(saved.slice(0, 3).map((c) => c.id)).toEqual(['activity', 'continue', 'tiles'])
+    expect(saved.find((c) => c.id === 'recent')).toEqual({ id: 'recent', size: 'L', options: { count: 10 } })
+    expect(saved.at(-1)!.id).toBe('spending')
+
+    await user.click(screen.getByRole('button', { name: '✎ Customise' }))
+    await user.click(screen.getByRole('button', { name: 'Reset' }))
+    expect(order().slice(0, 2)).toEqual(['Summary', 'Activity'])
   })
 
   it('says how long ago', () => {
