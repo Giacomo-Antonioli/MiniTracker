@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-11-02
+
 ### Added
 - Backlog unit: "Add missing paints to shopping list…" for the paints of its scheme you don't own (#104).
 - Shopping: search the whole catalogue (units, and paints with a colour swatch) and add to the shopping list without owning them. A unit also goes to the backlog as Wishlisted (a new entry, or more models on an entry you choose); a paint not in your inventory goes on the paint wishlist. Ticking a unit bought moves its Wishlisted models to the first painting stage.
@@ -129,7 +131,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.4.2
