@@ -71,6 +71,15 @@ describe('Armies', () => {
 
     await user.click(screen.getAllByRole('button', { name: 'Warlord: Big Walker' })[0])
     expect(within(issues).getByText(/is not a Character/)).toBeInTheDocument()
+    expect(within(issues).getByText(/is not a Character/).closest('button')).toHaveAttribute('title', 'The Warlord must be a Character model.')
+    // One Warlord: choosing another unit moves the star; clicking it again clears it.
+    const stars = () => screen.getAllByRole('button', { name: 'Warlord: Big Walker' })
+    await user.click(stars()[1])
+    expect(stars().map((b) => b.getAttribute('aria-pressed'))).toEqual(['false', 'true', 'false', 'false'])
+    await user.click(stars()[1])
+    expect(within(issues).getByText('⚠ Choose a Warlord')).toBeInTheDocument()
+    await user.click(stars()[0])
+    expect(stars()[0]).toHaveAttribute('title', 'Warlord (must be a Character)')
 
     const buy = screen.getByRole('region', { name: 'Buy list' })
     expect(buy).toHaveTextContent('3 models to buy')

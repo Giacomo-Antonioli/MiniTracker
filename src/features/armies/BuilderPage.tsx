@@ -18,7 +18,7 @@ import { isGone, setFlags } from '../../domain/collection/pipeline'
 import { BuyListSheet } from './BuyListSheet'
 import { listToJson, listToText } from '../../domain/lists/io'
 import { evalLimit } from '../../domain/lists/conditions'
-import { addUnit, battleSizes, canLead, checkList, enhancementAllowed, legalUnits, listCounter } from '../../domain/lists/rules'
+import { addUnit, ISSUE_HELP, battleSizes, canLead, checkList, enhancementAllowed, legalUnits, listCounter } from '../../domain/lists/rules'
 import type { ArmyList, ListEntry, ListStatus, LoadoutRow } from '../../domain/lists/types'
 import type { PaintDef } from '../../domain/paints/types'
 import { AddToShoppingButton } from '../shopping/AddToShoppingDialog'
@@ -204,7 +204,8 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   const flagged = new Set(issues.flatMap((i) => i.entryIds))
 
   const edit = (id: string, patch: Partial<Omit<ListEntry, 'id'>>) => onSave(updateEntry(list, id, patch, ctx()))
-  const setWarlord = (id: string) => onSave({ ...list, entries: list.entries.map((e) => ({ ...e, warlord: e.id === id ? !e.warlord : e.warlord })), updatedAt: ctx().now })
+  // One Warlord per army: choosing a unit moves the ★ there; clicking it again clears it.
+  const setWarlord = (id: string) => onSave({ ...list, entries: list.entries.map((e) => ({ ...e, warlord: e.id === id ? !e.warlord : false })), updatedAt: ctx().now })
   const leadable = list.entries.filter((e) => !sheets.get(e.datasheetId)?.keywords.includes('Character'))
   // With leader data (catalogue format 6) a Leader is offered only the units it can lead; older catalogues offer all.
   const hasLeaderData = cat.datasheets.some((d) => d.leads)
@@ -257,7 +258,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 <button className="w-5 text-muted" aria-label={`Details: ${d?.name ?? 'unit'}`} aria-expanded={openRows.has(e.id)} onClick={() => toggleRow(e.id)}>
                   {openRows.has(e.id) ? '▾' : '▸'}
                 </button>
-                <button className={`w-6 ${e.warlord ? 'text-accent' : 'text-muted/50'}`} aria-label={`Warlord: ${d?.name ?? 'unit'}`} aria-pressed={!!e.warlord} onClick={() => setWarlord(e.id)} title="Warlord">
+                <button className={`w-6 ${e.warlord ? 'text-accent' : 'text-muted/50'}`} aria-label={`Warlord: ${d?.name ?? 'unit'}`} aria-pressed={!!e.warlord} onClick={() => setWarlord(e.id)} title={d && !d.keywords.includes('Character') ? 'Warlord (must be a Character)' : 'Warlord'}>
                   ★
                 </button>
                 <span className="min-w-0 flex-1 truncate">{d?.name ?? 'Unknown unit'}</span>
@@ -346,6 +347,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 <button
                   key={k}
                   className="text-left text-sm hover:text-accent"
+                  title={ISSUE_HELP[i.code]}
                   onClick={() => setHighlight(highlight === i.entryIds ? [] : i.entryIds)}
                 >
                   ⚠ {i.message}
