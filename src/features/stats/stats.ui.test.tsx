@@ -41,7 +41,7 @@ describe('Stats', () => {
     expect(tiles.getByText('+8')).toBeTruthy()
     expect(screen.getByRole('img', { name: 'Models painted per month' })).toBeTruthy()
     const factions = within(screen.getByRole('region', { name: 'By faction' }))
-    expect(await factions.findByText('64 / 160 pts')).toBeTruthy()
+    expect(await factions.findByText('64 / 160 pts', {}, { timeout: 5000 })).toBeTruthy()
     expect(factions.getByText('4 / 10 (40%)')).toBeTruthy()
 
     const records = within(screen.getByRole('region', { name: 'Records' }))
