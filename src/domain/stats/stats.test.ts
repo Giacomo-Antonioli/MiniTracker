@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_PIPELINE } from '../collection/pipeline'
 import type { OwnedUnit, StatusEvent } from '../collection/types'
-import { byFaction, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileFlow, pileLevel, pileNow, streakWeeks } from './stats'
+import { byWeek, lastWeeks, monthsSince, byFaction, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileFlow, pileLevel, pileNow, streakWeeks } from './stats'
 
 const p = DEFAULT_PIPELINE
 let n = 0
@@ -13,6 +13,20 @@ const unit = (id: string, groups: [number, string][], extra: Partial<OwnedUnit> 
 describe('months', () => {
   it('lists the last n months, oldest first', () => {
     expect(lastMonths('2026-03-15', 4)).toEqual(['2025-12', '2026-01', '2026-02', '2026-03'])
+  })
+
+  it('lists weeks by their Monday, and months since a first date', () => {
+    expect(lastWeeks('2026-03-11', 3)).toEqual(['2026-02-23', '2026-03-02', '2026-03-09'])
+    expect(byWeek('2026-03-15T20:00:00Z')).toBe('2026-03-09')
+    expect(monthsSince('2025-11-30', '2026-02-01')).toEqual(['2025-11', '2025-12', '2026-01', '2026-02'])
+    expect(monthsSince(undefined, '2026-02-01')).toEqual(['2026-02'])
+  })
+
+  it('buckets by week, and works back from changes after the range', () => {
+    const units = [unit('a', [[5, 'built']], { createdAt: '2026-03-10' })]
+    const events = [ev('2026-03-03', 'built', 'painted', 2), ev('2026-03-12', 'built', 'painted', 1)]
+    expect(paintedPerMonth(events, p, ['2026-03-02', '2026-03-09'], 'painted', byWeek)).toEqual([2, 1])
+    expect(pileFlow(units, events, p, ['2026-02'])).toEqual([{ month: '2026-02', added: 0, finished: 0, pile: 3 }])
   })
 })
 

@@ -5,7 +5,7 @@ import { factionsOf } from '../../domain/collection/backlog'
 import { ownedModels } from '../../domain/collection/ownedUnit'
 import type { OwnedUnit, StatusEvent } from '../../domain/collection/types'
 import { MonthArea, MonthBars } from './charts'
-import { byFaction, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileFlow, pileLevel, pileNow, streakWeeks } from '../../domain/stats/stats'
+import { byMonth, byWeek, lastWeeks, monthsSince, byFaction, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileFlow, pileLevel, pileNow, streakWeeks } from '../../domain/stats/stats'
 
 /** "about 14 months", "about 2 years", or a dash when there is no pace yet. */
 export function forecast(months: number | undefined): string {
@@ -57,7 +57,7 @@ export function StatsPage() {
   const all = useAllEvents()
   const { pointsOf, factionName } = usePointsOf()
   const [faction, setFaction] = useState('')
-  const [range, setRange] = useState(12)
+  const [range, setRange] = useState<number | 'all'>(12)
   const now = new Date().toISOString()
 
   const shown = useMemo(() => (faction ? units.filter((u) => u.factionName === faction) : units), [units, faction])
@@ -65,13 +65,17 @@ export function StatsPage() {
     const ids = new Set(shown.map((u) => u.id))
     return all.filter((e) => ids.has(e.unitId))
   }, [all, shown])
-  const months = lastMonths(now, range)
+  // Short ranges are drawn by week, longer ones by month.
+  const weekly = range !== 'all' && range <= 3
+  const keyOf = weekly ? byWeek : byMonth
+  const first = [...shown.map((u) => u.createdAt), ...events.map((e) => e.date)].sort()[0]
+  const months = range === 'all' ? monthsSince(first, now) : weekly ? lastWeeks(now, range === 1 ? 5 : 13) : lastMonths(now, range)
   const pile = pileNow(shown, pipeline)
   const perMonth = pace(events, pipeline, now)
-  const thisMonth = paintedPerMonth(events, pipeline, months.slice(-1))[0]
+  const thisMonth = paintedPerMonth(events, pipeline, lastMonths(now, 1))[0]
   const net = netThisYear(shown, events, pipeline, now)
   const streak = streakWeeks(events, pipeline, now)
-  const flow = pileFlow(shown, events, pipeline, months)
+  const flow = pileFlow(shown, events, pipeline, months, 'painted', keyOf)
   const armies = byFaction(shown, events, pipeline, now, pointsOf, factionName)
 
   return (
@@ -83,9 +87,13 @@ export function StatsPage() {
             <option value="">All factions</option>
             {factionsOf(units).map((f) => <option key={f}>{f}</option>)}
           </select>
-          <select className="input" aria-label="Range" value={range} onChange={(e) => setRange(Number(e.target.value))}>
-            {[6, 12, 24].map((n) => <option key={n} value={n}>Last {n} months</option>)}
-          </select>
+          <div className="flex overflow-hidden rounded border border-line" role="group" aria-label="Range">
+            {([1, 3, 6, 12, 24, 'all'] as const).map((r) => (
+              <button key={r} aria-pressed={range === r} className={`px-2.5 py-1 text-sm ${range === r ? 'bg-accent text-accent-fg' : 'hover:bg-panel-2'}`} onClick={() => setRange(r)}>
+                {r === 'all' ? 'All' : r < 12 ? `${r}M` : `${r / 12}Y`}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -99,8 +107,8 @@ export function StatsPage() {
       </section>
 
       <section className="panel grid gap-2 p-4" aria-label="Painted per month">
-        <h2 className="font-display text-lg">Models painted per month</h2>
-        <MonthBars label="Models painted per month" months={months} series={[{ name: 'Painted', values: paintedPerMonth(events, pipeline, months), fill: 'fill-accent', swatch: 'bg-accent' }]} />
+        <h2 className="font-display text-lg">Models painted per {weekly ? 'week' : 'month'}</h2>
+        <MonthBars label="Models painted per month" months={months} series={[{ name: 'Painted', values: paintedPerMonth(events, pipeline, months, 'painted', keyOf), fill: 'fill-accent', swatch: 'bg-accent' }]} />
       </section>
 
       <div className="grid gap-4 xl:grid-cols-2">
@@ -118,7 +126,7 @@ export function StatsPage() {
 
         <section className="panel grid gap-2 p-4" aria-label="Pile size">
           <h2 className="font-display text-lg">Pile size</h2>
-          <MonthArea label="Unpainted models at each month end" name="Pile" months={months} values={flow.map((r) => r.pile)} />
+          <MonthArea label="Unpainted models over time" name="Pile" months={months} values={flow.map((r) => r.pile)} />
         </section>
       </div>
 

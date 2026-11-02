@@ -34,8 +34,26 @@ function finishedIn(events: StatusEvent[], p: Pipeline, keep: (date: string) => 
   return events.reduce((sum, e) => (keep(e.date) ? sum + finishedBy(e, p, t) : sum), 0)
 }
 
-export function paintedPerMonth(events: StatusEvent[], p: Pipeline, months: string[], target: StageId = 'painted'): number[] {
-  return months.map((m) => finishedIn(events, p, (d) => monthOf(d) === m, target))
+/** Bucket key of a date: 'YYYY-MM' for months, the Monday 'YYYY-MM-DD' for weeks. */
+export type KeyOf = (date: string) => string
+export const byMonth: KeyOf = monthOf
+export const byWeek: KeyOf = (date) => new Date(weekStart(date)).toISOString().slice(0, 10)
+
+/** Mondays of the last `n` weeks up to the week of `now`, oldest first. */
+export function lastWeeks(now: string, n: number): string[] {
+  const w = weekStart(now)
+  return Array.from({ length: n }, (_, i) => new Date(w - (n - 1 - i) * 7 * DAY).toISOString().slice(0, 10))
+}
+
+/** Months from the month of `first` to the month of `now`, at least one. */
+export function monthsSince(first: string | undefined, now: string): string[] {
+  if (!first || first > now) return lastMonths(now, 1)
+  const n = (Number(now.slice(0, 4)) - Number(first.slice(0, 4))) * 12 + Number(now.slice(5, 7)) - Number(first.slice(5, 7)) + 1
+  return lastMonths(now, n)
+}
+
+export function paintedPerMonth(events: StatusEvent[], p: Pipeline, keys: string[], target: StageId = 'painted', keyOf: KeyOf = byMonth): number[] {
+  return keys.map((m) => finishedIn(events, p, (d) => keyOf(d) === m, target))
 }
 
 /** Owned models of a unit (not wishlisted), and how many of them are painted. */
@@ -80,9 +98,12 @@ export interface FlowRow {
 }
 
 /** Models added (by unit creation) and finished per month, with the pile at each month's end, worked back from today's pile. */
-export function pileFlow(units: OwnedUnit[], events: StatusEvent[], p: Pipeline, months: string[], target: StageId = 'painted'): FlowRow[] {
-  const rows = months.map((month) => ({ month, added: addedIn(units, p, (d) => monthOf(d) === month), finished: finishedIn(events, p, (d) => monthOf(d) === month, target), pile: 0 }))
+export function pileFlow(units: OwnedUnit[], events: StatusEvent[], p: Pipeline, months: string[], target: StageId = 'painted', keyOf: KeyOf = byMonth): FlowRow[] {
+  const rows = months.map((month) => ({ month, added: addedIn(units, p, (d) => keyOf(d) === month), finished: finishedIn(events, p, (d) => keyOf(d) === month, target), pile: 0 }))
   let pile = pileNow(units, p, target)
+  // Changes after the last bucket (none for ranges ending today) are undone first.
+  const end = months.at(-1) ?? ''
+  pile -= addedIn(units, p, (d) => keyOf(d) > end) - finishedIn(events, p, (d) => keyOf(d) > end, target)
   for (let i = rows.length - 1; i >= 0; i--) {
     rows[i].pile = pile
     pile -= rows[i].added - rows[i].finished

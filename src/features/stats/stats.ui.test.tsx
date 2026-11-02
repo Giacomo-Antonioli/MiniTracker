@@ -43,7 +43,7 @@ describe('Stats', () => {
     expect(await factions.findByText('64 / 160 pts')).toBeTruthy()
     expect(factions.getByText('4 / 10 (40%)')).toBeTruthy()
 
-    const pile = screen.getByRole('img', { name: 'Unpainted models at each month end' })
+    const pile = screen.getByRole('img', { name: 'Unpainted models over time' })
     await user.hover(pile.querySelectorAll('rect')[pile.querySelectorAll('rect').length - 1])
     expect(screen.getByRole('tooltip').textContent).toContain('Pile8')
     await user.hover(screen.getByRole('img', { name: 'Models painted per month' }).querySelectorAll('rect')[11])
@@ -52,8 +52,15 @@ describe('Stats', () => {
     await user.selectOptions(screen.getByLabelText('Faction'), 'Orks')
     expect(tiles.getByText('+2')).toBeTruthy()
     expect(factions.queryByText('Testers')).toBeNull()
-    await user.selectOptions(screen.getByLabelText('Range'), '6')
-    expect(screen.getByRole('img', { name: 'Models painted per month' }).querySelectorAll('[data-bar]')).toHaveLength(6)
+    const bars = () => screen.getByRole('img', { name: 'Models painted per month' }).querySelectorAll('[data-bar]')
+    await user.click(screen.getByRole('button', { name: '6M' }))
+    expect(bars()).toHaveLength(6)
+    await user.click(screen.getByRole('button', { name: 'All' }))
+    expect(bars()).toHaveLength(1)
+    await user.click(screen.getByRole('button', { name: '3M' }))
+    expect(screen.getByRole('img', { name: 'Models painted per month' }).querySelectorAll('[data-bar]')).toHaveLength(13)
+    await user.hover(screen.getByRole('img', { name: 'Models painted per month' }).querySelectorAll('rect')[12])
+    expect(screen.getByRole('tooltip').textContent).toMatch(/^Week of/)
   })
 
   it('picks round axis ticks', () => {

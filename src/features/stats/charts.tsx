@@ -2,8 +2,11 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 
 const MONTH = new Intl.DateTimeFormat(undefined, { month: 'short', timeZone: 'UTC' })
 const LONG = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' })
-export const monthLabel = (m: string) => MONTH.format(new Date(`${m}-01T00:00:00Z`))
-const longLabel = (m: string) => LONG.format(new Date(`${m}-01T00:00:00Z`))
+const DAYM = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', timeZone: 'UTC' })
+const isWeek = (k: string) => k.length === 10
+/** Axis label of a bucket: 'Mar' for a month, '9 Mar' for a week (its Monday). */
+export const monthLabel = (k: string) => (isWeek(k) ? DAYM.format(new Date(`${k}T00:00:00Z`)) : MONTH.format(new Date(`${k}-01T00:00:00Z`)))
+const longLabel = (k: string) => (isWeek(k) ? `Week of ${DAYM.format(new Date(`${k}T00:00:00Z`))}` : LONG.format(new Date(`${k}-01T00:00:00Z`)))
 
 const H = 180
 const PAD = { top: 16, right: 12, bottom: 24, left: 32 }
