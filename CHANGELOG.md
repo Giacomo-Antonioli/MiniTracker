@@ -4,12 +4,17 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-02
+
 ### Added
 - Shopping lists: a new Shopping tab with a main list of everything to buy and your own lists (e.g. per shop) holding some of it. Add models and paints from an army's buy list, "Paints to buy" or the paint wishlist, choosing which lists they go on, or type in anything else. Set quantity, shop and price; see the total; copy as text or print / save as PDF. Ticking a paint as bought can mark it ordered or put it in your inventory (#87).
 - Paints to buy: on the Paints page, pick schemes (yours to start with) and print or save as PDF the paints they use that you don't own, with brand, swatch, the schemes that use each one and tick boxes (#86).
 
 ### Changed
 - The buy list PDF shows each paint's brand and swatch (#86).
+
+### Fixed
+- The old greyed-out "Shopping (soon)" item no longer shows next to the Shopping tab.
 
 ## [0.5.0] - 2026-11-02
 
@@ -119,7 +124,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.4.2
 [0.4.1]: https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v0.4.1
