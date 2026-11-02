@@ -541,6 +541,7 @@ function DetachmentBar({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; 
 function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSave, cat, linkedTo }: { list: ArmyList; rows: ReturnType<typeof buyList>; paints: BuyPaint[]; subtitle: string; schemeCtx: SchemeContext; paintById: Map<string, PaintDef>; onSave: (l: ArmyList) => void; cat: Catalogue; linkedTo: (e: ListEntry) => OwnedUnit[] }) {
   const { paintStock } = useStore()
   const [withCards, setWithCards] = useState(true)
+  const [withPaints, setWithPaints] = useState(true)
   const [copied, setCopied] = useState('')
   const [asking, setAsking] = useState(false)
   const [printing, setPrinting] = useState<ArmyList | null>(null)
@@ -582,6 +583,7 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
             paintById={paintById}
             subtitle={subtitle}
             cards={withCards ? unitCards(printing, cat, linkedTo) : undefined}
+            paints={withPaints}
             onDone={() => setPrinting(null)}
           />
         )}
@@ -593,6 +595,8 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
           c={schemeCtx}
           withCards={withCards}
           onCards={setWithCards}
+          withPaints={withPaints}
+          onPaints={setWithPaints}
           onCancel={() => setAsking(false)}
           onMake={(l) => {
             setAsking(false)
@@ -673,14 +677,14 @@ function CollectionPanel({ own, plan, missingPaints, toApply }: { own: ReturnTyp
         </button>
       )}
       {missingPaints.length > 0 && (
-        <div className="grid gap-1 text-sm">
-          <p className="text-muted">Paints missing for the list's schemes</p>
-          <ul className="grid gap-0.5">
+        <details className="text-sm">
+          <summary className="cursor-pointer text-muted hover:text-accent">Paints missing for the list's schemes ({missingPaints.length})</summary>
+          <ul className="mt-1 grid gap-0.5">
             {missingPaints.map((m) => (
               <li key={m.name}>{m.name} <span className="text-xs text-muted">({m.schemes.join(', ')})</span></li>
             ))}
           </ul>
-        </div>
+        </details>
       )}
     </section>
   )
@@ -758,7 +762,7 @@ function ArmySchemeSelect({ list, factionName, onChange, label = 'Army scheme' }
 }
 
 /** Asked before making the PDF: army scheme, and optionally a scheme per unit. Choices are saved to the list. */
-function PdfDialog({ list, c, withCards, onCards, onCancel, onMake }: { list: ArmyList; c: SchemeContext; withCards: boolean; onCards: (v: boolean) => void; onCancel: () => void; onMake: (l: ArmyList) => void }) {
+function PdfDialog({ list, c, withCards, onCards, withPaints, onPaints, onCancel, onMake }: { list: ArmyList; c: SchemeContext; withCards: boolean; onCards: (v: boolean) => void; withPaints: boolean; onPaints: (v: boolean) => void; onCancel: () => void; onMake: (l: ArmyList) => void }) {
   const [draft, setDraft] = useState(list)
   const [perUnit, setPerUnit] = useState(list.entries.some((e) => e.schemeId))
   return (
@@ -780,6 +784,9 @@ function PdfDialog({ list, c, withCards, onCards, onCancel, onMake }: { list: Ar
       )}
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={withCards} onChange={(e) => onCards(e.target.checked)} /> Include datasheet cards
+      </label>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={withPaints} onChange={(e) => onPaints(e.target.checked)} /> Include paints for the schemes
       </label>
       <div className="flex gap-2">
         <button className="btn btn-primary" onClick={() => onMake(perUnit ? draft : { ...draft, entries: draft.entries.map((x) => ({ ...x, schemeId: undefined })) })}>📄 Make PDF</button>

@@ -11,7 +11,7 @@ import { DatasheetCards } from './DatasheetCards'
 /** Printable buy list. Rendered off-screen and printed (or saved as PDF from the print dialog), like recipe cards. */
 const STATUS: Record<PaintStatus, string> = { buy: 'to buy', unpainted: 'to paint', painted: 'painted ✓' }
 
-export function BuyListSheet({ list, buy, plan, paintById, subtitle, cards, onDone }: { list: ArmyList; buy: BuyList; plan: PaintPlan; paintById: Map<string, PaintDef>; subtitle: string; cards?: UnitCard[]; onDone: () => void }) {
+export function BuyListSheet({ list, buy, plan, paintById, subtitle, cards, paints = true, onDone }: { list: ArmyList; buy: BuyList; plan: PaintPlan; paintById: Map<string, PaintDef>; subtitle: string; cards?: UnitCard[]; paints?: boolean; onDone: () => void }) {
   const [date] = useState(() => new Date().toLocaleDateString())
   useEffect(() => {
     const done = () => onDone()
@@ -57,14 +57,14 @@ export function BuyListSheet({ list, buy, plan, paintById, subtitle, cards, onDo
         </tfoot>
       </table>
       )}
-      {plan.groups.map((g) => (
+      {paints && plan.groups.map((g) => (
         <section key={g.scheme.id} className="mt-6" style={{ breakInside: 'avoid' }}>
           <h2 className="text-lg font-bold">Scheme: {g.scheme.name}</h2>
           <p className="text-sm">{g.units.map((u) => `${u.name} (${STATUS[u.status]})`).join(' · ')}</p>
           <PaintRows rows={g.paints.map((p) => ({ paintId: p.paintId, paint: paintById.get(p.paintId), have: p.have, usedBy: p.have ? 'have' : 'buy' }))} />
         </section>
       ))}
-      {plan.withoutScheme.length > 0 && <p className="mt-6 text-sm">No scheme: {plan.withoutScheme.map((u) => u.name).join(', ')}</p>}
+      {paints && plan.withoutScheme.length > 0 && <p className="mt-6 text-sm">No scheme: {plan.withoutScheme.map((u) => u.name).join(', ')}</p>}
       {cards && cards.length > 0 && (
         <section style={{ breakBefore: 'page' }}>
           <h1 className="text-2xl font-bold">Datasheets – {list.name}</h1>
