@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.5.5] - 2026-11-02
+
 ### Changed
 - Backlog table: entries of the same unit type and faction share one summary row (models, Wishlisted, a stage bar, painted, schemes, flags, last update) that expands into each entry with its own stages, scheme, tags and state. Columns sort on click and can be hidden; your choices are remembered.
 
@@ -144,7 +146,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.4...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.5...HEAD
+[0.5.5]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.1...v0.5.2
