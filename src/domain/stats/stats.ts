@@ -194,3 +194,24 @@ export function byFaction(
     .map(({ ids, ...r }) => ({ ...r, finishMonths: finishMonths(r.models - r.painted, pace(events.filter((e) => ids.has(e.unitId)), p, now, 3, target)) }))
     .sort((a, b) => Number(a.faction === NONE) - Number(b.faction === NONE) || b.models - a.models)
 }
+
+/** Units with models left to paint, the most recently moved (or edited) first. */
+export function recentUnits(units: OwnedUnit[], events: StatusEvent[], p: Pipeline, n: number, target: StageId = 'painted'): OwnedUnit[] {
+  const t = targetIndex(p, target)
+  const last = new Map<string, string>()
+  for (const e of events) if ((last.get(e.unitId) ?? '') < e.date) last.set(e.unitId, e.date)
+  const when = (u: OwnedUnit) => [last.get(u.id) ?? '', u.updatedAt].sort().at(-1)!
+  return units
+    .filter((u) => !isGone(u.lifecycle) && u.lifecycle !== 'on-hold')
+    .filter((u) => {
+      const c = counts(u, p, t)
+      return c.owned > c.painted
+    })
+    .sort((a, b) => when(b).localeCompare(when(a)))
+    .slice(0, n)
+}
+
+/** The latest `n` moves, newest first. */
+export function recentMoves(events: StatusEvent[], n: number): StatusEvent[] {
+  return [...events].sort((a, b) => b.date.localeCompare(a.date)).slice(0, n)
+}

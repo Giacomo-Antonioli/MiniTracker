@@ -73,6 +73,23 @@ function readTheme(): Theme {
   }
 }
 
+/** Page shown when the app opens. */
+export type StartPage = 'home' | 'backlog'
+export function readStartPage(): StartPage {
+  try {
+    return localStorage.getItem('startPage') === 'backlog' ? 'backlog' : 'home'
+  } catch {
+    return 'home'
+  }
+}
+export function saveStartPage(p: StartPage) {
+  try {
+    localStorage.setItem('startPage', p)
+  } catch {
+    // Not saved: the default (Home) is used.
+  }
+}
+
 /** How rule explanations show: closed until the arrow is clicked, always open, or open on hover. */
 export type RuleDisplay = 'collapsed' | 'expanded' | 'hover'
 function readRuleDisplay(): RuleDisplay {
