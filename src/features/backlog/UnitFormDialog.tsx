@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { firstOwnedStage } from '../../domain/collection/pipeline'
 import { ctx, useStore } from '../../app/store'
 import { pointsFor } from '../../domain/catalogue/points'
@@ -8,6 +8,8 @@ import { createUnit } from '../../domain/collection/ownedUnit'
 import type { Lifecycle, Link, OwnedUnit } from '../../domain/collection/types'
 import { schemesForUnit } from '../../domain/schemes/match'
 import { ORIGIN_LABEL } from '../schemes/origin'
+import { ColourStrip } from '../schemes/ColourStrip'
+import { colourStrip } from '../../domain/schemes/scheme'
 import { Combobox, type ComboOption } from '../../ui/Combobox'
 import { Dialog } from '../../ui/Dialog'
 import { InfoTip } from '../../ui/InfoTip'
@@ -40,7 +42,7 @@ export function UnitFormDialog({
   /** Start a new unit from a catalogue datasheet (e.g. "Add to collection"). */
   preset?: { datasheet: Datasheet; factionId?: string }
 }) {
-  const { pipeline, saveUnit, catalogue, schemes: mySchemes, library, schemeDefaults } = useStore()
+  const { pipeline, saveUnit, catalogue, schemes: mySchemes, library, schemeDefaults, paints, loadPaints } = useStore()
   const schemes = [...mySchemes, ...library]
   const presetFaction = preset && catalogue ? (preset.factionId && preset.datasheet.factionIds.includes(preset.factionId) ? preset.factionId : preset.datasheet.factionIds[0]) : undefined
   const [name, setName] = useState(unit?.customName ?? preset?.datasheet.name ?? '')
@@ -64,6 +66,10 @@ export function UnitFormDialog({
   const [error, setError] = useState('')
   // New units get their faction's default scheme until you pick one yourself.
   const effectiveScheme = schemeTouched ? schemeId : (schemeDefaults[faction.trim()] ?? schemeId)
+  const chosen = effectiveScheme ? schemes.find((s) => s.id === effectiveScheme) : undefined
+  useEffect(() => {
+    if (chosen && !paints.length) void loadPaints()
+  }, [chosen, paints.length, loadPaints])
 
   const datasheet = catalogue?.datasheets.find((d) => d.id === datasheetId)
   const totalModels = groups.reduce((n, g) => n + (Number(g.count) || 0), 0)
@@ -245,6 +251,7 @@ export function UnitFormDialog({
               </optgroup>
             ))}
           </select>
+          {chosen && <span className="mt-1 block" title={chosen.name}><ColourStrip colours={colourStrip(chosen, paints)} /></span>}
         </label>
 
         <fieldset className="grid gap-2">

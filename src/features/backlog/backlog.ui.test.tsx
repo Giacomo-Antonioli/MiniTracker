@@ -236,5 +236,8 @@ describe('Backlog schemes', () => {
     const strip = await screen.findByLabelText('1 paint colours')
     expect(strip.closest('[title]')).toHaveAttribute('title', 'Sept')
     expect((strip.firstElementChild as HTMLElement).style.background).toMatch(/#1f2211|rgb\(31, 34, 17\)/)
+    await userEvent.setup().click(screen.getByRole('cell', { name: /Crisis/ }))
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Edit' }))
+    expect(within(screen.getByRole('dialog')).getByLabelText('1 paint colours')).toBeInTheDocument()
   })
 })
