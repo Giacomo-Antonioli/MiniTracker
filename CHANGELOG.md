@@ -5,6 +5,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Changed
+- Add to shopping list: when models and paints come together (an army's buy list), checkboxes let you add only the models or only the paints.
 - One Warlord per army, and only a Character: ★ is disabled on other units, moves the Warlord to the unit you click (click again to clear), and until one is chosen the Characters' stars are highlighted with a hint above the list. Characters are starred in the Add units list too. Hovering a list warning explains the rule behind it.
 
 ### Added
