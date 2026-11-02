@@ -163,6 +163,14 @@ describe('detachments and enhancements', () => {
   })
 })
 
+describe('model wargear', () => {
+  it('follows links to wargear nested inside the same unit', () => {
+    // The Sergeant's Flamer links to the Trooper's own Flamer entry, not a shared one.
+    const sgt = ds('Line Troopers').models!.find((m) => m.id === 'm-sgt')!
+    expect(sgt.choices.map((c) => c.options[0])).toContainEqual({ id: 'el4', targetId: 'w-flamer', name: 'Flamer', max: 1 })
+  })
+})
+
 describe('stat lines and weapon profiles', () => {
   it('reads unit stats and weapons, following links to shared weapons', () => {
     expect(ds('Big Walker').stats).toEqual([{ name: 'Big Walker', values: [['M', '8"'], ['T', '9'], ['Sv', '3+'], ['W', '10'], ['LD', '7+'], ['OC', '3']] }])

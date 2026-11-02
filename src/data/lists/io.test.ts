@@ -27,6 +27,23 @@ describe('rosters (.ros / .rosz)', () => {
     expect(warnings).toEqual(['Not in the catalogue: Mystery Unit'])
   })
 
+  it('reads the wargear each model carries into the loadout', () => {
+    const { list } = listFromRoster(readRoster(strToU8(ros)), cat, '11e', ctx)
+    expect(list.entries.map((e) => e.loadout)).toEqual([
+      [{ modelId: 'u-walker', count: 1, picks: [] }],
+      [
+        { modelId: 'm-sgt', count: 1, picks: [] },
+        { modelId: 'm-trooper', count: 7, picks: ['w-flamer'] },
+      ],
+    ])
+  })
+
+  it('leaves the loadout out when the roster models do not match the datasheet', () => {
+    const odd = ros.replace('name="Sergeant" entryId="m-sgt"', 'name="Captain" entryId="m-nope"')
+    const { list } = listFromRoster(readRoster(strToU8(odd)), cat, '11e', ctx)
+    expect(list.entries[1].loadout).toBeUndefined()
+  })
+
   it('warns about a detachment the catalogue does not know', () => {
     const old = parseRosterXml(ros.replace('name="Line Doctrine" entryId="el-det::det-line"', 'name="Oathband" entryId="el-det::det-gone"'))
     const { list, warnings } = listFromRoster(old, cat, '11e', ctx)

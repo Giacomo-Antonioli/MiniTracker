@@ -34,6 +34,7 @@
                   <entryLinks>
                     <entryLink import="true" name="Rifle" hidden="false" type="selectionEntry" id="el1" targetId="w-rifle"/>
                     <entryLink import="true" name="Sword" hidden="false" type="selectionEntry" id="el2" targetId="w-sword"/>
+                    <entryLink import="true" name="Flamer" hidden="false" type="selectionEntry" id="el4" targetId="w-flamer"/>
                     <entryLink import="true" name="Weapon Modifications" hidden="false" type="selectionEntryGroup" id="el3" targetId="g-mods"/>
                   </entryLinks>
                 </selectionEntryGroup>

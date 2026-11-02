@@ -4,6 +4,13 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Wargear loadouts for army list units: in a unit's details (▸) set how many models of each type it has and the weapons each one takes. A unit starts from the loadout of your linked models, or the datasheet default, and keeps your own changes once you edit it. Rule checks flag loadouts that break the datasheet's limits (#78).
+- Importing a BattleScribe or New Recruit roster (`.rosz`, `.ros`) also reads each unit's wargear (#78).
+
+### Fixed
+- Wargear options that link to another model's weapon in the same unit (e.g. an Eliminator Sergeant's Bolt Sniper Rifle) were missing from the catalogue (#78).
+
 ## [0.4.2] - 2026-11-02
 
 ### Added

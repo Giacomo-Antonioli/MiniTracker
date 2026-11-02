@@ -95,6 +95,14 @@
            },
            {
             "import": true,
+            "name": "Flamer",
+            "hidden": false,
+            "type": "selectionEntry",
+            "id": "el4",
+            "targetId": "w-flamer"
+           },
+           {
+            "import": true,
             "name": "Weapon Modifications",
             "hidden": false,
             "type": "selectionEntryGroup",

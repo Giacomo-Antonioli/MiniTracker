@@ -211,11 +211,20 @@ function parentLimits(n: Node, open: number): [number, number] {
  * Groups without limits (e.g. "Wargear") are looked through. A unit that is a single model is its own model type.
  */
 function readModels(e: Node, linkable: Map<string, Node>): ModelType[] {
+  // Links may also point to entries nested inside the same unit (e.g. a sergeant's option linking the troopers' rifle).
+  const local = new Map<string, Node>()
+  const index = (n: Node) => {
+    for (const x of [...kids(n, 'selectionEntries', 'selectionEntry'), ...kids(n, 'selectionEntryGroups', 'selectionEntryGroup')]) {
+      local.set(attr(x, 'id')!, x)
+      index(x)
+    }
+  }
+  index(e)
   const children = (n: Node): { node: Node; target: Node; isLink: boolean }[] => [
     ...kids(n, 'selectionEntries', 'selectionEntry').map((x) => ({ node: x, target: x, isLink: false })),
     ...kids(n, 'selectionEntryGroups', 'selectionEntryGroup').map((x) => ({ node: x, target: x, isLink: false })),
     ...kids(n, 'entryLinks', 'entryLink').flatMap((l) => {
-      const t = linkable.get(attr(l, 'targetId') ?? '')
+      const t = linkable.get(attr(l, 'targetId') ?? '') ?? local.get(attr(l, 'targetId') ?? '')
       return t && !hidden(l) ? [{ node: l, target: t, isLink: true }] : []
     }),
   ]
@@ -231,13 +240,13 @@ function readModels(e: Node, linkable: Map<string, Node>): ModelType[] {
     const fixed: string[] = []
     const choices: LoadoutChoice[] = []
     const visit = (n: Node) => {
-      for (const { node, target } of children(n)) {
+      for (const { node, target, isLink } of children(n)) {
         const name = attr(node, 'name') ?? ''
         if (hidden(node) || NOT_WARGEAR(name) || NOT_WARGEAR_GROUP.test(name)) continue
         const [min, max] = parentLimits(node, Infinity)
         if (attr(target, 'type') === 'upgrade') {
           if (min >= 1 && min === max) fixed.push(name)
-          else choices.push({ id: attr(node, 'id')!, name, min, max: Number.isFinite(max) ? max : 1, options: [{ id: attr(node, 'id')!, name, max: Number.isFinite(max) ? max : 1 }] })
+          else choices.push({ id: attr(node, 'id')!, name, min, max: Number.isFinite(max) ? max : 1, options: [{ id: attr(node, 'id')!, ...(isLink ? { targetId: attr(target, 'id')! } : {}), name, max: Number.isFinite(max) ? max : 1 }] })
         } else if (attr(target, 'type') === undefined) {
           const hasLimits = kids(node, 'constraints', 'constraint').some((k) => attr(k, 'field') === 'selections') || kids(target, 'constraints', 'constraint').some((k) => attr(k, 'field') === 'selections')
           if (!hasLimits) {
