@@ -6,12 +6,13 @@ import type { ArmyList } from '../../domain/lists/types'
 import type { PaintDef } from '../../domain/paints/types'
 import { PaintRows } from '../paints/MissingPaintsSheet'
 import type { UnitCard } from '../../domain/lists/cards'
-import { DatasheetCards } from './DatasheetCards'
+import { DatasheetCards, KeywordLegend } from './DatasheetCards'
+import type { Rule } from '../../domain/catalogue/types'
 
 /** Printable buy list. Rendered off-screen and printed (or saved as PDF from the print dialog), like recipe cards. */
 const STATUS: Record<PaintStatus, string> = { buy: 'to buy', unpainted: 'to paint', painted: 'painted ✓' }
 
-export function BuyListSheet({ list, buy, plan, paintById, subtitle, cards, paints = true, buyRows = true, onDone }: { list: ArmyList; buy: BuyList; plan: PaintPlan; paintById: Map<string, PaintDef>; subtitle: string; cards?: UnitCard[]; paints?: boolean; buyRows?: boolean; onDone: () => void }) {
+export function BuyListSheet({ list, buy, plan, paintById, subtitle, cards, legend = [], paints = true, buyRows = true, onDone }: { list: ArmyList; buy: BuyList; plan: PaintPlan; paintById: Map<string, PaintDef>; subtitle: string; cards?: UnitCard[]; legend?: Rule[]; paints?: boolean; buyRows?: boolean; onDone: () => void }) {
   const [date] = useState(() => new Date().toLocaleDateString())
   useEffect(() => {
     const done = () => onDone()
@@ -69,6 +70,7 @@ export function BuyListSheet({ list, buy, plan, paintById, subtitle, cards, pain
         <section style={{ breakBefore: 'page' }}>
           <h1 className="text-2xl font-bold">Datasheets – {list.name}</h1>
           <DatasheetCards cards={cards} />
+          <KeywordLegend rules={legend} />
         </section>
       )}
       <p className="mt-6 text-xs">MiniTracker · {date}</p>

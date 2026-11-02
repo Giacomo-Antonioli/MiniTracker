@@ -1,5 +1,6 @@
 import { pointsFor } from '../catalogue/points'
-import type { Catalogue, Datasheet, WeaponProfile } from '../catalogue/types'
+import { ruleForKeyword } from '../catalogue/rules'
+import type { Catalogue, Datasheet, Rule, WeaponProfile } from '../catalogue/types'
 import type { OwnedUnit } from '../collection/types'
 import { effectiveLoadout } from './loadout'
 import type { ArmyList, ListEntry, LoadoutRow } from './types'
@@ -67,4 +68,26 @@ export function unitCards(list: ArmyList, cat: Catalogue, linkedTo: (e: ListEntr
     cards.set(d.id, card)
   }
   return [...cards.values()].map(({ carried, ...c }) => ({ ...c, weapons: (c.datasheet.weapons ?? []).filter((w) => carried.has(w)) }))
+}
+
+/**
+ * Rules behind every keyword on the cards (core rules, weapon abilities like "Sustained Hits 1",
+ * unit keywords that have a rule), once each and sorted by name, for a legend.
+ */
+export function keywordLegend(cards: UnitCard[], rules: Rule[]): Rule[] {
+  const words = new Set<string>()
+  for (const c of cards) {
+    c.rules.forEach((r) => words.add(r))
+    c.datasheet.keywords.forEach((k) => words.add(k))
+    for (const w of c.weapons) {
+      const kw = w.values.find(([k]) => k === 'Keywords')?.[1] ?? ''
+      kw.split(',').map((x) => x.trim()).filter((x) => x && x !== '-').forEach((x) => words.add(x))
+    }
+  }
+  const found = new Map<string, Rule>()
+  for (const w of words) {
+    const r = ruleForKeyword(rules, w)
+    if (r && r.text) found.set(r.id, r)
+  }
+  return [...found.values()].sort((a, b) => a.name.localeCompare(b.name))
 }

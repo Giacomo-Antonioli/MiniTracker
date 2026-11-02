@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { catalogueFor, ctx, useStore } from '../../app/store'
 import { EDITIONS } from '../../data/catalogue/fetch'
-import { unitCards } from '../../domain/lists/cards'
+import { keywordLegend, unitCards } from '../../domain/lists/cards'
 import { ArmyPrintDialog, ArmySheet, type ArmyPrintOptions } from './ArmySheet'
 import { ownedByDatasheet } from '../../domain/catalogue/owned'
 import type { Catalogue, Datasheet } from '../../domain/catalogue/types'
@@ -622,6 +622,7 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
             paintById={paintById}
             subtitle={subtitle}
             cards={withCards ? unitCards(printing, cat, linkedTo) : undefined}
+            legend={withCards ? keywordLegend(unitCards(printing, cat, linkedTo), cat.rules ?? []) : undefined}
             paints={withPaints}
             buyRows={withBuy}
             onDone={() => setPrinting(null)}

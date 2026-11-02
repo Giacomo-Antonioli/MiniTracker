@@ -2,7 +2,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import type { Datasheet } from '../../domain/catalogue/types'
-import { DatasheetCards } from './DatasheetCards'
+import { DatasheetCards, KeywordLegend } from './DatasheetCards'
 
 describe('DatasheetCards', () => {
   it('prints stats per model, weapon tables, rules, abilities with bold text, and enhancements', () => {
@@ -21,5 +21,14 @@ describe('DatasheetCards', () => {
     expect(card).toHaveTextContent('Core: Deep Strike')
     expect(within(card).getByText('put').tagName).toBe('B')
     expect(card).not.toHaveTextContent('Faction:')
+  })
+
+  it('prints a legend of the rules behind the keywords, and nothing when there are none', () => {
+    const { container } = render(<KeywordLegend rules={[]} />)
+    expect(container).toBeEmptyDOMElement()
+    render(<KeywordLegend rules={[{ id: 'a', name: 'Assault', text: 'Can shoot after **Advancing**, ^^Infantry^^ too.', kind: 'core' }]} />)
+    const legend = screen.getByLabelText('Keyword legend')
+    expect(legend).toHaveTextContent('Rules and keywordsAssaultCan shoot after Advancing, Infantry too.')
+    expect(within(legend).getByText('Advancing').tagName).toBe('B')
   })
 })

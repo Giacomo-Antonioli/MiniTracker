@@ -3,12 +3,12 @@ import { createPortal } from 'react-dom'
 import { useStore } from '../../app/store'
 import { EDITIONS } from '../../data/catalogue/fetch'
 import type { Catalogue } from '../../domain/catalogue/types'
-import { unitCards } from '../../domain/lists/cards'
+import { keywordLegend, unitCards } from '../../domain/lists/cards'
 import { listOwnership } from '../../domain/lists/ownership'
 import { listPoints } from '../../domain/lists/points'
 import { battleSizes } from '../../domain/lists/rules'
 import type { ArmyList } from '../../domain/lists/types'
-import { DatasheetCards } from './DatasheetCards'
+import { DatasheetCards, KeywordLegend } from './DatasheetCards'
 
 export interface ArmyPrintOptions {
   cards: boolean
@@ -79,7 +79,15 @@ export function ArmySheet({ list, cat, options, onDone }: { list: ArmyList; cat:
       {options.ownership && <p className="mt-2 text-sm">{own.missingModels ? `${own.missingModels} models missing` : 'Every model owned'} · {own.unpaintedModels} to paint</p>}
       {options.cards && (
         <section style={{ breakBefore: 'page' }}>
-          <DatasheetCards cards={unitCards(list, cat, (e) => linkedTo(e.id))} />
+          {(() => {
+            const cards = unitCards(list, cat, (e) => linkedTo(e.id))
+            return (
+              <>
+                <DatasheetCards cards={cards} />
+                <KeywordLegend rules={keywordLegend(cards, cat.rules ?? [])} />
+              </>
+            )
+          })()}
         </section>
       )}
       <p className="mt-6 text-xs">MiniTracker · {date}</p>

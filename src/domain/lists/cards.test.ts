@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Catalogue, Datasheet } from '../catalogue/types'
-import { carriedWeapons, unitCards } from './cards'
+import { carriedWeapons, keywordLegend, unitCards } from './cards'
 import type { ArmyList } from './types'
 
 const w = (name: string, kind: 'ranged' | 'melee' = 'ranged') => ({ name, kind, values: [['A', '1']] as [string, string][] })
@@ -45,5 +45,21 @@ describe('unit cards', () => {
     expect(cards[0].rules).toEqual(['Deep Strike'])
     expect(cards[1].entries).toEqual([{ models: 1, points: 90, warlord: true, enhancement: { name: 'Charm', points: 15 } }])
     expect(cards[1].rules).toEqual([])
+  })
+})
+
+describe('keyword legend', () => {
+  it('collects the rules behind core rules, weapon keywords and unit keywords, once each', () => {
+    const rules = [
+      { id: 'ds', name: 'Deep Strike', text: 'Arrive later.', kind: 'core' },
+      { id: 'sh', name: 'Sustained Hits', text: 'Extra hits.', kind: 'core' },
+      { id: 'as', name: 'Assault', text: 'Shoot after advancing.', kind: 'core' },
+      { id: 'inf', name: 'Infantry', text: '', kind: 'core' },
+      { id: 'unused', name: 'Lone Operative', text: 'x', kind: 'core' },
+    ] as never
+    const weapon = (kw: string) => ({ name: 'g', kind: 'ranged', values: [['A', '1'], ['Keywords', kw]] })
+    const card = (keywords: string[], weapons: object[], r: string[]) => ({ datasheet: { keywords }, entries: [], abilities: [], rules: r, weapons }) as never
+    const legend = keywordLegend([card(['Infantry'], [weapon('Assault, Sustained Hits 1')], ['Deep Strike']), card([], [weapon('-'), weapon('Sustained Hits 2')], [])], rules)
+    expect(legend.map((r) => r.name)).toEqual(['Assault', 'Deep Strike', 'Sustained Hits'])
   })
 })

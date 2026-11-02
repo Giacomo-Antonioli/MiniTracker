@@ -9,7 +9,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ### Added
 - Print the whole army (📄 Army PDF in the list header, no paints): roster with points, Warlord, enhancements and leaders, plus datasheet cards. Owned and painted counts are added only if you tick them.
-- Datasheet cards in the army PDF (#98): one card per unit type with points, stat lines, the ranged and melee weapons its loadout carries, core rules, abilities with their text and keywords. Checkboxes in the Make PDF dialog turn the models to buy, the scheme paints and the cards on or off. The buy list and the list's missing paints are now collapsible.
+- Datasheet cards in the army PDF (#98): one card per unit type with points, stat lines, the ranged and melee weapons its loadout carries, core rules, abilities with their text and keywords, followed by a legend explaining every rule and weapon keyword on the cards (Deep Strike, Sustained Hits, Assault…). Checkboxes in the Make PDF dialog turn the models to buy, the scheme paints and the cards on or off. The buy list and the list's missing paints are now collapsible.
 
 ## [0.6.0] - 2026-11-02
 

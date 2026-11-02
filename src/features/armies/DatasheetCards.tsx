@@ -1,9 +1,28 @@
-import type { WeaponProfile } from '../../domain/catalogue/types'
+import { formatRuleText } from '../../domain/catalogue/rules'
+import type { Rule, WeaponProfile } from '../../domain/catalogue/types'
 import type { UnitCard } from '../../domain/lists/cards'
 
 /** Rule text from the data: **bold** markers become bold. */
 function RuleText({ text }: { text: string }) {
-  return <>{text.split(/(\*\*[^*]+\*\*)/).map((p, i) => (p.startsWith('**') ? <b key={i}>{p.slice(2, -2)}</b> : p))}</>
+  return <>{formatRuleText(text).map((p, i) => (p.bold ? <b key={i}>{p.text}</b> : p.text))}</>
+}
+
+/** What each rule and keyword on the cards means. */
+export function KeywordLegend({ rules }: { rules: Rule[] }) {
+  if (!rules.length) return null
+  return (
+    <section aria-label="Keyword legend" className="mt-4" style={{ breakInside: 'avoid-page' }}>
+      <h2 className="border-b-2 border-black text-lg font-bold">Rules and keywords</h2>
+      <dl className="mt-1 grid gap-1 text-[8.5pt]" style={{ columns: 2, columnGap: '6mm' }}>
+        {rules.map((r) => (
+          <div key={r.id} style={{ breakInside: 'avoid' }} className="mb-1">
+            <dt className="font-bold uppercase">{r.name}</dt>
+            <dd><RuleText text={r.text} /></dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  )
 }
 
 function Weapons({ title, rows }: { title: string; rows: WeaponProfile[] }) {
