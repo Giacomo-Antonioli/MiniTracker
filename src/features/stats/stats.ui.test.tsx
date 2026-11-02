@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from '../../app/App'
@@ -31,7 +31,8 @@ describe('Stats', () => {
     await appDb.units.put(createUnit({ customName: 'Other', factionName: 'Orks', groups: [{ count: 2, status: 'built' }] }, { now, newId: () => `o${++n}` }))
     const user = userEvent.setup()
     render(<App />)
-    await screen.findByRole('button', { name: 'Stats' })
+    // Set the catalogue only after the app has loaded, or loading replaces it.
+    await waitFor(() => expect(useStore.getState().ready).toBe(true))
     useStore.setState({ catalogue })
     await user.click(screen.getByRole('button', { name: 'Stats' }))
 

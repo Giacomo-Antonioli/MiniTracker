@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { catalogueFor, ctx, useStore } from '../../app/store'
 import { EDITIONS } from '../../data/catalogue/fetch'
+import { keywordLegend, unitCards } from '../../domain/lists/cards'
+import { ArmyPrintDialog, ArmySheet, type ArmyPrintOptions } from './ArmySheet'
 import { ownedByDatasheet } from '../../domain/catalogue/owned'
 import type { Catalogue, Datasheet } from '../../domain/catalogue/types'
 import type { OwnedUnit } from '../../domain/collection/types'
@@ -16,7 +18,7 @@ import { isGone, setFlags } from '../../domain/collection/pipeline'
 import { BuyListSheet } from './BuyListSheet'
 import { listToJson, listToText } from '../../domain/lists/io'
 import { evalLimit } from '../../domain/lists/conditions'
-import { addUnit, battleSizes, canLead, checkList, enhancementAllowed, legalUnits, listCounter } from '../../domain/lists/rules'
+import { addUnit, ISSUE_HELP, battleSizes, canLead, checkList, enhancementAllowed, legalUnits, listCounter } from '../../domain/lists/rules'
 import type { ArmyList, ListEntry, ListStatus, LoadoutRow } from '../../domain/lists/types'
 import type { PaintDef } from '../../domain/paints/types'
 import { AddToShoppingButton } from '../shopping/AddToShoppingDialog'
@@ -76,6 +78,8 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
     [list, cat],
   )
   const set = (patch: Partial<ArmyList>) => onSave({ ...list, ...patch, updatedAt: new Date().toISOString() })
+  const [printAsk, setPrintAsk] = useState(false)
+  const [printOpts, setPrintOpts] = useState<ArmyPrintOptions | null>(null)
   const factionLocked = list.entries.length > 0
   const [name, setName] = useState(list.name)
 
@@ -143,7 +147,20 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
         <option value="playable">Playable</option>
       </select>
       {cat && list.factionId && <ArmySchemeSelect list={list} factionName={cat.factions.find((f) => f.id === list.factionId)?.name} onChange={(schemeId) => set({ schemeId })} />}
+      {cat && list.entries.length > 0 && <button className="btn" title="Roster and datasheet cards, no paints. Choose “Save as PDF” in the print dialog." onClick={() => setPrintAsk(true)}>📄 Army PDF</button>}
       <ExportMenu list={list} cat={cat} />
+      {printAsk && cat && (
+        <div className="relative">
+          <ArmyPrintDialog
+            onCancel={() => setPrintAsk(false)}
+            onPrint={(o) => {
+              setPrintAsk(false)
+              setPrintOpts(o)
+            }}
+          />
+        </div>
+      )}
+      {printOpts && cat && <ArmySheet list={list} cat={cat} options={printOpts} onDone={() => setPrintOpts(null)} />}
       <button className="btn btn-danger ml-auto" onClick={onDelete}>Delete list</button>
     </header>
   )
@@ -186,9 +203,12 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   const linkedElsewhere = (entryId: string) => new Set(list.entries.filter((x) => x.id !== entryId && x.ownedUnitId).map((x) => x.ownedUnitId))
   const issues = useMemo(() => (cat.muster ? checkList(list, cat) : []), [list, cat])
   const flagged = new Set(issues.flatMap((i) => i.entryIds))
+  const noWarlord = !list.entries.some((e) => e.warlord)
+  const characters = list.entries.filter((e) => sheets.get(e.datasheetId)?.keywords.includes('Character')).length
 
   const edit = (id: string, patch: Partial<Omit<ListEntry, 'id'>>) => onSave(updateEntry(list, id, patch, ctx()))
-  const setWarlord = (id: string) => onSave({ ...list, entries: list.entries.map((e) => ({ ...e, warlord: e.id === id ? !e.warlord : e.warlord })), updatedAt: ctx().now })
+  // One Warlord per army: choosing a unit moves the ★ there; clicking it again clears it.
+  const setWarlord = (id: string) => onSave({ ...list, entries: list.entries.map((e) => ({ ...e, warlord: e.id === id ? !e.warlord : false })), updatedAt: ctx().now })
   const leadable = list.entries.filter((e) => !sheets.get(e.datasheetId)?.keywords.includes('Character'))
   // With leader data (catalogue format 6) a Leader is offered only the units it can lead; older catalogues offer all.
   const hasLeaderData = cat.datasheets.some((d) => d.leads)
@@ -227,6 +247,9 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
         {cat.detachments && <DetachmentBar list={list} cat={cat} onSave={onSave} />}
         <section className={`panel grid gap-1 p-3 ${dropping ? 'border-accent' : ''}`} aria-label="List">
           {list.entries.length === 0 && <p className="text-muted">No units yet. Add them from the left: +, double-click, or drag them here.</p>}
+          {list.entries.length > 0 && noWarlord && (
+            <p className="text-sm text-accent" role="status">{characters ? '★ Choose your Warlord: click the star of a highlighted Character.' : '★ Add a Character to choose your Warlord.'}</p>
+          )}
           {list.entries.map((e) => {
             const d = sheets.get(e.datasheetId)
             const o = own.byEntry.get(e.id)!
@@ -241,9 +264,23 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 <button className="w-5 text-muted" aria-label={`Details: ${d?.name ?? 'unit'}`} aria-expanded={openRows.has(e.id)} onClick={() => toggleRow(e.id)}>
                   {openRows.has(e.id) ? '▾' : '▸'}
                 </button>
-                <button className={`w-6 ${e.warlord ? 'text-accent' : 'text-muted/50'}`} aria-label={`Warlord: ${d?.name ?? 'unit'}`} aria-pressed={!!e.warlord} onClick={() => setWarlord(e.id)} title="Warlord">
-                  ★
-                </button>
+                {(() => {
+                  // Only Characters can be the Warlord; until one is chosen, the candidates are highlighted.
+                  const can = !d || d.keywords.includes('Character')
+                  const look = e.warlord ? 'text-accent' : !can ? 'cursor-not-allowed text-muted/20' : noWarlord ? 'rounded text-accent ring-1 ring-accent/70' : 'text-muted/50 hover:text-accent'
+                  return (
+                    <button
+                      className={`w-6 ${look}`}
+                      aria-label={`Warlord: ${d?.name ?? 'unit'}`}
+                      aria-pressed={!!e.warlord}
+                      disabled={!can && !e.warlord}
+                      onClick={() => setWarlord(e.id)}
+                      title={e.warlord ? 'Warlord (click to clear)' : can ? 'Make Warlord' : 'Only a Character can be the Warlord'}
+                    >
+                      ★
+                    </button>
+                  )
+                })()}
                 <span className="min-w-0 flex-1 truncate">{d?.name ?? 'Unknown unit'}</span>
                 {isChar && !d?.keywords.includes('Epic Hero') && cat.detachments && (offered.length > 0 || e.enhancementId) && (
                   <select
@@ -330,6 +367,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 <button
                   key={k}
                   className="text-left text-sm hover:text-accent"
+                  title={ISSUE_HELP[i.code]}
                   onClick={() => setHighlight(highlight === i.entryIds ? [] : i.entryIds)}
                 >
                   ⚠ {i.message}
@@ -337,7 +375,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
               ))
             )}
         <CollectionPanel own={own} plan={plan} missingPaints={missingPaints} toApply={schemesToApply(list, schemeCtx)} />
-        <BuyPanel list={list} rows={buyList(list, sheets, own, points)} paints={missingPaints} schemeCtx={schemeCtx} paintById={paintById} onSave={onSave} subtitle={[cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name].filter(Boolean).join(' · ')} />
+        <BuyPanel list={list} cat={cat} linkedTo={(e) => (own.byEntry.get(e.id)?.from ?? []).map((f) => units.find((u) => u.id === f.unitId)).filter((u): u is NonNullable<typeof u> => !!u)} rows={buyList(list, sheets, own, points)} paints={missingPaints} schemeCtx={schemeCtx} paintById={paintById} onSave={onSave} subtitle={[cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name].filter(Boolean).join(' · ')} />
           </section>
         )}
       </div>
@@ -484,6 +522,7 @@ function AddPanel({ list, cat, onAdd, choose, onCancelChoose, onSave }: { list: 
               onDoubleClick={() => add(d)}
             >
               <span className="min-w-0 flex-1 truncate">
+                {d.keywords.includes('Character') && <span className="mr-1 text-accent/80" title="Character: can be your Warlord" aria-label="Can be Warlord">★</span>}
                 {d.name}
                 {owned.has(d.id) && <span className="ml-1 text-accent" title={`You own ${owned.get(d.id)!.models} models`}>✓</span>}
               </span>
@@ -537,8 +576,11 @@ function DetachmentBar({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; 
   )
 }
 
-function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSave }: { list: ArmyList; rows: ReturnType<typeof buyList>; paints: BuyPaint[]; subtitle: string; schemeCtx: SchemeContext; paintById: Map<string, PaintDef>; onSave: (l: ArmyList) => void }) {
+function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSave, cat, linkedTo }: { list: ArmyList; rows: ReturnType<typeof buyList>; paints: BuyPaint[]; subtitle: string; schemeCtx: SchemeContext; paintById: Map<string, PaintDef>; onSave: (l: ArmyList) => void; cat: Catalogue; linkedTo: (e: ListEntry) => OwnedUnit[] }) {
   const { paintStock } = useStore()
+  const [withCards, setWithCards] = useState(true)
+  const [withPaints, setWithPaints] = useState(true)
+  const [withBuy, setWithBuy] = useState(true)
   const [copied, setCopied] = useState('')
   const [asking, setAsking] = useState(false)
   const [printing, setPrinting] = useState<ArmyList | null>(null)
@@ -579,6 +621,10 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
             plan={paintPlan(printing, schemeCtx, paintStock)}
             paintById={paintById}
             subtitle={subtitle}
+            cards={withCards ? unitCards(printing, cat, linkedTo) : undefined}
+            legend={withCards ? keywordLegend(unitCards(printing, cat, linkedTo), cat.rules ?? []) : undefined}
+            paints={withPaints}
+            buyRows={withBuy}
             onDone={() => setPrinting(null)}
           />
         )}
@@ -588,6 +634,12 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
         <PdfDialog
           list={list}
           c={schemeCtx}
+          withCards={withCards}
+          onCards={setWithCards}
+          withPaints={withPaints}
+          onPaints={setWithPaints}
+          withBuy={withBuy}
+          onBuy={setWithBuy}
           onCancel={() => setAsking(false)}
           onMake={(l) => {
             setAsking(false)
@@ -596,36 +648,43 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
           }}
         />
       )}
-      {b.rows.length > 0 && (
-        <table className="text-sm">
-          <thead className="text-left text-xs text-muted">
-            <tr><th className="font-normal">Unit</th><th className="text-right font-normal">Models</th><th className="text-right font-normal">Points in list</th></tr>
-          </thead>
-          <tbody>
-            {b.rows.map((r) => (
-              <tr key={r.datasheetId}>
-                <td>{r.name}{r.units > 1 ? <span className="text-muted"> ×{r.units}</span> : null}</td>
-                <td className="text-right">{r.missingModels}</td>
-                <td className="text-right">{r.points}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-      {paints.length > 0 && (
-        <table className="text-sm" aria-label="Paints to buy">
-          <thead className="text-left text-xs text-muted">
-            <tr><th className="font-normal">Paint</th><th className="text-right font-normal">For schemes</th></tr>
-          </thead>
-          <tbody>
-            {paints.map((x) => (
-              <tr key={x.name}>
-                <td>{x.name}</td>
-                <td className="text-right text-muted">{x.schemes.join(', ')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {(b.rows.length > 0 || paints.length > 0) && (
+        <details className="text-sm">
+          <summary className="cursor-pointer text-muted hover:text-accent">Show what to buy</summary>
+          <div className="mt-1 grid gap-2">
+            {b.rows.length > 0 && (
+              <table className="text-sm">
+                <thead className="text-left text-xs text-muted">
+                  <tr><th className="font-normal">Unit</th><th className="text-right font-normal">Models</th><th className="text-right font-normal">Points in list</th></tr>
+                </thead>
+                <tbody>
+                  {b.rows.map((r) => (
+                    <tr key={r.datasheetId}>
+                      <td>{r.name}{r.units > 1 ? <span className="text-muted"> ×{r.units}</span> : null}</td>
+                      <td className="text-right">{r.missingModels}</td>
+                      <td className="text-right">{r.points}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {paints.length > 0 && (
+              <table className="text-sm" aria-label="Paints to buy">
+                <thead className="text-left text-xs text-muted">
+                  <tr><th className="font-normal">Paint</th><th className="text-right font-normal">For schemes</th></tr>
+                </thead>
+                <tbody>
+                  {paints.map((x) => (
+                    <tr key={x.name}>
+                      <td>{x.name}</td>
+                      <td className="text-right text-muted">{x.schemes.join(', ')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </details>
       )}
     </section>
   )
@@ -668,14 +727,14 @@ function CollectionPanel({ own, plan, missingPaints, toApply }: { own: ReturnTyp
         </button>
       )}
       {missingPaints.length > 0 && (
-        <div className="grid gap-1 text-sm">
-          <p className="text-muted">Paints missing for the list's schemes</p>
-          <ul className="grid gap-0.5">
+        <details className="text-sm">
+          <summary className="cursor-pointer text-muted hover:text-accent">Paints missing for the list's schemes ({missingPaints.length})</summary>
+          <ul className="mt-1 grid gap-0.5">
             {missingPaints.map((m) => (
               <li key={m.name}>{m.name} <span className="text-xs text-muted">({m.schemes.join(', ')})</span></li>
             ))}
           </ul>
-        </div>
+        </details>
       )}
     </section>
   )
@@ -753,7 +812,7 @@ function ArmySchemeSelect({ list, factionName, onChange, label = 'Army scheme' }
 }
 
 /** Asked before making the PDF: army scheme, and optionally a scheme per unit. Choices are saved to the list. */
-function PdfDialog({ list, c, onCancel, onMake }: { list: ArmyList; c: SchemeContext; onCancel: () => void; onMake: (l: ArmyList) => void }) {
+function PdfDialog({ list, c, withCards, onCards, withPaints, onPaints, withBuy, onBuy, onCancel, onMake }: { list: ArmyList; c: SchemeContext; withCards: boolean; onCards: (v: boolean) => void; withPaints: boolean; onPaints: (v: boolean) => void; withBuy: boolean; onBuy: (v: boolean) => void; onCancel: () => void; onMake: (l: ArmyList) => void }) {
   const [draft, setDraft] = useState(list)
   const [perUnit, setPerUnit] = useState(list.entries.some((e) => e.schemeId))
   return (
@@ -773,6 +832,15 @@ function PdfDialog({ list, c, onCancel, onMake }: { list: ArmyList; c: SchemeCon
           ))}
         </div>
       )}
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={withBuy} onChange={(e) => onBuy(e.target.checked)} /> Include the models to buy
+      </label>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={withCards} onChange={(e) => onCards(e.target.checked)} /> Include datasheet cards
+      </label>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={withPaints} onChange={(e) => onPaints(e.target.checked)} /> Include paints for the schemes
+      </label>
       <div className="flex gap-2">
         <button className="btn btn-primary" onClick={() => onMake(perUnit ? draft : { ...draft, entries: draft.entries.map((x) => ({ ...x, schemeId: undefined })) })}>📄 Make PDF</button>
         <button className="btn" onClick={onCancel}>Cancel</button>

@@ -45,6 +45,33 @@ export type IssueCode =
   | 'leaders'
   | 'loadout'
 
+/** Why each check exists, shown when hovering a warning. */
+export const ISSUE_HELP: Record<IssueCode, string> = {
+  'battle-size': 'The battle size sets the points limit, the detachment points and other limits. Pick one the catalogue knows.',
+  'unknown-unit': 'This unit is not in the installed catalogue (renamed or removed in an update). Replace it or update the catalogue.',
+  'unit-size': 'Each datasheet allows a minimum and maximum number of models; points depend on the size.',
+  points: 'The total of units and enhancements must not go over the points limit of the battle size.',
+  'unit-limit': 'Most units can be taken a limited number of times (usually 3, Battleline and Dedicated Transports more, Epic Heroes once). Some limits change with the battle size.',
+  'keyword-minimum': 'Some battle sizes require a minimum number of units with a keyword, for example at least one Character.',
+  'no-warlord': 'Every army has exactly one Warlord: one Character model, chosen when you muster the army. Click ★ on a Character.',
+  warlords: 'Only one model in the army can be the Warlord. Keep the ★ on one unit.',
+  'warlord-not-character': 'The Warlord must be a Character model.',
+  'no-detachment': 'Every army needs a detachment: it gives the army rule, the stratagems and the enhancements you can take.',
+  detachments: 'The number of detachments you can take depends on the battle size.',
+  'detachment-points': 'Each detachment costs detachment points (DP); the battle size sets how many you can spend.',
+  'detachment-faction': 'A detachment can only be used by the factions it belongs to.',
+  'unknown-detachment': 'This detachment is not in the installed catalogue. Pick another or update the catalogue.',
+  enhancements: 'The battle size limits how many enhancements the army can take.',
+  'enhancement-detachment': 'Enhancements come from a detachment: you can only take those of the detachments in your army.',
+  'enhancement-twice': 'Each enhancement can be taken once per army.',
+  'enhancement-unit': 'Enhancements go on Character models (not Epic Heroes) that meet the enhancement\'s own requirements.',
+  'unknown-enhancement': 'This enhancement is not in the installed catalogue. Pick another or update the catalogue.',
+  'not-a-leader': 'Only units with the Leader ability can be attached to another unit.',
+  'leader-target': 'A Leader can only join the units listed on its datasheet.',
+  leaders: 'A unit can usually have only one Leader attached (some datasheets allow two).',
+  loadout: 'Wargear choices must fit the datasheet: model counts per type and how many of each option.',
+}
+
 export interface ListIssue {
   code: IssueCode
   message: string
