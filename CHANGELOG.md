@@ -5,7 +5,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Changed
-- One Warlord per army, and only a Character: ★ is disabled on other units, moves the Warlord to the unit you click (click again to clear), and until one is chosen the Characters' stars are highlighted with a hint above the list. Hovering a list warning explains the rule behind it.
+- One Warlord per army, and only a Character: ★ is disabled on other units, moves the Warlord to the unit you click (click again to clear), and until one is chosen the Characters' stars are highlighted with a hint above the list. Characters are starred in the Add units list too. Hovering a list warning explains the rule behind it.
 
 ### Added
 - Print the whole army (📄 Army PDF in the list header, no paints): roster with points, Warlord, enhancements and leaders, plus datasheet cards. Owned and painted counts are added only if you tick them.

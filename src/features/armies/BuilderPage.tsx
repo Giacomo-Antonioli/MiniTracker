@@ -522,6 +522,7 @@ function AddPanel({ list, cat, onAdd, choose, onCancelChoose, onSave }: { list: 
               onDoubleClick={() => add(d)}
             >
               <span className="min-w-0 flex-1 truncate">
+                {d.keywords.includes('Character') && <span className="mr-1 text-accent/80" title="Character: can be your Warlord" aria-label="Can be Warlord">★</span>}
                 {d.name}
                 {owned.has(d.id) && <span className="ml-1 text-accent" title={`You own ${owned.get(d.id)!.models} models`}>✓</span>}
               </span>

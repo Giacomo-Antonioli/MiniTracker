@@ -47,6 +47,9 @@ describe('Armies', () => {
     expect(within(add).queryByRole('button', { name: 'Add Line Troopers' })).toBeNull()
     await user.click(within(add).getByLabelText('Not owned'))
     expect(within(add).getByRole('button', { name: 'Add Line Troopers' })).toBeInTheDocument()
+    // Characters (possible Warlords) are starred, owned or not.
+    expect(within(add).getByRole('button', { name: 'Add Big Walker' }).parentElement!.querySelector('[aria-label="Can be Warlord"]')).not.toBeNull()
+    expect(within(add).getByRole('button', { name: 'Add Line Troopers' }).parentElement!.querySelector('[aria-label="Can be Warlord"]')).toBeNull()
 
     // The first unit sets the faction; a unit in two factions asks which one.
     await user.click(within(add).getByRole('button', { name: 'Add Big Walker' }))
