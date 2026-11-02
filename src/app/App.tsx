@@ -14,7 +14,7 @@ import { useStore } from './store'
 
 type Page = 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'settings'
 
-const SOON = ['Games', 'Shopping']
+const SOON = ['Games']
 
 export default function App() {
   const { ready, load, theme } = useStore()
