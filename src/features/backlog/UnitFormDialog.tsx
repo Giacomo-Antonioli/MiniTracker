@@ -7,9 +7,7 @@ import type { Datasheet } from '../../domain/catalogue/types'
 import { createUnit } from '../../domain/collection/ownedUnit'
 import type { Lifecycle, Link, OwnedUnit } from '../../domain/collection/types'
 import { schemesForUnit } from '../../domain/schemes/match'
-import { ORIGIN_LABEL } from '../schemes/origin'
-import { ColourStrip } from '../schemes/ColourStrip'
-import { colourStrip } from '../../domain/schemes/scheme'
+import { SchemePicker } from '../schemes/SchemePicker'
 import { Combobox, type ComboOption } from '../../ui/Combobox'
 import { Dialog } from '../../ui/Dialog'
 import { InfoTip } from '../../ui/InfoTip'
@@ -225,34 +223,24 @@ export function UnitFormDialog({
           </button>
         </fieldset>
 
-        <label className="grid gap-1">
+        <div className="grid gap-1">
           <span className="text-sm text-muted">Paint scheme</span>
-          <select
-            className="input"
-            value={effectiveScheme ?? ''}
-            onChange={(e) => {
-              setSchemeTouched(true)
-              setSchemeId(e.target.value || undefined)
-            }}
-          >
-            <option value="">None</option>
-            {schemesForUnit(
+          <SchemePicker
+            label="Paint scheme"
+            value={effectiveScheme}
+            paints={paints}
+            isDefault={(x) => schemeDefaults[x.factionName ?? ''] === x.id}
+            groups={schemesForUnit(
               schemes,
               { ...(unit ?? createUnit({ customName: name.trim() || 'unit', groups: [] }, { now: '', newId: () => '' })), customName: name, factionName: faction.trim() || undefined, schemeId: effectiveScheme },
               datasheet,
-            ).map((g) => (
-              <optgroup key={g.origin} label={ORIGIN_LABEL[g.origin]}>
-                {g.schemes.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                    {schemeDefaults[s.factionName ?? ''] === s.id ? ' ⭐' : ''}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-          {chosen && <span className="mt-1 block" title={chosen.name}><ColourStrip colours={colourStrip(chosen, paints)} /></span>}
-        </label>
+            )}
+            onChange={(id) => {
+              setSchemeTouched(true)
+              setSchemeId(id)
+            }}
+          />
+        </div>
 
         <fieldset className="grid gap-2">
           <legend className="mb-1 text-sm text-muted">Tutorials and guides</legend>
