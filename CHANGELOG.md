@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-02
+
 ### Added
 - More stats: records (best month, week and day, longest streak, average days from Built to Painted), a year activity calendar, models moved into each stage, average time per stage, painted points over time, pile age with the oldest unpainted units, painted models by role, money spent from the shopping list, and the paints your units' schemes use most.
 - Home page (#117), the new start page: painted this month and streak, pile, net pile this year and finish estimate; cards to continue painting the last units you worked on (with a quick move), a year activity calendar, records, the oldest units in the pile, factions closest to done, recent activity, the last 6 months, and what's left to buy. New users get a prompt to add their first unit. Settings → Appearance → Start page switches back to the Backlog. ✎ Customise reorders (drag or arrows), resizes (S/M/L), removes and adds cards (points painted, pile age, stage flow, spending, paint usage, roles), with a few options per card; the layout is saved with your data and backups.
@@ -151,7 +153,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.5...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.5...v0.6.0
 [0.5.5]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.2...v0.5.3

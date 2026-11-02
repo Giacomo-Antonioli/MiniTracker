@@ -26,6 +26,10 @@ No account, no server: your collection stays in your browser. Install it from th
 - **Backup.** Export everything to one JSON file; restore it on any device.
 - **Themes.** *Grimdark* (modern dark) and *Forum 2005* (old-school fantasy forum).
 
+**New in v0.6**
+
+Home dashboard, Stats page and customisable cards
+
 **New in v0.2**
 
 - **Unit catalogue.** Download every Warhammer 40,000 datasheet (10th and/or 11th edition) (unit sizes, points, keywords, wargear, abilities) from BSData in Settings → Catalogue data. The data is downloaded and converted on your device; MiniTracker never hosts it.
