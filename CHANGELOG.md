@@ -5,6 +5,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Added
+- Shopping lists: a new Shopping tab with a main list of everything to buy and your own lists (e.g. per shop) holding some of it. Add models and paints from an army's buy list, "Paints to buy" or the paint wishlist, choosing which lists they go on, or type in anything else. Set quantity, shop and price; see the total; copy as text or print / save as PDF. Ticking a paint as bought can mark it ordered or put it in your inventory (#87).
 - Paints to buy: on the Paints page, pick schemes (yours to start with) and print or save as PDF the paints they use that you don't own, with brand, swatch, the schemes that use each one and tick boxes (#86).
 
 ### Changed

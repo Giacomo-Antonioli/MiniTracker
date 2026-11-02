@@ -19,6 +19,7 @@ import { evalLimit } from '../../domain/lists/conditions'
 import { addUnit, battleSizes, canLead, checkList, enhancementAllowed, legalUnits, listCounter } from '../../domain/lists/rules'
 import type { ArmyList, ListEntry, ListStatus, LoadoutRow } from '../../domain/lists/types'
 import type { PaintDef } from '../../domain/paints/types'
+import { AddToShoppingButton } from '../shopping/AddToShoppingDialog'
 
 const ROLE_ORDER = ['Epic Hero', 'Character', 'Battleline']
 const roleRank = (r: string) => (ROLE_ORDER.includes(r) ? ROLE_ORDER.indexOf(r) : ROLE_ORDER.length)
@@ -179,7 +180,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   const paintName = useMemo(() => new Map(paints.map((x) => [x.id, `${x.brand} ${x.name}`])), [paints])
   const paintById = useMemo(() => new Map(paints.map((x) => [x.id, x])), [paints])
   // Paints come from every unit's scheme, owned or not.
-  const missingPaints = useMemo((): BuyPaint[] => pplan.missing.map((m) => ({ name: paintName.get(m.paintId) ?? m.paintId, schemes: m.schemes })), [pplan, paintName])
+  const missingPaints = useMemo((): BuyPaint[] => pplan.missing.map((m) => ({ paintId: m.paintId, name: paintName.get(m.paintId) ?? m.paintId, schemes: m.schemes })), [pplan, paintName])
   const [openRows, setOpenRows] = useState<Set<string>>(new Set())
   const toggleRow = (id: string) => setOpenRows((cur) => { const next = new Set(cur); if (next.has(id)) next.delete(id); else next.add(id); return next })
   const linkedElsewhere = (entryId: string) => new Set(list.entries.filter((x) => x.id !== entryId && x.ownedUnitId).map((x) => x.ownedUnitId))
@@ -565,6 +566,12 @@ function BuyPanel({ list, rows: b, paints, subtitle, schemeCtx, paintById, onSav
         <button className="btn px-2 py-0.5 text-sm" title="Asks for colour schemes, then opens the print dialog: choose “Save as PDF”" onClick={() => setAsking(true)}>
           📄 PDF
         </button>
+        <AddToShoppingButton
+          items={[
+            ...b.rows.map((r) => ({ kind: 'model' as const, name: r.name, refId: r.datasheetId, qty: r.missingModels, sources: [`List: ${list.name}`] })),
+            ...paints.map((p) => ({ kind: 'paint' as const, name: p.name, refId: p.paintId, qty: 1, sources: p.schemes.map((x) => `Scheme: ${x}`) })),
+          ]}
+        />
         {printing && (
           <BuyListSheet
             list={printing}

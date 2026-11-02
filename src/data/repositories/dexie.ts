@@ -1,4 +1,5 @@
 import { validateList } from '../../domain/lists/list'
+import type { ShopItem, ShopList } from '../../domain/shopping/types'
 import type { ArmyList } from '../../domain/lists/types'
 import { validateScheme } from '../../domain/schemes/scheme'
 import type { PaintScheme } from '../../domain/schemes/types'
@@ -285,5 +286,33 @@ export class DexieListRepository {
 
   async delete(id: string): Promise<void> {
     await this.db.lists.delete(id)
+  }
+}
+
+export class DexieShoppingRepository {
+  private db: MiniTrackerDb
+  constructor(db: MiniTrackerDb) {
+    this.db = db
+  }
+
+  async load(): Promise<{ items: ShopItem[]; lists: ShopList[] }> {
+    const [items, lists] = await Promise.all([this.db.shopItems.toArray(), this.db.shopLists.toArray()])
+    return { items, lists: lists.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.name.localeCompare(b.name)) }
+  }
+
+  async saveItems(items: ShopItem[]): Promise<void> {
+    await this.db.shopItems.bulkPut(items)
+  }
+
+  async deleteItem(id: string): Promise<void> {
+    await this.db.shopItems.delete(id)
+  }
+
+  async saveList(l: ShopList): Promise<void> {
+    await this.db.shopLists.put(l)
+  }
+
+  async deleteList(id: string): Promise<void> {
+    await this.db.shopLists.delete(id)
   }
 }

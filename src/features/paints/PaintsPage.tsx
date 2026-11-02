@@ -5,6 +5,7 @@ import { filterPaints, paintStats, type PaintFilter } from '../../domain/paints/
 import type { PaintDef } from '../../domain/paints/types'
 import { CustomPaintDialog } from './CustomPaintDialog'
 import { MissingPaintsDialog } from './MissingPaintsDialog'
+import { AddToShoppingButton } from '../shopping/AddToShoppingDialog'
 import { PaintPanel } from './PaintPanel'
 
 const PAGE = 240
@@ -92,6 +93,7 @@ export function PaintsPage() {
           <span><b className="text-lg">{stats.value.toFixed(2)}</b> total value</span>
           <button className="text-left" onClick={() => set({ stage: 'low' })}><b className="text-lg text-danger">{stats.low}</b> running low</button>
           <button className="text-left" onClick={() => set({ stage: 'wishlist' })}><b className="text-lg">{stats.wishlist}</b> on wishlist</button>
+          <AddToShoppingButton label="Wishlist to shopping list…" items={paints.filter((p) => paintStock.get(p.id)?.stage === 'wishlist').map((p) => ({ kind: 'paint' as const, name: `${p.brand} ${p.name}`, refId: p.id, qty: 1, sources: ['Wishlist'] }))} />
           <span className="text-muted">{Object.entries(stats.byBrand).map(([b, n]) => `${b} ${n}`).join(' · ')}</span>
         </section>
 

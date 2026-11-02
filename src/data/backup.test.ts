@@ -26,6 +26,8 @@ async function seed(target: MiniTrackerDb) {
   await target.customPaints.put({ id: 'custom/1', brand: 'GSW', name: 'Rocket', hex: '#00ff00', custom: true })
   await target.schemes.put({ id: 's1', name: 'Blue', description: '', origin: 'personal', stage: 'idea', tags: [], tips: '', tutorials: [], sections: [], createdAt: 't', updatedAt: 't' })
   await target.lists.put({ id: 'l1', name: 'Tau 1k', edition: '11e', factionId: 'tau', battleSize: 'strike', pointsLimit: 1000, status: 'planned', entries: [{ id: 'e1', datasheetId: 'crisis', models: 3, wargear: [] }], notes: '', createdAt: 't', updatedAt: 't' })
+  await target.shopItems.put({ id: 'i1', kind: 'other', name: 'Brushes', qty: 1, bought: false, sources: [], listIds: ['sl1'], createdAt: 't', updatedAt: 't' })
+  await target.shopLists.put({ id: 'sl1', name: 'GW', createdAt: 't' })
   await new DexieSettingsRepository(target).savePipeline(addStage(DEFAULT_PIPELINE, { id: 'washed', name: 'Washed' }))
 }
 
@@ -58,6 +60,7 @@ describe('backup', () => {
     expect(b.data.customPaints).toHaveLength(1)
     expect(b.data.schemes).toHaveLength(1)
     expect(b.data.lists).toHaveLength(1)
+    expect([b.data.shopItems, b.data.shopLists].map((x) => x?.length)).toEqual([1, 1])
   })
 
   it('reads v3 backups (no lists) and clears lists on import', async () => {
@@ -65,7 +68,9 @@ describe('backup', () => {
     const v3 = { format: BACKUP_FORMAT, version: 3, exportedAt: 'x', data: { units: [], statusEvents: [], settings: [], paintStock: [], customPaints: [] } }
     await importBackup(db, parseBackup(JSON.stringify(v3)))
     expect(await db.lists.count()).toBe(0)
+    expect(await db.shopItems.count()).toBe(0)
     expect(() => parseBackup(JSON.stringify({ ...v3, data: { ...v3.data, lists: 'x' } }))).toThrow(/damaged/)
+    expect(() => parseBackup(JSON.stringify({ ...v3, data: { ...v3.data, shopItems: 'x' } }))).toThrow(/damaged/)
   })
 
   it('still reads v1 backups (no paint data)', () => {

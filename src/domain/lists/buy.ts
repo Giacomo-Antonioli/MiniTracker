@@ -37,6 +37,7 @@ export function buyList(l: ArmyList, sheets: Map<string, Datasheet>, own: ListOw
 
 /** A paint the list's units need for their schemes and you don't have. */
 export interface BuyPaint {
+  paintId?: string
   name: string
   schemes: string[]
 }
