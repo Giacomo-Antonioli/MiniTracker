@@ -42,6 +42,9 @@ describe('Home', () => {
     expect(within(screen.getByRole('region', { name: 'Closest to done' })).getByText('Testers')).toBeTruthy()
     expect(within(screen.getByRole('region', { name: 'Shopping' })).getByText('€4.50')).toBeTruthy()
     expect(screen.getByRole('img', { name: 'Models painted in the last 6 months' })).toBeTruthy()
+    expect(screen.getByRole('img', { name: 'Models moved per day over the last year' })).toBeTruthy()
+    expect(within(screen.getByRole('region', { name: 'Records' })).getByText('Best month').nextSibling?.textContent).toBe('4')
+    expect(within(screen.getByRole('region', { name: 'Oldest in the pile' })).getByText('6 models · this month')).toBeTruthy()
 
     const cont = within(screen.getByRole('region', { name: 'Continue painting' }))
     await user.click(cont.getByRole('button', { name: 'All' }))

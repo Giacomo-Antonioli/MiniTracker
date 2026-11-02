@@ -7,7 +7,8 @@ import { totals } from '../../domain/shopping/shopping'
 import { byFaction, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileLevel, pileNow, recentMoves, recentUnits, streakWeeks } from '../../domain/stats/stats'
 import { QuickMove } from '../backlog/QuickMove'
 import { StageBar } from '../backlog/BacklogTable'
-import { MonthBars } from '../stats/charts'
+import { activityByDay, pileAge, records } from '../../domain/stats/more'
+import { ActivityCalendar, MonthBars } from '../stats/charts'
 import { forecast, Tile, useAllEvents, usePointsOf } from '../stats/StatsPage'
 
 type Go = 'backlog' | 'stats' | 'shopping' | 'paints'
@@ -56,6 +57,8 @@ export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: st
     .sort((a, b) => b.pct - a.pct)
     .slice(0, 3)
   const shop = totals(shopItems)
+  const best = records(events, pipeline)
+  const oldest = pileAge(units, pipeline, now, 3).oldest
   const usedSchemes = useMemo(() => schemes.filter((s) => units.some((u) => u.schemeId === s.id)), [schemes, units])
   const missing = paints.length ? missingForSchemes(usedSchemes, paints, paintStock).length : 0
   const names = new Map(units.map((u) => [u.id, u.customName]))
@@ -83,6 +86,12 @@ export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: st
         <Tile label="Net pile this year" value={net > 0 ? `−${net}` : net < 0 ? `+${-net}` : '0'} hint="Painted minus added" tone={net > 0 ? 'good' : net < 0 ? 'bad' : undefined} />
         <Tile label="Finish" value={forecast(finishMonths(pile, perMonth))} hint="At your 3-month pace" />
       </section>
+
+      {events.length > 0 && (
+        <Card title="Activity" action={<Link onClick={onGo && (() => onGo('stats'))}>Stats →</Link>}>
+          <ActivityCalendar counts={activityByDay(events)} now={now} />
+        </Card>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         {continueUnits.length > 0 && (
@@ -121,6 +130,30 @@ export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: st
                 <li key={f.faction} className="grid gap-1">
                   <div className="flex justify-between text-sm"><span>{f.faction}</span><span className="text-muted">{Math.round(f.pct * 100)}% · {forecast(f.finishMonths)}</span></div>
                   <div className="h-2 overflow-hidden rounded-full bg-panel-2"><div className="h-full rounded-full bg-accent" style={{ width: `${f.pct * 100}%` }} /></div>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+
+        {best.bestMonth && (
+          <Card title="Records">
+            <div className="grid grid-cols-2 gap-2">
+              <Tile label="Best month" value={best.bestMonth.count} hint={best.bestMonth.key} />
+              <Tile label="Best week" value={best.bestWeek!.count} hint={`Week of ${best.bestWeek!.key}`} />
+              <Tile label="Best day" value={best.bestDay!.count} hint={best.bestDay!.key} />
+              <Tile label="Longest streak" value={`${best.longestStreak} wk`} />
+            </div>
+          </Card>
+        )}
+
+        {oldest.length > 0 && (
+          <Card title="Oldest in the pile">
+            <ul className="grid gap-1.5 text-sm">
+              {oldest.map((o) => (
+                <li key={o.unit.id} className="flex justify-between gap-2">
+                  <button className="truncate text-left hover:text-accent" onClick={() => onOpenUnit?.(o.unit.id)}>{o.unit.customName}</button>
+                  <span className="shrink-0 text-muted">{o.models} models · {o.months < 1 ? 'this month' : o.months < 24 ? `${o.months} mo` : `${Math.floor(o.months / 12)} yr`}</span>
                 </li>
               ))}
             </ul>
