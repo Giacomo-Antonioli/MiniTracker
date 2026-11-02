@@ -43,6 +43,8 @@ export interface ArmyList {
   pointsLimit: number
   /** Chosen detachments (10th edition: one; 11th: several, within the detachment points). */
   detachmentIds?: string[]
+  /** Detachment name → Wahapedia detachment name, chosen when the names differ (stratagem cards, #98). */
+  stratagemDetachments?: Record<string, string>
   /** Colour scheme for the whole army. */
   schemeId?: string
   status: ListStatus

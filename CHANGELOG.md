@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Stratagem cards (#98): import Wahapedia's Stratagems.csv and Detachment_abilities.csv in Settings → Catalogue (links there; kept in your data and backups). The Army PDF can add the rules and stratagem cards of the list's detachments plus the core stratagems; a detachment whose name differs is picked once from a list. Powered by Wahapedia.
+
 ## [0.6.1] - 2026-11-03
 
 ### Changed
