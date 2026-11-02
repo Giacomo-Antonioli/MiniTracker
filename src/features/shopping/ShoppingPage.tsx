@@ -53,12 +53,12 @@ export function ShoppingPage() {
           {t.toBuy} to buy · total {money(t.price)}{t.unpriced ? ` (+${t.unpriced} without price)` : ''}{t.bought ? ` · ${t.bought} bought` : ''}
         </p>
 
+        <CatalogueSearch listIds={list ? [list.id] : []} />
+
         <form className="mt-3 flex gap-2" onSubmit={async (e) => { e.preventDefault(); if (!draft.trim()) return; await addToShopping([{ kind: 'other', name: draft, qty: 1 }], list ? [list.id] : []); setDraft('') }}>
           <input className="input flex-1" aria-label="New item" placeholder="Add anything: brushes, basing sand…" value={draft} onChange={(e) => setDraft(e.target.value)} />
           <button className="btn btn-primary">Add</button>
         </form>
-
-        <CatalogueSearch listIds={list ? [list.id] : []} />
 
         {items.length === 0 ? (
           <p className="mt-6 text-muted">Nothing here yet. Add items above, or from an army's buy list, "Paints to buy" or your paint wishlist.</p>
