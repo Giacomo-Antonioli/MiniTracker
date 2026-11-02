@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { catalogueFor, ctx, useStore } from '../../app/store'
 import { EDITIONS } from '../../data/catalogue/fetch'
 import { unitCards } from '../../domain/lists/cards'
+import { ArmyPrintDialog, ArmySheet, type ArmyPrintOptions } from './ArmySheet'
 import { ownedByDatasheet } from '../../domain/catalogue/owned'
 import type { Catalogue, Datasheet } from '../../domain/catalogue/types'
 import type { OwnedUnit } from '../../domain/collection/types'
@@ -77,6 +78,8 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
     [list, cat],
   )
   const set = (patch: Partial<ArmyList>) => onSave({ ...list, ...patch, updatedAt: new Date().toISOString() })
+  const [printAsk, setPrintAsk] = useState(false)
+  const [printOpts, setPrintOpts] = useState<ArmyPrintOptions | null>(null)
   const factionLocked = list.entries.length > 0
   const [name, setName] = useState(list.name)
 
@@ -144,7 +147,19 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
         <option value="playable">Playable</option>
       </select>
       {cat && list.factionId && <ArmySchemeSelect list={list} factionName={cat.factions.find((f) => f.id === list.factionId)?.name} onChange={(schemeId) => set({ schemeId })} />}
-      <ExportMenu list={list} cat={cat} />
+      <ExportMenu list={list} cat={cat} onPrint={cat && list.entries.length ? () => setPrintAsk(true) : undefined} />
+      {printAsk && cat && (
+        <div className="relative">
+          <ArmyPrintDialog
+            onCancel={() => setPrintAsk(false)}
+            onPrint={(o) => {
+              setPrintAsk(false)
+              setPrintOpts(o)
+            }}
+          />
+        </div>
+      )}
+      {printOpts && cat && <ArmySheet list={list} cat={cat} options={printOpts} onDone={() => setPrintOpts(null)} />}
       <button className="btn btn-danger ml-auto" onClick={onDelete}>Delete list</button>
     </header>
   )
@@ -711,7 +726,7 @@ function download(name: string, text: string, type: string) {
 }
 
 /** Export as text (copy or .txt) or as a MiniTracker .json file. */
-function ExportMenu({ list, cat }: { list: ArmyList; cat?: Catalogue }) {
+function ExportMenu({ list, cat, onPrint }: { list: ArmyList; cat?: Catalogue; onPrint?: () => void }) {
   const [msg, setMsg] = useState('')
   const label = EDITIONS.find((e) => e.key === list.edition)?.label ?? list.edition
   const file = list.name.replace(/[^\w\- ]+/g, '').trim() || 'list'
@@ -732,6 +747,10 @@ function ExportMenu({ list, cat }: { list: ArmyList; cat?: Catalogue }) {
         </button>
         <button className="btn text-left text-sm" onClick={() => download(`${file}.txt`, listToText(list, cat, label), 'text/plain')}>📄 Text file (.txt)</button>
         <button className="btn text-left text-sm" onClick={() => download(`${file}.json`, listToJson(list), 'application/json')}>🗂 MiniTracker file (.json)</button>
+        {onPrint && <button className="btn text-left text-sm" onClick={(e) => {
+          e.currentTarget.closest('details')?.removeAttribute('open')
+          onPrint()
+        }}>🖨 Print army (PDF)…</button>}
         {msg && <span className="text-xs text-muted" role="status">{msg}</span>}
       </div>
     </details>
