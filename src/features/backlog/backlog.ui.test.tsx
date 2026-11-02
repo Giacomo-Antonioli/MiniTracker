@@ -187,6 +187,7 @@ describe('Catalogue banner', () => {
 
   it('groups entries of the same unit type; expands, sorts and hides columns', async () => {
     localStorage.clear()
+    useStore.setState({ backlogFilter: {} })
     let n = 0
     const c = { now: '2026-01-01T00:00:00.000Z', newId: () => `g${++n}` }
     await appDb.units.bulkPut([

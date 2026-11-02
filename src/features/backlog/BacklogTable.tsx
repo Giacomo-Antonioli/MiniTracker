@@ -48,6 +48,7 @@ function StageBar({ stages, pipeline }: { stages: UnitGroup['stages']; pipeline:
       <div className="flex h-3 w-28 overflow-hidden rounded border border-line">
         {stages.map((s) => <div key={s.id} style={{ width: `${(100 * s.count) / Math.max(1, total)}%`, background: shade(pipeline, s.id) }} className={s.id === WISHLISTED ? 'border-r border-dashed border-line' : ''} />)}
       </div>
+      <span className="whitespace-nowrap text-xs text-muted">{stages.map((s) => `${s.name} ${Math.round((100 * s.count) / Math.max(1, total))}%`).join(' · ')}</span>
     </div>
   )
 }
