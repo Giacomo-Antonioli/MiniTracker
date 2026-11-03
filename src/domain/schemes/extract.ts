@@ -32,6 +32,9 @@ export function normaliseBrand(range: string): string {
   if (r.includes('vallejo')) return 'Vallejo'
   if (r.includes('army painter')) return 'Army Painter'
   if (r.startsWith('ak ') || r.includes('ak interactive')) return 'AK Interactive'
+  if (r.includes('green stuff') || r === 'gsw') return 'Green Stuff World'
+  if (r.replace(/\s/g, '').includes('scale75')) return 'Scale75'
+  if (r.replace(/[\s-]/g, '').includes('proacryl') || r.includes('monument')) return 'Pro Acryl'
   return range.trim()
 }
 

@@ -8,6 +8,8 @@ export interface PaintDef {
   /** red, blue, metallic, bone… */
   family?: string
   hex: string
+  /** Product range, e.g. "Scale Color Range" (when the data has it). */
+  range?: string
   /** Only set for paints the user added. */
   custom?: true
 }

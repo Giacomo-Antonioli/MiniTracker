@@ -33,7 +33,7 @@ export function PaintPanel({ paint, onClose, onSelect }: { paint: PaintDef; onCl
             <p className="text-sm text-muted">
               {paint.brand}
               {paint.type && ` · ${paint.type}`}
-              {paint.family && ` · ${paint.family}`} · <code>{paint.hex}</code>
+              {paint.range && ` · ${paint.range}`}{paint.family && ` · ${paint.family}`} · <code>{paint.hex}</code>
               {paint.custom && ' · custom'}
             </p>
           </div>

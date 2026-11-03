@@ -13,7 +13,8 @@
     "test:coverage": "vitest run --coverage",
     "e2e": "playwright test",
     "check:bsdata": "vitest run --config vitest.live.config.ts",
-    "schemes:scrape": "node --experimental-strip-types --no-warnings tools/schemes/scrape.mts"
+    "schemes:scrape": "node --experimental-strip-types --no-warnings tools/schemes/scrape.mts",
+    "paints:seed": "node --experimental-strip-types --no-warnings tools/paints/build-seed.mjs"
   },
   "dependencies": {
     "dexie": "^4.4.7",
