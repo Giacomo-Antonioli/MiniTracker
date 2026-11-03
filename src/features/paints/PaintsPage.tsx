@@ -7,6 +7,7 @@ import { CustomPaintDialog } from './CustomPaintDialog'
 import { MissingPaintsDialog } from './MissingPaintsDialog'
 import { AddToShoppingButton } from '../shopping/AddToShoppingDialog'
 import { PaintPanel } from './PaintPanel'
+import { HexMatchDialog } from './ColourMatches'
 
 const PAGE = 240
 
@@ -19,6 +20,7 @@ export function PaintsPage() {
   const [filter, setFilter] = useState<PaintFilter>({})
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
+  const [matching, setMatching] = useState(false)
   const [buying, setBuying] = useState(false)
   const [limit, setLimit] = useState(PAGE)
 
@@ -82,6 +84,7 @@ export function PaintsPage() {
               />
             </label>
             <button className="btn" onClick={() => setBuying(true)}>Paints to buy…</button>
+            <button className="btn" onClick={() => setMatching(true)}>🎯 Match a colour</button>
             <button className="btn btn-primary" onClick={() => setAdding(true)}>+ Custom paint</button>
           </div>
         </header>
@@ -152,8 +155,9 @@ export function PaintsPage() {
         {shown.length === 0 && <p className="p-6 text-center text-muted">No paints match these filters.</p>}
       </div>
 
-      {selected && <PaintPanel paint={selected} onClose={() => setSelectedId(null)} />}
+      {selected && <PaintPanel paint={selected} onClose={() => setSelectedId(null)} onSelect={setSelectedId} />}
       {buying && <MissingPaintsDialog onClose={() => setBuying(false)} />}
+      {matching && <HexMatchDialog onClose={() => setMatching(false)} onPick={(p) => { setSelectedId(p.id); setMatching(false) }} />}
       {adding && <CustomPaintDialog onClose={() => setAdding(false)} onCreated={(id) => setSelectedId(id)} />}
     </div>
   )

@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Closest colour match (CIEDE2000): closest paints you own and closest in any brand on each paint, a "Match a colour" picker for any hex colour, and the closest owned substitute for missing paints in schemes (#30).
+
 ## [0.8.0] - 2026-11-03
 
 ### Added
