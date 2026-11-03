@@ -59,7 +59,7 @@ No account, no server: your collection stays in your browser. Install it from th
 
 ## Roadmap
 
-Released: collection tracker (v0.1), catalogue (v0.2), paints, schemes and photos (v0.3), army builder (v0.4), loadouts and shopping (v0.5), Home and Stats (v0.6), stratagems, supplies and photo timeline (v0.7), games and match companion (v0.8), colour match, magnets and cost tracking (v0.9). See the [changelog](CHANGELOG.md).
+Released: collection tracker (v0.1), catalogue (v0.2), paints, schemes and photos (v0.3), army builder (v0.4), loadouts and shopping (v0.5), Home and Stats (v0.6), stratagems, supplies and photo timeline (v0.7), games and match companion (v0.8), colour match, magnets and cost tracking (v0.9), goals, recipe links and share links, bigger scheme library (v0.10). See the [changelog](CHANGELOG.md).
 
 Next, from the [open issues](https://github.com/Giacomo-Antonioli/MiniTracker/issues): magnet editor ([#32](https://github.com/Giacomo-Antonioli/MiniTracker/issues/32)), closest paint match ([#30](https://github.com/Giacomo-Antonioli/MiniTracker/issues/30)), cost tracking ([#94](https://github.com/Giacomo-Antonioli/MiniTracker/issues/94)), Kanban board ([#91](https://github.com/Giacomo-Antonioli/MiniTracker/issues/91)), painting time ([#89](https://github.com/Giacomo-Antonioli/MiniTracker/issues/89)), storage boxes ([#18](https://github.com/Giacomo-Antonioli/MiniTracker/issues/18)). Later: more paint brands, barcode scan, share links, a buy optimiser, Kill Team / Age of Sigmar, QR/NFC tags, phone layout.
 
