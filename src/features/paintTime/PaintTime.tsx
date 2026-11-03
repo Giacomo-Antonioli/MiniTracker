@@ -8,7 +8,7 @@ import {
 import { HBars, MonthBars } from '../stats/charts'
 
 /** Re-renders every second while `on`, for running clocks. */
-function useTick(on: boolean): string {
+export function useTick(on: boolean): string {
   const [now, setNow] = useState(() => new Date().toISOString())
   useEffect(() => {
     if (!on) return
@@ -18,7 +18,7 @@ function useTick(on: boolean): string {
   return on ? now : new Date().toISOString()
 }
 
-function useLabels() {
+export function useLabels() {
   const { units, pipeline } = useStore()
   return useMemo(() => {
     const stage = (id?: string) => (id ? pipeline.stages.find((s) => s.id === id)?.name ?? id : '')
@@ -41,7 +41,7 @@ function groupOptions(units: OwnedUnit[]) {
     .sort((a, b) => a.unit.customName.localeCompare(b.unit.customName))
 }
 
-function StageSelect({ value, onChange, label }: { value?: string; onChange: (v?: string) => void; label: string }) {
+export function StageSelect({ value, onChange, label }: { value?: string; onChange: (v?: string) => void; label: string }) {
   const { pipeline } = useStore()
   return (
     <select className="input" aria-label={label} value={value ?? ''} onChange={(e) => onChange(e.target.value || undefined)}>
@@ -97,8 +97,8 @@ function StartTimer({ onDone }: { onDone: () => void }) {
   )
 }
 
-function TimerRow({ t, now }: { t: PaintTimer; now: string }) {
-  const { saveTimer, deleteTimer, stopTimer } = useStore()
+export function TimerRow({ t, now, onPaused }: { t: PaintTimer; now: string; onPaused?: () => void }) {
+  const { saveTimer, deleteTimer, stopTimer, openCompanion, companion } = useStore()
   const { group, stage } = useLabels()
   const running = !!t.runningSince
   const minis = t.targets.reduce((a, x) => a + x.count, 0)
@@ -108,9 +108,11 @@ function TimerRow({ t, now }: { t: PaintTimer; now: string }) {
         <span className={`font-mono text-xl ${running ? 'text-accent' : 'text-muted'}`}>{formatClock(elapsedMs(t, now))}{running ? '' : ' ⏸'}</span>
         <div className="flex gap-1">
           {running
-            ? <button className="btn" onClick={() => void saveTimer(pauseTimer(t, new Date().toISOString()))}>⏸ Pause</button>
+            ? <button className="btn" onClick={() => void saveTimer(pauseTimer(t, new Date().toISOString())).then(onPaused)}>⏸ Pause</button>
             : <button className="btn" onClick={() => void saveTimer(resumeTimer(t, new Date().toISOString()))}>▶ Resume</button>}
           <button className="btn btn-primary" onClick={() => void stopTimer(t.id)}>■ Stop</button>
+          {!companion && <button className="btn" title="Painter companion" aria-label="Open painter companion" onClick={() => openCompanion('paint', t.targets[0].unitId, t.id)}>🎨</button>}
+          {!companion && <button className="btn" title="Builder companion" aria-label="Open builder companion" onClick={() => openCompanion('build', t.targets[0].unitId, t.id)}>🔨</button>}
           <button className="btn" aria-label="Discard timer" onClick={() => confirm('Discard this timer without logging its time?') && void deleteTimer(t.id)}>✕</button>
         </div>
       </div>

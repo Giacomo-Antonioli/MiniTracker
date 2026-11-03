@@ -151,6 +151,12 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
               : <span className="text-muted">{ago(u.updatedAt)}</span>}
           </td>
         ))}
+        <td className="whitespace-nowrap p-2 text-right" aria-label="Companion">
+          <span className="opacity-60 hover:opacity-100">
+            <button title="Painter companion" aria-label={`Paint ${u.customName}`} onClick={(e) => { e.stopPropagation(); useStore.getState().openCompanion('paint', u.id) }}>🎨</button>
+            <button title="Builder companion" aria-label={`Build ${u.customName}`} onClick={(e) => { e.stopPropagation(); useStore.getState().openCompanion('build', u.id) }}>🔨</button>
+          </span>
+        </td>
       </tr>
     )
   }
@@ -164,7 +170,7 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
                 <span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm border border-line align-middle" style={{ background: stageColour(pipeline, g.status) }} />
                 <b>{g.count} ×</b> {pipeline.stages.find((s) => s.id === g.status)?.name ?? g.status}
               </td>
-              <td className="p-1 text-muted" colSpan={show.length}>
+              <td className="p-1 text-muted" colSpan={show.length + 1}>
                 {[g.loadout.length ? g.loadout.join(', ') : '', ...g.magnetised.map((m) => `🧲 ${m.slot}: ${m.optionIds.join(' | ')}`), scheme ? `Scheme: ${scheme.name}` : ''].filter(Boolean).join(' · ') || '—'}
               </td>
             </tr>
@@ -189,7 +195,7 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
       </div>
       <table className="w-full text-left text-sm">
         <thead className="border-b border-line text-xs uppercase tracking-wider text-muted">
-          <tr>{head('unit', 'Unit')}{show.map((c) => head(c, TITLE[c]))}</tr>
+          <tr>{head('unit', 'Unit')}{show.map((c) => head(c, TITLE[c]))}<th className="p-2"><span className="sr-only">Companion</span></th></tr>
         </thead>
         <tbody>
           {groups.map((g) => {
@@ -210,6 +216,7 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
                         : <span className="text-muted">{ago(g.updatedAt)}</span>}
                     </td>
                   ))}
+                  <td />
                 </tr>
                 {isOpen && g.units.map((u) => <Fragment key={u.id}>{entry(u, true)}</Fragment>)}
               </Fragment>

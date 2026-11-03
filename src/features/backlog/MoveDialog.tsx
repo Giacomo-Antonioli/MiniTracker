@@ -5,7 +5,7 @@ import { Dialog } from '../../ui/Dialog'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
-export function MoveDialog({ unit, group, initialTo, onClose }: { unit: OwnedUnit; group: ModelGroup; initialTo?: string; onClose: () => void }) {
+export function MoveDialog({ unit, group, initialTo, onClose, onMoved }: { unit: OwnedUnit; group: ModelGroup; initialTo?: string; onClose: () => void; onMoved?: () => void }) {
   const { pipeline, move } = useStore()
   const currentIdx = pipeline.stages.findIndex((s) => s.id === group.status)
   const next = pipeline.stages[currentIdx + 1] ?? pipeline.stages.find((s) => s.id !== group.status)!
@@ -27,6 +27,7 @@ export function MoveDialog({ unit, group, initialTo, onClose }: { unit: OwnedUni
           try {
             // Keep the real time when the date is today, so history stays in order within a day.
             await move(unit, group.id, count, to, { date: date === today() ? new Date().toISOString() : date, note }, photo ?? undefined)
+            onMoved?.()
             dialog?.close()
           } catch (err) {
             setError((err as Error).message)

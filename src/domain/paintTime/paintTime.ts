@@ -149,3 +149,10 @@ export function pruneTimers(timers: PaintTimer[], units: OwnedUnit[]): PaintTime
   const groups = new Set(units.flatMap((u) => u.groups.map((g) => `${u.id}/${g.id}`)))
   return timers.map((t) => ({ ...t, targets: t.targets.filter((x) => groups.has(`${x.unitId}/${x.groupId}`)) })).filter((t) => t.targets.length > 0)
 }
+
+/** Timers that cover any group of the unit. */
+export const timersForUnit = (timers: PaintTimer[], unitId: string) => timers.filter((t) => t.targets.some((x) => x.unitId === unitId))
+
+/** Pauses every running timer except `keepId`, to switch to other units; returns only the changed ones. */
+export const pauseOthers = (timers: PaintTimer[], keepId: string | undefined, now: string): PaintTimer[] =>
+  timers.filter((t) => t.id !== keepId && t.runningSince).map((t) => pauseTimer(t, now))

@@ -20,13 +20,16 @@ import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeIm
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { readStartPage, useStore } from './store'
 import { HomePage } from '../features/home/HomePage'
+import { CompanionHub, WorkCompanion } from '../features/companion/WorkCompanion'
 
-type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'guides' | 'games' | 'settings'
+type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'settings'
 
 const SOON: string[] = []
 
 export default function App() {
   const { ready, load, theme } = useStore()
+  const companion = useStore((s) => s.companion)
+  const timing = useStore((s) => s.paintTimers.some((t) => t.runningSince))
   const lowSupplies = useStore((s) => s.supplies.filter(isLow).length)
   const liveGame = useStore((s) => s.games.some((g) => g.status === 'live'))
   // A recipe sent by the bookmarklet arrives in the URL (#recipe=…): start on Schemes with it.
@@ -61,6 +64,19 @@ export default function App() {
     if (location.hash.startsWith('#recipe=') || location.hash.startsWith(SHARE_HASH)) history.replaceState(null, '', location.pathname + location.search)
   }, [])
 
+  // Opening a companion from anywhere shows it under its own tab.
+  // Remember where a companion was opened from, to go back there.
+  const [from, setFrom] = useState<Page | null>(null)
+  useEffect(() => {
+    // Back in the picker: the next companion goes back to the picker.
+    if (!companion) return setFrom(null)
+    setPage((p) => {
+      if (p !== 'companion') setFrom(p)
+      return 'companion'
+    })
+  }, [companion])
+  const PAGE_NAME: Partial<Record<Page, string>> = { home: 'Home', backlog: 'Backlog', unit: 'unit page' }
+
   useEffect(() => {
     void load()
   }, [load])
@@ -70,6 +86,7 @@ export default function App() {
   }, [theme])
 
   const go = (p: Page, s?: SettingsSection) => {
+    if (p !== 'companion') useStore.getState().closeCompanion()
     setPage(p)
     setSection(s)
     setDatasheetId(undefined)
@@ -100,6 +117,7 @@ export default function App() {
         {nav('schemes', 'Schemes')}
         {nav('guides', 'Guides')}
         {nav('shopping', 'Shopping')}
+        {nav('companion', timing ? 'Companion ●' : 'Companion')}
         {nav('stats', 'Stats')}
         {nav('goals', 'Goals')}
         {nav('games', liveGame ? 'Games ●' : 'Games')}
@@ -122,6 +140,8 @@ export default function App() {
         {ready && shared && <SharedSchemeBanner token={shared} onDone={(id) => { setShared(null); if (id) openScheme(id) }} />}
         {!ready ? (
           <p className="text-muted">Loading…</p>
+        ) : page === 'companion' ? (
+          companion ? <WorkCompanion key={`${companion.mode}/${companion.unitId}`} backTo={from && PAGE_NAME[from] ? { label: PAGE_NAME[from]!, go: () => { useStore.getState().closeCompanion(); setPage(from); setFrom(null) } } : undefined} /> : <CompanionHub />
         ) : page === 'home' ? (
           <HomePage onOpenUnit={openUnit} onGo={(p) => go(p)} onAddUnit={() => go('backlog')} />
         ) : page === 'backlog' ? (

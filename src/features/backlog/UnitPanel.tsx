@@ -36,7 +36,7 @@ interface Props {
 
 export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage, onOpenDatasheet, onOpenScheme }: Props) {
   const page = variant === 'page'
-  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, library, loadLibrary, paints, loadPaints, paintStock, purchases, currency } = useStore()
+  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, library, loadLibrary, paints, loadPaints, paintStock, purchases, currency, openCompanion } = useStore()
   const allSchemes = [...schemes, ...library]
   const scheme = unit.schemeId ? allSchemes.find((s) => s.id === unit.schemeId) : undefined
   const photos = allPhotos[unit.id] ?? []
@@ -83,6 +83,8 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
           <h2 className={`font-display text-accent ${page ? 'text-3xl' : 'text-xl'}`}>{unit.customName}</h2>
           <div className="flex gap-1">
             <button className="btn" aria-pressed={unit.favourite} title="Favourite" onClick={() => toggle('favourite')}>{unit.favourite ? '★' : '☆'}</button>
+            <button className="btn" title="Painter companion" onClick={() => openCompanion('paint', unit.id)}>🎨 Paint</button>
+            <button className="btn" title="Builder companion" onClick={() => openCompanion('build', unit.id)}>🔨 Build</button>
             <button className="btn" aria-pressed={unit.nextUp} title="Next up" onClick={() => toggle('nextUp')}>{unit.nextUp ? '⏭' : '⏵'}</button>
             {!page && onOpenPage && (
               <button className="btn" title="Open the full unit page" onClick={onOpenPage}>⤢ Open page</button>
