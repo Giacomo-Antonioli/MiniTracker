@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-03
+
 ### Added
 - Match companion (#72): 📱 Companion on the live game opens a phone-friendly screen with the phase bar (Command → Fight, then the next turn), the stratagems you can use now (your detachments' and core, by turn and phase; Use spends the CP), detachment rules and unit abilities that mention the phase, your units with wounds tracked per model (a unit is destroyed when its last model dies), quick score buttons, CP, and a chess clock with total game time.
 - Games (#71): start a game from an army list (or without one), with the opponent, their faction and optionally their list (.rosz, .ros, .json or text). Live score board: primary and secondary per round with +1/+5/−1, CP for both (+1 each at every turn), round and turn, units destroyed on both sides (ticked off their lists, or counted). End the game with notes; the history shows score by round, units lost and destroyed, and results overall, per list and per opponent faction. A Games card on Home, and each unit shows how many games it played and how often it was destroyed. The Stats page gets a Games section: played, win rate, average score, win streak, best list, results and average score over time, and wins by opponent faction and by list. The game saves after every tap.
@@ -177,7 +179,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.5...v0.6.0
