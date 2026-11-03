@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-03
+
 ### Added
 - Guides › Terrain: 15 terrain recipes (10 from 'Eavy Archive: Battlezone Mechanicus, Battle Sanctum, Boarding Actions; 5 written for MiniTracker: Imperial ruins, rusted metal, wood, sci-fi panels, ice crystals), filtered by surface.
 - Guides › Bases › Materials: 12 basing materials (texture paste, sand, rocks/cork, static grass, tufts, flowers, flock, pigments, snow, water effects, PVA, super glue) with how-to, tips, mistakes and links to makers (Green Stuff World, Army Painter, Gamers Grass, Citadel, Vallejo and more). "+ Add to Supplies" on each. Base recipes list the materials they use.
@@ -212,7 +214,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.7.0...v0.8.0
