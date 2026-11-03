@@ -38,7 +38,9 @@ describe('backup', () => {
     expect(b).toMatchObject({ format: BACKUP_FORMAT, version: BACKUP_VERSION, exportedAt: '2026-11-02T00:00:00.000Z' })
     expect(b.data.units).toHaveLength(1)
     expect(b.data.statusEvents).toHaveLength(1)
-    expect(b.data.settings).toHaveLength(2)
+    // Feature settings plus the edit times recorded for sync (#161).
+    expect(b.data.settings.filter((r) => r.key !== 'syncStamps')).toHaveLength(2)
+    expect(b.data.settings.some((r) => r.key === 'syncStamps')).toBe(true)
   })
 
   it('round-trips: export → JSON text → import gives identical data', async () => {

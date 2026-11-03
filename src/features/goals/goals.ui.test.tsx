@@ -33,7 +33,7 @@ it('creates, edits and deletes goals of each kind', async () => {
   const list = within(screen.getByRole('list', { name: 'Goals' }))
   expect(await list.findByText('4 / 10 models')).toBeTruthy()
 
-  await user.click(screen.getByRole('button', { name: '+ Goal' }))
+  await user.click(await screen.findByRole('button', { name: '+ Goal' }))
   form = within(screen.getByRole('form', { name: 'Goal' }))
   await user.selectOptions(form.getByLabelText('Kind'), 'units')
   await user.click(form.getByRole('button', { name: 'Save goal' }))
@@ -46,7 +46,7 @@ it('creates, edits and deletes goals of each kind', async () => {
   expect(list.getByText(/overdue/)).toBeTruthy()
 
   for (const [kind, text] of [['pile', /painted, \d+ added/], ['streak', '1 / 4 weeks']] as const) {
-    await user.click(screen.getByRole('button', { name: '+ Goal' }))
+    await user.click(await screen.findByRole('button', { name: '+ Goal' }))
     form = within(screen.getByRole('form', { name: 'Goal' }))
     await user.selectOptions(form.getByLabelText('Kind'), kind)
     await user.click(form.getByRole('button', { name: 'Save goal' }))

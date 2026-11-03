@@ -50,8 +50,8 @@ it('batch timer: start on two groups, pause, resume, stop splits by minis; Stats
   await user.click(card.getByRole('button', { name: '▶ Resume' }))
   await user.click(card.getByRole('button', { name: '■ Stop' }))
   await waitFor(() => expect(useStore.getState().paintSessions.map((s) => [s.unitId === a.id, s.minutes])).toEqual([[true, 40], [false, 20]]))
-  expect(useStore.getState().paintTimers).toEqual([])
-  expect(card.getByText('This week: 1 h 00 min')).toBeTruthy()
+  await waitFor(() => expect(useStore.getState().paintTimers).toEqual([]))
+  expect(await card.findByText('This week: 1 h 00 min')).toBeTruthy()
 
   // Stats
   await user.click(screen.getAllByRole('button', { name: /Stats/ })[0])

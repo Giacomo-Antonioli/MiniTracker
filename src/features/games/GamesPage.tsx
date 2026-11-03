@@ -106,6 +106,60 @@ function useEntryNames() {
   return (l?: ArmyList) => (l?.entries ?? []).map((e) => ({ id: e.id, name: names.get(e.datasheetId) ?? 'Unknown unit', models: e.models }))
 }
 
+/** One side of a live game. Its own component so its buttons stay in place while the game updates. */
+function Side({ k, g, units }: { k: SideKey; g: Game; units: { id: string; name: string; models: number }[] }) {
+  const { saveGame } = useStore()
+  const c = ctx()
+  // Build on the latest saved game, so quick taps never undo each other.
+  const apply = (f: (g: Game) => Game) => void saveGame(f(useStore.getState().games.find((x) => x.id === g.id) ?? g))
+  const s = g[k]
+  const t = totals(s)
+  const r = s.rounds[g.round - 1]
+  return (
+    <section className={`panel grid content-start gap-3 p-4 ${g.turn === k ? 'border-accent' : ''}`} aria-label={k === 'me' ? 'My side' : 'Their side'}>
+      <header className="flex items-baseline justify-between gap-2">
+        <h2 className="font-display text-lg">{s.name}{s.faction ? <span className="text-sm text-muted"> · {s.faction}</span> : null}</h2>
+        <span className="font-display text-4xl text-accent tabular-nums" aria-label={`${s.name} total`}>{t.total}</span>
+      </header>
+      {(['primary', 'secondary'] as const).map((kind) => (
+        <div key={kind} className="flex items-center gap-2">
+          <span className="w-28 text-sm capitalize">{kind} <span className="text-xs text-muted">({kind === 'primary' ? t.primary : t.secondary})</span></span>
+          <span className="w-10 text-center tabular-nums" aria-label={`${s.name} ${kind} this round`}>{r[kind]}</span>
+          <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} ${kind} −1`} onClick={() => apply((g) => addPoints(g, k, kind, -1, c))}>−1</button>
+          <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} ${kind} +1`} onClick={() => apply((g) => addPoints(g, k, kind, 1, c))}>+1</button>
+          <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} ${kind} +5`} onClick={() => apply((g) => addPoints(g, k, kind, 5, c))}>+5</button>
+        </div>
+      ))}
+      <div className="flex items-center gap-2">
+        <span className="w-28 text-sm">Command points</span>
+        <span className="w-10 text-center tabular-nums" aria-label={`${s.name} CP`}>{s.cp}</span>
+        <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} CP −1`} onClick={() => apply((g) => setCp(g, k, -1, c))}>−1</button>
+        <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} CP +1`} onClick={() => apply((g) => setCp(g, k, 1, c))}>+1</button>
+      </div>
+      <div className="grid gap-1">
+        <h3 className="text-xs uppercase tracking-wider text-muted">Units destroyed: {s.destroyed.length}{units.length ? ` / ${units.length}` : ''}</h3>
+        {units.length ? (
+          <ul className="grid gap-0.5 text-sm">
+            {units.map((u) => (
+              <li key={u.id}>
+                <label className={`flex items-center gap-2 ${s.destroyed.includes(u.id) ? 'text-muted line-through' : ''}`}>
+                  <input type="checkbox" checked={s.destroyed.includes(u.id)} onChange={() => apply((g) => toggleDestroyed(g, k, u.id, c))} />
+                  {u.name} <span className="text-xs text-muted">({u.models})</span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="flex gap-2">
+            <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name}: one more unit destroyed`} onClick={() => apply((g) => toggleDestroyed(g, k, `unit-${s.destroyed.length + 1}`, c))}>+ Unit destroyed</button>
+            {s.destroyed.length > 0 && <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name}: one less unit destroyed`} onClick={() => apply((g) => toggleDestroyed(g, k, s.destroyed.at(-1)!, c))}>−</button>}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
 function LiveGame({ game: g, onCompanion }: { game: Game; onCompanion: () => void }) {
   const { saveGame, deleteGame, lists } = useStore()
   const [ending, setEnding] = useState(false)
@@ -114,56 +168,6 @@ function LiveGame({ game: g, onCompanion }: { game: Game; onCompanion: () => voi
   const save = (next: Game) => void saveGame(next)
   const c = ctx()
   const myList = lists.find((l) => l.id === g.me.listId)
-
-  const Side = ({ k }: { k: SideKey }) => {
-    const s = g[k]
-    const t = totals(s)
-    const units = entries(k === 'me' ? myList : s.list)
-    const r = s.rounds[g.round - 1]
-    return (
-      <section className={`panel grid content-start gap-3 p-4 ${g.turn === k ? 'border-accent' : ''}`} aria-label={k === 'me' ? 'My side' : 'Their side'}>
-        <header className="flex items-baseline justify-between gap-2">
-          <h2 className="font-display text-lg">{s.name}{s.faction ? <span className="text-sm text-muted"> · {s.faction}</span> : null}</h2>
-          <span className="font-display text-4xl text-accent tabular-nums" aria-label={`${s.name} total`}>{t.total}</span>
-        </header>
-        {(['primary', 'secondary'] as const).map((kind) => (
-          <div key={kind} className="flex items-center gap-2">
-            <span className="w-28 text-sm capitalize">{kind} <span className="text-xs text-muted">({kind === 'primary' ? t.primary : t.secondary})</span></span>
-            <span className="w-10 text-center tabular-nums" aria-label={`${s.name} ${kind} this round`}>{r[kind]}</span>
-            <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} ${kind} −1`} onClick={() => save(addPoints(g, k, kind, -1, c))}>−1</button>
-            <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} ${kind} +1`} onClick={() => save(addPoints(g, k, kind, 1, c))}>+1</button>
-            <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} ${kind} +5`} onClick={() => save(addPoints(g, k, kind, 5, c))}>+5</button>
-          </div>
-        ))}
-        <div className="flex items-center gap-2">
-          <span className="w-28 text-sm">Command points</span>
-          <span className="w-10 text-center tabular-nums" aria-label={`${s.name} CP`}>{s.cp}</span>
-          <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} CP −1`} onClick={() => save(setCp(g, k, -1, c))}>−1</button>
-          <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} CP +1`} onClick={() => save(setCp(g, k, 1, c))}>+1</button>
-        </div>
-        <div className="grid gap-1">
-          <h3 className="text-xs uppercase tracking-wider text-muted">Units destroyed: {s.destroyed.length}{units.length ? ` / ${units.length}` : ''}</h3>
-          {units.length ? (
-            <ul className="grid gap-0.5 text-sm">
-              {units.map((u) => (
-                <li key={u.id}>
-                  <label className={`flex items-center gap-2 ${s.destroyed.includes(u.id) ? 'text-muted line-through' : ''}`}>
-                    <input type="checkbox" checked={s.destroyed.includes(u.id)} onChange={() => save(toggleDestroyed(g, k, u.id, c))} />
-                    {u.name} <span className="text-xs text-muted">({u.models})</span>
-                  </label>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="flex gap-2">
-              <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name}: one more unit destroyed`} onClick={() => save(toggleDestroyed(g, k, `unit-${s.destroyed.length + 1}`, c))}>+ Unit destroyed</button>
-              {s.destroyed.length > 0 && <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name}: one less unit destroyed`} onClick={() => save(toggleDestroyed(g, k, s.destroyed.at(-1)!, c))}>−</button>}
-            </div>
-          )}
-        </div>
-      </section>
-    )
-  }
 
   return (
     <div className="grid gap-3" aria-label="Live game">
@@ -188,8 +192,8 @@ function LiveGame({ game: g, onCompanion }: { game: Game; onCompanion: () => voi
         </div>
       )}
       <div className="grid gap-3 lg:grid-cols-2">
-        <Side k="me" />
-        <Side k="them" />
+        <Side k="me" g={g} units={entries(myList)} />
+        <Side k="them" g={g} units={entries(g.them.list)} />
       </div>
       <RoundTable game={g} />
     </div>

@@ -48,7 +48,7 @@ describe('Games', () => {
     await user.click(within(live).getByRole('button', { name: 'Me secondary +1' }))
     await user.click(within(live).getByRole('button', { name: 'Me secondary +1' }))
     await user.click(within(live).getByRole('button', { name: 'Me secondary −1' }))
-    expect(within(live).getByLabelText('Me total')).toHaveTextContent('6')
+    await waitFor(() => expect(within(live).getByLabelText('Me total')).toHaveTextContent('6'))
     await user.click(within(live).getByRole('button', { name: 'Next turn ▶' }))
     expect(within(live).getByRole('status')).toHaveTextContent("Bob's turn")
     expect(within(live).getByLabelText('Bob CP')).toHaveTextContent('1')
