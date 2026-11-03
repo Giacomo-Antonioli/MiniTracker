@@ -62,9 +62,18 @@ export function schemeSheet(scheme: PaintScheme, paintName: (id: string) => stri
     .join('')
   return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(scheme.name)}</title><style>
 body{font:13px/1.4 system-ui,sans-serif;margin:24px;color:#111}h1{margin:0 0 4px}h3{margin:14px 0 4px}small{color:#666;font-weight:normal}
-.meta{color:#444}ul.paints{columns:3;padding-left:18px}ol{margin:0;padding-left:22px}li{margin:1px 0}i{color:#555}
+.meta{color:#444}ul.paints{columns:3;padding-left:18px}ol{margin:0;padding-left:22px}li{margin:1px 0}i{color:#555}.tips{break-before:page}.tech{break-inside:avoid;margin-bottom:8px}.tech p{margin:2px 0}
 </style></head><body><h1>${esc(scheme.name)}</h1><p class="meta">${esc(scheme.factionName ?? '')} · ${DIFFICULTY_LABEL[difficulty(scheme)]} · ${paints.length} paints${scheme.source?.url ? ` · ${esc(scheme.source.url)}` : ''}</p>
-<p><b>Techniques:</b> ${techniquesUsed(scheme).map((t) => esc(t.name)).join(', ')}</p><h2>Paints</h2><ul class="paints">${paints.map((p) => `<li>${esc(p)}</li>`).join('')}</ul><h2>Recipe, in painting order</h2>${areas}</body></html>`
+<p><b>Techniques:</b> ${techniquesUsed(scheme).map((t) => esc(t.name)).join(', ')}</p><h2>Paints</h2><ul class="paints">${paints.map((p) => `<li>${esc(p)}</li>`).join('')}</ul><h2>Recipe, in painting order</h2>${areas}${techniqueTips(scheme)}</body></html>`
+}
+
+/** Tips for each technique the recipe uses, for the printed sheet. */
+function techniqueTips(scheme: PaintScheme): string {
+  const guides = techniquesUsed(scheme).flatMap((t) => (t.guide ? [t.guide] : []))
+  if (!guides.length) return ''
+  return `<h2 class="tips">How to: techniques used</h2>${guides
+    .map((g) => `<div class="tech"><h3>${esc(g.name)}</h3><p>${esc(g.what)}</p><p><b>When:</b> ${esc(g.when)}</p><p><b>Brush:</b> ${esc(g.brush)} <b>Thinning:</b> ${esc(g.thinning)}</p>${g.detail ? `<p><b>How to:</b></p><ol>${g.detail.how.map((h) => `<li>${esc(h)}</li>`).join('')}</ol><p><b>Tips:</b> ${g.detail.tips.map(esc).join(' ')}</p>` : ''}<p><b>Avoid:</b> ${g.mistakes.map(esc).join(' ')}</p></div>`)
+    .join('')}`
 }
 
 function printScheme(scheme: PaintScheme, paintName: (id: string) => string) {

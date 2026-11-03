@@ -1,3 +1,5 @@
+import { TECHNIQUE_DETAILS, type TechniqueDetail } from './techniqueDetails.ts'
+
 /** Painting technique guides. Text written for MiniTracker; videos are YouTube searches so links never go stale. */
 
 export interface Technique {
@@ -10,9 +12,11 @@ export interface Technique {
   brush: string
   thinning: string
   mistakes: string[]
+  /** In-depth method, tips, sources and diagram (see techniqueDetails.ts). */
+  detail?: TechniqueDetail
 }
 
-export const TECHNIQUES_GUIDE: Technique[] = [
+const BASE: Technique[] = [
   {
     id: 'prime', name: 'Priming', aliases: ['primer', 'undercoat', 'spray'],
     what: 'A thin, even coat of primer over the whole model so paint grips the plastic or resin.',
@@ -89,7 +93,7 @@ export const TECHNIQUES_GUIDE: Technique[] = [
     id: 'drybrush', name: 'Drybrushing', aliases: ['dry brush', 'dry-brush', 'overbrush'],
     what: 'A brush with almost no paint flicked over textured areas so only the raised details catch colour.',
     when: 'On fur, chainmail, rough stone, bases and texture. Great for speed.',
-    brush: 'An old or dedicated drybrush (soft, flat).',
+    brush: 'An old, stiff or dedicated drybrush; round makeup-style drybrushes work well.',
     thinning: 'No thinning: wipe the brush on a towel until almost nothing comes off.',
     mistakes: ['Too much paint on the brush: it leaves streaks.', 'Using it on smooth panels: it looks chalky.'],
   },
@@ -166,6 +170,8 @@ export const TECHNIQUES_GUIDE: Technique[] = [
     mistakes: ['Spraying in humid weather: the varnish frosts white.', 'Varnishing before paint is fully dry.'],
   },
 ]
+
+export const TECHNIQUES_GUIDE: Technique[] = BASE.map((t) => ({ ...t, detail: TECHNIQUE_DETAILS[t.id] }))
 
 const norm = (s: string) => s.toLowerCase().replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim()
 

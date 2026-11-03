@@ -5,6 +5,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Added
+- Technique guides in depth: each of the 19 techniques now has a step-by-step method and tips, merged from three published guides (credited and linked), and an explanatory diagram for every technique, drawn for MiniTracker. The scheme Print / PDF sheet ends with "How to" for every technique the recipe uses.
+- Guides › Bases: 105 basing recipes (8 written for MiniTracker: snow, lava, urban rubble, desert, mud, Mars, grass, ash; 5 from 'Eavy Archive; the rest from base areas of library schemes), filtered by terrain type. In the scheme editor, "🪨 Add a base" / "Use a base recipe" copies a base into your scheme.
 - "Before you start" in every scheme (library and your own, updating as you edit): painting order worked out from the area names, techniques used (each opens its guide), paint count, estimated difficulty, and a Print / PDF sheet with the recipe in painting order.
 - Guides: a new page (also a tab in Schemes) with 19 technique guides (what, when, brush, thinning, mistakes, video search) and a Getting started guide. Techniques in recipe steps open their guide in a side panel.
 - Scheme library: 125 more schemes from 'Eavy Archive (chapters, craftworlds, hive fleets and more), with mixes, ratios and notes kept. Library now has 598 schemes.
