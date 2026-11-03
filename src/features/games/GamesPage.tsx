@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { editionOfRepo } from '../../data/catalogue/fetch'
 import type { Catalogue } from '../../domain/catalogue/types'
-import { addPoints, endGame, gameStats, newGame, nextTurn, result, ROUNDS, setCp, toggleDestroyed, totals, type Game, type SideKey, type StatRow } from '../../domain/games/games'
+import { addPoints, endGame, gameStats, newGame, result, ROUNDS, setCp, toggleDestroyed, totals, type Game, type SideKey, type StatRow } from '../../domain/games/games'
 import type { ArmyList } from '../../domain/lists/types'
 import { importListFile } from '../armies/ImportForm'
+import { advanceTurn } from '../../domain/games/companion'
+import { Companion } from './Companion'
 
 const RESULT = { win: 'W', loss: 'L', draw: 'D' } as const
 const RESULT_CLASS = { win: 'text-ok', loss: 'text-danger', draw: 'text-muted' } as const
@@ -14,13 +16,15 @@ export function GamesPage() {
   const { games } = useStore()
   const live = games.find((g) => g.status === 'live')
   const [starting, setStarting] = useState(false)
+  const [companion, setCompanion] = useState(false)
+  if (live && companion) return <Companion game={live} onExit={() => setCompanion(false)} />
   return (
     <div className="grid gap-4">
       <header className="flex items-center justify-between">
         <h1 className="font-display text-2xl text-accent">Games</h1>
         {!live && !starting && <button className="btn btn-primary" onClick={() => setStarting(true)}>▶ New game</button>}
       </header>
-      {live ? <LiveGame game={live} /> : starting && <NewGameForm onCancel={() => setStarting(false)} onStarted={() => setStarting(false)} />}
+      {live ? <LiveGame game={live} onCompanion={() => setCompanion(true)} /> : starting && <NewGameForm onCancel={() => setStarting(false)} onStarted={() => setStarting(false)} />}
       <History />
     </div>
   )
@@ -102,7 +106,7 @@ function useEntryNames() {
   return (l?: ArmyList) => (l?.entries ?? []).map((e) => ({ id: e.id, name: names.get(e.datasheetId) ?? 'Unknown unit', models: e.models }))
 }
 
-function LiveGame({ game: g }: { game: Game }) {
+function LiveGame({ game: g, onCompanion }: { game: Game; onCompanion: () => void }) {
   const { saveGame, deleteGame, lists } = useStore()
   const [ending, setEnding] = useState(false)
   const [notes, setNotes] = useState('')
@@ -167,7 +171,8 @@ function LiveGame({ game: g }: { game: Game }) {
         <span className="font-display text-xl">Round {g.round} / {ROUNDS}</span>
         <span className="text-sm" role="status">{g.turn === 'me' ? 'Your turn' : `${g.them.name}'s turn`}</span>
         {g.mission && <span className="text-sm text-muted">{g.mission}{g.deployment ? ` · ${g.deployment}` : ''}</span>}
-        <button className="btn btn-primary ml-auto" disabled={g.round === ROUNDS && g.turn !== g.first} onClick={() => save(nextTurn(g, c))}>Next turn ▶</button>
+        <button className="btn ml-auto" onClick={onCompanion}>📱 Companion</button>
+        <button className="btn btn-primary" disabled={g.round === ROUNDS && g.turn !== g.first} onClick={() => save(advanceTurn(g, c))}>Next turn ▶</button>
         <button className="btn" onClick={() => setEnding(true)}>End game</button>
         <button className="btn btn-danger" onClick={() => { if (confirm('Delete this game?')) void deleteGame(g.id) }}>Delete</button>
       </div>

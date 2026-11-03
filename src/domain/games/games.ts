@@ -36,6 +36,12 @@ export interface Game {
   me: Side
   them: Side
   notes: string
+  /** Companion (#72): current phase index in PHASES. */
+  phase?: number
+  /** Companion: wounds left per model, by list entry id (my units). */
+  wounds?: Record<string, number[]>
+  /** Companion: time used per player in ms, and when the running clock started. */
+  clock?: { me: number; them: number; since?: string }
   createdAt: string
   updatedAt: string
 }
