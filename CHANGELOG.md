@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Backlog board (#91): a Table | Board switch on the Backlog. One column per painting stage (your custom stages too), one card per group of models, so a unit split across stages shows up in each. Drag a card to another stage, or use its "Move…" menu (works on touch); both open the usual Move dialog, so you can move only some models and add a date, note or photo. The view is remembered.
+
 ## [0.11.2] - 2026-11-03
 
 ### Added
