@@ -68,6 +68,8 @@ it('shows "Before you start" with painting order, techniques and a printable she
   expect(fake.print).toHaveBeenCalled()
   expect(written[0]).toContain('Recipe, in painting order')
   expect(written[0]).toContain('Black Templars')
+  expect(written[0]).toContain('How to: techniques used')
+  expect(written[0]).toContain('main flat colour')
 })
 
 it('shows "Before you start" in the editor for your own schemes, updating as you edit', async () => {
