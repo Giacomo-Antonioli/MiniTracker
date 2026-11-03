@@ -11,6 +11,7 @@ import { RulesPage } from '../features/rules/RulesPage'
 import { SchemesPage } from '../features/schemes/SchemesPage'
 import { StatsPage } from '../features/stats/StatsPage'
 import { SuppliesPage } from '../features/supplies/SuppliesPage'
+import { GoalsPage } from '../features/goals/GoalsPage'
 import { isLow } from '../domain/supplies/supplies'
 import { GamesPage } from '../features/games/GamesPage'
 import { ShoppingPage } from '../features/shopping/ShoppingPage'
@@ -19,7 +20,7 @@ import { SettingsPage, type SettingsSection } from '../features/settings/Setting
 import { readStartPage, useStore } from './store'
 import { HomePage } from '../features/home/HomePage'
 
-type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'games' | 'settings'
+type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'games' | 'settings'
 
 const SOON: string[] = []
 
@@ -98,6 +99,7 @@ export default function App() {
         {nav('schemes', 'Schemes')}
         {nav('shopping', 'Shopping')}
         {nav('stats', 'Stats')}
+        {nav('goals', 'Goals')}
         {nav('games', liveGame ? 'Games ●' : 'Games')}
         {SOON.map((s) => (
           <span key={s} className="px-3 py-1.5 text-muted/60" title="Coming in a later sprint">{s} ⌛</span>
@@ -140,6 +142,8 @@ export default function App() {
           <SuppliesPage />
         ) : page === 'games' ? (
           <GamesPage />
+        ) : page === 'goals' ? (
+          <GoalsPage />
         ) : page === 'stats' ? (
           <StatsPage />
         ) : page === 'browse' ? (
