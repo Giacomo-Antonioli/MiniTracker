@@ -64,3 +64,16 @@ it('shows "Before you start" with painting order, techniques and a printable she
   expect(written[0]).toContain('Recipe, in painting order')
   expect(written[0]).toContain('Black Templars')
 })
+
+it('shows "Before you start" in the editor for your own schemes, updating as you edit', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  await waitFor(() => expect(useStore.getState().ready).toBe(true))
+  await user.click(screen.getByRole('button', { name: 'Schemes' }))
+  await user.click(screen.getByRole('button', { name: '+ New scheme' }))
+  const editor = await screen.findByRole('region', { name: 'Scheme editor' })
+  expect(within(editor).queryByRole('group', { name: 'Before you start' })).toBeNull()
+  await user.click(within(editor).getByRole('button', { name: /\+ Area/ }))
+  const box = within(editor).getByRole('group', { name: 'Before you start' })
+  expect(within(box).getByRole('list', { name: 'Painting order' })).toBeTruthy()
+})
