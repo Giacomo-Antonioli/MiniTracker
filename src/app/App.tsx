@@ -10,19 +10,21 @@ import { SchemesPage } from '../features/schemes/SchemesPage'
 import { StatsPage } from '../features/stats/StatsPage'
 import { SuppliesPage } from '../features/supplies/SuppliesPage'
 import { isLow } from '../domain/supplies/supplies'
+import { GamesPage } from '../features/games/GamesPage'
 import { ShoppingPage } from '../features/shopping/ShoppingPage'
 import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeImport'
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { readStartPage, useStore } from './store'
 import { HomePage } from '../features/home/HomePage'
 
-type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'settings'
+type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'games' | 'settings'
 
-const SOON = ['Games']
+const SOON: string[] = []
 
 export default function App() {
   const { ready, load, theme } = useStore()
   const lowSupplies = useStore((s) => s.supplies.filter(isLow).length)
+  const liveGame = useStore((s) => s.games.some((g) => g.status === 'live'))
   // A recipe sent by the bookmarklet arrives in the URL (#recipe=…): start on Schemes with it.
   const [recipe, setRecipe] = useState<RecipePayload | null>(() => readRecipeHash(location.hash))
   const [page, setPage] = useState<Page>(() => (readRecipeHash(location.hash) ? 'schemes' : readStartPage()))
@@ -92,6 +94,7 @@ export default function App() {
         {nav('schemes', 'Schemes')}
         {nav('shopping', 'Shopping')}
         {nav('stats', 'Stats')}
+        {nav('games', liveGame ? 'Games ●' : 'Games')}
         {SOON.map((s) => (
           <span key={s} className="px-3 py-1.5 text-muted/60" title="Coming in a later sprint">{s} ⌛</span>
         ))}
@@ -130,6 +133,8 @@ export default function App() {
           <ShoppingPage />
         ) : page === 'supplies' ? (
           <SuppliesPage />
+        ) : page === 'games' ? (
+          <GamesPage />
         ) : page === 'stats' ? (
           <StatsPage />
         ) : page === 'browse' ? (

@@ -5,6 +5,7 @@ import { WISHLISTED } from '../../domain/collection/pipeline'
 import { addCard, CARDS, DEFAULT_LAYOUT, hiddenCards, moveCard, optionOf, removeCard, setOption, setSize, type CardLayout, type CardSize } from '../../domain/home/layout'
 import { missingForSchemes } from '../../domain/paints/missing'
 import { totals } from '../../domain/shopping/shopping'
+import { gameStats, result, totals as scoreOf } from '../../domain/games/games'
 import { isLow, lowPaints } from '../../domain/supplies/supplies'
 import { activityByDay, byRole, paintUsage, pileAge, pointsOverTime, records, spending, stageFlow } from '../../domain/stats/more'
 import { byFaction, byMonth, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileLevel, pileNow, recentMoves, recentUnits, streakWeeks } from '../../domain/stats/stats'
@@ -13,7 +14,7 @@ import { StageBar, stageColour } from '../backlog/BacklogTable'
 import { ActivityCalendar, HBars, MonthArea, MonthBars } from '../stats/charts'
 import { forecast, Tile, useAllEvents, usePointsOf } from '../stats/StatsPage'
 
-type Go = 'backlog' | 'stats' | 'shopping' | 'paints' | 'supplies'
+type Go = 'backlog' | 'stats' | 'shopping' | 'paints' | 'supplies' | 'games'
 
 const AGO = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
 /** "today", "yesterday", "3 days ago", "2 months ago". */
@@ -30,7 +31,7 @@ const Link = ({ onClick, children }: { onClick?: () => void; children: ReactNode
   onClick ? <button className="text-sm text-muted hover:text-accent" onClick={onClick}>{children}</button> : null
 
 export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: string) => void; onGo?: (p: Go) => void; onAddUnit?: () => void }) {
-  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints, homeLayout, saveHomeLayout, supplies } = useStore()
+  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints, homeLayout, saveHomeLayout, supplies, games } = useStore()
   const events = useAllEvents()
   const { pointsOf, roleOf, factionName } = usePointsOf()
   const [editing, setEditing] = useState(false)
@@ -188,6 +189,32 @@ export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: st
             </div>
           ),
         } : null
+      }
+      case 'games': {
+        const live = games.find((g) => g.status === 'live')
+        const done = games.filter((g) => g.status === 'done').sort((a, b) => b.date.localeCompare(a.date))
+        if (!live && !done.length) return null
+        const all = gameStats(games, () => undefined).overall
+        return {
+          action: <Link onClick={onGo && (() => onGo('games'))}>{live ? 'Continue →' : 'Games →'}</Link>,
+          content: (
+            <div className="grid gap-2 text-sm">
+              {live && <p className="font-semibold text-accent">● Game in progress vs {live.them.name}: round {live.round}, {scoreOf(live.me).total}–{scoreOf(live.them).total}</p>}
+              {done.length > 0 && <p className="text-muted">{all.played} played · {all.wins}-{all.losses}-{all.draws} · {Math.round((all.wins / all.played) * 100)}% wins</p>}
+              <ul className="grid gap-1">
+                {done.slice(0, 3).map((g) => {
+                  const r = result(g)
+                  return (
+                    <li key={g.id} className="flex justify-between gap-2">
+                      <span className="truncate">vs {g.them.name}{g.them.faction ? ` (${g.them.faction})` : ''}</span>
+                      <span className="shrink-0 tabular-nums">{scoreOf(g.me).total}–{scoreOf(g.them).total} <b className={r === 'win' ? 'text-ok' : r === 'loss' ? 'text-danger' : 'text-muted'}>{r === 'win' ? 'W' : r === 'loss' ? 'L' : 'D'}</b></span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          ),
+        }
       }
       case 'low': {
         const paintsLow = lowPaints(paintStock, paints)

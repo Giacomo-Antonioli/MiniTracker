@@ -4,6 +4,15 @@ import { EDITIONS } from '../../data/catalogue/fetch'
 import { readRoster } from '../../data/lists/rosz'
 import { listFromJson, listFromRoster, listFromText, type ImportResult } from '../../domain/lists/io'
 import type { EditionKey } from '../../domain/lists/types'
+import type { Catalogue } from '../../domain/catalogue/types'
+
+/** A list from a file: BattleScribe / NewRecruit .rosz/.ros, MiniTracker .json or text. */
+export async function importListFile(f: File, cat: Catalogue, edition: EditionKey): Promise<ImportResult> {
+  const name = f.name.toLowerCase()
+  if (name.endsWith('.json')) return listFromJson(await f.text(), ctx())
+  if (name.endsWith('.txt')) return listFromText(await f.text(), cat, edition, ctx())
+  return listFromRoster(readRoster(new Uint8Array(await f.arrayBuffer())), cat, edition, ctx())
+}
 
 /** Import a list: BattleScribe / NewRecruit .rosz/.ros, MiniTracker .json, or text (file or pasted). */
 export function ImportForm({ onCancel, onOpen }: { onCancel: () => void; onOpen: (id: string) => void }) {
@@ -30,10 +39,7 @@ export function ImportForm({ onCancel, onOpen }: { onCancel: () => void; onOpen:
   const fromFile = (f: File) =>
     run(async () => {
       if (!cat || !edition) throw new Error('Install a catalogue first')
-      const name = f.name.toLowerCase()
-      if (name.endsWith('.json')) return listFromJson(await f.text(), ctx())
-      if (name.endsWith('.txt')) return listFromText(await f.text(), cat, edition, ctx())
-      return listFromRoster(readRoster(new Uint8Array(await f.arrayBuffer())), cat, edition, ctx())
+      return importListFile(f, cat, edition)
     })
 
   if (done) {
