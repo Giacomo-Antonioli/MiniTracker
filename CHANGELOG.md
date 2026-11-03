@@ -4,15 +4,18 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
-### Fixed
-- Stats charts no longer overflow their cards.
+## [0.9.0] - 2026-11-03
+
 ### Added
+- Closest colour match (CIEDE2000): closest paints you own and closest in any brand on each paint, a "Match a colour" picker for any hex colour, and the closest owned substitute for missing paints in schemes (#30).
+- Magnet editor in the unit form: add, edit and remove magnet slots per model group, with options picked from the datasheet's wargear (#32).
 - Cost tracking: price paid per unit, purchases (boxes, bundles) shared across units by model count, a currency setting, and a Costs section on Stats with total spent and collection value painted vs unpainted (#94).
+
 ### Changed
 - Games: "Discard game" next to "Save game" when ending a game, and a delete button on every row of the game history.
-### Added
-- Magnet editor in the unit form: add, edit and remove magnet slots per model group, with options picked from the datasheet's wargear (#32).
-- Closest colour match (CIEDE2000): closest paints you own and closest in any brand on each paint, a "Match a colour" picker for any hex colour, and the closest owned substitute for missing paints in schemes (#30).
+
+### Fixed
+- Stats charts no longer overflow their cards.
 
 ## [0.8.0] - 2026-11-03
 
@@ -189,7 +192,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.6.0...v0.6.1
