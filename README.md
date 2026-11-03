@@ -26,6 +26,10 @@ No account, no server: your collection stays in your browser. Install it from th
 - **Backup.** Export everything to one JSON file; restore it on any device.
 - **Themes.** *Grimdark* (modern dark) and *Forum 2005* (old-school fantasy forum).
 
+**New in v0.7**
+
+Stratagem cards, running-low paints and supplies, photo timeline
+
 **New in v0.6**
 
 Home dashboard, Stats page and customisable cards

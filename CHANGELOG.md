@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-03
+
 ### Added
 - Stratagem cards (#98): import Wahapedia's Stratagems.csv and Detachment_abilities.csv in Settings → Catalogue (links there; kept in your data and backups). The Army PDF can add the rules and stratagem cards of the list's detachments plus the core stratagems; a detachment whose name differs is picked once from a list. Powered by Wahapedia.
 - Running low (#92): marking a paint "Running low" puts it on the shopping list. New Supplies page (primer, glue, brushes…) with stock and an alert level: reaching it flags the supply, adds it to the shopping list and shows a ⚠ count in the menu. A "Running low" card on Home lists both.
@@ -171,7 +173,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.5...v0.6.0
 [0.5.5]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.5.4...v0.5.5
