@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-03
+
 ### Added
 - Scheme library grows from 43 T'au schemes to 473 community recipes for 28 Warhammer 40k factions (#57): the scraper now reads every faction listing on Paint Pad, tags sub-factions (chapters, craftworlds, hive fleets…) and unit types, and drops duplicate recipes.
 - Home: a Goals card with progress bars (unfinished goals first; 3, 5 or 10 goals).
@@ -200,7 +202,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.6.1...v0.7.0
