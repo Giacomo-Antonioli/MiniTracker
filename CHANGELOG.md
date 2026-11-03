@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Cost tracking: price paid per unit, purchases (boxes, bundles) shared across units by model count, a currency setting, and a Costs section on Stats with total spent and collection value painted vs unpainted (#94).
 ### Changed
 - Games: "Discard game" next to "Save game" when ending a game, and a delete button on every row of the game history.
 ### Added

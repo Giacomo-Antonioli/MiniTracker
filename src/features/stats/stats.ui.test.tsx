@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../app/App'
 import { appDb, useStore } from '../../app/store'
 import { parseBsData } from '../../data/catalogue/bsdata'
@@ -79,5 +79,53 @@ describe('Stats', () => {
 
   it('words the finish estimate', () => {
     expect([forecast(undefined), forecast(0), forecast(1), forecast(14), forecast(30)]).toEqual(['—', 'Done', 'about 1 month', 'about 14 months', 'about 3 years'])
+  })
+})
+
+describe('Costs', () => {
+  it('adds a purchase shared by units and shows spent and value painted vs unpainted', async () => {
+    const now = new Date().toISOString()
+    let n = 0
+    const ctx = { now, newId: () => `c${++n}` }
+    await appDb.units.put({ ...createUnit({ customName: 'Squad', groups: [{ count: 5, status: 'painted' }, { count: 5, status: 'built' }] }, ctx), price: 10 })
+    await appDb.units.put(createUnit({ customName: 'Tanks', groups: [{ count: 2, status: 'built' }] }, ctx))
+    await appDb.units.put(createUnit({ customName: 'Bikes', groups: [{ count: 3, status: 'built' }] }, ctx))
+    const user = userEvent.setup()
+    render(<App />)
+    await waitFor(() => expect(useStore.getState().ready).toBe(true))
+    await user.click(screen.getByRole('button', { name: 'Stats' }))
+    const costs = within(await screen.findByRole('region', { name: 'Costs' }))
+    expect(costs.getByText('2 units have no price yet: set it on the unit or add a purchase.')).toBeTruthy()
+
+    await user.click(costs.getByRole('button', { name: '+ Purchase' }))
+    const form = within(costs.getByRole('form', { name: 'Purchase' }))
+    await user.click(form.getByRole('button', { name: 'Save purchase' }))
+    expect(form.getByRole('alert')).toHaveTextContent('needs a name')
+    await user.type(form.getByLabelText('Name'), 'Bundle')
+    const price = form.getByLabelText('Price (€)')
+    await user.clear(price)
+    await user.type(price, '50')
+    await user.type(form.getByLabelText('Filter units'), 'ta')
+    expect(form.queryByLabelText('Bikes')).toBeNull()
+    await user.click(form.getByLabelText('Tanks'))
+    await user.clear(form.getByLabelText('Filter units'))
+    await user.click(form.getByLabelText('Bikes'))
+    await user.click(form.getByRole('button', { name: 'Save purchase' }))
+
+    expect(await costs.findByText('Bundle')).toBeTruthy()
+    expect(costs.getByText('Tanks, Bikes')).toBeTruthy()
+    const value = (label: string) => costs.getByText(label).nextSibling?.textContent
+    expect(value('Total spent')).toBe('€60')
+    expect(value('Value painted')).toBe('€5')
+    expect(value('Value unpainted')).toBe('€55')
+    expect(costs.queryByText(/no price yet/)).toBeNull()
+
+    await user.click(costs.getByRole('button', { name: 'Edit Bundle' }))
+    await user.click(within(costs.getByRole('form', { name: 'Purchase' })).getByRole('button', { name: 'Cancel' }))
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    await user.click(costs.getByRole('button', { name: 'Delete Bundle' }))
+    expect(costs.queryByText('Bundle')).toBeNull()
+    await useStore.getState().setCurrency('£')
+    expect((await costs.findAllByText('£10')).length).toBeGreaterThan(0)
   })
 })
