@@ -80,13 +80,15 @@ export interface Storage {
   places: Place[]
   /** Storage-flow stage per unit. */
   flow: Record<string, string>
+  /** Short codes (U-007, B-03) of units and places, by id. */
+  codes: Record<string, string>
   homes: Record<string, Home>
   /** Checked-out units: unit id → place it is in now. */
   out: Record<string, string>
   log: StorageMove[]
 }
 
-export const EMPTY_STORAGE: Storage = { sites: [], kinds: PLACE_KINDS, places: [], flow: {}, homes: {}, out: {}, log: [] }
+export const EMPTY_STORAGE: Storage = { sites: [], kinds: PLACE_KINDS, places: [], flow: {}, codes: {}, homes: {}, out: {}, log: [] }
 
 type Ctx = { now: string; newId: () => string }
 
@@ -298,6 +300,7 @@ export function parseStorage(x: unknown): Storage {
     kinds,
     places,
     flow: isObj(x.flow) ? (x.flow as Record<string, string>) : {},
+    codes: isObj(x.codes) ? (x.codes as Record<string, string>) : {},
     homes: isObj(x.homes) ? (x.homes as Record<string, Home>) : {},
     out: isObj(x.out) ? (x.out as Record<string, string>) : {},
     log: Array.isArray(x.log) ? (x.log as StorageMove[]) : [],

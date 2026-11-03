@@ -6,6 +6,7 @@ import {
   saveSite, setFlow, setHome, siteOf, sitePlaces, unitLog, whereIs, type KindDef, type Place, type Site, type Storage,
 } from '../../domain/storage/storage'
 import { Dialog } from '../../ui/Dialog'
+import { CodeBadge, FindCode, LabelsDialog } from './Labels'
 
 const icon = (k: string) => kindOf(useStore.getState().storage, k).icon
 
@@ -134,6 +135,7 @@ function PlaceDetail({ id, onOpenUnit, onEdit, onDeleted, onOpenPlace, full }: {
           <button className="btn" onClick={() => { if (confirm(`Remove "${p.name}"? What is inside moves up one level and its units lose this home.`)) { run((x) => removePlace(x, id, ctx())); onDeleted() } }}>Delete</button>
         </div>
       </header>
+      {full && <CodeBadge id={id} kind="place" />}
       {inside.length > 0 && (
         <p className="flex flex-wrap gap-2 text-sm">Inside:{inside.map((x) => onOpenPlace ? <button key={x.id} className="text-accent underline" onClick={() => onOpenPlace(x.id)}>{icon(x.kind)} {x.name}</button> : <span key={x.id}>{icon(x.kind)} {x.name}</span>)}</p>
       )}
@@ -237,6 +239,7 @@ export function StoragePage({ onOpenUnit, onOpenPlace }: { onOpenUnit: (id: stri
   }
   const [sel, setSel] = useState<string>()
   const [form, setForm] = useState<'new' | 'edit' | 'site' | 'edit-site' | null>(null)
+  const [labels, setLabels] = useState(false)
   const site = s.sites.find((x) => x.id === siteId) ?? s.sites[0]
   const out = Object.keys(s.out).length
   const rows = tree(s, site?.id ?? null)
@@ -244,8 +247,13 @@ export function StoragePage({ onOpenUnit, onOpenPlace }: { onOpenUnit: (id: stri
     <div className="grid gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="font-display text-2xl text-accent">Storage</h1>
-        <span className="text-sm text-muted">{s.places.length} places · {Object.keys(s.homes).length} units stored{out ? ` · ${out} checked out` : ''}</span>
+        <div className="flex flex-wrap items-start gap-2">
+          <FindCode onFound={(t) => (t.kind === 'unit' ? onOpenUnit(t.id) : onOpenPlace(t.id))} />
+          <button className="btn" onClick={() => setLabels(true)}>🏷 Labels</button>
+        </div>
       </header>
+      <p className="-mt-2 text-sm text-muted">{s.places.length} places · {Object.keys(s.homes).length} units stored{out ? ` · ${out} checked out` : ''}</p>
+      {labels && <LabelsDialog onClose={() => setLabels(false)} />}
       <div className="flex flex-wrap items-center gap-1 border-b border-line" role="tablist" aria-label="Storages">
         {s.sites.map((x) => (
           <button key={x.id} role="tab" aria-selected={site?.id === x.id} className={`rounded-t px-3 py-1.5 ${site?.id === x.id ? 'bg-panel-2 text-accent' : 'text-muted hover:text-fg'}`} onClick={() => { setSiteId(x.id); setSel(undefined); setForm(null) }}>
@@ -353,6 +361,7 @@ export function UnitStorage({ unit }: { unit: OwnedUnit }) {
   return (
     <section className="grid gap-2 border-b border-line p-4" aria-label="Storage">
       <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">Storage</h3>
+      <CodeBadge id={unit.id} kind="unit" />
       {s.places.length === 0 ? <p className="text-sm text-muted">Add boxes and other places on the Storage page first.</p> : (
         <>
           <div className="flex flex-wrap items-center gap-2 text-sm">

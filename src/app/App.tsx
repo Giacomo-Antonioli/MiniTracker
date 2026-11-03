@@ -20,6 +20,7 @@ import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeIm
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { readStartPage, useStore } from './store'
 import { HomePage } from '../features/home/HomePage'
+import { codeFromText, findCode } from '../domain/storage/codes'
 import { PlacePage, StoragePage } from '../features/storage/Storage'
 import { CompanionHub, WorkCompanion } from '../features/companion/WorkCompanion'
 
@@ -83,6 +84,27 @@ export default function App() {
   }, [companion])
   const PAGE_NAME: Partial<Record<Page, string>> = { home: 'Home', backlog: 'Backlog', unit: 'unit page' }
 
+  // A scanned QR opens the app with #code=U-007: open that unit or place.
+  const [missingCode, setMissingCode] = useState('')
+  useEffect(() => {
+    if (!ready) return
+    const open = () => {
+      const code = codeFromText(location.hash)
+      if (!code) return
+      history.replaceState(null, '', location.pathname + location.search)
+      const t = findCode(useStore.getState().storage, code)
+      if (!t) return setMissingCode(code)
+      setMissingCode('')
+      useStore.getState().closeCompanion()
+      if (t.kind === 'unit') openUnit(t.id)
+      else openPlace(t.id)
+    }
+    open()
+    addEventListener('hashchange', open)
+    return () => removeEventListener('hashchange', open)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready])
+
   useEffect(() => {
     void load()
   }, [load])
@@ -145,6 +167,7 @@ export default function App() {
       </nav>
       <main className="min-w-0 flex-1 overflow-auto p-4">
         {ready && shared && <SharedSchemeBanner token={shared} onDone={(id) => { setShared(null); if (id) openScheme(id) }} />}
+        {missingCode && <p className="panel mb-3 p-3 text-sm" role="alert">No unit or place with code {missingCode} on this device. Restore a backup from the device where you made the labels. <button className="underline" onClick={() => setMissingCode('')}>Dismiss</button></p>}
         {!ready ? (
           <p className="text-muted">Loading…</p>
         ) : page === 'companion' ? (
