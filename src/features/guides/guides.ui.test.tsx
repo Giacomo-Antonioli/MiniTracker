@@ -132,6 +132,7 @@ it('shows terrain recipes filtered by surface', async () => {
   expect(screen.getByRole('group', { name: 'How to paint terrain' })).toBeTruthy()
   expect(screen.getByRole('region', { name: 'Drybrush and shade' })).toBeTruthy()
   expect(screen.getByRole('region', { name: 'Build and lay out' })).toBeTruthy()
+  expect(screen.getByRole('region', { name: 'Beginner projects' })).toBeTruthy()
   expect(screen.getByRole('img', { name: /Where dirt goes/ })).toBeTruthy()
   expect(await screen.findByRole('article', { name: 'Terrain Grey Imperial ruins' })).toBeTruthy()
   expect(screen.getByRole('article', { name: 'Terrain Plasma Pipes' })).toBeTruthy()

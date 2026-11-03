@@ -17,12 +17,26 @@ export function terrainKinds(text: string): string[] {
 
 /** How to paint terrain: what several published guides agree on, in our own words. */
 export const TERRAIN_GUIDE: { title: string; points: string[] }[] = [
-  { title: 'Build and lay out', points: [
-    'Cheap materials work: XPS foam for rocks and hills, cardboard and coffee stirrers for buildings, cork for rubble.',
+  { title: 'Materials', points: [
+    'Structure: XPS insulation foam (cheap, easy to cut and texture), foamcore for flat walls and floors, cardboard for ruins.',
+    'Detail: sand and fine grit for ground, cat litter or coarse ballast for rubble, twigs and bark for forests, plastic card for doors and panels.',
+    'Glue: PVA for texture and sealing, a hot glue gun for big structures, super glue for small parts and resin.',
+    'Paint: cheap black spray primer and craft acrylics are fine for terrain; a good drybrush matters more than the paint.',
     'Seal foam with PVA or a brush-on primer before any spray: spray solvents melt foam.',
+  ] },
+  { title: 'Build and lay out', points: [
+    'Give every piece a base (MDF or thick card): terrain without one looks unfinished.',
     'Build in batches to save time and keep a matching look across the table.',
     'Mix big pieces that block line of sight with small scatter terrain; use height (walkways, hills), not only flat pieces.',
-    'Do not push everything to the table edges; keep pieces modular so they store and transport easily.',
+    'Build for your game: 40K wants medium–high density (ruins, barricades), Kill Team dense urban ruins, Age of Sigmar medium (ruins, forests), Trench Crusade trenches, wire and craters.',
+    'Do not push everything to the table edges; keep pieces modular so they store and travel easily.',
+    'Mix scratch-built rubble and walls with one or two kits as centrepieces.',
+  ] },
+  { title: 'Beginner projects', points: [
+    'Rubble piles (30 min, almost free): foam scraps glued to card, sand and cat litter, black primer, grey drybrush.',
+    'Ruined walls (1–2 h): cut foam walls, press bricks in with a ballpoint pen, rubble at the foot, prime and drybrush.',
+    'Forest bases (1 h): model or aquarium trees on MDF, sand and flock on the base, paint and seal; trees can lift out.',
+    'Modular ruins (3–4 h): foamcore walls with doors and windows, foam rubble, plastic-card detail, in sections you can rearrange.',
   ] },
   { title: 'Prepare', points: [
     'Wash resin and 3D-printed pieces in warm soapy water; glue and fill gaps before priming.',
@@ -53,6 +67,7 @@ export const TERRAIN_GUIDE: { title: string; points: string[] }[] = [
 ]
 
 export const TERRAIN_SOURCES = [
+  { title: 'Tista Minis: How to build better wargame terrain', url: 'https://tistaminis.com/blogs/blog/how-to-build-better-terrain-for-your-tabletop-games' },
   { title: 'Tista Minis: Cinematic Warhammer terrain on a budget', url: 'https://tistaminis.com/blogs/blog/how-to-build-cinematic-warhammer-terrain-on-a-budget-step-by-step' },
   { title: 'Tista Minis: Building better battlefields', url: 'https://tistaminis.com/blogs/blog/star-wars-legion-terrain-guide-building-better-battlefields' },
   { title: 'Mind Games: Tabletop terrain guide', url: 'https://www.m-g.com.au/tabletop-terrain-guide-better-battlefields/' },
