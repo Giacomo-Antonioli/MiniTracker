@@ -17,6 +17,7 @@
     "paints:seed": "node --experimental-strip-types --no-warnings tools/paints/build-seed.mjs"
   },
   "dependencies": {
+    "@zxing/library": "^0.23.0",
     "dexie": "^4.4.7",
     "fast-xml-parser": "^5.11.2",
     "fflate": "^0.8.3",

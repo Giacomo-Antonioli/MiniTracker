@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ScanBoxButton } from '../barcodes/BoxScan'
 import { createPortal } from 'react-dom'
 import { useStore } from '../../app/store'
 import { itemsOn, MAIN, shoppingText, totals } from '../../domain/shopping/shopping'
@@ -39,6 +40,7 @@ export function ShoppingPage() {
       <section className="flex-1" aria-label={title}>
         <header className="flex flex-wrap items-center gap-2">
           <h1 className="text-xl font-bold">{title}</h1>
+          <ScanBoxButton />
           {list && (
             <>
               <button className="btn" onClick={() => { const n = prompt('Rename list', list.name); if (n) void renameShopList(list.id, n) }}>Rename</button>

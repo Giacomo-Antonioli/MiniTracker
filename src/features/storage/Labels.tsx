@@ -1,10 +1,11 @@
-import jsQR from 'jsqr'
 import QRCode from 'qrcode'
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../../app/store'
 import { assignCodes, codeFromText, codeLink, findCode, stencilPath, type CodeTarget } from '../../domain/storage/codes'
 import { homedIn, kindOf, pathLabel, type Storage } from '../../domain/storage/storage'
 import { Dialog } from '../../ui/Dialog'
+import { isBarcode } from '../../domain/barcodes/barcodes'
+import { decodeFrame } from './decode'
 
 export type LabelLayout = 'stickers' | 'boxes' | 'stencil'
 export interface LabelItem { code: string; name: string; sub: string; contents: string[]; qr: string }
@@ -147,12 +148,17 @@ export function CodeBadge({ id, kind }: { id: string; kind: 'unit' | 'place' }) 
 }
 
 /** Type a code or scan a QR with the camera; calls onFound with the unit or place. */
-export function FindCode({ onFound }: { onFound: (t: CodeTarget) => void }) {
+export function FindCode({ onFound, onBarcode }: { onFound: (t: CodeTarget) => void; onBarcode?: (code: string) => void }) {
   const { storage: s } = useStore()
   const [text, setText] = useState('')
   const [err, setErr] = useState('')
   const [scanning, setScanning] = useState(false)
   const go = (raw: string) => {
+    if (onBarcode && isBarcode(raw)) {
+      setErr('')
+      setScanning(false)
+      return onBarcode(raw.trim())
+    }
     const code = codeFromText(raw) ?? raw
     const t = findCode(s, code)
     if (t) {
@@ -174,7 +180,9 @@ export function FindCode({ onFound }: { onFound: (t: CodeTarget) => void }) {
   )
 }
 
-function ScanDialog({ onText, onClose }: { onText: (t: string) => void; onClose: () => void }) {
+/** Camera scanner for QR labels and box barcodes, with a typed fallback. */
+export function ScanDialog({ onText, onClose, title = 'Scan a QR or barcode' }: { onText: (t: string) => void; onClose: () => void; title?: string }) {
+  const [typed, setTyped] = useState('')
   const video = useRef<HTMLVideoElement>(null)
   const [err, setErr] = useState('')
   useEffect(() => {
@@ -191,8 +199,8 @@ function ScanDialog({ onText, onClose }: { onText: (t: string) => void; onClose:
         if (ctx) {
           ctx.drawImage(v, 0, 0)
           const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
-          const hit = jsQR(img.data, img.width, img.height)
-          if (hit?.data) return onText(hit.data)
+          const hit = decodeFrame(img.data, img.width, img.height)
+          if (hit) return onText(hit)
         }
       }
       requestAnimationFrame(tick)
@@ -213,9 +221,13 @@ function ScanDialog({ onText, onClose }: { onText: (t: string) => void; onClose:
     }
   }, [onText])
   return (
-    <Dialog title="Scan a QR" onClose={onClose}>
+    <Dialog title={title} onClose={onClose}>
       {err ? <p className="text-sm text-danger" role="alert">{err}</p> : <video ref={video} className="w-full rounded" muted playsInline aria-label="Camera" />}
-      <p className="mt-2 text-xs text-muted">Point the camera at a MiniTracker sticker or box label.</p>
+      <p className="mt-2 text-xs text-muted">Point the camera at a MiniTracker label or the barcode on a box.</p>
+      <form className="mt-2 flex gap-2" onSubmit={(e) => { e.preventDefault(); if (typed.trim()) onText(typed.trim()) }}>
+        <input className="input flex-1" aria-label="Type a code or barcode" placeholder="…or type it" value={typed} onChange={(e) => setTyped(e.target.value)} />
+        <button className="btn">OK</button>
+      </form>
     </Dialog>
   )
 }

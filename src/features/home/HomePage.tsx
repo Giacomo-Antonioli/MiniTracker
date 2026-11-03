@@ -1,4 +1,5 @@
 import { goalProgress, goalTitle } from '../../domain/goals/goals'
+import { ScanBoxButton } from '../barcodes/BoxScan'
 import { GoalBar } from '../goals/GoalBar'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useStore } from '../../app/store'
@@ -305,6 +306,8 @@ export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: st
     <div className="grid gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="font-display text-2xl text-accent">Home</h1>
+        <span className="flex-1" />
+        <ScanBoxButton onOpenUnit={onOpenUnit} />
         {editing ? (
           <div className="flex flex-wrap items-center gap-2">
             {hidden.length > 0 && (
