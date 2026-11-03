@@ -3,7 +3,7 @@ import { ctx, useStore } from '../../app/store'
 import { buildChecklist, paintChecklist, type CheckItem, type CompanionMode } from '../../domain/companion/companion'
 import type { ModelGroup } from '../../domain/collection/types'
 import { WISHLISTED } from '../../domain/collection/pipeline'
-import { newTimer, pauseOthers, resumeTimer, timersForUnit } from '../../domain/paintTime/paintTime'
+import { newTimer, pauseOthers, pauseTimer, resumeTimer, timersForUnit } from '../../domain/paintTime/paintTime'
 import { MoveDialog } from '../backlog/MoveDialog'
 import { StageSelect, TimerPanel, TimerRow, useLabels, useTick } from '../paintTime/PaintTime'
 
@@ -89,6 +89,11 @@ export function WorkCompanion({ backTo }: { backTo?: { label: string; go: () => 
     if (pauseRest) for (const t of pauseOthers(paintTimers, undefined, stamp())) await saveTimer(t)
     await saveTimer(newTimer(groups.map((g) => ({ unitId: unit.id, groupId: g.id, count: g.count })), ctx(), stage))
   }
+  // Leaving to paint other units pauses (and saves) this unit's running timers.
+  const pickAnother = async () => {
+    for (const t of mine.filter((x) => x.runningSince)) await saveTimer(pauseTimer(t, stamp()))
+    closeCompanion()
+  }
   const switchTo = async (id: string) => {
     const t = paintTimers.find((x) => x.id === id)!
     for (const x of pauseOthers(paintTimers, id, stamp())) await saveTimer(x)
@@ -105,7 +110,7 @@ export function WorkCompanion({ backTo }: { backTo?: { label: string; go: () => 
           <p className="text-muted">{unit.customName}{unit.factionName ? ` · ${unit.factionName}` : ''}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-        <button className="btn" onClick={closeCompanion}>Pick another unit</button>
+        <button className="btn" onClick={() => void pickAnother()}>Pick another unit</button>
         <button className="btn" onClick={() => openCompanion(mode === 'paint' ? 'build' : 'paint', unit.id, companion.timerId)}>
           Switch to {mode === 'paint' ? '🔨 Builder' : '🎨 Painter'}
         </button>

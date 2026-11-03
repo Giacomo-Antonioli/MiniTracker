@@ -157,3 +157,17 @@ it('pausing offers to pick another unit or go back, keeping the saved pause', as
   expect(await screen.findByRole('button', { name: 'Paint Alpha' })).toBeTruthy()
   expect(useStore.getState().paintTimers.every((t) => !t.runningSince)).toBe(true)
 })
+
+it('Pick another unit pauses and saves the running timer', async () => {
+  await seed()
+  const user = userEvent.setup()
+  render(<App />)
+  await user.click(await screen.findByRole('button', { name: 'Paint Alpha' }))
+  await user.click(await screen.findByRole('button', { name: '▶ Start timer' }))
+  await waitFor(() => expect(useStore.getState().paintTimers[0]?.runningSince).toBeTruthy())
+  await user.click(screen.getByRole('button', { name: 'Pick another unit' }))
+  expect(await screen.findByRole('region', { name: 'Pick a unit' })).toBeTruthy()
+  expect(useStore.getState().paintTimers[0].runningSince).toBeUndefined()
+  const saved = (await appDb.settings.get('paintTimers'))?.value as { runningSince?: string }[]
+  expect(saved[0].runningSince).toBeUndefined()
+})
