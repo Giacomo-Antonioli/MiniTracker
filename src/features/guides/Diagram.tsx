@@ -256,6 +256,67 @@ const DIAGRAMS: Record<DiagramId, { caption: string; svg: React.ReactNode }> = {
       </>
     ),
   },
+  'terrain-steps': {
+    caption: 'Terrain, fast: dark spray, light spray from above, shade, heavy drybrush, light drybrush.',
+    svg: (
+      <>
+        {[['#1a1a1a', '#1a1a1a', 'dark'], ['#1a1a1a', '#9a9a9a', 'zenith'], ['#3a3a3a', '#7a7a7a', 'shade'], ['#4a4a4a', '#9c9c9c', 'drybrush'], ['#555', '#d0d0d0', 'light']].map(([low, top, label], i) => (
+          <g key={label} transform={`translate(${8 + i * 46},18)`}>
+            <defs>
+              <linearGradient id={`dg-ts${i}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={top} /><stop offset="1" stopColor={low} /></linearGradient>
+            </defs>
+            <path d="M2,70 V20 h8 v-10 h8 v10 h8 v-14 h8 v24 h4 V70 Z" fill={`url(#dg-ts${i})`} />
+            {i >= 2 && <path d="M8,40 h24 M8,55 h24 M20,40 v15" stroke="#111" strokeWidth="1.5" opacity="0.7" />}
+            <text x="20" y="88" textAnchor="middle" fill={ink} fontSize="9">{label}</text>
+          </g>
+        ))}
+      </>
+    ),
+  },
+  grime: {
+    caption: 'Where dirt goes: grime low and in corners, streaks under ledges, moss at the base.',
+    svg: (
+      <>
+        <rect x="40" y="12" width="160" height="92" fill="#8f8a80" />
+        <rect x="40" y="40" width="160" height="6" fill="#6f6a60" />
+        {[60, 95, 130, 165].map((x) => <path key={x} d={`M${x},46 q2,14 0,28`} stroke="#4b4235" strokeWidth="3" opacity="0.6" fill="none" />)}
+        <rect x="40" y="84" width="160" height="20" fill="#4b4235" opacity="0.55" />
+        <path d="M40,104 q10,-10 20,0 q12,-8 22,0 q10,-6 20,0 L40,104 Z M150,104 q14,-12 26,0 q12,-8 24,0 Z" fill="#4f7a2e" />
+        <text x="206" y="50" fill={ink} fontSize="9">streaks</text>
+        <text x="206" y="96" fill={ink} fontSize="9">grime</text>
+        <text x="4" y="100" fill={ink} fontSize="9">moss</text>
+      </>
+    ),
+  },
+  'army-contrast': {
+    caption: 'Muted terrain makes a bright army stand out; avoid terrain in your army\'s colours.',
+    svg: (
+      <>
+        <rect x="10" y="14" width="104" height="80" rx="4" fill="#6f6a5e" />
+        <circle cx="62" cy="54" r="14" fill="#2f6fd6" />
+        <text x="62" y="108" textAnchor="middle" fill={ink} fontSize="10">✓ stands out</text>
+        <rect x="126" y="14" width="104" height="80" rx="4" fill="#2f5aa8" />
+        <circle cx="178" cy="54" r="14" fill="#2f6fd6" />
+        <text x="178" y="108" textAnchor="middle" fill={ink} fontSize="10">✗ blends in</text>
+      </>
+    ),
+  },
+  tufts: {
+    caption: 'Tufts where grass would grow: against rocks and the feet, not in the open; rim left clean.',
+    svg: (
+      <>
+        <ellipse cx="120" cy="70" rx="104" ry="36" fill="#111" />
+        <ellipse cx="120" cy="64" rx="100" ry="32" fill="#7a6247" />
+        <path d="M150,50 l14,-14 l18,4 l8,16 l-14,8 Z" fill="#8a8f98" />
+        <ellipse cx="100" cy="62" rx="12" ry="6" fill="#333" />
+        <ellipse cx="124" cy="66" rx="12" ry="6" fill="#333" />
+        {[[146, 58], [190, 60], [80, 72], [140, 76]].map(([x, y]) => <path key={`${x}`} d={`M${x},${y} l3,-10 l3,10 l3,-12 l3,12`} stroke="#6f9a3a" strokeWidth="2" fill="none" />)}
+        <text x="112" y="44" textAnchor="middle" fill={ink} fontSize="9">feet</text>
+        <text x="200" y="30" fill={ink} fontSize="9">rock</text>
+        <text x="20" y="112" fill={ink} fontSize="9">neat black rim</text>
+      </>
+    ),
+  },
   order: {
     caption: 'Basing order: texture → shade → drybrush → rim → tufts.',
     svg: (
