@@ -3,6 +3,7 @@ import {
   createUnit,
   mergeGroups,
   setMagnetSlots,
+  cleanMagnetSlots,
   splitGroup,
   totalModels,
   modelsByStatus,
@@ -193,5 +194,16 @@ describe('setMagnetSlots', () => {
         { now: T1 },
       ),
     ).toThrow(/slot/)
+  })
+})
+
+describe('cleanMagnetSlots', () => {
+  it('trims, dedupes options and drops empty rows', () => {
+    expect(cleanMagnetSlots([{ slot: ' arms ', optionIds: [' a', 'b ', 'a', ''] }, { slot: ' ', optionIds: [' '] }])).toEqual([{ slot: 'arms', optionIds: ['a', 'b'] }])
+  })
+  it('needs a name, two options and unique names', () => {
+    expect(() => cleanMagnetSlots([{ slot: '', optionIds: ['a', 'b'] }])).toThrow(/name/)
+    expect(() => cleanMagnetSlots([{ slot: 'x', optionIds: ['a', 'a'] }])).toThrow(/two options/)
+    expect(() => cleanMagnetSlots([{ slot: 'X', optionIds: ['a', 'b'] }, { slot: 'x', optionIds: ['c', 'd'] }])).toThrow(/Duplicate/)
   })
 })

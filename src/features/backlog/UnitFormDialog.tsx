@@ -4,7 +4,8 @@ import { ctx, useStore } from '../../app/store'
 import { pointsFor } from '../../domain/catalogue/points'
 import { factionLabel, searchDatasheets } from '../../domain/catalogue/search'
 import type { Datasheet } from '../../domain/catalogue/types'
-import { createUnit } from '../../domain/collection/ownedUnit'
+import { cleanMagnetSlots, createUnit } from '../../domain/collection/ownedUnit'
+import { MagnetEditor, fromMagnetDrafts, toMagnetDrafts, type MagnetDraft } from './MagnetEditor'
 import type { Lifecycle, Link, OwnedUnit } from '../../domain/collection/types'
 import { schemesForUnit } from '../../domain/schemes/match'
 import { SchemePicker } from '../schemes/SchemePicker'
@@ -17,7 +18,8 @@ interface GroupDraft {
   count: number
   status: string
   loadout: string
-  magnetised: OwnedUnit['groups'][number]['magnetised']
+  magnets: MagnetDraft[]
+  showMagnets?: boolean
 }
 
 const LEGENDS_INFO =
@@ -49,8 +51,8 @@ export function UnitFormDialog({
   const [datasheetId, setDatasheetId] = useState(unit?.datasheetId ?? preset?.datasheet.id)
   const [showLegends, setShowLegends] = useState(false)
   const [groups, setGroups] = useState<GroupDraft[]>(
-    unit?.groups.map((g) => ({ ...g, loadout: g.loadout.join(', ') })) ?? [
-      { count: preset?.datasheet.minModels ?? 1, status: firstOwnedStage(pipeline), loadout: '', magnetised: [] },
+    unit?.groups.map((g) => ({ id: g.id, count: g.count, status: g.status, loadout: g.loadout.join(', '), magnets: toMagnetDrafts(g.magnetised) })) ?? [
+      { count: preset?.datasheet.minModels ?? 1, status: firstOwnedStage(pipeline), loadout: '', magnets: [] },
     ],
   )
   const [tutorials, setTutorials] = useState<Link[]>(unit?.tutorials ?? [])
@@ -125,6 +127,7 @@ export function UnitFormDialog({
         nextUp,
         lifecycle,
       }
+      const magnets = groups.map((g) => cleanMagnetSlots(fromMagnetDrafts(g.magnets)))
       // createUnit validates name and counts; for edits we keep the original id and dates.
       const fresh = createUnit({ ...fields, groups: groups.map((g) => ({ count: g.count, status: g.status, loadout: split(g.loadout) })) }, c)
       const merged: OwnedUnit = unit
@@ -133,9 +136,9 @@ export function UnitFormDialog({
             ...fresh,
             id: unit.id,
             createdAt: unit.createdAt,
-            groups: fresh.groups.map((g, i) => ({ ...g, id: groups[i].id ?? g.id, magnetised: groups[i].magnetised })),
+            groups: fresh.groups.map((g, i) => ({ ...g, id: groups[i].id ?? g.id, magnetised: magnets[i] })),
           }
-        : fresh
+        : { ...fresh, groups: fresh.groups.map((g, i) => ({ ...g, magnetised: magnets[i] })) }
       await saveUnit(merged)
       close()
     } catch (e) {
@@ -213,12 +216,19 @@ export function UnitFormDialog({
                 {pipeline.stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
               <input className="input flex-1" list={datasheet ? 'wargear-options' : undefined} placeholder="loadout, comma separated" value={g.loadout} aria-label="Loadout" onChange={(e) => patchGroup(i, { loadout: e.target.value })} />
-              {g.magnetised.length > 0 && <span title="Magnetised">🧲</span>}
+              <button type="button" className="btn" aria-expanded={!!g.showMagnets} aria-label="Magnets" title="Magnet slots" onClick={() => patchGroup(i, { showMagnets: !g.showMagnets })}>
+                🧲{g.magnets.length > 0 && ` ${g.magnets.length}`}
+              </button>
               <button type="button" className="btn btn-danger" aria-label="Remove group" disabled={groups.length === 1} onClick={() => setGroups(groups.filter((_, j) => j !== i))}>✕</button>
+              {g.showMagnets && (
+                <div className="basis-full">
+                  <MagnetEditor slots={g.magnets} wargear={datasheet?.wargear ?? []} onChange={(m) => patchGroup(i, { magnets: m })} />
+                </div>
+              )}
             </div>
           ))}
           {datasheet && <datalist id="wargear-options">{datasheet.wargear.map((w) => <option key={w} value={w} />)}</datalist>}
-          <button type="button" className="btn w-fit" onClick={() => setGroups([...groups, { count: 1, status: firstOwnedStage(pipeline), loadout: '', magnetised: [] }])}>
+          <button type="button" className="btn w-fit" onClick={() => setGroups([...groups, { count: 1, status: firstOwnedStage(pipeline), loadout: '', magnets: [] }])}>
             + Add group
           </button>
         </fieldset>

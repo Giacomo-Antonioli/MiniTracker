@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ctx, useStore } from '../../app/store'
+import { MissingPaints } from './MissingPaints'
 import { colourStrip, makeVariant, missingPaints } from '../../domain/schemes/scheme'
 import type { PaintScheme } from '../../domain/schemes/types'
 import { ColourStrip } from './ColourStrip'
@@ -70,7 +71,7 @@ export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: Pa
       </div>
       {missing.length > 0 && (
         <p className="border-b border-line p-4 text-sm">
-          <b className="text-danger">Missing paints ({missing.length}):</b> {missing.map((id) => byId.get(id)?.name ?? id).join(', ')}
+          <MissingPaints ids={missing} name={(id) => byId.get(id)?.name ?? id} />
         </p>
       )}
       <div className="grid gap-4 p-4">
