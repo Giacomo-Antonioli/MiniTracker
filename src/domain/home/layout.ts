@@ -19,6 +19,7 @@ export const CARDS: CardDef[] = [
   { id: 'closest', title: 'Closest to done', size: 'M', options: { count: { label: 'Factions', values: [3, 5, 10] } } },
   { id: 'recent', title: 'Recent activity', size: 'M', options: { count: { label: 'Moves', values: [5, 10, 20] } } },
   { id: 'shopping', title: 'Shopping', size: 'M' },
+  { id: 'low', title: 'Running low', size: 'M' },
   { id: 'points', title: 'Points painted', size: 'M', options: { months: { label: 'Months', values: [12, 6, 24] } } },
   { id: 'pile-age', title: 'Pile age', size: 'M' },
   { id: 'stage-flow', title: 'Where the work goes', size: 'M', options: { months: { label: 'Months', values: [6, 12, 24] } } },
@@ -33,7 +34,7 @@ export interface CardLayout {
   options?: Record<string, number>
 }
 
-const DEFAULT_IDS = ['tiles', 'activity', 'continue', 'painted', 'records', 'oldest', 'closest', 'recent', 'shopping']
+const DEFAULT_IDS = ['tiles', 'activity', 'continue', 'painted', 'records', 'oldest', 'closest', 'recent', 'shopping', 'low']
 export const DEFAULT_LAYOUT: CardLayout[] = DEFAULT_IDS.map((id) => ({ id, size: CARDS.find((c) => c.id === id)!.size }))
 
 const SIZES: CardSize[] = ['S', 'M', 'L']

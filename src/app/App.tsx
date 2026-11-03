@@ -8,18 +8,21 @@ import { PaintsPage } from '../features/paints/PaintsPage'
 import { RulesPage } from '../features/rules/RulesPage'
 import { SchemesPage } from '../features/schemes/SchemesPage'
 import { StatsPage } from '../features/stats/StatsPage'
+import { SuppliesPage } from '../features/supplies/SuppliesPage'
+import { isLow } from '../domain/supplies/supplies'
 import { ShoppingPage } from '../features/shopping/ShoppingPage'
 import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeImport'
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { readStartPage, useStore } from './store'
 import { HomePage } from '../features/home/HomePage'
 
-type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'stats' | 'settings'
+type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'settings'
 
 const SOON = ['Games']
 
 export default function App() {
   const { ready, load, theme } = useStore()
+  const lowSupplies = useStore((s) => s.supplies.filter(isLow).length)
   // A recipe sent by the bookmarklet arrives in the URL (#recipe=…): start on Schemes with it.
   const [recipe, setRecipe] = useState<RecipePayload | null>(() => readRecipeHash(location.hash))
   const [page, setPage] = useState<Page>(() => (readRecipeHash(location.hash) ? 'schemes' : readStartPage()))
@@ -85,6 +88,7 @@ export default function App() {
         {nav('browse', 'Catalogue')}
         {nav('rules', 'Rules')}
         {nav('paints', 'Paints')}
+        {nav('supplies', lowSupplies ? `Supplies ⚠${lowSupplies}` : 'Supplies')}
         {nav('schemes', 'Schemes')}
         {nav('shopping', 'Shopping')}
         {nav('stats', 'Stats')}
@@ -124,6 +128,8 @@ export default function App() {
           <PaintsPage />
         ) : page === 'shopping' ? (
           <ShoppingPage />
+        ) : page === 'supplies' ? (
+          <SuppliesPage />
         ) : page === 'stats' ? (
           <StatsPage />
         ) : page === 'browse' ? (

@@ -15,6 +15,7 @@ import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Catalogue } from '../domain/catalogue/types'
 import { DEFAULT_LAYOUT, parseLayout, type CardLayout } from '../domain/home/layout'
 import { parseWahapedia, type StratagemData } from '../domain/stratagems/stratagems'
+import { becameLow, lowPaints, parseSupplies, supplyItem, type Supply } from '../domain/supplies/supplies'
 import type { ArmyList, EditionKey } from '../domain/lists/types'
 import { addItems, newList, syncWishlisted, withoutList } from '../domain/shopping/shopping'
 import type { NewShopItem, ShopItem, ShopList } from '../domain/shopping/types'
@@ -173,6 +174,10 @@ interface State {
   stratagemData: StratagemData | null
   importStratagems(files: File[]): Promise<void>
   removeStratagems(): Promise<void>
+  /** Hobby supplies with low-stock alerts (#92); saved in the backup. */
+  supplies: Supply[]
+  saveSupply(s: Supply): Promise<void>
+  deleteSupply(id: string): Promise<void>
   /** Cards on Home, in order, with sizes (saved in the backup). */
   homeLayout: CardLayout[]
   saveHomeLayout(l: CardLayout[]): Promise<void>
@@ -268,8 +273,11 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async saveStock(stock) {
+    const before = get().paintStock.get(stock.paintId)
     await paintRepo.saveStock(stock)
     set({ paintStock: new Map(get().paintStock).set(stock.paintId, stock) })
+    // Marking a paint "Running low" puts it on the shopping list (#92).
+    if (stock.stage === 'low' && before?.stage !== 'low') await get().addToShopping(lowPaints(new Map([[stock.paintId, stock]]), get().paints), [])
   },
 
   async removeStock(paintId) {
@@ -311,7 +319,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, stratagemData] = await Promise.all([
+    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, stratagemData, supplies] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
@@ -326,6 +334,7 @@ export const useStore = create<State>((set, get) => ({
       shopRepo.load(),
       settingsRepo.getValue<CardLayout[] | null>('homeLayout', null),
       settingsRepo.getValue<StratagemData | null>('stratagems', null),
+      settingsRepo.getValue<unknown>('supplies', []),
     ])
     const catalogue = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
     set({
@@ -343,6 +352,7 @@ export const useStore = create<State>((set, get) => ({
       shopLists: shopping.lists,
       homeLayout: homeLayout ? parseLayout(JSON.stringify(homeLayout)) : DEFAULT_LAYOUT,
       stratagemData,
+      supplies: parseSupplies(supplies),
       ready: true,
     })
     if (get().paints.length) await get().loadPaints()
@@ -552,6 +562,20 @@ export const useStore = create<State>((set, get) => ({
   async removeStratagems() {
     await settingsRepo.setValue('stratagems', null)
     set({ stratagemData: null })
+  },
+  supplies: [],
+  async saveSupply(supply) {
+    const before = get().supplies.find((x) => x.id === supply.id)
+    const list = before ? get().supplies.map((x) => (x.id === supply.id ? supply : x)) : [...get().supplies, supply]
+    set({ supplies: list })
+    await settingsRepo.setValue('supplies', list)
+    // Reaching the alert level puts it on the shopping list.
+    if (becameLow(before, supply)) await get().addToShopping([supplyItem(supply)], [])
+  },
+  async deleteSupply(id) {
+    const list = get().supplies.filter((x) => x.id !== id)
+    set({ supplies: list })
+    await settingsRepo.setValue('supplies', list)
   },
   async saveHomeLayout(l) {
     set({ homeLayout: l })

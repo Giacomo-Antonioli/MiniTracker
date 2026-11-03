@@ -46,6 +46,7 @@ describe('pile age', () => {
     ]
     const r = pileAge(us, p, '2026-03-10', 2)
     expect(r.oldest.map((x) => [x.unit.id, x.months, x.models])).toEqual([['old', 26, 4], ['mid', 4, 3]])
+    expect(pileAge([unit('bad', [[1, 'built']], { createdAt: 'x' })], p, '2026-03-10').buckets[0].models).toBe(1)
     expect(r.buckets).toEqual([
       { label: '< 3 months', models: 2 },
       { label: '3–6 months', models: 3 },
