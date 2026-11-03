@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Goals page (#90): paint N models per week/month/year, finish chosen units (with an optional due date), shrink the pile (paint more than you add) and weekly painting streaks; progress bars, and past periods marked hit or missed for recurring goals.
+
 ## [0.9.0] - 2026-11-03
 
 ### Added
