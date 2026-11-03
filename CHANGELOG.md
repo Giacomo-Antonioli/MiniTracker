@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Magnet editor in the unit form: add, edit and remove magnet slots per model group, with options picked from the datasheet's wargear (#32).
+
 ## [0.8.0] - 2026-11-03
 
 ### Added

@@ -100,3 +100,27 @@ describe('Unit picker', () => {
     expect(within(d).getByRole('option', { name: /Old Hero \(Legends\)/ })).toBeInTheDocument()
   })
 })
+
+describe('Magnet editor', () => {
+  it('adds magnet slots with wargear options, validates and edits them', async () => {
+    const user = userEvent.setup()
+    const d = await openForm(user)
+    await user.type(within(d).getByRole('combobox', { name: 'Name *' }), 'troop')
+    await user.click(within(d).getByRole('option', { name: /Line Troopers/ }))
+    await user.click(within(d).getByRole('button', { name: 'Magnets' }))
+    await user.click(within(d).getByRole('button', { name: '+ Magnet slot' }))
+    const slot = within(d).getByRole('group', { name: 'Magnet slot 1' })
+    await user.type(within(slot).getByLabelText('Slot name'), 'arms')
+    const wargear = within(slot).getByLabelText('Add wargear option') as HTMLSelectElement
+    const [a, b] = [...wargear.options].slice(1, 3).map((o) => o.value)
+    await user.selectOptions(wargear, a)
+    await user.click(within(d).getByRole('button', { name: 'Save' }))
+    expect(within(d).getByRole('alert')).toHaveTextContent('needs at least two options')
+
+    await user.selectOptions(wargear, b ?? a)
+    if (!b) await user.type(within(slot).getByLabelText('Options'), ', other')
+    await user.click(within(d).getByRole('button', { name: 'Save' }))
+    await screen.findByRole('cell', { name: /Line Troopers/ })
+    expect(useStore.getState().units[0].groups[0].magnetised).toEqual([{ slot: 'arms', optionIds: [a, b ?? 'other'] }])
+  })
+})
