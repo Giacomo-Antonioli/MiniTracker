@@ -4,15 +4,16 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
-### Fixed
-- Stats charts no longer overflow their cards.
 ### Added
+- Closest colour match (CIEDE2000): closest paints you own and closest in any brand on each paint, a "Match a colour" picker for any hex colour, and the closest owned substitute for missing paints in schemes (#30).
+- Magnet editor in the unit form: add, edit and remove magnet slots per model group, with options picked from the datasheet's wargear (#32).
 - Cost tracking: price paid per unit, purchases (boxes, bundles) shared across units by model count, a currency setting, and a Costs section on Stats with total spent and collection value painted vs unpainted (#94).
+
 ### Changed
 - Games: "Discard game" next to "Save game" when ending a game, and a delete button on every row of the game history.
-### Added
-- Magnet editor in the unit form: add, edit and remove magnet slots per model group, with options picked from the datasheet's wargear (#32).
-- Closest colour match (CIEDE2000): closest paints you own and closest in any brand on each paint, a "Match a colour" picker for any hex colour, and the closest owned substitute for missing paints in schemes (#30).
+
+### Fixed
+- Stats charts no longer overflow their cards.
 
 ## [0.8.0] - 2026-11-03
 
