@@ -34,12 +34,18 @@ async function record(db: MiniTrackerDb, changed: string[], removed: string[], n
     for (const p of changed) stamps[p] = now
     for (const p of removed) delete stamps[p]
     await db.settings.put({ key: 'syncStamps', value: stamps })
-
-    const prefs = (await db.settings.get('syncPrefs'))?.value as SyncPrefs | undefined
-    if (removed.length && prefs?.tagDeletions) {
-      const old = ((await db.settings.get('syncTombstones'))?.value as Tombstone[] | undefined) ?? []
-      const added = removed.map((id) => ({ table: 'settings', id, deletedAt: now }))
-      await db.settings.put({ key: 'syncTombstones', value: pruneTombstones([...old, ...added], now) })
-    }
+    if (removed.length) await saveTombstones(db, removed.map((id) => ({ table: 'settings', id, deletedAt: now })), now)
   })
+}
+
+/** Queue deletion markers (when tagging is on); saved after the delete went through. */
+export function addTombstones(db: MiniTrackerDb, list: Tombstone[]): void {
+  queue = queue.then(() => db.transaction('rw', db.settings, () => saveTombstones(db, list, list[0]?.deletedAt ?? new Date().toISOString()))).catch((e) => console.error('sync: could not record deletions', e))
+}
+
+async function saveTombstones(db: MiniTrackerDb, list: Tombstone[], now: string): Promise<void> {
+  const prefs = (await db.settings.get('syncPrefs'))?.value as SyncPrefs | undefined
+  if (!prefs?.tagDeletions || !list.length) return
+  const old = ((await db.settings.get('syncTombstones'))?.value as Tombstone[] | undefined) ?? []
+  await db.settings.put({ key: 'syncTombstones', value: pruneTombstones([...old, ...list], now) })
 }

@@ -7,6 +7,7 @@ import type { PaintScheme } from '../domain/schemes/types'
 import { buildBackupZip, isZip, readBackupZip, type PhotoEntry, type PhotoFileRef } from './backupZip'
 import type { MiniTrackerDb, SettingRow } from './db'
 import { flushSyncStamps } from './syncStamps'
+import { untracked } from './syncTracking'
 
 export const BACKUP_FORMAT = 'minitracker-backup'
 /** Bump when the file layout changes; parseBackup must keep reading older versions. */
@@ -102,7 +103,8 @@ export function parseBackup(text: string): Backup {
 export async function importBackup(db: MiniTrackerDb, backup: Backup, photos: { photos: Photo[]; files: PhotoFiles[] } | 'keep' = 'keep'): Promise<void> {
   const { units, statusEvents, settings, paintStock, customPaints } = backup.data
   const tables = [db.units, db.statusEvents, db.settings, db.paintStock, db.customPaints, db.schemes, db.lists, db.shopItems, db.shopLists, db.photos, db.photoFiles]
-  await db.transaction('rw', tables, async () => {
+  // Restored records keep their own edit times, and clearing makes no deletion markers.
+  await untracked(() => db.transaction('rw', tables, async () => {
     await Promise.all([db.units.clear(), db.statusEvents.clear(), db.settings.clear(), db.paintStock.clear(), db.customPaints.clear(), db.schemes.clear(), db.lists.clear(), db.shopItems.clear(), db.shopLists.clear()])
     await db.schemes.bulkAdd(backup.data.schemes ?? [])
     await db.lists.bulkAdd(backup.data.lists ?? [])
@@ -118,7 +120,7 @@ export async function importBackup(db: MiniTrackerDb, backup: Backup, photos: { 
       await db.photos.bulkAdd(photos.photos)
       await db.photoFiles.bulkAdd(photos.files)
     }
-  })
+  }))
 }
 
 /** Rough size of a backup before making it. */

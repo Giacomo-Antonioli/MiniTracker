@@ -68,7 +68,7 @@ describe('Paints page', () => {
 
     expect(within(panel).getByLabelText('Pots owned')).toHaveTextContent('1')
     await user.click(within(panel).getByRole('button', { name: 'One pot more' }))
-    expect(within(panel).getByLabelText('Pots owned')).toHaveTextContent('2')
+    await waitFor(() => expect(within(panel).getByLabelText('Pots owned')).toHaveTextContent('2'))
     await user.type(within(panel).getByLabelText('Location'), 'Drawer A')
     await user.tab()
     await user.click(within(panel).getByRole('button', { name: 'Mark running low' }))
@@ -76,7 +76,7 @@ describe('Paints page', () => {
     const stats = screen.getByRole('region', { name: 'Paint stats' })
     expect(stats).toHaveTextContent('1 paints owned')
     expect(stats).toHaveTextContent('2 pots')
-    expect(stats).toHaveTextContent('1 running low')
+    await waitFor(() => expect(stats).toHaveTextContent('1 running low'))
     const stock = [...useStore.getState().paintStock.values()][0]
     expect(stock).toMatchObject({ quantity: 2, location: 'Drawer A', stage: 'low' })
   })
