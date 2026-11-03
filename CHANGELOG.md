@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-11-03
+
 ### Added
 - Guides › Terrain: "How to paint terrain" (prepare, prime, drybrush and shade, details and weathering, finish), plus a "Build and lay out" section, merged from seven published guides (credited), with three diagrams drawn for MiniTracker.
 - Guides › Bases: "How to base miniatures" (plan, texture, paint, rim, finish), merged from four published guides, with diagrams.
@@ -218,7 +220,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.1...HEAD
+[0.11.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.8.0...v0.9.0
