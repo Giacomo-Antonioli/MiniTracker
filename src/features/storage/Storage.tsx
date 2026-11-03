@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { BoxDialog } from '../barcodes/BoxScan'
 import { ctx, useStore } from '../../app/store'
 import type { OwnedUnit } from '../../domain/collection/types'
 import {
@@ -240,6 +241,7 @@ export function StoragePage({ onOpenUnit, onOpenPlace }: { onOpenUnit: (id: stri
   const [sel, setSel] = useState<string>()
   const [form, setForm] = useState<'new' | 'edit' | 'site' | 'edit-site' | null>(null)
   const [labels, setLabels] = useState(false)
+  const [box, setBox] = useState<string>()
   const site = s.sites.find((x) => x.id === siteId) ?? s.sites[0]
   const out = Object.keys(s.out).length
   const rows = tree(s, site?.id ?? null)
@@ -248,7 +250,8 @@ export function StoragePage({ onOpenUnit, onOpenPlace }: { onOpenUnit: (id: stri
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="font-display text-2xl text-accent">Storage</h1>
         <div className="flex flex-wrap items-start gap-2">
-          <FindCode onFound={(t) => (t.kind === 'unit' ? onOpenUnit(t.id) : onOpenPlace(t.id))} />
+          <FindCode onFound={(t) => (t.kind === 'unit' ? onOpenUnit(t.id) : onOpenPlace(t.id))} onBarcode={setBox} />
+          {box && <BoxDialog code={box} onOpenUnit={onOpenUnit} onClose={() => setBox(undefined)} />}
           <button className="btn" onClick={() => setLabels(true)}>🏷 Labels</button>
         </div>
       </header>

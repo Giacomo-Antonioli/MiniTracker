@@ -18,6 +18,7 @@ import { parseGames, type Game } from '../domain/games/games'
 import { parseWahapedia, type StratagemData } from '../domain/stratagems/stratagems'
 import { parseGoals, type Goal } from '../domain/goals/goals'
 import { parseTicks, toggleTick as flipTick, clearTicks, type CompanionMode, type Ticks } from '../domain/companion/companion'
+import { parseMappings, saveMapping, type BoxMapping } from '../domain/barcodes/barcodes'
 import { parseStorage, pruneStorage, EMPTY_STORAGE, type Storage } from '../domain/storage/storage'
 import { parseSessions, parseTimers, pruneTimers, stopTimer as endTimer, type PaintSession, type PaintTimer } from '../domain/paintTime/paintTime'
 import { parsePurchases, type Purchase } from '../domain/costs/costs'
@@ -197,6 +198,9 @@ interface State {
   deleteTimer(id: string): Promise<void>
   /** Stops a timer and logs its time as sessions split over its groups. */
   stopTimer(id: string): Promise<void>
+  /** Box barcodes the app has learned (#93); saved in the backup. */
+  barcodes: BoxMapping[]
+  saveBarcode(m: BoxMapping): Promise<void>
   /** Storage places, unit homes and check-outs (#18); saved in the backup. */
   storage: Storage
   saveStorage(s: Storage): Promise<void>
@@ -360,7 +364,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, storageFlow, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals, paintSessions, paintTimers, companionTicks, storage] = await Promise.all([
+    const [units, painting, paint, scheme, storageFlow, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals, paintSessions, paintTimers, companionTicks, storage, barcodes] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
@@ -385,6 +389,7 @@ export const useStore = create<State>((set, get) => ({
       settingsRepo.getValue<unknown>('paintTimers', []),
       settingsRepo.getValue<unknown>('companionTicks', {}),
       settingsRepo.getValue<unknown>('storage', null),
+      settingsRepo.getValue<unknown>('barcodes', []),
     ])
     const catalogue = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
     set({
@@ -409,6 +414,7 @@ export const useStore = create<State>((set, get) => ({
       paintSessions: parseSessions(paintSessions),
       paintTimers: pruneTimers(parseTimers(paintTimers), units),
       companionTicks: parseTicks(companionTicks),
+      barcodes: parseMappings(barcodes),
       storage: pruneStorage(parseStorage(storage), new Set(units.map((u) => u.id))),
       currency: typeof currency === 'string' && currency ? currency : '€',
       ready: true,
@@ -645,6 +651,12 @@ export const useStore = create<State>((set, get) => ({
   },
   paintSessions: [],
   paintTimers: [],
+  barcodes: [],
+  async saveBarcode(m) {
+    const list = saveMapping(get().barcodes, m)
+    set({ barcodes: list })
+    await settingsRepo.setValue('barcodes', list)
+  },
   storage: EMPTY_STORAGE,
   async saveStorage(x) {
     set({ storage: x })

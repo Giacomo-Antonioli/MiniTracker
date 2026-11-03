@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { ScanBoxButton } from '../barcodes/BoxScan'
 import { useStore } from '../../app/store'
 import { factionsOf, filterUnits, stageTotals, type BacklogFilter } from '../../domain/collection/backlog'
 import { isGone, progress, WISHLISTED } from '../../domain/collection/pipeline'
@@ -67,6 +68,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
               ))}
             </div>
           </div>
+          <ScanBoxButton onOpenUnit={onOpenUnit} />
           <button className="btn btn-primary" onClick={() => setEditing('new')}>+ Add unit</button>
         </header>
 
