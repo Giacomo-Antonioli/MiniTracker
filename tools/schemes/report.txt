@@ -596,8 +596,8 @@ OK    lib/eavy-aeldari-craftworld-saim-hann  "Craftworld: Saim-Hann"  areas=3 ma
 OK    lib/eavy-aeldari-craftworld-ulthwe  "Craftworld: Ulthwe"  areas=8 matched=85%
 OK    lib/eavy-aeldari-craftworld-ulthwe-legacy  "Craftworld: Ulthwe - Legacy"  areas=6 matched=70%
 OK    lib/eavy-aeldari-howling-banshees-and-jain-zar  "Howling Banshees & Jain Zar"  areas=3 matched=86%
-DROP  lib/eavy-aeldari-masque-of-midnight-sorrow  "Masque of Midnight Sorrow"  matched=45%
-OK    lib/eavy-aeldari-masque-of-soaring-spite  "Masque of Soaring Spite"  areas=12 matched=75%
+OK    lib/eavy-aeldari-masque-of-midnight-sorrow  "Masque of Midnight Sorrow"  areas=12 matched=69%
+OK    lib/eavy-aeldari-masque-of-soaring-spite  "Masque of Soaring Spite"  areas=12 matched=84%
 OK    lib/eavy-aeldari-maugan-ra  "Maugan Ra"  areas=9 matched=99%
 OK    lib/eavy-aeldari-rangers  "Rangers"  areas=2 matched=80%
 OK    lib/eavy-aeldari-striking-scorpions  "Striking Scorpions"  areas=1 matched=76%
@@ -627,7 +627,7 @@ OK    lib/eavy-chaos-space-marines-thousand-sons-tzaangor  "Thousand Sons Tzaang
 OK    lib/eavy-chaos-space-marines-traitor-guard  "Traitor Guard"  areas=15 matched=87%
 OK    lib/eavy-chaos-space-marines-word-bearers  "Word Bearers"  areas=5 matched=70%
 OK    lib/eavy-chaos-space-marines-world-eaters  "World Eaters"  areas=10 matched=79%
-OK    lib/eavy-drukhari-kabal-of-the-poisoned-tongue  "Dark Blue Drukhari"  areas=1 matched=60%
+OK    lib/eavy-drukhari-kabal-of-the-poisoned-tongue  "Dark Blue Drukhari"  areas=1 matched=90%
 OK    lib/eavy-drukhari-kabal-of-the-Black-heart  "Kabal of the Black Heart"  areas=6 matched=91%
 OK    lib/eavy-drukhari-ur-ghul  "Ur-Ghul"  areas=1 matched=100%
 OK    lib/eavy-genestealer-cults-abominant  "Abominant"  areas=2 matched=72%
@@ -647,7 +647,7 @@ OK    lib/eavy-orks-ghazghkull-thraka  "Ghazghkull Thraka"  areas=7 matched=94%
 OK    lib/eavy-orks-ork-warboss  "Ork Warboss"  areas=2 matched=90%
 OK    lib/eavy-orks-orks-beast-snaggas  "Orks (Beast Snaggas)"  areas=5 matched=79%
 OK    lib/eavy-orks-goffs  "Orks (General)"  areas=1 matched=73%
-DROP  lib/eavy-orks-squigs-beast-snaggas  "Squigs (Beast Snaggas)"  matched=44%
+OK    lib/eavy-orks-squigs-beast-snaggas  "Squigs (Beast Snaggas)"  areas=5 matched=74%
 OK    lib/eavy-orks-wazdakka  "Wazdakka"  areas=14 matched=94%
 OK    lib/eavy-space-marines-black-templars  "Black Templars"  areas=15 matched=91%
 OK    lib/eavy-space-marines-blood-angels  "Blood Angels"  areas=10 matched=89%

@@ -1,5 +1,5 @@
 import type { PaintScheme, SchemeSection } from '../schemes/types'
-import { techniqueFor, type Technique } from './techniques'
+import { techniqueFor, type Technique } from './techniques.ts'
 
 /**
  * "Before you start" for a scheme: the areas in a sensible painting order, the techniques used,

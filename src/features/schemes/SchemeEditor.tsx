@@ -3,6 +3,8 @@ import type { StepLink } from '../../domain/schemes/types'
 import { useMemo, useState } from 'react'
 import type { Technique } from '../../domain/guides/techniques'
 import { BeforeYouStart } from '../guides/BeforeYouStart'
+import { BasePickerDialog } from '../guides/Bases'
+import { areaStage } from '../../domain/guides/prepare'
 import { TechniquePanel } from '../guides/GuidesPage'
 import { ctx, useStore } from '../../app/store'
 import { MissingPaints } from './MissingPaints'
@@ -27,6 +29,7 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
   const [printing, setPrinting] = useState(false)
   const [linkNote, setLinkNote] = useState('')
   const [technique, setTechnique] = useState<Technique | null>(null)
+  const [pickingBase, setPickingBase] = useState<string | null>(null)
   const coverUrl = usePhotoUrl(draft.coverPhotoId)
   const dirty = JSON.stringify(draft) !== JSON.stringify(scheme)
   const byId = useMemo(() => new Map(paints.map((p) => [p.id, p])), [paints])
@@ -262,10 +265,32 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
             </ol>
             <div className="p-2">
               <button className="btn text-sm" onClick={() => setDraft(addStep(draft, sec.id, {}, c()))}>+ Step</button>
+              {areaStage(sec.area) === 9 && sec.steps.length === 0 && (
+                <button className="btn ml-2 text-sm" onClick={() => setPickingBase(sec.id)}>🪨 Use a base recipe</button>
+              )}
             </div>
           </section>
         ))}
-        <button className="btn w-fit" onClick={() => setDraft(addSection(draft, draft.sections.length ? '' : 'Armour', c()))}>+ Area</button>
+        <div className="flex flex-wrap gap-2">
+          <button className="btn w-fit" onClick={() => setDraft(addSection(draft, draft.sections.length ? '' : 'Armour', c()))}>+ Area</button>
+          {!draft.sections.some((x) => areaStage(x.area) === 9) && <button className="btn w-fit" onClick={() => setPickingBase('new')}>🪨 Add a base</button>}
+        </div>
+        {pickingBase && (
+          <BasePickerDialog
+            onClose={() => setPickingBase(null)}
+            onPick={(b) => {
+              let next = draft
+              let sectionId = pickingBase
+              if (sectionId === 'new') {
+                next = addSection(next, 'Base', c())
+                sectionId = next.sections[next.sections.length - 1].id
+              }
+              for (const st of b.steps) next = addStep(next, sectionId, { technique: st.technique, paints: st.paints, note: st.note }, c())
+              setDraft(next)
+              setPickingBase(null)
+            }}
+          />
+        )}
       </div>
       {printing && <RecipeCard scheme={draft} onDone={() => setPrinting(false)} />}
       {technique && <TechniquePanel technique={technique} onClose={() => setTechnique(null)} />}

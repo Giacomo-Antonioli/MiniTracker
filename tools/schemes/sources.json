@@ -887,6 +887,7 @@
         "url": "https://eavy-archive.com/40k/tyranids/",
         "faction": "Tyranids"
       }
-    ]
+    ],
+    "basesPage": "https://eavy-archive.com/40k/"
   }
 }

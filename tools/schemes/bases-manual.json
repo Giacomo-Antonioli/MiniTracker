@@ -1,0 +1,68 @@
+{
+  "note": "Basing recipes written for MiniTracker (own words, common Citadel paints). Paint names must exist in the paint list.",
+  "bases": [
+    { "id": "snowy-tundra", "name": "Snowy tundra", "kinds": ["snow", "rocks"], "steps": [
+      ["texture", ["Astrogranite"], "Thick coat over the whole base; press in a few small rocks or cork pieces first."],
+      ["shade", ["Nuln Oil"], ""],
+      ["drybrush", ["Dawnstone"], ""],
+      ["drybrush", ["Administratum Grey"], "Lighter, mostly on the rocks."],
+      ["texture", ["Valhallan Blizzard"], "Patches of snow, thicker against rocks and the model's feet."],
+      ["basing", ["Abaddon Black"], "Rim."]
+    ] },
+    { "id": "lava-field", "name": "Lava field", "kinds": ["lava", "rocks"], "steps": [
+      ["texture", ["Astrogranite"], "Leave a few channels between the rocks for the lava."],
+      ["basecoat", ["Abaddon Black"], "Rocks only."],
+      ["drybrush", ["Dawnstone"], "Rocks only."],
+      ["basecoat", ["Khorne Red"], "The channels between the rocks."],
+      ["layer", ["Troll Slayer Orange"], "Centre of each channel."],
+      ["layer", ["Yriel Yellow"], "Thin lines in the very middle, where it is hottest."],
+      ["glaze", ["Fuegan Orange"], "Over the rock edges next to the lava, so they seem to glow."],
+      ["basing", ["Abaddon Black"], "Rim."]
+    ] },
+    { "id": "urban-rubble", "name": "Urban rubble", "kinds": ["urban", "rocks"], "steps": [
+      ["texture", ["Astrogranite"], "Glue on bits of brick, plastic sprue offcuts or spare parts first as debris."],
+      ["basecoat", ["Mechanicus Standard Grey"], ""],
+      ["shade", ["Nuln Oil"], ""],
+      ["drybrush", ["Dawnstone"], ""],
+      ["drybrush", ["Administratum Grey"], ""],
+      ["details", ["Mournfang Brown"], "Pick out a few bricks; rust on metal debris with Ryza Rust."],
+      ["drybrush", ["Ryza Rust"], "Metal debris only."],
+      ["basing", ["Abaddon Black"], "Rim."]
+    ] },
+    { "id": "desert-sand", "name": "Desert sand", "kinds": ["sand"], "steps": [
+      ["texture", ["Armageddon Dust"], ""],
+      ["shade", ["Seraphim Sepia"], ""],
+      ["drybrush", ["Ushabti Bone"], ""],
+      ["drybrush", ["Screaming Skull"], "Very light, on the highest grains."],
+      ["basing", ["Steel Legion Drab"], "Rim."]
+    ] },
+    { "id": "muddy-battlefield", "name": "Muddy battlefield", "kinds": ["mud", "soil"], "steps": [
+      ["texture", ["Stirland Mud"], "Drag a cocktail stick through it for tracks and footprints."],
+      ["shade", ["Agrax Earthshade"], ""],
+      ["drybrush", ["Karak Stone"], "Light, on ridges only."],
+      ["varnish", ["Ardcoat"], "In the deepest tracks, for wet puddles."],
+      ["basing", ["Rhinox Hide"], "Rim."]
+    ] },
+    { "id": "red-wastes", "name": "Red wastes (Mars)", "kinds": ["mars", "soil"], "steps": [
+      ["texture", ["Martian Ironearth"], "Dries with cracks; a thicker coat gives bigger cracks."],
+      ["shade", ["Agrax Earthshade"], "Into the cracks."],
+      ["drybrush", ["Ryza Rust"], ""],
+      ["drybrush", ["Tallarn Sand"], "Very light."],
+      ["basing", ["Mournfang Brown"], "Rim."]
+    ] },
+    { "id": "grassy-meadow", "name": "Grassy meadow", "kinds": ["grass", "soil"], "steps": [
+      ["texture", ["Stirland Mud"], ""],
+      ["drybrush", ["Tallarn Sand"], ""],
+      ["basecoat", ["Deathworld Forest"], "Patches where grass will go."],
+      ["basing", [], "Glue static grass or tufts on the green patches with PVA; blow off the loose fibres when dry."],
+      ["basing", ["Steel Legion Drab"], "Rim."]
+    ] },
+    { "id": "ash-wastes", "name": "Ash wastes", "kinds": ["ash", "rocks"], "steps": [
+      ["texture", ["Astrogranite"], ""],
+      ["shade", ["Nuln Oil"], ""],
+      ["drybrush", ["Celestra Grey"], ""],
+      ["drybrush", ["Ulthuan Grey"], "Very light, on top edges."],
+      ["basing", ["Abaddon Black"], "Rim."]
+    ] }
+  ]
+}

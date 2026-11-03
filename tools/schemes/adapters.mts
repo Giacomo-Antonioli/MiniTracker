@@ -106,9 +106,10 @@ export function eavyArchive(html: string): EavyScheme[] {
         // Generic names ("Black") link to alternatives; the last one is the Citadel paint.
         const raw = li.replace(/<a [^>]*data-bs-content="([^"]*)"[^>]*>[\s\S]*?<\/a>/g, (_, alts: string) => decode(alts).split(';').pop()!.trim())
         const line = htext(raw)
-        const colon = line.indexOf(':')
+        // "Stage: paints", or "Stage - paints" on some pages.
+        const colon = line.indexOf(':') > 0 ? line.indexOf(':') : line.search(/\w\s*-\s/) > 0 ? line.search(/\w\s*-\s/) + 1 : -1
         const stage = colon > 0 ? line.slice(0, colon).trim() : ''
-        let body = colon > 0 ? line.slice(colon + 1).trim() : line
+        let body = colon > 0 ? line.slice(colon + 1).replace(/^-\s*/, '').trim() : line
         // "(Ridges & Edges)" is a note; "A/B 3:1" or "A & B 1:1" is a mix; "A, B, C" are used one after another.
         const note = [...body.matchAll(/\(([^)]*)\)/g)].map((x) => x[1].trim()).join('; ')
         body = body.replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim()
