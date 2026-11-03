@@ -104,6 +104,26 @@ export function splitGroup(unit: OwnedUnit, groupId: string, count: number, stat
   return mergeGroups({ ...unit, groups }, ctx)
 }
 
+/**
+ * Tidies magnet slots typed in a form: trims names and options, drops duplicate options and fully empty rows.
+ * Throws when a slot has no name, fewer than two options, or the same name twice.
+ */
+export function cleanMagnetSlots(slots: MagnetSlot[]): MagnetSlot[] {
+  const out: MagnetSlot[] = []
+  const names = new Set<string>()
+  for (const s of slots) {
+    const slot = s.slot.trim()
+    const optionIds = [...new Set(s.optionIds.map((o) => o.trim()).filter(Boolean))]
+    if (!slot && !optionIds.length) continue
+    if (!slot) throw new Error('Every magnet slot needs a name')
+    if (optionIds.length < 2) throw new Error(`Magnet slot "${slot}" needs at least two options`)
+    if (names.has(slot.toLowerCase())) throw new Error(`Duplicate magnet slot: ${slot}`)
+    names.add(slot.toLowerCase())
+    out.push({ slot, optionIds })
+  }
+  return out
+}
+
 export function setMagnetSlots(
   unit: OwnedUnit,
   groupId: string,
@@ -111,15 +131,10 @@ export function setMagnetSlots(
   ctx: Pick<Ctx, 'now'>,
 ): OwnedUnit {
   findGroup(unit, groupId)
-  const names = new Set<string>()
-  for (const s of slots) {
-    if (new Set(s.optionIds).size < 2) throw new Error(`Magnet slot "${s.slot}" needs at least two options`)
-    if (names.has(s.slot)) throw new Error(`Duplicate magnet slot: ${s.slot}`)
-    names.add(s.slot)
-  }
+  const clean = cleanMagnetSlots(slots)
   return {
     ...unit,
-    groups: unit.groups.map((g) => (g.id === groupId ? { ...g, magnetised: structuredClone(slots) } : g)),
+    groups: unit.groups.map((g) => (g.id === groupId ? { ...g, magnetised: clean } : g)),
     updatedAt: ctx.now,
   }
 }

@@ -34,6 +34,31 @@ describe('Paints page', () => {
     expect(Number(screen.getByText(/^\d+ paints$/).textContent!.split(' ')[0])).toBeLessThan(400)
   })
 
+  it('shows colour matches in the panel and from a hex colour', async () => {
+    const user = await openPaints()
+    await user.type(screen.getByPlaceholderText(/Search name or brand/), 'macragge blue')
+    await user.click(screen.getByRole('button', { name: 'Macragge Blue (Citadel)' }))
+    let panel = screen.getByRole('complementary', { name: 'Paint details' })
+    await user.click(within(panel).getByRole('button', { name: 'I own it' }))
+    const match = within(panel).getByRole('region', { name: 'Colour match' })
+    await user.selectOptions(within(match).getByLabelText('Match brand'), 'Vallejo')
+    const vallejo = within(match).getByRole('list', { name: 'Closest in Vallejo' })
+    const first = within(vallejo).getAllByRole('listitem')[0]
+    const name = first.textContent!.split(' · ')[0]
+    await user.click(first)
+    panel = screen.getByRole('complementary', { name: 'Paint details' })
+    expect(within(panel).getByRole('heading', { level: 2 })).toHaveTextContent(name)
+
+    await user.click(screen.getByRole('button', { name: /Match a colour/ }))
+    const dialog = screen.getByRole('dialog', { name: 'Match a colour' })
+    await user.clear(within(dialog).getByLabelText('Hex'))
+    await user.type(within(dialog).getByLabelText('Hex'), '#0d407f')
+    const owned = within(dialog).getByRole('list', { name: 'Closest you own' })
+    await user.click(within(owned).getByText(/Macragge Blue/))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(within(screen.getByRole('complementary', { name: 'Paint details' })).getByRole('heading', { level: 2 })).toHaveTextContent('Macragge Blue')
+  })
+
   it('adds a paint to the inventory and edits its stock', async () => {
     const user = await openPaints()
     await user.type(screen.getByPlaceholderText(/Search name or brand/), 'nuln oil')
