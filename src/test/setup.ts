@@ -22,3 +22,7 @@ if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.sho
     this.dispatchEvent(new Event('close'))
   }
 }
+
+// The bundled scheme library is large; give UI tests time to load it under a full parallel run.
+import { configure } from '@testing-library/react'
+configure({ asyncUtilTimeout: 5000 })

@@ -83,3 +83,44 @@ export function blogPost(html: string, site: string): Scraped {
   const date = doc.querySelector('meta[property="article:published_time"]')?.getAttribute('content')?.slice(0, 10)
   return { title, author: author || undefined, date, site, blocks }
 }
+
+const decode = (s: string) => parse(s).text
+const htext = (s: string) => clean(decode(s.replace(/<[^>]+>/g, ' ')))
+
+export interface EavyStep { text: string; stage: string; paints: { name: string; parts?: number }[]; note: string }
+export interface EavyScheme { slug: string; title: string; areas: { area: string; tags: string[]; steps: EavyStep[] }[] }
+
+/** 'Eavy Archive faction page: each modal is a scheme, each card an area, each <li> "Stage: Paint & Paint 1:1" a step. */
+export function eavyArchive(html: string): EavyScheme[] {
+  const out: EavyScheme[] = []
+  const modals = html.split(/<div class="modal m-0" id="/).slice(1)
+  for (const m of modals) {
+    const slug = m.slice(0, m.indexOf('"'))
+    const title = decode(m.match(/data-recipe-title="([^"]*)"/)?.[1] ?? slug)
+    const areas: EavyScheme['areas'] = []
+    for (const card of m.split(/<div class="card mb-3" id="/).slice(1)) {
+      const area = htext(card.match(/<h5 class="card-title">([\s\S]*?)<(?:a|button|\/h5)/)?.[1] ?? '')
+      const tags = [...card.matchAll(/>#([^<]+)<\/button>/g)].map((t) => t[1].trim())
+      const steps: EavyStep[] = []
+      for (const li of card.match(/<ol>([\s\S]*?)<\/ol>/)?.[1].match(/<li>[\s\S]*?<\/li>/g) ?? []) {
+        // Generic names ("Black") link to alternatives; the last one is the Citadel paint.
+        const raw = li.replace(/<a [^>]*data-bs-content="([^"]*)"[^>]*>[\s\S]*?<\/a>/g, (_, alts: string) => decode(alts).split(';').pop()!.trim())
+        const line = htext(raw)
+        const colon = line.indexOf(':')
+        const stage = colon > 0 ? line.slice(0, colon).trim() : ''
+        let body = colon > 0 ? line.slice(colon + 1).trim() : line
+        // "(Ridges & Edges)" is a note; "A/B 3:1" or "A & B 1:1" is a mix; "A, B, C" are used one after another.
+        const note = [...body.matchAll(/\(([^)]*)\)/g)].map((x) => x[1].trim()).join('; ')
+        body = body.replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim()
+        const ratio = body.match(/\s*(\d+(?::\d+)+)\s*$/)
+        if (ratio) body = body.slice(0, ratio.index).trim()
+        const parts = ratio?.[1].split(':').map(Number)
+        const names = body.split(/\s*(?:&|\/|,|\+|\bor\b|\band\b)\s*/).filter(Boolean)
+        steps.push({ text: line, stage, note, paints: names.map((name, i) => ({ name, ...(parts && parts.length === names.length ? { parts: parts[i] } : {}) })) })
+      }
+      if (area && steps.length) areas.push({ area, tags, steps })
+    }
+    if (areas.length) out.push({ slug, title, areas })
+  }
+  return out
+}

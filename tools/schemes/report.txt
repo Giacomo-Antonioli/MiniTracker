@@ -571,6 +571,137 @@ OK    lib/paint-pad-75  "T'au troops: green undersuit" by andypearson  steps=41 
 OK    lib/paint-pad-66  "T'au Stealth Suits" by andypearson  steps=19 paints=19 matched=95%  
 OK    lib/paint-pad-14  "T’au fusion weapons" by andypearson  steps=7 paints=6 matched=100%  
 OK    lib/paint-pad-6  "T’au troops: red undersuit" by andypearson  steps=32 paints=24 matched=100%  
+OK    lib/eavy-adepta-sororitas-novitiates  "Novitiates"  areas=3 matched=100%
+OK    lib/eavy-adepta-sororitas-order-of-our-martyred-lady  "Order of Our Martyred Lady"  areas=21 matched=88%
+OK    lib/eavy-adepta-sororitas-order-of-the-ashen-shrine  "Order of the Ashen Shrine"  areas=4 matched=100%
+OK    lib/eavy-adepta-sororitas-order-of-the-bloody-rose  "Order of the Bloody Rose"  areas=5 matched=88%
+OK    lib/eavy-adepta-sororitas-order-of-the-sacred-rose  "Order of the Sacred Rose"  areas=2 matched=100%
+OK    lib/eavy-adeptus-mechanicus-mars-forge-world  "Mars Forge World"  areas=10 matched=78%
+OK    lib/eavy-aeldari-avatar-of-khaine  "Avatar of Khaine"  areas=1 matched=100%
+OK    lib/eavy-aeldari-corsair-voidscarred  "Corsair Voidscarred"  areas=2 matched=90%
+OK    lib/eavy-aeldari-corsair-sunblitz-brotherhood  "Corsair: Sunblitz Brotherhood"  areas=3 matched=88%
+OK    lib/eavy-aeldari-corsairs-of-the-court-of-chains  "Corsairs: Court of Chains"  areas=3 matched=100%
+OK    lib/eavy-aeldari-corsairs-of-the-crimson-eclipse  "Corsairs: Crimson Eclipse"  areas=3 matched=96%
+OK    lib/eavy-aeldari-corsairs-of-the-darkflame-phoenixes  "Corsairs: Darkflame Phoenixes"  areas=3 matched=90%
+OK    lib/eavy-aeldari-corsairs-of-the-starkillers  "Corsairs: Starkillers"  areas=3 matched=86%
+OK    lib/eavy-aeldari-corsairs-of-the-starstreak-cadre  "Corsairs: Starstreak Cadre"  areas=3 matched=81%
+OK    lib/eavy-aeldari-corsairs-void-dragons  "Corsairs: Void Dragons"  areas=2 matched=90%
+OK    lib/eavy-aeldari-corsairs-warp-hunters  "Corsairs: Warp Hunters"  areas=3 matched=77%
+OK    lib/eavy-aeldari-craftworld-alaitoc  "Craftworld: Alaitoc"  areas=2 matched=100%
+OK    lib/eavy-aeldari-craftworld-altansar  "Craftworld: Altansar"  areas=1 matched=91%
+OK    lib/eavy-aeldari-biel-tan  "Craftworld: Biel-Tan"  areas=3 matched=95%
+OK    lib/eavy-aeldari-craftworld-iyanden  "Craftworld: Iyanden"  areas=4 matched=100%
+OK    lib/eavy-aeldari-craftworld-iybraesil  "Craftworld: Iybraesil"  areas=2 matched=94%
+OK    lib/eavy-aeldari-craftworld-saim-hann  "Craftworld: Saim-Hann"  areas=3 matched=71%
+OK    lib/eavy-aeldari-craftworld-ulthwe  "Craftworld: Ulthwe"  areas=8 matched=85%
+OK    lib/eavy-aeldari-craftworld-ulthwe-legacy  "Craftworld: Ulthwe - Legacy"  areas=6 matched=70%
+OK    lib/eavy-aeldari-howling-banshees-and-jain-zar  "Howling Banshees & Jain Zar"  areas=3 matched=86%
+DROP  lib/eavy-aeldari-masque-of-midnight-sorrow  "Masque of Midnight Sorrow"  matched=45%
+OK    lib/eavy-aeldari-masque-of-soaring-spite  "Masque of Soaring Spite"  areas=12 matched=75%
+OK    lib/eavy-aeldari-maugan-ra  "Maugan Ra"  areas=9 matched=99%
+OK    lib/eavy-aeldari-rangers  "Rangers"  areas=2 matched=80%
+OK    lib/eavy-aeldari-striking-scorpions  "Striking Scorpions"  areas=1 matched=76%
+DROP  lib/eavy-imperial-agents-elucidian-starstriders  "Elucidian Starstriders"  matched=0%
+OK    lib/eavy-imperial-agents-imperial-assassins  "Imperial Assassins"  areas=3 matched=72%
+OK    lib/eavy-astra-militarum-cadian-shock-troops  "Cadian Shock Troops"  areas=6 matched=100%
+OK    lib/eavy-astra-militarum-cadian-vehicles  "Cadian Vehicles"  areas=1 matched=100%
+OK    lib/eavy-astra-militarum-death-korps-of-krieg  "Death Korps of Krieg"  areas=18 matched=82%
+OK    lib/eavy-astra-militarum-death-korps-of-krieg-artillery  "Death Korps of Krieg: Artillery"  areas=2 matched=100%
+OK    lib/eavy-astra-militarum-death-korps-of-krieg-death-riders  "Death Korps of Krieg: Death Riders"  areas=4 matched=88%
+OK    lib/eavy-astra-militarum-tempestus-scions  "Tempestus Scions"  areas=3 matched=88%
+OK    lib/eavy-chaos-daemons-daemon-prince-of-tzeentch  "Daemon Prince of Tzeentch"  areas=10 matched=82%
+OK    lib/eavy-chaos-knights-dreadblade  "Dreadblade"  areas=5 matched=83%
+OK    lib/eavy-chaos-knights-house-lucaris  "House Lucaris"  areas=6 matched=74%
+OK    lib/eavy-chaos-space-marines-alpha-legion  "Alpha Legion"  areas=4 matched=77%
+OK    lib/eavy-chaos-space-marines-angron  "Angron"  areas=12 matched=95%
+OK    lib/eavy-chaos-space-marines-black-legion  "Black Legion"  areas=17 matched=85%
+OK    lib/eavy-chaos-space-marines-death-guard  "Death Guard"  areas=14 matched=81%
+OK    lib/eavy-chaos-space-marines-emperors-children  "Emperor's Children"  areas=1 matched=75%
+OK    lib/eavy-chaos-space-marines-fulgrim  "Fulgrim"  areas=8 matched=92%
+OK    lib/eavy-chaos-space-marines-mortarion  "Mortarion"  areas=1 matched=100%
+DROP  lib/eavy-chaos-space-marines-night-lords  "Night Lords"  matched=54%
+DROP  lib/eavy-chaos-space-marines-poxwalkers  "Poxwalkers"  matched=55%
+OK    lib/eavy-chaos-space-marines-thousand-sons  "Thousand Sons"  areas=6 matched=78%
+OK    lib/eavy-chaos-space-marines-thousand-sons-hellbrute  "Thousand Sons Hellbrute"  areas=2 matched=100%
+OK    lib/eavy-chaos-space-marines-thousand-sons-tzaangor  "Thousand Sons Tzaangor"  areas=1 matched=89%
+OK    lib/eavy-chaos-space-marines-traitor-guard  "Traitor Guard"  areas=15 matched=87%
+OK    lib/eavy-chaos-space-marines-word-bearers  "Word Bearers"  areas=5 matched=70%
+OK    lib/eavy-chaos-space-marines-world-eaters  "World Eaters"  areas=10 matched=79%
+OK    lib/eavy-drukhari-kabal-of-the-poisoned-tongue  "Dark Blue Drukhari"  areas=1 matched=60%
+OK    lib/eavy-drukhari-kabal-of-the-Black-heart  "Kabal of the Black Heart"  areas=6 matched=91%
+OK    lib/eavy-drukhari-ur-ghul  "Ur-Ghul"  areas=1 matched=100%
+OK    lib/eavy-genestealer-cults-abominant  "Abominant"  areas=2 matched=72%
+OK    lib/eavy-genestealer-cults-biophagus  "Biophagus"  areas=1 matched=63%
+OK    lib/eavy-genestealer-cults-cult-of-the-four-armed-emperor  "Cult of the Four-Armed Emperor"  areas=23 matched=86%
+OK    lib/eavy-genestealer-cults-cult-of-the-writhing-shadow  "Cult of the Writhing Shadow"  areas=4 matched=95%
+OK    lib/eavy-genestealer-cults-nexos  "Nexos"  areas=1 matched=100%
+OK    lib/eavy-imperial-knights-house-raven  "House Raven"  areas=3 matched=86%
+OK    lib/eavy-imperial-knights-house-taranis  "House Taranis"  areas=1 matched=100%
+OK    lib/eavy-imperial-knights-house-terryn  "House Terryn"  areas=3 matched=100%
+OK    lib/eavy-leagues-of-votann-greater-thurian-league  "Greater Thurian League"  areas=24 matched=68%
+OK    lib/eavy-leagues-of-votann-trans-hyperian-alliance  "Trans-Hyperian Alliance"  areas=11 matched=99%
+OK    lib/eavy-leagues-of-votann-uthar-the-destined  "Ûthar the Destined"  areas=3 matched=93%
+OK    lib/eavy-leagues-of-votann-ymyr-conglomerate  "Ymyr Conglomerate"  areas=4 matched=95%
+OK    lib/eavy-necrons-szarekhan-dynasty  "Szarekhan Dynasty"  areas=15 matched=68%
+OK    lib/eavy-orks-ghazghkull-thraka  "Ghazghkull Thraka"  areas=7 matched=94%
+OK    lib/eavy-orks-ork-warboss  "Ork Warboss"  areas=2 matched=90%
+OK    lib/eavy-orks-orks-beast-snaggas  "Orks (Beast Snaggas)"  areas=5 matched=79%
+OK    lib/eavy-orks-goffs  "Orks (General)"  areas=1 matched=73%
+DROP  lib/eavy-orks-squigs-beast-snaggas  "Squigs (Beast Snaggas)"  matched=44%
+OK    lib/eavy-orks-wazdakka  "Wazdakka"  areas=14 matched=94%
+OK    lib/eavy-space-marines-black-templars  "Black Templars"  areas=15 matched=91%
+OK    lib/eavy-space-marines-blood-angels  "Blood Angels"  areas=10 matched=89%
+OK    lib/eavy-space-marines-blood-ravens-2  "Blood Ravens"  areas=1 matched=100%
+OK    lib/eavy-space-marines-castellans-of-the-rift  "Castellans of the Rift"  areas=6 matched=89%
+OK    lib/eavy-space-marines-crimson-fists  "Crimson Fists"  areas=2 matched=100%
+OK    lib/eavy-space-marines-dark-angels  "Dark Angels"  areas=5 matched=93%
+OK    lib/eavy-space-marines-deathwatch  "Deathwatch"  areas=5 matched=62%
+OK    lib/eavy-space-marines-deathwing  "Deathwing"  areas=5 matched=89%
+OK    lib/eavy-space-marines-exorcists  "Exorcists"  areas=2 matched=100%
+OK    lib/eavy-space-marines-flesh-tearers  "Flesh Tearers"  areas=2 matched=100%
+OK    lib/eavy-space-marines-hawk-lords  "Hawk Lords"  areas=1 matched=100%
+OK    lib/eavy-space-marines-helbrecht  "Helbrecht"  areas=1 matched=63%
+OK    lib/eavy-space-marines-howling-griffons  "Howling Griffons"  areas=2 matched=100%
+OK    lib/eavy-space-marines-illuminators  "Illuminators"  areas=2 matched=100%
+OK    lib/eavy-space-marines-imperial-fists  "Imperial Fists"  areas=8 matched=84%
+OK    lib/eavy-space-marines-iron-hands  "Iron Hands"  areas=3 matched=95%
+OK    lib/eavy-space-marines-iron-ravens  "Iron Ravens"  areas=10 matched=86%
+OK    lib/eavy-space-marines-keepers-of-the-chalice  "Keepers of the Chalice"  areas=2 matched=95%
+OK    lib/eavy-space-marines-knights-of-the-raven  "Knights of the Raven"  areas=2 matched=75%
+OK    lib/eavy-space-marines-lion-eljonson  "Lion El’Jonson"  areas=1 matched=87%
+OK    lib/eavy-space-marines-marines-errant  "Marines Errant"  areas=2 matched=100%
+OK    lib/eavy-space-marines-penumbral-talons  "Penumbral Talons"  areas=2 matched=100%
+OK    lib/eavy-space-marines-primaris-apothecary  "Primaris Apothecary"  areas=1 matched=82%
+OK    lib/eavy-space-marines-primaris-chaplain  "Primaris Chaplain"  areas=3 matched=95%
+OK    lib/eavy-space-marines-primaris-librarian  "Primaris Librarian"  areas=4 matched=94%
+OK    lib/eavy-space-marines-primaris-techmarine  "Primaris Techmarine"  areas=1 matched=100%
+OK    lib/eavy-space-marines-raptors  "Raptors"  areas=2 matched=100%
+OK    lib/eavy-space-marines-raven-guard  "Raven Guard"  areas=2 matched=100%
+DROP  lib/eavy-space-marines-roboute-guilliman  "Roboute Guilliman"  matched=54%
+OK    lib/eavy-space-marines-salamanders  "Salamanders"  areas=2 matched=90%
+OK    lib/eavy-space-marines-scythes-of-the-emperor  "Scythes of the Emperor"  areas=2 matched=100%
+OK    lib/eavy-space-marines-space-wolves  "Space Wolves"  areas=4 matched=87%
+OK    lib/eavy-space-marines-ultramarines  "Ultramarines"  areas=19 matched=76%
+OK    lib/eavy-space-marines-void-tridents  "Void Tridents"  areas=3 matched=77%
+OK    lib/eavy-space-marines-white-scars  "White Scars"  areas=5 matched=100%
+OK    lib/eavy-space-marines-white-templars  "White Templars"  areas=2 matched=100%
+OK    lib/eavy-space-marines-wolfspear  "Wolfspear"  areas=13 matched=95%
+OK    lib/eavy-adeptus-custodes-adeptus-custodes  "Adeptus Custodes"  areas=9 matched=81%
+OK    lib/eavy-adeptus-custodes-sisters-of-silence  "Sisters of Silence"  areas=8 matched=66%
+OK    lib/eavy-tau-empire-commander-shadowsun  "Commander Shadowsun"  areas=1 matched=83%
+OK    lib/eavy-tau-empire-farsight-enclaves  "Farsight Enclaves"  areas=2 matched=94%
+OK    lib/eavy-tau-empire-kroot  "Kroot"  areas=8 matched=74%
+OK    lib/eavy-tau-empire-tau-sept  "T'au Sept"  areas=7 matched=86%
+OK    lib/eavy-tau-empire-viorla-sept  "Vior'la Sept"  areas=10 matched=90%
+OK    lib/eavy-tyranids-hive-fleet-behemoth  "Hive Fleet Behemoth"  areas=4 matched=97%
+OK    lib/eavy-tyranids-hive-fleet-behemoth-2  "Hive Fleet Behemoth"  areas=9 matched=91%
+OK    lib/eavy-tyranids-hive-fleet-cetu  "Hive Fleet Cetu"  areas=2 matched=100%
+OK    lib/eavy-tyranids-hive-fleet-kraken  "Hive Fleet Kraken"  areas=5 matched=97%
+OK    lib/eavy-tyranids-hive-fleet-leviathan  "Hive Fleet Leviathan"  areas=5 matched=97%
+OK    lib/eavy-tyranids-hive-fleet-lotan  "Hive Fleet Lotan"  areas=2 matched=100%
+OK    lib/eavy-tyranids-hive-fleet-tiamet  "Hive Fleet Tiamet"  areas=2 matched=100%
+OK    lib/eavy-tyranids-hive-fleet-typhon  "Hive Fleet Typhon"  areas=2 matched=100%
+OK    lib/eavy-tyranids-toxicrene  "Toxicrene"  areas=1 matched=88%
 MANUAL lib/official-farsight-enclaves  "Farsight Enclaves (studio colours)"
 MANUAL lib/official-tau-sept  "T'au Sept (studio colours)"
 MANUAL lib/official-viorla  "Vior'la (studio colours)"
