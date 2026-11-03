@@ -3,6 +3,8 @@ import { ctx, useStore } from '../../app/store'
 import { pointsFor } from '../../domain/catalogue/points'
 import { totalModels } from '../../domain/collection/ownedUnit'
 import { setFlags } from '../../domain/collection/pipeline'
+import { unitRecord } from '../../domain/games/games'
+import { listOwnership } from '../../domain/lists/ownership'
 import type { ModelGroup, OwnedUnit } from '../../domain/collection/types'
 import { DatasheetInfo } from '../catalogue/DatasheetInfo'
 import { PhotoGallery } from '../photos/PhotoGallery'
@@ -91,6 +93,7 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
           {unit.factionName ?? 'No faction'} · {unit.lifecycle} ·{' '}
           <span title="Permanent unit tag, used in photo names and future QR/NFC tags" aria-label="Unit tag">🏷 {unitTag(unit.id)}</span>
         </p>
+        <GamesPlayed unitId={unit.id} />
         {datasheet && (
           <p className="mt-1 text-sm" aria-label="Datasheet">
             📜{' '}
@@ -242,4 +245,13 @@ function Container({ className, children, ...rest }: { className: string; childr
   ) : (
     <aside className={className} {...rest}>{children}</aside>
   )
+}
+
+/** "⚔ Played in 3 games · destroyed in 1", from finished games whose list this unit fills (#71). */
+function GamesPlayed({ unitId }: { unitId: string }) {
+  const { games, lists, units, pipeline } = useStore()
+  if (!games.length) return null
+  const r = unitRecord(unitId, games, lists, (id, l) => [...listOwnership(l, units, pipeline).byEntry].filter(([, o]) => o.from.some((f) => f.unitId === id)).map(([entryId]) => entryId))
+  if (!r.played) return null
+  return <p className="mt-1 text-sm text-muted" aria-label="Games played">⚔ Played in {r.played} game{r.played === 1 ? '' : 's'}{r.destroyed ? ` · destroyed in ${r.destroyed}` : ''}</p>
 }

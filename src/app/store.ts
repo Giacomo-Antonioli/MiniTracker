@@ -14,6 +14,7 @@ import { newStock } from '../domain/paints/inventory'
 import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Catalogue } from '../domain/catalogue/types'
 import { DEFAULT_LAYOUT, parseLayout, type CardLayout } from '../domain/home/layout'
+import { parseGames, type Game } from '../domain/games/games'
 import { parseWahapedia, type StratagemData } from '../domain/stratagems/stratagems'
 import { becameLow, lowPaints, parseSupplies, supplyItem, type Supply } from '../domain/supplies/supplies'
 import type { ArmyList, EditionKey } from '../domain/lists/types'
@@ -178,6 +179,10 @@ interface State {
   supplies: Supply[]
   saveSupply(s: Supply): Promise<void>
   deleteSupply(id: string): Promise<void>
+  /** Games, live and finished (#71); saved in the backup. */
+  games: Game[]
+  saveGame(g: Game): Promise<void>
+  deleteGame(id: string): Promise<void>
   /** Cards on Home, in order, with sizes (saved in the backup). */
   homeLayout: CardLayout[]
   saveHomeLayout(l: CardLayout[]): Promise<void>
@@ -319,7 +324,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, stratagemData, supplies] = await Promise.all([
+    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
@@ -333,6 +338,7 @@ export const useStore = create<State>((set, get) => ({
       listRepo.list(),
       shopRepo.load(),
       settingsRepo.getValue<CardLayout[] | null>('homeLayout', null),
+      settingsRepo.getValue<unknown>('games', []),
       settingsRepo.getValue<StratagemData | null>('stratagems', null),
       settingsRepo.getValue<unknown>('supplies', []),
     ])
@@ -351,6 +357,7 @@ export const useStore = create<State>((set, get) => ({
       shopItems: shopping.items,
       shopLists: shopping.lists,
       homeLayout: homeLayout ? parseLayout(JSON.stringify(homeLayout)) : DEFAULT_LAYOUT,
+      games: parseGames(games),
       stratagemData,
       supplies: parseSupplies(supplies),
       ready: true,
@@ -550,6 +557,17 @@ export const useStore = create<State>((set, get) => ({
   schemes: [],
   schemeDefaults: {},
   homeLayout: DEFAULT_LAYOUT,
+  games: [],
+  async saveGame(g) {
+    const list = get().games.some((x) => x.id === g.id) ? get().games.map((x) => (x.id === g.id ? g : x)) : [g, ...get().games]
+    set({ games: list })
+    await settingsRepo.setValue('games', list)
+  },
+  async deleteGame(id) {
+    const list = get().games.filter((x) => x.id !== id)
+    set({ games: list })
+    await settingsRepo.setValue('games', list)
+  },
   stratagemData: null,
   async importStratagems(files) {
     const data = parseWahapedia(await Promise.all(files.map((f) => f.text())), ctx().now)
