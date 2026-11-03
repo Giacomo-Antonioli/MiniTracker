@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BasesBrowser } from './Bases'
+import { BasesTab } from './Bases'
 import { Diagram } from './Diagram'
 import { GETTING_STARTED, TECHNIQUES_GUIDE, videoSearch, type Technique } from '../../domain/guides/techniques'
 
@@ -30,7 +30,7 @@ export function Guides({ initialTab = 'techniques' }: { initialTab?: Tab }) {
           </div>
         </>
       )}
-      {tab === 'bases' && <BasesBrowser />}
+      {tab === 'bases' && <BasesTab />}
       {tab === 'start' && (
         <div className="grid gap-3 md:grid-cols-2">
           {GETTING_STARTED.map((s) => (
