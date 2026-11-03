@@ -4,6 +4,13 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-11-03
+
+### Added
+- Storage (#18): a Storage tab with separate storages (home, club locker…) as tabs, nested places (shelf, drawer, box, bag, case, tray, desk; kinds editable in Settings) with slots and fill, and a page per place. Each unit has a home place and slot (bags can hold several units of one sprue), can be checked out to a case or the desk and put back, with a moves log and a storage status (Settings › Pipelines › Storage). The unit page has Details | Storage tabs.
+- Army Pick list: which places to open in order and what to take, units not stored, Pack into a case and Put back.
+- Codes and labels (#10): short codes (U-001, B-01), Find code and an in-app QR scanner; QR links open the unit or place. Print QR stickers, box labels with contents, or a stencil sheet (print or SVG for cutting machines); the code is shown big for writing under a base.
+
 ## [0.12.0] - 2026-11-03
 
 ### Added
@@ -232,7 +239,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.2...v0.12.0
 [0.11.2]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.1...v0.11.2
 [0.11.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.0...v0.11.1
