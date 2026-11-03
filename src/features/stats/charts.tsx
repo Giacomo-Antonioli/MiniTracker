@@ -18,7 +18,7 @@ function useWidth() {
   useEffect(() => {
     const el = ref.current
     if (!el || typeof ResizeObserver === 'undefined') return
-    const ro = new ResizeObserver(([e]) => setW(Math.max(240, e.contentRect.width)))
+    const ro = new ResizeObserver(([e]) => setW(Math.max(200, Math.floor(e.contentRect.width))))
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
@@ -45,9 +45,9 @@ const barPath = (x: number, y: number, w: number, h: number) => {
 function Frame({ label, w, top, children, tip, legend }: { label: string; w: number; top: number; children: ReactNode; tip?: ReactNode; legend?: ReactNode }) {
   const y = (v: number) => PAD.top + (H - PAD.top - PAD.bottom) * (1 - v / top)
   return (
-    <figure className="relative grid gap-2">
+    <figure className="relative grid min-w-0 gap-2">
       {legend}
-      <svg role="img" aria-label={label} width={w} height={H} className="block overflow-visible">
+      <svg role="img" aria-label={label} width={w} height={H} className="block max-w-full overflow-visible">
         {ticks(top).map((t) => (
           <g key={t} className="text-muted">
             <line x1={PAD.left} x2={w - PAD.right} y1={y(t)} y2={y(t)} className="stroke-line" strokeDasharray={t === 0 ? undefined : '2 4'} />
@@ -110,7 +110,7 @@ export function MonthBars({ months, series, label, stacked = false, format }: { 
     </div>
   )
   return (
-    <div ref={ref} onMouseLeave={() => setHover(null)}>
+    <div ref={ref} className="min-w-0" onMouseLeave={() => setHover(null)}>
       <Frame label={label} w={w} top={top} legend={legend} tip={hover !== null && <Tip x={x0(hover) + groupW / 2} w={w} month={months[hover]} format={format} rows={series.filter((s) => !stacked || s.values[hover]).map((s) => ({ name: s.name, value: s.values[hover], swatch: s.swatch, color: s.color }))} />}>
         {months.map((m, i) => (
           <g key={m} opacity={hover === null || hover === i ? 1 : 0.45}>
@@ -158,7 +158,7 @@ export function MonthArea({ months, values, name, label }: { months: string[]; v
   const last = values.length - 1
   const every = Math.ceil(months.length / Math.max(1, Math.floor(plotW / 44)))
   return (
-    <div ref={ref} onMouseLeave={() => setHover(null)}>
+    <div ref={ref} className="min-w-0" onMouseLeave={() => setHover(null)}>
       <Frame label={label} w={w} top={top} tip={hover !== null && <Tip x={x(hover)} w={w} month={months[hover]} rows={[{ name, value: values[hover], swatch: 'bg-accent' }]} />}>
         <defs>
           <linearGradient id={gid} x1="0" x2="0" y1="0" y2="1">

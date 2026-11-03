@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Fixed
+- Stats charts no longer overflow their cards.
+
 ## [0.8.0] - 2026-11-03
 
 ### Added
