@@ -6,6 +6,7 @@ import { usePhotoUrl } from '../photos/usePhotoUrl'
 import { ColourStrip } from './ColourStrip'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
 import { SchemeEditor } from './SchemeEditor'
+import { Guides } from '../guides/GuidesPage'
 import { SchemeView } from './SchemeView'
 import { AddFromLinkDialog } from './AddFromLinkDialog'
 import type { RecipePayload } from './recipeImport'
@@ -25,6 +26,7 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
   const [selectedId, setSelectedId] = useState<string | null>(openId ?? null)
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
   const [adding, setAdding] = useState(false)
+  const [view, setView] = useState<'schemes' | 'guides'>('schemes')
   // The library has hundreds of schemes: draw them a page at a time; new filters start again at one page.
   const filterKey = JSON.stringify([text, faction, origin, stage, showLibrary])
   const [more, setMore] = useState({ key: filterKey, n: PAGE })
@@ -53,11 +55,25 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
     setSelectedId(s.id)
   }
 
+  if (view === 'guides')
+    return (
+      <div className="grid gap-4">
+        <header className="flex flex-wrap items-center gap-3">
+          <h1 className="font-display text-2xl text-accent">Schemes</h1>
+          <ViewTabs view={view} onChange={setView} />
+        </header>
+        <Guides />
+      </div>
+    )
+
   return (
     <div className="flex h-full gap-4">
       <div className={`flex min-w-0 flex-col gap-4 ${selected ? 'w-[380px] shrink-0' : 'flex-1'}`}>
         <header className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="font-display text-2xl text-accent">Schemes</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-display text-2xl text-accent">Schemes</h1>
+            <ViewTabs view={view} onChange={setView} />
+          </div>
           <div className="flex gap-2">
             <label className="btn">
               ⬆ Import
@@ -188,5 +204,14 @@ function SchemeCard(props: {
         </span>
       </button>
     </li>
+  )
+}
+
+function ViewTabs({ view, onChange }: { view: 'schemes' | 'guides'; onChange: (v: 'schemes' | 'guides') => void }) {
+  return (
+    <div role="tablist" aria-label="Schemes view" className="flex gap-1">
+      <button role="tab" aria-selected={view === 'schemes'} className={`btn ${view === 'schemes' ? 'btn-primary' : ''}`} onClick={() => onChange('schemes')}>Schemes</button>
+      <button role="tab" aria-selected={view === 'guides'} className={`btn ${view === 'guides' ? 'btn-primary' : ''}`} onClick={() => onChange('guides')}>📖 Guides</button>
+    </div>
   )
 }

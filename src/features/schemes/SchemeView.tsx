@@ -7,6 +7,8 @@ import { MissingPaints } from './MissingPaints'
 import { colourStrip, makeVariant, missingPaints } from '../../domain/schemes/scheme'
 import type { PaintScheme } from '../../domain/schemes/types'
 import { ColourStrip } from './ColourStrip'
+import { techniqueFor, type Technique } from '../../domain/guides/techniques'
+import { TechniquePanel } from '../guides/GuidesPage'
 import { RecipeCard } from './RecipeCard'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
 
@@ -16,6 +18,7 @@ export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: Pa
   useEffect(() => {
     void loadSchemePhotos(scheme.id)
   }, [scheme.id, loadSchemePhotos])
+  const [technique, setTechnique] = useState<Technique | null>(null)
   const [viewing, setViewing] = useState<{ stepId: string; photoId: string } | null>(null)
   const stepPhotos = (stepId: string) => (allPhotos[scheme.id] ?? []).filter((p) => p.owner.kind === 'scheme' && p.owner.stepId === stepId)
   const usedBy = units.filter((u) => u.schemeId === scheme.id)
@@ -92,7 +95,11 @@ export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: Pa
               {sec.steps.map((st, i) => (
                 <li key={st.id} className="flex flex-wrap items-center gap-2">
                   <span className="w-6 text-right text-muted">{i + 1}.</span>
-                  <span className="w-28 text-muted">{st.technique || 'step'}</span>
+                  {techniqueFor(st.technique) ? (
+                    <button className="w-28 text-left text-muted underline decoration-dotted hover:text-accent" title="How to do this" onClick={() => setTechnique(techniqueFor(st.technique)!)}>{st.technique}</button>
+                  ) : (
+                    <span className="w-28 text-muted">{st.technique || 'step'}</span>
+                  )}
                   {st.paints.map((sp, j) => {
                     const p = byId.get(sp.paintId)
                     const owned = (paintStock.get(sp.paintId)?.quantity ?? 0) > 0
@@ -119,6 +126,7 @@ export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: Pa
       </div>
       {viewing && <PhotoViewer photos={stepPhotos(viewing.stepId)} startId={viewing.photoId} onClose={() => setViewing(null)} />}
       {printing && <RecipeCard scheme={scheme} onDone={() => setPrinting(false)} />}
+      {technique && <TechniquePanel technique={technique} onClose={() => setTechnique(null)} />}
     </section>
   )
 }
