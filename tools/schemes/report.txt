@@ -13,13 +13,13 @@ OK    lib/paint-pad-5034  "Bright Ultramarines" by ASquigPaints  steps=58 paints
 OK    lib/paint-pad-3443  "Ultramarines (quick)" by jedi58  steps=6 paints=6 matched=83%  
 OK    lib/paint-pad-2859  "Relic: Ultramarines Captain Playing Peice" by RookieBrushes  steps=45 paints=30 matched=97%  
 OK    lib/paint-pad-45049  "Blood Angels Infernus Marine" by BearsFrogs  steps=37 paints=18 matched=100%  
-OK    lib/paint-pad-30002  "Blood Angels Legions Imperialis Armour" by diceandpaint  steps=21 paints=16 matched=69%  
+OK    lib/paint-pad-30002  "Blood Angels Legions Imperialis Armour" by diceandpaint  steps=21 paints=17 matched=82%  
 OK    lib/paint-pad-10102  "Blood Angels" by sanguinius.simp  steps=62 paints=46 matched=96%  
 OK    lib/paint-pad-4791  "How to paint blood angels Ballistus dreadnought (out of date)" by darthcosicat  steps=76 paints=24 matched=100%  
-OK    lib/paint-pad-33337  "Space Wolves" by Eden_Blade  steps=52 paints=36 matched=67%  
+OK    lib/paint-pad-33337  "Space Wolves" by Eden_Blade  steps=52 paints=36 matched=75%  
 OK    lib/paint-pad-24028  "Space wolves armor (darker)" by Imprecise9900  steps=4 paints=4 matched=75%  
 OK    lib/paint-pad-22048  "Space Wolves Armour" by Bloodeagle  steps=29 paints=23 matched=91%  
-OK    lib/paint-pad-3439  "Space Wolves" by WarpfireMiniatures  steps=28 paints=25 matched=80%  
+OK    lib/paint-pad-3439  "Space Wolves" by WarpfireMiniatures  steps=28 paints=25 matched=96%  
 DROP  lib/paint-pad-2631  "Space Wolves Intersessor" by andromedastudio  steps=0 paints=0 matched=0%  (too few steps)
 OK    lib/paint-pad-2323  "30k Wolves" by Mong710  steps=11 paints=8 matched=88%  
 OK    lib/paint-pad-26536  "Shades of Caliban (vehicles)" by Ekatum  steps=51 paints=32 matched=91%  
@@ -34,21 +34,21 @@ OK    lib/paint-pad-2152  "Deathwing (Green)" by WhiskerForge  steps=5 paints=4 
 OK    lib/paint-pad-2151  "Deathwing (Bone)" by WhiskerForge  steps=5 paints=5 matched=80%  
 OK    lib/paint-pad-2104  "Dark Angel Armour" by RookieBrushes  steps=16 paints=10 matched=100%  
 OK    lib/paint-pad-2036  "Grimdark Dark Angels" by tsemana  steps=21 paints=11 matched=91%  
-DROP  lib/paint-pad-32314  "Flames" by LazyPainter  steps=8 paints=5 matched=40%  (too many unknown paints)
-OK    lib/paint-pad-7232  "Salamander 5th Company Scheme" by PurgeProjects  steps=35 paints=27 matched=89%  
+OK    lib/paint-pad-32314  "Flames" by LazyPainter  steps=8 paints=5 matched=80%  
+OK    lib/paint-pad-7232  "Salamander 5th Company Scheme" by PurgeProjects  steps=35 paints=27 matched=93%  
 OK    lib/paint-pad-2684  "Salamanders Green" by WhiskerForge  steps=4 paints=4 matched=75%  
-OK    lib/paint-pad-2201  "Purity Seals" by CorranHorn  steps=9 paints=9 matched=67%  
+OK    lib/paint-pad-2201  "Purity Seals" by CorranHorn  steps=9 paints=9 matched=89%  
 OK    lib/paint-pad-2200  "Black weapon casing" by CorranHorn  steps=6 paints=6 matched=100%  
-DROP  lib/paint-pad-2187  "Warm leather" by CorranHorn  steps=6 paints=5 matched=40%  (too many unknown paints)
-OK    lib/paint-pad-2186  "Space Marine undersuit" by CorranHorn  steps=3 paints=3 matched=67%  
-DROP  lib/paint-pad-2185  "Black Armour (Salamanders)" by CorranHorn  steps=11 paints=7 matched=57%  (too many unknown paints)
+OK    lib/paint-pad-2187  "Warm leather" by CorranHorn  steps=6 paints=5 matched=80%  
+OK    lib/paint-pad-2186  "Space Marine undersuit" by CorranHorn  steps=3 paints=3 matched=100%  
+OK    lib/paint-pad-2185  "Black Armour (Salamanders)" by CorranHorn  steps=11 paints=7 matched=86%  
 DROP  lib/paint-pad-2184  "Salamanders Armour" by CorranHorn  steps=12 paints=7 matched=43%  (too many unknown paints)
-OK    lib/paint-pad-2183  "Orange/Rusty Desert Bases" by CorranHorn  steps=7 paints=8 matched=75%  
-OK    lib/paint-pad-32014  "Imperial Fists" by TDCliph  steps=31 paints=28 matched=61%  
+OK    lib/paint-pad-2183  "Orange/Rusty Desert Bases" by CorranHorn  steps=7 paints=8 matched=88%  
+OK    lib/paint-pad-32014  "Imperial Fists" by TDCliph  steps=31 paints=29 matched=72%  
 OK    lib/paint-pad-13304  "Imperial Fists Reiver" by andromedastudio  steps=20 paints=19 matched=100%  
 OK    lib/paint-pad-10236  "Glowing Blue Lenses Imperial Fists" by TheMooseIsLoose  steps=7 paints=2 matched=100%  
 OK    lib/paint-pad-3118  "Imperial Fist Yellow" by TheGoldenChin  steps=8 paints=7 matched=100%  
-DROP  lib/paint-pad-2084  "Green Alien Sword (For Necrons/Deathwatch/Tau)" by r.j.h.  steps=9 paints=3 matched=0%  (too many unknown paints)
+OK    lib/paint-pad-2084  "Green Alien Sword (For Necrons/Deathwatch/Tau)" by r.j.h.  steps=9 paints=3 matched=67%  
 OK    lib/paint-pad-1740  "Deathwatch Weapon Casing" by RookieBrushes  steps=5 paints=5 matched=100%  
 OK    lib/paint-pad-1725  "Deathwatch Armour" by RookieBrushes  steps=17 paints=13 matched=85%  
 OK    lib/paint-pad-477  "Deathwatch" by LC  steps=127 paints=53 matched=96%  
@@ -60,7 +60,7 @@ OK    lib/paint-pad-37625  "Scythes of the Emperor" by Mark  steps=37 paints=30 
 OK    lib/paint-pad-37097  "Tome Keepers: Penguin Space Marine" by RookieBrushes  steps=52 paints=36 matched=97%  
 OK    lib/paint-pad-34922  "Carcharodons" by gariusthebrit  steps=18 paints=15 matched=100%  
 OK    lib/paint-pad-33829  "How to paint Eternal Talons space marines" by darthcosicat  steps=37 paints=32 matched=97%  
-OK    lib/paint-pad-32014  "Imperial Fists" by TDCliph  steps=31 paints=28 matched=61%  
+OK    lib/paint-pad-32014  "Imperial Fists" by TDCliph  steps=31 paints=29 matched=72%  
 OK    lib/paint-pad-30133  "WW2-ish Green Space Marines" by gariusthebrit  steps=15 paints=12 matched=100%  
 OK    lib/paint-pad-28483  "Salamanders" by porter_randall  steps=9 paints=8 matched=88%  
 OK    lib/paint-pad-26536  "Shades of Caliban (vehicles)" by Ekatum  steps=51 paints=32 matched=91%  
@@ -86,17 +86,17 @@ OK    lib/paint-pad-13304  "Imperial Fists Reiver" by andromedastudio  steps=20 
 OK    lib/paint-pad-13303  "Aurora Chapter Primaris Reiver" by andromedastudio  steps=24 paints=20 matched=90%  
 OK    lib/paint-pad-12941  "Tome Keepers Ballistus Dreadnought" by RookieBrushes  steps=86 paints=42 matched=95%  
 OK    lib/paint-pad-12181  "Hawk Lords Assault Intercessor" by andromedastudio  steps=19 paints=20 matched=100%  
-OK    lib/paint-pad-11686  "Violet Sabrewing" by TDCliph  steps=34 paints=32 matched=75%  
+OK    lib/paint-pad-11686  "Violet Sabrewing" by TDCliph  steps=34 paints=32 matched=78%  
 OK    lib/paint-pad-11621  "Ultramarines" by RookieBrushes  steps=50 paints=33 matched=94%  
 OK    lib/paint-pad-10269  "Space Marines: Scythes of the Emperor" by Gavnixs  steps=16 paints=15 matched=93%  
 OK    lib/paint-pad-10236  "Glowing Blue Lenses Imperial Fists" by TheMooseIsLoose  steps=7 paints=2 matched=100%  
 OK    lib/paint-pad-10102  "Blood Angels" by sanguinius.simp  steps=62 paints=46 matched=96%  
 OK    lib/paint-pad-9740  "Emperors Spears Blue" by XenusMinis  steps=6 paints=7 matched=86%  
 OK    lib/paint-pad-7234  "Brown Camo Cloak" by RookieBrushes  steps=10 paints=8 matched=100%  
-OK    lib/paint-pad-7232  "Salamander 5th Company Scheme" by PurgeProjects  steps=35 paints=27 matched=89%  
-OK    lib/paint-pad-6901  "Violet Sabrewing Scout" by TDCliph  steps=17 paints=14 matched=100%  
+OK    lib/paint-pad-7232  "Salamander 5th Company Scheme" by PurgeProjects  steps=35 paints=27 matched=93%  
+OK    lib/paint-pad-6901  "Violet Sabrewing Scout" by TDCliph  steps=17 paints=15 matched=100%  
 OK    lib/paint-pad-6737  "Tome Keepers: Angels of Death Kill Team" by RookieBrushes  steps=142 paints=61 matched=98%  
-OK    lib/paint-pad-5812  "Void Tridents" by Spammy777  steps=28 paints=21 matched=90%  
+OK    lib/paint-pad-5812  "Void Tridents" by Spammy777  steps=28 paints=21 matched=100%  
 OK    lib/paint-pad-5034  "Bright Ultramarines" by ASquigPaints  steps=58 paints=29 matched=100%  
 DROP  lib/paint-pad-3557  "Carcharodon Terminator" by GrimCourt  steps=32 paints=21 matched=57%  (too many unknown paints)
 OK    lib/paint-pad-3431  "Tome Keepers Space Marine Scouts" by RookieBrushes  steps=92 paints=49 matched=98%  
@@ -127,13 +127,13 @@ OK    lib/paint-pad-2246  "Ultramarines (Corrupted)" by Ninth.Bright  steps=28 p
 OK    lib/paint-pad-2245  "Lost Sons" by Ninth.Bright  steps=27 paints=23 matched=100%  
 OK    lib/paint-pad-2241  "Lucent Blades" by Ninth.Bright  steps=31 paints=24 matched=96%  
 OK    lib/paint-pad-2236  "Invocators" by Ninth.Bright  steps=36 paints=29 matched=97%  
-OK    lib/paint-pad-2201  "Purity Seals" by CorranHorn  steps=9 paints=9 matched=67%  
+OK    lib/paint-pad-2201  "Purity Seals" by CorranHorn  steps=9 paints=9 matched=89%  
 OK    lib/paint-pad-2200  "Black weapon casing" by CorranHorn  steps=6 paints=6 matched=100%  
 OK    lib/paint-pad-2197  "Predator Legion" by Sligg_Paints  steps=20 paints=25 matched=96%  
-OK    lib/paint-pad-2186  "Space Marine undersuit" by CorranHorn  steps=3 paints=3 matched=67%  
-DROP  lib/paint-pad-2185  "Black Armour (Salamanders)" by CorranHorn  steps=11 paints=7 matched=57%  (too many unknown paints)
+OK    lib/paint-pad-2186  "Space Marine undersuit" by CorranHorn  steps=3 paints=3 matched=100%  
+OK    lib/paint-pad-2185  "Black Armour (Salamanders)" by CorranHorn  steps=11 paints=7 matched=86%  
 DROP  lib/paint-pad-2184  "Salamanders Armour" by CorranHorn  steps=12 paints=7 matched=43%  (too many unknown paints)
-OK    lib/paint-pad-2183  "Orange/Rusty Desert Bases" by CorranHorn  steps=7 paints=8 matched=75%  
+OK    lib/paint-pad-2183  "Orange/Rusty Desert Bases" by CorranHorn  steps=7 paints=8 matched=88%  
 OK    lib/paint-pad-2147  "Tome Keeper Space Marine Scouts (2022)" by RookieBrushes  steps=32 paints=23 matched=100%  
 OK    lib/paint-pad-2110  "Earth Breakers" by Sligg_Paints  steps=25 paints=28 matched=96%  
 OK    lib/paint-pad-2106  "Spectral Claws" by Sligg_Paints  steps=29 paints=28 matched=96%  
@@ -151,7 +151,7 @@ OK    lib/paint-pad-1982  "Space Wolves Intercessors" by publicjoeuk  steps=29 p
 OK    lib/paint-pad-1936  "Malkaan Feirros black armor (NMM)" by SandoPourpre  steps=10 paints=8 matched=75%  
 OK    lib/paint-pad-1935  "Interrogator-Chapelain black armor" by SandoPourpre  steps=11 paints=9 matched=67%  
 OK    lib/paint-pad-18914  "Adepta Sororitas - Battle Sisters" by SimoGecko  steps=46 paints=35 matched=97%  
-OK    lib/paint-pad-18775  "Battle Sister - Order of Our Aegis Resplendent" by FayDayParade  steps=71 paints=39 matched=77%  
+OK    lib/paint-pad-18775  "Battle Sister - Order of Our Aegis Resplendent" by FayDayParade  steps=71 paints=39 matched=79%  
 OK    lib/paint-pad-10334  "Sister of battle" by kraxkrax  steps=16 paints=12 matched=92%  
 OK    lib/paint-pad-4527  "Canoness Order Of Our Martyred Lady" by KingBoo  steps=44 paints=28 matched=96%  
 OK    lib/paint-pad-4525  "Grim white" by Maffoo  steps=5 paints=5 matched=100%  
@@ -162,17 +162,17 @@ OK    lib/paint-pad-3219  "Sisters of Battle" by rythefly  steps=13 paints=12 ma
 OK    lib/paint-pad-2299  "Order of the Sacred Rose" by RookieBrushes  steps=25 paints=18 matched=94%  
 OK    lib/paint-pad-2049  "Sisters of Battle - The Ashes of Angela" by TheLastCabbagebender  steps=14 paints=9 matched=100%  
 OK    lib/paint-pad-1737  "Sister Of Battle Red Armour" by Sartre  steps=18 paints=15 matched=80%  
-DROP  lib/paint-pad-714  "Feral World Sisters of Batttle" by cloverfox  steps=50 paints=28 matched=32%  (too many unknown paints)
+OK    lib/paint-pad-714  "Feral World Sisters of Batttle" by cloverfox  steps=50 paints=29 matched=100%  
 OK    lib/paint-pad-493  "Arco-Flagellant" by VaMinion  steps=9 paints=9 matched=100%  
 OK    lib/paint-pad-35380  "Simple and Easy Custodes Recipe (TableTopReady)" by maxmccoy  steps=11 paints=11 matched=100%  
 OK    lib/paint-pad-33105  "Quick and Easy Custodes Gold Armor" by Atomicmurph  steps=7 paints=6 matched=83%  
 OK    lib/paint-pad-19146  "Custodes - Deathknight" by Pembini  steps=22 paints=17 matched=94%  
-OK    lib/paint-pad-13666  "Royal Garden's Guards" by WalkerExZero  steps=17 paints=14 matched=86%  
+OK    lib/paint-pad-13666  "Royal Garden's Guards" by WalkerExZero  steps=17 paints=14 matched=100%  
 OK    lib/paint-pad-3133  "Adeptes Custodes: Custodian Wardens" by Gavnixs  steps=30 paints=16 matched=94%  
 OK    lib/paint-pad-3113  "Gothic Ruin Bases" by tsemana  steps=6 paints=4 matched=100%  
 OK    lib/paint-pad-2466  "Power Swords" by RookieBrushes  steps=8 paints=6 matched=100%  
 OK    lib/paint-pad-2462  "'Eavy Metal Style Purity Seals" by RookieBrushes  steps=30 paints=19 matched=100%  
-OK    lib/paint-pad-2362  "Blue Adeptus Custodes" by Treeoftales  steps=27 paints=20 matched=95%  
+OK    lib/paint-pad-2362  "Blue Adeptus Custodes" by Treeoftales  steps=28 paints=21 matched=95%  
 OK    lib/paint-pad-2107  "Death Knight Custodes" by Sligg_Paints  steps=30 paints=27 matched=96%  
 OK    lib/paint-pad-2089  "Custodes Contrast" by pyranite  steps=10 paints=8 matched=100%  
 OK    lib/paint-pad-2067  "Custodes - Shadowkeepers - Stolen!" by pyranite  steps=44 paints=30 matched=100%  
@@ -181,28 +181,28 @@ OK    lib/paint-pad-1931  "Custodes gems" by Dankman420  steps=7 paints=6 matche
 OK    lib/paint-pad-1283  "Custodian Guard Gold Armour" by RookieBrushes  steps=8 paints=7 matched=100%  
 OK    lib/paint-pad-1232  "Adeptus Custodes" by KnoxMinis  steps=12 paints=9 matched=78%  
 OK    lib/paint-pad-12976  "Forge World Lucius Skitarii Rangers" by RookieBrushes  steps=78 paints=46 matched=98%  
-OK    lib/paint-pad-3429  "Scavenger Hunter" by SadNarwhal  steps=40 paints=23 matched=70%  
+OK    lib/paint-pad-3429  "Scavenger Hunter" by SadNarwhal  steps=40 paints=23 matched=74%  
 OK    lib/paint-pad-3049  "AlchemistModels Admech Ironstrider" by publicjoeuk  steps=14 paints=12 matched=92%  
 OK    lib/paint-pad-2863  "Relic: Tech-Priest Playing Peice" by RookieBrushes  steps=55 paints=45 matched=98%  
-OK    lib/paint-pad-2611  "House Taranis Imperial Knight" by RookieBrushes  steps=49 paints=40 matched=90%  
+OK    lib/paint-pad-2611  "House Taranis Imperial Knight" by RookieBrushes  steps=49 paints=41 matched=93%  
 OK    lib/paint-pad-2462  "'Eavy Metal Style Purity Seals" by RookieBrushes  steps=30 paints=19 matched=100%  
 OK    lib/paint-pad-2407  "Martian Basing" by RookieBrushes  steps=7 paints=6 matched=83%  
 OK    lib/paint-pad-2225  "Adeptus Mechanicus" by bowlzee  steps=40 paints=28 matched=89%  
-OK    lib/paint-pad-2183  "Orange/Rusty Desert Bases" by CorranHorn  steps=7 paints=8 matched=75%  
+OK    lib/paint-pad-2183  "Orange/Rusty Desert Bases" by CorranHorn  steps=7 paints=8 matched=88%  
 OK    lib/paint-pad-34984  "Death Korps Chainsword" by Maserta  steps=11 paints=10 matched=100%  
 OK    lib/paint-pad-34921  "Death Korps Plasma Pistol" by Maserta  steps=22 paints=14 matched=100%  
 OK    lib/paint-pad-33310  "Death Korps" by Maserta  steps=47 paints=32 matched=84%  
-OK    lib/paint-pad-29572  "Death korps Bullgryns" by Batrius  steps=15 paints=13 matched=85%  
+OK    lib/paint-pad-29572  "Death korps Bullgryns" by Batrius  steps=15 paints=13 matched=92%  
 OK    lib/paint-pad-27295  "55-505th Ghouls - DKOK" by SrryBrryVryScry  steps=30 paints=14 matched=100%  
 OK    lib/paint-pad-22246  "Death korps of krieg, grim dark, army painting" by Hologiome  steps=16 paints=11 matched=91%  
 OK    lib/paint-pad-19059  "Death Rider Steed Flesh" by Nevermore.minis  steps=6 paints=5 matched=100%  
 OK    lib/paint-pad-9673  "Death korp of krieg (speed paint)" by Batrius  steps=29 paints=24 matched=100%  
 OK    lib/paint-pad-9377  "Burgundy Krieg" by Tantris  steps=26 paints=18 matched=94%  
-OK    lib/paint-pad-8815  "DKOK Greatcoat" by Duckwingr  steps=5 paints=4 matched=75%  
+OK    lib/paint-pad-8815  "DKOK Greatcoat" by Duckwingr  steps=5 paints=4 matched=100%  
 OK    lib/paint-pad-7792  "Death Korps of Kreig 143rd Siege Regiment by theapatheticfish" by Synersist  steps=21 paints=17 matched=100%  
 OK    lib/paint-pad-4098  "GrimGuard Cavalry" by publicjoeuk  steps=26 paints=24 matched=96%  
 OK    lib/paint-pad-3478  "Blue GrimGuard (Krieg Proxy)" by That2D  steps=23 paints=21 matched=71%  
-OK    lib/paint-pad-2463  "Krieg Green/Khaki" by ebiljebus  steps=21 paints=13 matched=69%  
+OK    lib/paint-pad-2463  "Krieg Green/Khaki" by ebiljebus  steps=21 paints=13 matched=77%  
 OK    lib/paint-pad-1871  "Death Korps of Krieg (5th Regiment)" by RookieBrushes  steps=45 paints=30 matched=90%  
 OK    lib/paint-pad-43531  "Tiger Stripe Camo + Weapon" by chrisb_40k  steps=11 paints=10 matched=80%  
 OK    lib/paint-pad-34459  "Cadian Grove Camouflage" by CadiaStands  steps=29 paints=16 matched=69%  
@@ -210,11 +210,11 @@ OK    lib/paint-pad-27295  "55-505th Ghouls - DKOK" by SrryBrryVryScry  steps=30
 OK    lib/paint-pad-22246  "Death korps of krieg, grim dark, army painting" by Hologiome  steps=16 paints=11 matched=91%  
 OK    lib/paint-pad-19059  "Death Rider Steed Flesh" by Nevermore.minis  steps=6 paints=5 matched=100%  
 OK    lib/paint-pad-16438  "Tempestus Aquilons" by kill.team.enjoyer  steps=12 paints=11 matched=100%  
-OK    lib/paint-pad-10279  "Savlar Chem-Dogs" by tencentpaintbrush  steps=45 paints=37 matched=81%  
+OK    lib/paint-pad-10279  "Savlar Chem-Dogs" by tencentpaintbrush  steps=45 paints=37 matched=95%  
 OK    lib/paint-pad-9673  "Death korp of krieg (speed paint)" by Batrius  steps=29 paints=24 matched=100%  
 OK    lib/paint-pad-9377  "Burgundy Krieg" by Tantris  steps=26 paints=18 matched=94%  
 OK    lib/paint-pad-9376  "Sergeant 'Ripper' Jackson/Catachan Jungle Fighters" by RookieBrushes  steps=63 paints=40 matched=98%  
-OK    lib/paint-pad-7330  "Kasrkin - Cadian 8th" by kill.team.enjoyer  steps=55 paints=32 matched=100%  
+OK    lib/paint-pad-7330  "Kasrkin - Cadian 8th" by kill.team.enjoyer  steps=54 paints=33 matched=100%  
 OK    lib/paint-pad-7234  "Brown Camo Cloak" by RookieBrushes  steps=10 paints=8 matched=100%  
 OK    lib/paint-pad-3647  "Militarum Standard Green Camo" by Nevermore.minis  steps=7 paints=7 matched=86%  
 OK    lib/paint-pad-3369  "Death Korps of Kreig Troops" by Caasiluap21  steps=41 paints=34 matched=94%  
@@ -222,12 +222,12 @@ OK    lib/paint-pad-3270  "Cadian Armoured Sentinel" by RookieBrushes  steps=71 
 OK    lib/paint-pad-3132  "Tempestus Scions & Aquilons" by LC  steps=75 paints=57 matched=95%  
 OK    lib/paint-pad-2791  "Cadian 482nd Infantry" by Zontarz  steps=14 paints=11 matched=100%  
 OK    lib/paint-pad-2466  "Power Swords" by RookieBrushes  steps=8 paints=6 matched=100%  
-OK    lib/paint-pad-2463  "Krieg Green/Khaki" by ebiljebus  steps=21 paints=13 matched=69%  
+OK    lib/paint-pad-2463  "Krieg Green/Khaki" by ebiljebus  steps=21 paints=13 matched=77%  
 OK    lib/paint-pad-2232  "Imperial Infantry "Valour Corps Model" 1st Cobar Line Infantry" by Cohinor  steps=10 paints=10 matched=90%  
-OK    lib/paint-pad-2227  "Wall of Martyrs" by RookieBrushes  steps=26 paints=26 matched=92%  
+OK    lib/paint-pad-2227  "Wall of Martyrs" by RookieBrushes  steps=26 paints=27 matched=93%  
 OK    lib/paint-pad-2209  "Cadian Shock Troops" by RookieBrushes  steps=49 paints=33 matched=97%  
 OK    lib/paint-pad-3581  "House Hawkshroud" by LC  steps=44 paints=32 matched=94%  
-OK    lib/paint-pad-2611  "House Taranis Imperial Knight" by RookieBrushes  steps=49 paints=40 matched=90%  
+OK    lib/paint-pad-2611  "House Taranis Imperial Knight" by RookieBrushes  steps=49 paints=41 matched=93%  
 OK    lib/paint-pad-2353  "House Drakkus" by LC  steps=60 paints=45 matched=98%  
 OK    lib/paint-pad-36436  "Clade Vanus Infocyte Assassin" by Ekatum  steps=42 paints=23 matched=100%  
 OK    lib/paint-pad-5024  "Inquisition: Autosavant Agent" by RookieBrushes  steps=56 paints=39 matched=95%  
@@ -276,14 +276,14 @@ OK    lib/paint-pad-17567  "Necron Blackstone" by SimoGecko  steps=5 paints=4 ma
 OK    lib/paint-pad-17566  "Necron Warrior - TableTopReady" by SimoGecko  steps=9 paints=8 matched=100%  
 OK    lib/paint-pad-7238  "Grimdark Necron" by NerdmitBrille  steps=13 paints=11 matched=91%  
 OK    lib/paint-pad-6604  "Imotekh the Stormlord" by HowAdzPaints  steps=74 paints=40 matched=93%  
-OK    lib/paint-pad-6441  "Necron Chronomancer (Sautekh Dynasty)" by RookieBrushes  steps=48 paints=31 matched=87%  
-OK    lib/paint-pad-6406  "Necron Apprentek (Sautekh Dynasty)" by RookieBrushes  steps=51 paints=29 matched=86%  
-OK    lib/paint-pad-6307  "Necron Deathmarks (Sautekh Dynasty)" by RookieBrushes  steps=39 paints=25 matched=84%  
-OK    lib/paint-pad-6243  "Necron Immortals (Sautekh Dynasty)" by RookieBrushes  steps=50 paints=33 matched=88%  
-OK    lib/paint-pad-6216  "Plasmacyte Accelerator & Reanimator (Sautekh Dynasty)" by RookieBrushes  steps=34 paints=26 matched=85%  
-OK    lib/paint-pad-5219  "Necron Cryptek (Sautekh Dynasty)" by RookieBrushes  steps=56 paints=29 matched=86%  
+OK    lib/paint-pad-6441  "Necron Chronomancer (Sautekh Dynasty)" by RookieBrushes  steps=48 paints=32 matched=91%  
+OK    lib/paint-pad-6406  "Necron Apprentek (Sautekh Dynasty)" by RookieBrushes  steps=51 paints=30 matched=90%  
+OK    lib/paint-pad-6307  "Necron Deathmarks (Sautekh Dynasty)" by RookieBrushes  steps=39 paints=26 matched=88%  
+OK    lib/paint-pad-6243  "Necron Immortals (Sautekh Dynasty)" by RookieBrushes  steps=50 paints=34 matched=91%  
+OK    lib/paint-pad-6216  "Plasmacyte Accelerator & Reanimator (Sautekh Dynasty)" by RookieBrushes  steps=34 paints=27 matched=89%  
+OK    lib/paint-pad-5219  "Necron Cryptek (Sautekh Dynasty)" by RookieBrushes  steps=56 paints=30 matched=90%  
 OK    lib/paint-pad-4501  "How to paint Pyrotekh dynasty necrons" by darthcosicat  steps=30 paints=15 matched=100%  
-OK    lib/paint-pad-4030  "Tsarakura Dynasty" by Quinn  steps=76 paints=34 matched=79%  
+OK    lib/paint-pad-4030  "Tsarakura Dynasty" by Quinn  steps=76 paints=34 matched=82%  
 OK    lib/paint-pad-3699  "Anrakyr's Necrons" by LC  steps=22 paints=22 matched=95%  
 OK    lib/paint-pad-2926  "Sautekh Cryptothralls" by HowAdzPaints  steps=28 paints=21 matched=95%  
 OK    lib/paint-pad-2919  "Necron Monolith" by Ineptus_humanicus  steps=11 paints=10 matched=90%  
@@ -291,23 +291,23 @@ OK    lib/paint-pad-2809  "Sautekh Overlords" by HowAdzPaints  steps=59 paints=3
 OK    lib/paint-pad-2805  "Sautekh Canoptek Scarab Swarms" by HowAdzPaints  steps=19 paints=17 matched=88%  
 OK    lib/paint-pad-2803  "Sautekh Necron Warriors" by HowAdzPaints  steps=37 paints=28 matched=96%  
 OK    lib/paint-pad-2630  "5 Alternative Necron Dynasties" by HowAdzPaints  steps=72 paints=43 matched=95%  
-OK    lib/paint-pad-2604  "Grey Necrons" by Bazleebub  steps=16 paints=16 matched=88%  
+OK    lib/paint-pad-2604  "Grey Necrons" by Bazleebub  steps=16 paints=16 matched=94%  
 OK    lib/paint-pad-2446  "Thokt Necron Destroyer" by Ali  steps=22 paints=14 matched=93%  
 OK    lib/paint-pad-2240  "Necron Tomb Marble Base" by RookieBrushes  steps=12 paints=8 matched=88%  
-OK    lib/paint-pad-2153  "Tsarakura Dynasty Necrons" by lallsta_paints  steps=37 paints=25 matched=84%  
-OK    lib/paint-pad-2109  "Kaubal Dynasty" by Sligg_Paints  steps=13 paints=13 matched=92%  
-DROP  lib/paint-pad-2084  "Green Alien Sword (For Necrons/Deathwatch/Tau)" by r.j.h.  steps=9 paints=3 matched=0%  (too many unknown paints)
-OK    lib/paint-pad-2014  "Necron Tomb Scenery" by RookieBrushes  steps=18 paints=15 matched=73%  
+OK    lib/paint-pad-2153  "Tsarakura Dynasty Necrons" by lallsta_paints  steps=37 paints=25 matched=100%  
+OK    lib/paint-pad-2109  "Kaubal Dynasty" by Sligg_Paints  steps=13 paints=13 matched=100%  
+OK    lib/paint-pad-2084  "Green Alien Sword (For Necrons/Deathwatch/Tau)" by r.j.h.  steps=9 paints=3 matched=67%  
+OK    lib/paint-pad-2014  "Necron Tomb Scenery" by RookieBrushes  steps=18 paints=15 matched=80%  
 OK    lib/paint-pad-1949  "Szarekhan Dynasty Necrons" by publicjoeuk  steps=15 paints=13 matched=92%  
 OK    lib/paint-pad-1913  "Necron Flayed One Skin" by RookieBrushes  steps=6 paints=5 matched=100%  
-OK    lib/paint-pad-1800  "Necron Warrior (Sautekh Dynasty)" by RookieBrushes  steps=23 paints=18 matched=83%  
+OK    lib/paint-pad-1800  "Necron Warrior (Sautekh Dynasty)" by RookieBrushes  steps=23 paints=19 matched=89%  
 OK    lib/paint-pad-1479  "Necron purple Nihilakh" by bnorus  steps=18 paints=17 matched=88%  
 OK    lib/paint-pad-42806  "Gorrnak's Gitz - Infantry" by Spammy777  steps=31 paints=14 matched=93%  
-OK    lib/paint-pad-42376  "Grimdark Ork Goffs" by LazyPainter  steps=17 paints=13 matched=77%  
-OK    lib/paint-pad-38350  "Speed Freakz/Evil Suns Orks (40k)" by notatadbad  steps=34 paints=34 matched=88%  
-OK    lib/paint-pad-37196  "Armageddon Orks (40k)" by notatadbad  steps=44 paints=40 matched=80%  
+OK    lib/paint-pad-42376  "Grimdark Ork Goffs" by LazyPainter  steps=17 paints=13 matched=85%  
+OK    lib/paint-pad-38350  "Speed Freakz/Evil Suns Orks (40k)" by notatadbad  steps=34 paints=34 matched=91%  
+OK    lib/paint-pad-37196  "Armageddon Orks (40k)" by notatadbad  steps=44 paints=40 matched=85%  
 OK    lib/paint-pad-37030  "Orks Armageddon Weirdboy - War Hipster" by SimoGecko  steps=31 paints=28 matched=89%  
-OK    lib/paint-pad-36833  "Goff Orks for Tabletop" by imalerich  steps=59 paints=19 matched=68%  
+OK    lib/paint-pad-36833  "Goff Orks for Tabletop" by imalerich  steps=59 paints=20 matched=85%  
 OK    lib/paint-pad-36040  "W40K - Ork - Goff" by Watcekk  steps=22 paints=19 matched=95%  
 DROP  lib/paint-pad-34951  "Pale Yellow-Green Ork Skin" by imalerich  steps=8 paints=6 matched=17%  (too many unknown paints)
 OK    lib/paint-pad-31915  "Ork Warboss - Bad Moonz" by Orkscum  steps=12 paints=9 matched=100%  
@@ -327,7 +327,7 @@ OK    lib/paint-pad-17565  "Ork Skin Citadel Similar" by SimoGecko  steps=7 pain
 OK    lib/paint-pad-17231  "Rumbleslam: Juicer" by RookieBrushes  steps=39 paints=28 matched=100%  
 OK    lib/paint-pad-16802  "Rumbleslam: Toadstool Peddler" by RookieBrushes  steps=79 paints=49 matched=98%  
 OK    lib/paint-pad-16603  "Rumbleslam: Grunt Orcel" by RookieBrushes  steps=74 paints=44 matched=98%  
-OK    lib/paint-pad-10402  "Goff Orks" by tencentpaintbrush  steps=65 paints=42 matched=74%  
+OK    lib/paint-pad-10402  "Goff Orks" by tencentpaintbrush  steps=65 paints=42 matched=90%  
 OK    lib/paint-pad-4691  "Gretchin Goffs" by RookieBrushes  steps=84 paints=50 matched=98%  
 OK    lib/paint-pad-4625  "Gretchin/Goblin Skin Tone Collection" by RookieBrushes  steps=24 paints=17 matched=100%  
 OK    lib/paint-pad-3521  "Ork Goffs" by RookieBrushes  steps=149 paints=65 matched=98%  
@@ -348,9 +348,9 @@ OK    lib/paint-pad-18827  "Tyranids - Black scheme" by SimoGecko  steps=17 pain
 OK    lib/paint-pad-17572  "Termagant - GamesWorkshop" by SimoGecko  steps=13 paints=11 matched=100%  
 OK    lib/paint-pad-17167  "Termagants" by surue  steps=39 paints=21 matched=95%  
 OK    lib/paint-pad-16143  "Hive Fleet Typhon" by genestealercultdale  steps=22 paints=21 matched=90%  
-OK    lib/paint-pad-15448  "Tyranid JoJormungandr" by hymnoids  steps=31 paints=18 matched=67%  
+OK    lib/paint-pad-15448  "Tyranid JoJormungandr" by hymnoids  steps=31 paints=18 matched=72%  
 OK    lib/paint-pad-12116  "Tyranids" by TDCliph  steps=10 paints=13 matched=85%  
-OK    lib/paint-pad-10237  "Termagants" by eruecco87  steps=20 paints=18 matched=83%  
+OK    lib/paint-pad-10237  "Termagants" by eruecco87  steps=20 paints=18 matched=89%  
 OK    lib/paint-pad-10003  "Genestealer Patriarch" by RookieBrushes  steps=64 paints=32 matched=94%  
 OK    lib/paint-pad-6571  "Hive Fleet Leviathan Termagants" by HowAdzPaints  steps=42 paints=26 matched=96%  
 DROP  lib/paint-pad-6472  "Hive Fleet Typhon" by Wurmed  steps=17 paints=15 matched=27%  (too many unknown paints)
@@ -391,10 +391,10 @@ OK    lib/paint-pad-4536  "Cult of the Crawling Chain" by Sligg_Paints  steps=28
 OK    lib/paint-pad-3229  "Cult of the Rusted Claw - Hybrid Metamorphs/Acolyte Hybrids" by RookieBrushes  steps=96 paints=59 matched=98%  
 OK    lib/paint-pad-3199  "Cult of the Rusted Claw - Neophyte Hybrids" by RookieBrushes  steps=75 paints=49 matched=98%  
 OK    lib/paint-pad-2905  "Greater Thurian League" by RookieBrushes  steps=64 paints=36 matched=97%  
-OK    lib/paint-pad-18785  "Poxwalker" by marshgOLEm  steps=27 paints=23 matched=83%  
+OK    lib/paint-pad-18785  "Poxwalker" by marshgOLEm  steps=27 paints=23 matched=87%  
 OK    lib/paint-pad-15319  "Speed Paint Poxwalkers" by Bams  steps=9 paints=9 matched=78%  
 OK    lib/paint-pad-13468  "Nurglings!" by RookieBrushes  steps=71 paints=37 matched=100%  
-OK    lib/paint-pad-13435  "Heresy-style Death Guard (40k)" by notatadbad  steps=21 paints=19 matched=68%  
+OK    lib/paint-pad-13435  "Heresy-style Death Guard (40k)" by notatadbad  steps=21 paints=19 matched=95%  
 OK    lib/paint-pad-13369  "Death Guard Plague Marine Kill Team" by RookieBrushes  steps=103 paints=59 matched=98%  
 OK    lib/paint-pad-8618  "Slime & Toxic Ooze" by NerdmitBrille  steps=6 paints=7 matched=86%  
 OK    lib/paint-pad-7236  "Horns & Bones" by NerdmitBrille  steps=9 paints=8 matched=100%  
@@ -405,8 +405,8 @@ OK    lib/paint-pad-5581  "Death Guard Pallid Hand - by AP" by Arkhendill  steps
 OK    lib/paint-pad-3817  "Death Guard Plague Marine" by Panda_Dante  steps=27 paints=16 matched=81%  
 OK    lib/paint-pad-3460  "Death Guard Pallid Hand scheme" by Short_Frodo  steps=47 paints=36 matched=100%  
 OK    lib/paint-pad-3366  "Death Guard Pallid Hand Plague Marines" by carneh  steps=61 paints=43 matched=100%  
-OK    lib/paint-pad-3209  "Death Guard" by rythefly  steps=17 paints=15 matched=67%  
-OK    lib/paint-pad-2980  "Death Guard Plague Marines" by RookieBrushes  steps=132 paints=66 matched=97%  
+OK    lib/paint-pad-3209  "Death Guard" by rythefly  steps=17 paints=15 matched=73%  
+OK    lib/paint-pad-2980  "Death Guard Plague Marines" by RookieBrushes  steps=132 paints=67 matched=97%  
 OK    lib/paint-pad-2795  "Mortarion, Daemon Primarch of Nurgle" by RookieBrushes  steps=93 paints=54 matched=98%  
 OK    lib/paint-pad-2514  "Death Guard Legionnaire (Horus Heresy)" by RookieBrushes  steps=28 paints=22 matched=100%  
 OK    lib/paint-pad-2328  "Daddy Issue Death Guard" by Raiche  steps=31 paints=21 matched=90%  
@@ -419,17 +419,17 @@ OK    lib/paint-pad-1282  "Poxwalker Skin" by RookieBrushes  steps=13 paints=9 m
 OK    lib/paint-pad-13699  "green thousand sons" by Tarkus_The_Rock  steps=8 paints=8 matched=88%  
 OK    lib/paint-pad-9973  "Space Marines: Thousand Sons Rubric Marines" by Gavnixs  steps=34 paints=24 matched=96%  
 OK    lib/paint-pad-3579  "Tzaangors (Desaturated)" by RookieBrushes  steps=45 paints=26 matched=100%  
-OK    lib/paint-pad-3551  "Horus Heresy Thousand Sons" by imperviousmike  steps=21 paints=20 matched=80%  
+OK    lib/paint-pad-3551  "Horus Heresy Thousand Sons" by imperviousmike  steps=21 paints=20 matched=85%  
 OK    lib/paint-pad-2834  "Pre-Magnus Thousand Sons" by Ohmanoid  steps=7 paints=7 matched=86%  
 OK    lib/paint-pad-2807  "Prosperine Skin" by syph0n  steps=9 paints=8 matched=88%  
 OK    lib/paint-pad-2407  "Martian Basing" by RookieBrushes  steps=7 paints=6 matched=83%  
 OK    lib/paint-pad-2158  "Pre-Heresy Thousand Sons" by Beornwulf  steps=23 paints=18 matched=94%  
 OK    lib/paint-pad-1606  "Thousand Sons" by bowlzee  steps=59 paints=43 matched=98%  
-OK    lib/paint-pad-6902  "Frost Eaters" by TDCliph  steps=16 paints=16 matched=63%  
-OK    lib/paint-pad-38746  "Regal Emperor's Children" by Tako-Taco  steps=61 paints=33 matched=64%  
+OK    lib/paint-pad-6902  "Frost Eaters" by TDCliph  steps=16 paints=16 matched=81%  
+OK    lib/paint-pad-38746  "Regal Emperor's Children" by Tako-Taco  steps=61 paints=33 matched=67%  
 OK    lib/paint-pad-29708  "The Ceaseless Voice V2" by andypearson  steps=97 paints=60 matched=95%  
 OK    lib/paint-pad-18802  "Emperor's Children Tormentor" by AssassinGamer1975  steps=75 paints=51 matched=100%  
-OK    lib/paint-pad-15416  "Emperor's Children Armour" by tinybrushstrokes  steps=19 paints=16 matched=69%  
+OK    lib/paint-pad-15416  "Emperor's Children Armour" by tinybrushstrokes  steps=19 paints=16 matched=88%  
 OK    lib/paint-pad-3268  "Emperors children MK6 Marines" by Alpharius20  steps=23 paints=21 matched=100%  
 OK    lib/paint-pad-1987  "Emperor's children pink armor" by Kondziupainter  steps=7 paints=5 matched=100%  
 OK    lib/paint-pad-76  "The Ceaseless Voice" by andypearson  steps=67 paints=36 matched=100%  
@@ -449,21 +449,21 @@ OK    lib/paint-pad-30562  "Daemonic Flesh" by FayDayParade  steps=11 paints=8 m
 OK    lib/paint-pad-29708  "The Ceaseless Voice V2" by andypearson  steps=97 paints=60 matched=95%  
 OK    lib/paint-pad-18883  "Word Bearers Legion" by FayDayParade  steps=62 paints=38 matched=87%  
 OK    lib/paint-pad-18802  "Emperor's Children Tormentor" by AssassinGamer1975  steps=75 paints=51 matched=100%  
-OK    lib/paint-pad-14989  "Easiest Iron Warriors Ever (Warhammer 40,000, Horus Heresy)" by notatadbad  steps=14 paints=11 matched=82%  
-OK    lib/paint-pad-13799  "Red Corsairs (Chaos 40k)" by notatadbad  steps=27 paints=21 matched=81%  
-OK    lib/paint-pad-13204  "Night Lords CSM" by TDCliph  steps=31 paints=27 matched=67%  
+OK    lib/paint-pad-14989  "Easiest Iron Warriors Ever (Warhammer 40,000, Horus Heresy)" by notatadbad  steps=14 paints=11 matched=100%  
+OK    lib/paint-pad-13799  "Red Corsairs (Chaos 40k)" by notatadbad  steps=27 paints=21 matched=100%  
+OK    lib/paint-pad-13204  "Night Lords CSM" by TDCliph  steps=31 paints=27 matched=85%  
 OK    lib/paint-pad-10534  "The Pyre Recipe" by Planetsplitter_Minis  steps=6 paints=5 matched=80%  
 OK    lib/paint-pad-4498  "Night Lords/Nemesis Claw Kill Team" by RookieBrushes  steps=87 paints=45 matched=98%  
 OK    lib/paint-pad-3817  "Death Guard Plague Marine" by Panda_Dante  steps=27 paints=16 matched=81%  
 OK    lib/paint-pad-3554  "Black legion possessed" by ArtyBlock  steps=14 paints=10 matched=100%  
 OK    lib/paint-pad-3288  "Chaos Cultists" by Titodelscorcho  steps=25 paints=17 matched=88%  
-OK    lib/paint-pad-2980  "Death Guard Plague Marines" by RookieBrushes  steps=132 paints=66 matched=97%  
-OK    lib/paint-pad-2958  "Warhammer 40k Sons of Horus CSM" by imperviousmike  steps=32 paints=25 matched=76%  
+OK    lib/paint-pad-2980  "Death Guard Plague Marines" by RookieBrushes  steps=132 paints=67 matched=97%  
+OK    lib/paint-pad-2958  "Warhammer 40k Sons of Horus CSM" by imperviousmike  steps=32 paints=25 matched=92%  
 OK    lib/paint-pad-2915  "Word Bearers of The Blind Host" by AlfalfaWendigo  steps=52 paints=35 matched=97%  
 OK    lib/paint-pad-2835  "Black Legion Lord Discordant" by Danno212  steps=27 paints=21 matched=90%  
 OK    lib/paint-pad-2795  "Mortarion, Daemon Primarch of Nurgle" by RookieBrushes  steps=93 paints=54 matched=98%  
-OK    lib/paint-pad-2515  "Iron Warriors" by RookieBrushes  steps=24 paints=19 matched=79%  
-OK    lib/paint-pad-2365  "Grimdark Black Legion" by Commissar_Jeremy  steps=11 paints=8 matched=100%  
+OK    lib/paint-pad-2515  "Iron Warriors" by RookieBrushes  steps=24 paints=19 matched=84%  
+OK    lib/paint-pad-2365  "Grimdark Black Legion" by Commissar_Jeremy  steps=11 paints=9 matched=100%  
 OK    lib/paint-pad-2247  "Sons of Sorrow" by Onechan  steps=54 paints=38 matched=97%  
 OK    lib/paint-pad-2246  "Ultramarines (Corrupted)" by Ninth.Bright  steps=28 paints=22 matched=100%  
 OK    lib/paint-pad-2245  "Lost Sons" by Ninth.Bright  steps=27 paints=23 matched=100%  
@@ -523,13 +523,13 @@ OK    lib/paint-pad-1378  "Alpha Legion Armour" by RookieBrushes  steps=12 paint
 OK    lib/paint-pad-1274  "Iron Warrior Hazard Stripes" by RookieBrushes  steps=9 paints=7 matched=100%  
 OK    lib/paint-pad-1273  "Night Lords Lightning Bolts" by RookieBrushes  steps=5 paints=4 matched=100%  
 OK    lib/paint-pad-1272  "Night Lords Armour (2020)" by RookieBrushes  steps=11 paints=10 matched=100%  
-OK    lib/paint-pad-1255  "Iron Warrior Armour ('Eavy Contrast)" by RookieBrushes  steps=15 paints=9 matched=67%  
+OK    lib/paint-pad-1255  "Iron Warrior Armour ('Eavy Contrast)" by RookieBrushes  steps=15 paints=9 matched=78%  
 OK    lib/paint-pad-76  "The Ceaseless Voice" by andypearson  steps=67 paints=36 matched=100%  
 OK    lib/paint-pad-70  "Emperor's Children" by andypearson  steps=35 paints=26 matched=100%  
-OK    lib/paint-pad-46204  "Pathfinder - Farsight Enclaves" by KDJ1  steps=34 paints=25 matched=96%  
+OK    lib/paint-pad-46204  "Pathfinder - Farsight Enclaves" by KDJ1  steps=34 paints=25 matched=100%  
 OK    lib/paint-pad-43762  "Ke'lshan Fire Warrior" by nkryik  steps=53 paints=28 matched=100%  
-OK    lib/paint-pad-39505  "Breacher Support Turret - TMM Farsight Cadre" by KDJ1  steps=26 paints=19 matched=74%  
-DROP  lib/paint-pad-27494  "Camo tau" by TDCliph  steps=6 paints=9 matched=22%  (too many unknown paints)
+OK    lib/paint-pad-39505  "Breacher Support Turret - TMM Farsight Cadre" by KDJ1  steps=26 paints=19 matched=84%  
+DROP  lib/paint-pad-27494  "Camo tau" by TDCliph  steps=6 paints=9 matched=56%  (too many unknown paints)
 OK    lib/paint-pad-26444  "Vespid Stingwings" by Rageino  steps=9 paints=10 matched=100%  
 OK    lib/paint-pad-26443  "Fire Warriors" by Rageino  steps=7 paints=7 matched=86%  
 OK    lib/paint-pad-26442  "Pathfinders" by Rageino  steps=8 paints=8 matched=88%  
@@ -539,7 +539,7 @@ OK    lib/paint-pad-17626  "Arizona Peach Tea Vespids" by VolatileRig  steps=27 
 OK    lib/paint-pad-17582  "Vespid Stingwing - GamesWorkshop" by SimoGecko  steps=18 paints=18 matched=100%  
 OK    lib/paint-pad-15415  "Blue Kroot" by Smigdit78  steps=21 paints=15 matched=100%  
 OK    lib/paint-pad-15184  "Speedy Pale Tan Kroot" by krootybooty  steps=41 paints=32 matched=94%  
-OK    lib/paint-pad-11653  "Vespid Stingwings" by notatadbad  steps=24 paints=21 matched=81%  
+OK    lib/paint-pad-11653  "Vespid Stingwings" by notatadbad  steps=24 paints=22 matched=91%  
 OK    lib/paint-pad-11554  "Vespid Stingwings" by andypearson  steps=18 paints=16 matched=94%  
 OK    lib/paint-pad-8320  "Urban camo Pathfinders" by Refayr  steps=29 paints=17 matched=100%  
 OK    lib/paint-pad-5153  "Vespid Stingwings - Easy Contrast Paint" by Haeskre  steps=13 paints=10 matched=90%  
@@ -547,7 +547,7 @@ OK    lib/paint-pad-4921  "Green Kroot Kalamandra" by andypearson  steps=23 pain
 OK    lib/paint-pad-4531  "Dark Red Kroot" by andypearson  steps=46 paints=30 matched=100%  
 OK    lib/paint-pad-3509  "Shadowsun’s Hair" by andypearson  steps=9 paints=4 matched=100%  
 OK    lib/paint-pad-3451  "Breacher Team (Farsight Enclaves)" by revolver_40k  steps=21 paints=19 matched=89%  
-OK    lib/paint-pad-3220  "Tau Farsight / Au Taal Sept" by Warbringer  steps=36 paints=27 matched=85%  
+OK    lib/paint-pad-3220  "Tau Farsight / Au Taal Sept" by Warbringer  steps=36 paints=27 matched=96%  
 OK    lib/paint-pad-3101  "Tau" by tsemana  steps=13 paints=8 matched=88%  
 OK    lib/paint-pad-2759  "Shu'n Sept Pathfinder" by andromedastudio  steps=18 paints=13 matched=77%  
 OK    lib/paint-pad-2758  "Vash'ya Sept Fire Warrior" by andromedastudio  steps=13 paints=9 matched=100%  
@@ -564,8 +564,8 @@ DROP  lib/paint-pad-2711  "Vior'la Sept Medical Technician Pathfinder" by androm
 DROP  lib/paint-pad-2637  "Sa'cea Sept Pathfinder" by andromedastudio  steps=1 paints=0 matched=0%  (too few steps)
 DROP  lib/paint-pad-2636  "Ke'lshan Sept Shas'la & MV1 Gun Drone" by andromedastudio  steps=1 paints=1 matched=100%  (too few steps)
 OK    lib/paint-pad-2607  "Aeronautica - Tau Camo Red" by Bazleebub  steps=13 paints=9 matched=78%  
-DROP  lib/paint-pad-2084  "Green Alien Sword (For Necrons/Deathwatch/Tau)" by r.j.h.  steps=9 paints=3 matched=0%  (too many unknown paints)
-DROP  lib/paint-pad-2083  "Red Tau Armor" by r.j.h.  steps=6 paints=6 matched=17%  (too many unknown paints)
+OK    lib/paint-pad-2084  "Green Alien Sword (For Necrons/Deathwatch/Tau)" by r.j.h.  steps=9 paints=3 matched=67%  
+OK    lib/paint-pad-2083  "Red Tau Armor" by r.j.h.  steps=6 paints=6 matched=83%  
 OK    lib/paint-pad-1284  "Tau Jade Armour" by RookieBrushes  steps=5 paints=3 matched=100%  
 OK    lib/paint-pad-75  "T'au troops: green undersuit" by andypearson  steps=41 paints=29 matched=100%  
 OK    lib/paint-pad-66  "T'au Stealth Suits" by andypearson  steps=19 paints=19 matched=95%  
@@ -734,6 +734,7 @@ DUP   lib/paint-pad-2455  "Grey Knights Space Marines"  (same as lib/paint-pad-2
 DUP   lib/paint-pad-2201  "Purity Seals"  (same as lib/paint-pad-2201)
 DUP   lib/paint-pad-2200  "Black weapon casing"  (same as lib/paint-pad-2200)
 DUP   lib/paint-pad-2186  "Space Marine undersuit"  (same as lib/paint-pad-2186)
+DUP   lib/paint-pad-2185  "Black Armour (Salamanders)"  (same as lib/paint-pad-2185)
 DUP   lib/paint-pad-2183  "Orange/Rusty Desert Bases"  (same as lib/paint-pad-2183)
 DUP   lib/paint-pad-2104  "Dark Angel Armour"  (same as lib/paint-pad-2104)
 DUP   lib/paint-pad-2036  "Grimdark Dark Angels"  (same as lib/paint-pad-2036)
@@ -756,6 +757,7 @@ DUP   lib/paint-pad-1616  "Masque of the Reaper's Mirth (2021)"  (same as lib/pa
 DUP   lib/paint-pad-3752  "Kabal of the Black Heart - Kabalite Warrior"  (same as lib/paint-pad-3752)
 DUP   lib/paint-pad-3013  "Kabal of the Flayed Skull"  (same as lib/paint-pad-3013)
 DUP   lib/paint-pad-5219  "Necron Cryptek (Sautekh Dynasty)"  (same as lib/paint-pad-6406)
+DUP   lib/paint-pad-2084  "Green Alien Sword (For Necrons/Deathwatch/Tau)"  (same as lib/paint-pad-2084)
 DUP   lib/paint-pad-3153  "Hive Fleet Behemoth: Barbgaunts"  (same as lib/paint-pad-3154)
 DUP   lib/paint-pad-10003  "Genestealer Patriarch"  (same as lib/paint-pad-10003)
 DUP   lib/paint-pad-2407  "Martian Basing"  (same as lib/paint-pad-2407)
@@ -784,3 +786,4 @@ DUP   lib/paint-pad-1810  "Gloss Black Armour"  (same as lib/paint-pad-1810)
 DUP   lib/paint-pad-1770  "Heretic Astartes - Bringers of Decay - Basic Scheme"  (same as lib/paint-pad-1770)
 DUP   lib/paint-pad-76  "The Ceaseless Voice"  (same as lib/paint-pad-76)
 DUP   lib/paint-pad-70  "Emperor's Children"  (same as lib/paint-pad-70)
+DUP   lib/paint-pad-2084  "Green Alien Sword (For Necrons/Deathwatch/Tau)"  (same as lib/paint-pad-2084)
