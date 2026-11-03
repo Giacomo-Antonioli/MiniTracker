@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { catalogueFor, ctx, useStore } from '../../app/store'
 import { EDITIONS } from '../../data/catalogue/fetch'
 import { keywordLegend, unitCards } from '../../domain/lists/cards'
+import { PickListDialog } from '../storage/Storage'
 import { ArmyPrintDialog, ArmySheet, type ArmyPrintOptions } from './ArmySheet'
 import { ownedByDatasheet } from '../../domain/catalogue/owned'
 import type { Catalogue, Datasheet } from '../../domain/catalogue/types'
@@ -79,6 +80,7 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
   )
   const set = (patch: Partial<ArmyList>) => onSave({ ...list, ...patch, updatedAt: new Date().toISOString() })
   const [printAsk, setPrintAsk] = useState(false)
+  const [picking, setPicking] = useState(false)
   const [printOpts, setPrintOpts] = useState<ArmyPrintOptions | null>(null)
   const factionLocked = list.entries.length > 0
   const [name, setName] = useState(list.name)
@@ -147,6 +149,8 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
         <option value="playable">Playable</option>
       </select>
       {cat && list.factionId && <ArmySchemeSelect list={list} factionName={cat.factions.find((f) => f.id === list.factionId)?.name} onChange={(schemeId) => set({ schemeId })} />}
+      {list.entries.length > 0 && <button className="btn" title="Which boxes to open, and pack the army into a case" onClick={() => setPicking(true)}>🧳 Pick list</button>}
+      {picking && <PickListDialog title={list.name} unitIds={list.entries.flatMap((e) => (e.ownedUnitId ? [e.ownedUnitId] : []))} unlinked={list.entries.filter((e) => !e.ownedUnitId).length} onClose={() => setPicking(false)} />}
       {cat && list.entries.length > 0 && <button className="btn" title="Roster and datasheet cards, no paints. Choose “Save as PDF” in the print dialog." onClick={() => setPrintAsk(true)}>📄 Army PDF</button>}
       <ExportMenu list={list} cat={cat} />
       {printAsk && cat && (

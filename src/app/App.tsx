@@ -20,9 +20,10 @@ import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeIm
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { readStartPage, useStore } from './store'
 import { HomePage } from '../features/home/HomePage'
+import { PlacePage, StoragePage } from '../features/storage/Storage'
 import { CompanionHub, WorkCompanion } from '../features/companion/WorkCompanion'
 
-type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'settings'
+type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'storage' | 'place' | 'settings'
 
 const SOON: string[] = []
 
@@ -43,6 +44,11 @@ export default function App() {
   const openUnit = (id: string) => {
     setUnitId(id)
     setPage('unit')
+  }
+  const [placeId, setPlaceId] = useState<string | null>(null)
+  const openPlace = (id: string) => {
+    setPlaceId(id)
+    setPage('place')
   }
   const [listId, setListId] = useState<string | null>(null)
   const openList = (id: string) => {
@@ -95,7 +101,7 @@ export default function App() {
 
   const nav = (id: Page, label: string) => (
     <button
-      className={`w-full rounded px-3 py-1.5 text-left ${page === id || (id === 'armies' && page === 'army') ? 'bg-panel-2 text-accent' : 'hover:bg-panel-2'}`}
+      className={`w-full rounded px-3 py-1.5 text-left ${page === id || (id === 'armies' && page === 'army') || (id === 'storage' && page === 'place') ? 'bg-panel-2 text-accent' : 'hover:bg-panel-2'}`}
       aria-current={page === id || (id === 'backlog' && page === 'unit') || (id === 'armies' && page === 'army') ? 'page' : undefined}
       onClick={() => go(id)}
     >
@@ -113,6 +119,7 @@ export default function App() {
         {nav('browse', 'Catalogue')}
         {nav('rules', 'Rules')}
         {nav('paints', 'Paints')}
+        {nav('storage', 'Storage')}
         {nav('supplies', lowSupplies ? `Supplies ⚠${lowSupplies}` : 'Supplies')}
         {nav('schemes', 'Schemes')}
         {nav('guides', 'Guides')}
@@ -142,6 +149,10 @@ export default function App() {
           <p className="text-muted">Loading…</p>
         ) : page === 'companion' ? (
           companion ? <WorkCompanion key={`${companion.mode}/${companion.unitId}`} backTo={from && PAGE_NAME[from] ? { label: PAGE_NAME[from]!, go: () => { useStore.getState().closeCompanion(); setPage(from); setFrom(null) } } : undefined} /> : <CompanionHub />
+        ) : page === 'storage' ? (
+          <StoragePage onOpenUnit={openUnit} onOpenPlace={openPlace} />
+        ) : page === 'place' && placeId ? (
+          <PlacePage key={placeId} placeId={placeId} onBack={() => setPage('storage')} onOpenUnit={openUnit} onOpenPlace={openPlace} />
         ) : page === 'home' ? (
           <HomePage onOpenUnit={openUnit} onGo={(p) => go(p)} onAddUnit={() => go('backlog')} />
         ) : page === 'backlog' ? (
