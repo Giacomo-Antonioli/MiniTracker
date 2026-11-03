@@ -62,4 +62,10 @@ it('creates, edits and deletes goals of each kind', async () => {
   await user.click(list.getByRole('button', { name: 'Delete Monthly' }))
   expect(list.queryByText('Monthly')).toBeNull()
   expect(useStore.getState().goals).toHaveLength(3)
+
+  await user.click(screen.getByRole('button', { name: 'Home' }))
+  const card = within(await screen.findByRole('list', { name: 'Goal progress' }))
+  expect(card.getAllByRole('listitem')).toHaveLength(3)
+  await user.click(screen.getByRole('button', { name: 'Goals →' }))
+  expect(await screen.findByRole('heading', { name: 'Goals', level: 1 })).toBeTruthy()
 })
