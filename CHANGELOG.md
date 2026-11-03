@@ -5,6 +5,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Added
+- "Before you start" in every scheme (library and your own, updating as you edit): painting order worked out from the area names, techniques used (each opens its guide), paint count, estimated difficulty, and a Print / PDF sheet with the recipe in painting order.
 - Guides: a new page (also a tab in Schemes) with 19 technique guides (what, when, brush, thinning, mistakes, video search) and a Getting started guide. Techniques in recipe steps open their guide in a side panel.
 - Scheme library: 125 more schemes from 'Eavy Archive (chapters, craftworlds, hive fleets and more), with mixes, ratios and notes kept. Library now has 598 schemes.
 

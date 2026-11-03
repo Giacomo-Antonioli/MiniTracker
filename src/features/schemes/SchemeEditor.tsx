@@ -1,6 +1,9 @@
 import { shareUrl } from '../../domain/schemes/share'
 import type { StepLink } from '../../domain/schemes/types'
 import { useMemo, useState } from 'react'
+import type { Technique } from '../../domain/guides/techniques'
+import { BeforeYouStart } from '../guides/BeforeYouStart'
+import { TechniquePanel } from '../guides/GuidesPage'
 import { ctx, useStore } from '../../app/store'
 import { MissingPaints } from './MissingPaints'
 import {
@@ -23,6 +26,7 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
   const [error, setError] = useState('')
   const [printing, setPrinting] = useState(false)
   const [linkNote, setLinkNote] = useState('')
+  const [technique, setTechnique] = useState<Technique | null>(null)
   const coverUrl = usePhotoUrl(draft.coverPhotoId)
   const dirty = JSON.stringify(draft) !== JSON.stringify(scheme)
   const byId = useMemo(() => new Map(paints.map((p) => [p.id, p])), [paints])
@@ -231,8 +235,9 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
       <div className="grid gap-4 p-4">
         <datalist id="scheme-techniques">{TECHNIQUES.map((t) => <option key={t} value={t} />)}</datalist>
         <datalist id="scheme-areas">{AREAS.map((t) => <option key={t} value={t} />)}</datalist>
+        <BeforeYouStart scheme={draft} paintName={(id) => byId.get(id)?.name ?? id} onTechnique={setTechnique} />
         {draft.sections.map((sec, si) => (
-          <section key={sec.id} className="rounded border border-line" aria-label={`Area ${sec.area}`}>
+          <section key={sec.id} id={`area-${sec.id}`} className="rounded border border-line" aria-label={`Area ${sec.area}`}>
             <div className="flex items-center gap-2 border-b border-line bg-panel-2 p-2">
               <input className="input flex-1 font-semibold" list="scheme-areas" aria-label="Area name" value={sec.area} onChange={(e) => setDraft(updateSection(draft, sec.id, e.target.value, c()))} />
               <button className="btn" aria-label="Move area up" disabled={si === 0} onClick={() => setDraft(moveSection(draft, sec.id, -1, c()))}>↑</button>
@@ -263,6 +268,7 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
         <button className="btn w-fit" onClick={() => setDraft(addSection(draft, draft.sections.length ? '' : 'Armour', c()))}>+ Area</button>
       </div>
       {printing && <RecipeCard scheme={draft} onDone={() => setPrinting(false)} />}
+      {technique && <TechniquePanel technique={technique} onClose={() => setTechnique(null)} />}
     </section>
   )
 }

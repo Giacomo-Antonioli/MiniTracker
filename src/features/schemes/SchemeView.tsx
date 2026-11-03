@@ -9,6 +9,7 @@ import type { PaintScheme } from '../../domain/schemes/types'
 import { ColourStrip } from './ColourStrip'
 import { techniqueFor, type Technique } from '../../domain/guides/techniques'
 import { TechniquePanel } from '../guides/GuidesPage'
+import { BeforeYouStart } from '../guides/BeforeYouStart'
 import { RecipeCard } from './RecipeCard'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
 
@@ -88,8 +89,9 @@ export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: Pa
       <div className="grid gap-4 p-4">
         <p className="text-sm text-muted">{scheme.description}</p>
         {scheme.tips && <p className="text-sm"><b>Note:</b> {scheme.tips}</p>}
+        <BeforeYouStart scheme={scheme} paintName={(id) => byId.get(id)?.name ?? id.split('/').pop()!.replace(/-/g, ' ')} onTechnique={setTechnique} />
         {scheme.sections.map((sec) => (
-          <section key={sec.id} aria-label={`Area ${sec.area}`}>
+          <section key={sec.id} id={`area-${sec.id}`} aria-label={`Area ${sec.area}`}>
             <h3 className="mb-1 font-semibold">{sec.area}</h3>
             <ol className="grid gap-1 text-sm">
               {sec.steps.map((st, i) => (
