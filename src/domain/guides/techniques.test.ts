@@ -31,3 +31,14 @@ describe('technique guides', () => {
     expect(videoSearch(TECHNIQUES_GUIDE[0])).toContain('youtube.com/results?search_query=Priming')
   })
 })
+
+describe('technique details', () => {
+  it('every guide has a method, tips and three credited sources', () => {
+    for (const t of TECHNIQUES_GUIDE) {
+      expect(t.detail?.how.length, t.id).toBeGreaterThanOrEqual(3)
+      expect(t.detail?.tips.length, t.id).toBeGreaterThanOrEqual(2)
+      expect(t.detail?.sources.length, t.id).toBe(3)
+      for (const s of t.detail!.sources) expect(s.url, t.id).toMatch(/^https:\/\//)
+    }
+  })
+})

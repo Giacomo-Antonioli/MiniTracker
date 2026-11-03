@@ -72,7 +72,7 @@ function techniqueTips(scheme: PaintScheme): string {
   const guides = techniquesUsed(scheme).flatMap((t) => (t.guide ? [t.guide] : []))
   if (!guides.length) return ''
   return `<h2 class="tips">How to: techniques used</h2>${guides
-    .map((g) => `<div class="tech"><h3>${esc(g.name)}</h3><p>${esc(g.what)}</p><p><b>When:</b> ${esc(g.when)}</p><p><b>Brush:</b> ${esc(g.brush)} <b>Thinning:</b> ${esc(g.thinning)}</p><p><b>Avoid:</b> ${g.mistakes.map(esc).join(' ')}</p></div>`)
+    .map((g) => `<div class="tech"><h3>${esc(g.name)}</h3><p>${esc(g.what)}</p><p><b>When:</b> ${esc(g.when)}</p><p><b>Brush:</b> ${esc(g.brush)} <b>Thinning:</b> ${esc(g.thinning)}</p>${g.detail ? `<p><b>How to:</b></p><ol>${g.detail.how.map((h) => `<li>${esc(h)}</li>`).join('')}</ol><p><b>Tips:</b> ${g.detail.tips.map(esc).join(' ')}</p>` : ''}<p><b>Avoid:</b> ${g.mistakes.map(esc).join(' ')}</p></div>`)
     .join('')}`
 }
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { BasesBrowser } from './Bases'
+import { Diagram } from './Diagram'
 import { GETTING_STARTED, TECHNIQUES_GUIDE, videoSearch, type Technique } from '../../domain/guides/techniques'
 
 type Tab = 'techniques' | 'bases' | 'start'
@@ -44,18 +45,36 @@ export function Guides({ initialTab = 'techniques' }: { initialTab?: Tab }) {
   )
 }
 
-export function TechniqueCard({ technique: t }: { technique: Technique }) {
+export function TechniqueCard({ technique: t, open = false }: { technique: Technique; open?: boolean }) {
+  const d = t.detail
   return (
-    <article className="panel grid gap-2 p-4 text-sm" aria-label={t.name}>
+    <article className="panel grid content-start gap-2 p-4 text-sm" aria-label={t.name}>
       <h2 className="font-semibold text-accent">{t.name}</h2>
       <p>{t.what}</p>
+      {d?.diagram && <Diagram id={d.diagram} />}
       <p><b>When:</b> {t.when}</p>
       <p><b>Brush:</b> {t.brush}</p>
       <p><b>Thinning:</b> {t.thinning}</p>
+      {d && (
+        <details open={open} className="grid gap-2">
+          <summary className="cursor-pointer font-semibold text-accent">How to, step by step</summary>
+          <ol className="mt-1 grid list-decimal gap-1 pl-5">{d.how.map((h) => <li key={h}>{h}</li>)}</ol>
+          <p className="mt-2 font-semibold">Tips</p>
+          <ul className="grid list-disc gap-1 pl-5">{d.tips.map((h) => <li key={h}>{h}</li>)}</ul>
+        </details>
+      )}
       <div>
         <b>Avoid:</b>
         <ul className="list-disc pl-5">{t.mistakes.map((m) => <li key={m}>{m}</li>)}</ul>
       </div>
+      {d && (
+        <p className="text-xs text-muted">
+          Based on:{' '}
+          {d.sources.map((s, i) => (
+            <span key={s.url}>{i > 0 && ' · '}<a className="hover:text-accent hover:underline" href={s.url} target="_blank" rel="noreferrer">{s.title}</a></span>
+          ))}
+        </p>
+      )}
       <a className="text-accent hover:underline" href={videoSearch(t)} target="_blank" rel="noreferrer">▶ Find videos</a>
     </article>
   )
@@ -69,7 +88,7 @@ export function TechniquePanel({ technique, onClose }: { technique: Technique; o
         <div className="mb-2 flex justify-end">
           <button className="btn" aria-label="Close technique" onClick={onClose}>✕</button>
         </div>
-        <TechniqueCard technique={technique} />
+        <TechniqueCard technique={technique} open />
       </div>
     </div>
   )
