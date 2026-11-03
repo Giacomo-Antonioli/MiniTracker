@@ -17,7 +17,7 @@ const SECTIONS: { id: SettingsSection; label: string }[] = [
 
 export function SettingsPage({ section }: { section?: SettingsSection }) {
   const [start, setStart] = useState<StartPage>(readStartPage)
-  const { theme, setTheme, ruleDisplay, setRuleDisplay, pipelines, savePipelineFor, units, paintStock, schemes } = useStore()
+  const { currency, setCurrency, theme, setTheme, ruleDisplay, setRuleDisplay, pipelines, savePipelineFor, units, paintStock, schemes } = useStore()
 
   useEffect(() => {
     if (section) document.getElementById(`settings-${section}`)?.scrollIntoView?.({ block: 'start' })
@@ -59,6 +59,10 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
               <option value="home">Home</option>
               <option value="backlog">Backlog</option>
             </select>
+          </label>
+          <label className="flex items-center gap-3">
+            Currency
+            <input className="input w-20" aria-label="Currency" defaultValue={currency} key={currency} maxLength={4} onBlur={(e) => e.target.value.trim() && e.target.value.trim() !== currency && void setCurrency(e.target.value.trim())} />
           </label>
           <label className="flex items-center gap-3">
             Theme

@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Cost tracking: price paid per unit, purchases (boxes, bundles) shared across units by model count, a currency setting, and a Costs section on Stats with total spent and collection value painted vs unpainted (#94).
+
 ## [0.8.0] - 2026-11-03
 
 ### Added

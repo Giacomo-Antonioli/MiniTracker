@@ -1,0 +1,25 @@
+import { expect, test } from '@playwright/test'
+
+test('costs: unit price, currency, stats', async ({ page }) => {
+  const errors: string[] = []
+  page.on('pageerror', (e) => errors.push(e.message))
+  await page.goto('./')
+  await page.getByRole('button', { name: '+ Add unit' }).click()
+  const d = page.getByRole('dialog', { name: 'Add unit' })
+  await d.getByLabel('Name *').fill('Intercessors')
+  await d.getByRole('button', { name: 'Save' }).click()
+  await page.getByRole('cell', { name: /Intercessors/ }).click()
+  await page.getByLabel('Price paid').fill('42.5')
+  await page.getByLabel('Price paid').blur()
+  await page.getByRole('button', { name: /Settings/ }).click()
+  await page.getByLabel('Currency').fill('£')
+  await page.getByLabel('Currency').blur()
+  await page.getByRole('button', { name: 'Stats' }).click()
+  const costs = page.getByRole('region', { name: 'Costs' })
+  await expect(costs).toContainText('Total spent£42.50')
+  await page.reload()
+  await page.getByRole('button', { name: 'Stats' }).click()
+  await expect(page.getByRole('region', { name: 'Costs' })).toContainText('Value unpainted£42.50')
+  await page.getByRole('region', { name: 'Costs' }).screenshot({ path: process.env.SHOT ?? 'test-results/costs.png' })
+  expect(errors).toEqual([])
+})

@@ -1,3 +1,4 @@
+import { CostsSection } from '../costs/CostsSection'
 import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../../app/store'
 import { pointsFor } from '../../domain/catalogue/points'
@@ -127,6 +128,8 @@ export function StatsPage() {
         <Tile label="Pace" value={`${Math.round(perMonth * 10) / 10}/mo`} hint="Last 3 months" />
         <Tile label="Finish" value={forecast(finishMonths(pile, perMonth))} hint="At this pace" />
       </section>
+
+      <CostsSection />
 
       <section className="panel grid grid-cols-2 gap-2 p-4 sm:grid-cols-3 lg:grid-cols-5" aria-label="Records">
         <Tile label="Best month" value={best.bestMonth?.count ?? 0} hint={bucketName(best.bestMonth?.key)} />
