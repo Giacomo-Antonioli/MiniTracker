@@ -16,7 +16,7 @@ export function lastMonths(now: string, n: number): string[] {
 }
 
 /** Index of the painted stage, or the last stage when the pipeline has none. */
-function targetIndex(p: Pipeline, target: StageId) {
+export function targetIndex(p: Pipeline, target: StageId) {
   const i = p.stages.findIndex((s) => s.id === target)
   return i < 0 ? p.stages.length - 1 : i
 }
@@ -57,7 +57,7 @@ export function paintedPerMonth(events: StatusEvent[], p: Pipeline, keys: string
 }
 
 /** Owned models of a unit (not wishlisted), and how many of them are painted. */
-function counts(u: OwnedUnit, p: Pipeline, t: number) {
+export function counts(u: OwnedUnit, p: Pipeline, t: number) {
   let owned = 0
   let painted = 0
   for (const g of u.groups) {

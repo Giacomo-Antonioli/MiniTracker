@@ -77,6 +77,8 @@ export interface OwnedUnit {
   nextUp: boolean
   /** Links to things outside the app, e.g. a digital twin or a 3D model file. */
   externalRefs: ExternalRef[]
+  /** What you paid for this unit on its own (not via a purchase), in the app currency. */
+  price?: number
   createdAt: string
   updatedAt: string
 }
