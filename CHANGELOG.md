@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Changed
+- Games: "Discard game" next to "Save game" when ending a game, and a delete button on every row of the game history.
+
 ## [0.8.0] - 2026-11-03
 
 ### Added
