@@ -811,5 +811,82 @@
         "Aeronautica"
       ]
     }
-  ]
+  ],
+  "eavyArchive": {
+    "note": "'Eavy Archive faction pages (Necromunda and Blackstone Fortress left out for now; terrain/basing kept for a Bases page). A scheme whose title is a known faction (e.g. a chapter) is filed under that faction.",
+    "pages": [
+      {
+        "url": "https://eavy-archive.com/40k/adepta-sororitas/",
+        "faction": "Adepta Sororitas"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/adeptus-mechanicus/",
+        "faction": "Adeptus Mechanicus"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/aeldari/",
+        "faction": "Aeldari"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/agents-of-the-imperium/",
+        "faction": "Imperial Agents"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/astra-militarum/",
+        "faction": "Astra Militarum"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/chaos-daemons/",
+        "faction": "Chaos Daemons"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/chaos-knights/",
+        "faction": "Chaos Knights"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/chaos-space-marines/",
+        "faction": "Chaos Space Marines"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/drukhari/",
+        "faction": "Drukhari"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/genestealer-cults/",
+        "faction": "Genestealer Cults"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/imperial-knights/",
+        "faction": "Imperial Knights"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/leagues-of-votann/",
+        "faction": "Leagues of Votann"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/necrons/",
+        "faction": "Necrons"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/orks/",
+        "faction": "Orks"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/space-marines/",
+        "faction": "Space Marines"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/talons-of-the-emperor/",
+        "faction": "Adeptus Custodes"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/tau-empire/",
+        "faction": "T'au Empire"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/tyranids/",
+        "faction": "Tyranids"
+      }
+    ]
+  }
 }

@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Scheme library: 125 more schemes from 'Eavy Archive (chapters, craftworlds, hive fleets and more), with mixes, ratios and notes kept. Library now has 598 schemes.
+
 ## [0.10.0] - 2026-11-03
 
 ### Added
