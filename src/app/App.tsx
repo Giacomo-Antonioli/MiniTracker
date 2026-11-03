@@ -1,3 +1,5 @@
+import { SHARE_HASH, shareToken } from '../domain/schemes/share'
+import { SharedSchemeBanner } from '../features/schemes/SharedSchemeBanner'
 import { useEffect, useState } from 'react'
 import { ArmiesPage } from '../features/armies/ArmiesPage'
 import { BuilderPage } from '../features/armies/BuilderPage'
@@ -29,6 +31,8 @@ export default function App() {
   // A recipe sent by the bookmarklet arrives in the URL (#recipe=…): start on Schemes with it.
   const [recipe, setRecipe] = useState<RecipePayload | null>(() => readRecipeHash(location.hash))
   const [page, setPage] = useState<Page>(() => (readRecipeHash(location.hash) ? 'schemes' : readStartPage()))
+  // A scheme shared by link arrives as #scheme=…: offer to import it.
+  const [shared, setShared] = useState(() => shareToken(location.hash))
   const [section, setSection] = useState<SettingsSection | undefined>()
   const [unitId, setUnitId] = useState<string | null>(null)
   const [datasheetId, setDatasheetId] = useState<string | undefined>()
@@ -53,7 +57,7 @@ export default function App() {
 
   useEffect(() => {
     // Remove the recipe from the address bar so a reload doesn't import it again.
-    if (location.hash.startsWith('#recipe=')) history.replaceState(null, '', location.pathname + location.search)
+    if (location.hash.startsWith('#recipe=') || location.hash.startsWith(SHARE_HASH)) history.replaceState(null, '', location.pathname + location.search)
   }, [])
 
   useEffect(() => {
@@ -113,6 +117,7 @@ export default function App() {
         </div>
       </nav>
       <main className="min-w-0 flex-1 overflow-auto p-4">
+        {ready && shared && <SharedSchemeBanner token={shared} onDone={(id) => { setShared(null); if (id) openScheme(id) }} />}
         {!ready ? (
           <p className="text-muted">Loading…</p>
         ) : page === 'home' ? (

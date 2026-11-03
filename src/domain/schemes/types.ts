@@ -19,6 +19,13 @@ export interface SchemeStep {
   /** e.g. "size 1 brush", "drybrush" */
   tool?: string
   note: string
+  /** Videos or tutorials for this step. */
+  links?: StepLink[]
+}
+
+export interface StepLink {
+  url: string
+  title?: string
 }
 
 export interface SchemeSection {

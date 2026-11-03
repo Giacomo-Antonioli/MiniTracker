@@ -67,6 +67,7 @@ export function RecipeCard({ scheme, onDone }: { scheme: PaintScheme; onDone: ()
                 {st.thinning && ` (${st.thinning})`}
                 {st.tool && ` · ${st.tool}`}
                 {st.note && ` · ${st.note}`}
+                {st.links?.map((l) => <span key={l.url} className="block break-all text-xs">▶ {l.title ? `${l.title}: ` : ''}{l.url}</span>)}
               </li>
             ))}
           </ol>
