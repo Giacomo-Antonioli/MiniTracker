@@ -3,6 +3,8 @@ import { useStore } from '../../app/store'
 import { BASE_KINDS, filterBases, type BaseRecipe } from '../../domain/guides/bases'
 import { techniqueFor, type Technique } from '../../domain/guides/techniques'
 import { TechniquePanel } from './GuidesPage'
+import { materialsFor, type Material } from '../../domain/guides/materials'
+import { MaterialPanel, MaterialsList } from './Materials'
 
 let cache: BaseRecipe[] | null = null
 /** Bases are loaded on first use, like the scheme library. */
@@ -27,6 +29,7 @@ export function BasesBrowser({ onPick }: { onPick?: (b: BaseRecipe) => void }) {
   const [kind, setKind] = useState('')
   const [text, setText] = useState('')
   const [technique, setTechnique] = useState<Technique | null>(null)
+  const [material, setMaterial] = useState<Material | null>(null)
   // Our own recipes first, then the dedicated basing recipes, then bases taken from faction schemes.
   const shown = useMemo(
     () => (bases ? filterBases(bases, kind, text).sort((a, b) => Number(a.origin !== 'minitracker') - Number(b.origin !== 'minitracker') || Number(!!a.schemeId) - Number(!!b.schemeId) || a.name.localeCompare(b.name)) : []),
@@ -48,14 +51,15 @@ export function BasesBrowser({ onPick }: { onPick?: (b: BaseRecipe) => void }) {
       </div>
       <p className="text-sm text-muted">{shown.length} recipes. Texture paints go on first; finish with drybrushing and a neat rim.</p>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {shown.map((b) => <BaseCard key={b.id} base={b} onTechnique={setTechnique} onPick={onPick} />)}
+        {shown.map((b) => <BaseCard key={b.id} base={b} onTechnique={setTechnique} onMaterial={setMaterial} onPick={onPick} />)}
       </div>
       {technique && <TechniquePanel technique={technique} onClose={() => setTechnique(null)} />}
+      {material && <MaterialPanel material={material} onClose={() => setMaterial(null)} />}
     </div>
   )
 }
 
-function BaseCard({ base: b, onTechnique, onPick }: { base: BaseRecipe; onTechnique: (t: Technique) => void; onPick?: (b: BaseRecipe) => void }) {
+function BaseCard({ base: b, onTechnique, onMaterial, onPick }: { base: BaseRecipe; onTechnique: (t: Technique) => void; onMaterial: (m: Material) => void; onPick?: (b: BaseRecipe) => void }) {
   const { paints } = useStore()
   const byId = useMemo(() => new Map(paints.map((p) => [p.id, p])), [paints])
   return (
@@ -94,6 +98,14 @@ function BaseCard({ base: b, onTechnique, onPick }: { base: BaseRecipe; onTechni
           )
         })}
       </ol>
+      {materialsFor(b).length > 0 && (
+        <p className="flex flex-wrap items-center gap-1 text-xs text-muted">
+          Materials:
+          {materialsFor(b).map((m) => (
+            <button key={m.id} className="rounded border border-line px-1.5 hover:border-accent hover:text-accent" onClick={() => onMaterial(m)}>{m.name}</button>
+          ))}
+        </p>
+      )}
       {onPick && <button className="btn btn-primary justify-self-start text-sm" onClick={() => onPick(b)}>Use this base</button>}
     </article>
   )
@@ -110,6 +122,20 @@ export function BasePickerDialog({ onPick, onClose }: { onPick: (b: BaseRecipe) 
         </header>
         <BasesBrowser onPick={onPick} />
       </div>
+    </div>
+  )
+}
+
+/** Guides › Bases: recipes or materials. */
+export function BasesTab() {
+  const [view, setView] = useState<'recipes' | 'materials'>('recipes')
+  return (
+    <div className="grid gap-3">
+      <div role="tablist" aria-label="Bases view" className="flex gap-1">
+        <button role="tab" aria-selected={view === 'recipes'} className={`btn text-sm ${view === 'recipes' ? 'btn-primary' : ''}`} onClick={() => setView('recipes')}>Recipes</button>
+        <button role="tab" aria-selected={view === 'materials'} className={`btn text-sm ${view === 'materials' ? 'btn-primary' : ''}`} onClick={() => setView('materials')}>Materials</button>
+      </div>
+      {view === 'recipes' ? <BasesBrowser /> : <MaterialsList />}
     </div>
   )
 }

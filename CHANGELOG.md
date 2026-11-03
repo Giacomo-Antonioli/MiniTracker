@@ -5,6 +5,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Added
+- Guides › Bases › Materials: 12 basing materials (texture paste, sand, rocks/cork, static grass, tufts, flowers, flock, pigments, snow, water effects, PVA, super glue) with how-to, tips, mistakes and links to makers (Green Stuff World, Army Painter, Gamers Grass, Citadel, Vallejo and more). "+ Add to Supplies" on each. Base recipes list the materials they use.
 - Paints: Green Stuff World (220), Scale75 (358) and Pro Acryl (131) from the MIT-licensed miniature-paints dataset, with range, type and colour family. Paint brands are listed in `tools/paints/sources.json`, so more can be added without code changes (#29). Scheme recipes using these brands now link to them.
 - Technique guides in depth: each of the 19 techniques now has a step-by-step method and tips, merged from three published guides (credited and linked), and an explanatory diagram for every technique, drawn for MiniTracker. The scheme Print / PDF sheet ends with "How to" for every technique the recipe uses.
 - Guides › Bases: 105 basing recipes (8 written for MiniTracker: snow, lava, urban rubble, desert, mud, Mars, grass, ash; 5 from 'Eavy Archive; the rest from base areas of library schemes), filtered by terrain type. In the scheme editor, "🪨 Add a base" / "Use a base recipe" copies a base into your scheme.
