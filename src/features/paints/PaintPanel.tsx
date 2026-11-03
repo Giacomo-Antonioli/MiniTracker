@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { adjustQuantity, newStock, updateStock } from '../../domain/paints/inventory'
 import type { PaintDef, PaintStock } from '../../domain/paints/types'
+import { ColourMatches } from './ColourMatches'
 
-export function PaintPanel({ paint, onClose }: { paint: PaintDef; onClose: () => void }) {
+export function PaintPanel({ paint, onClose, onSelect }: { paint: PaintDef; onClose: () => void; onSelect?: (id: string) => void }) {
   const { paintStock, pipelines, saveStock, removeStock, deleteCustomPaint } = useStore()
   const stock = paintStock.get(paint.id)
   const [error, setError] = useState('')
@@ -95,6 +96,10 @@ export function PaintPanel({ paint, onClose }: { paint: PaintDef; onClose: () =>
           </button>
         </section>
       )}
+
+      <section className="border-t border-line p-4" aria-label="Colour match">
+        <ColourMatches key={paint.id} hex={paint.hex} exclude={paint.id} onPick={(p) => onSelect?.(p.id)} />
+      </section>
 
       {paint.custom && !paint.id.startsWith('lib/') && (
         <section className="mt-auto border-t border-line p-4">

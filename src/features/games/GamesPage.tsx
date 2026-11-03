@@ -182,6 +182,7 @@ function LiveGame({ game: g, onCompanion }: { game: Game; onCompanion: () => voi
           <label className="grid gap-1 text-sm">Notes<textarea className="input" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} /></label>
           <div className="flex gap-2">
             <button className="btn btn-primary" onClick={() => save(endGame(g, notes, c))}>Save game</button>
+            <button className="btn btn-danger" onClick={() => { if (confirm('Discard this game? It will not be saved.')) void deleteGame(g.id) }}>Discard game</button>
             <button className="btn" onClick={() => setEnding(false)}>Back</button>
           </div>
         </div>
@@ -250,7 +251,7 @@ function History() {
         <h2 className="font-display text-lg">History</h2>
         <table className="w-full text-sm">
           <thead className="text-left text-xs uppercase tracking-wider text-muted">
-            <tr><th>Date</th><th>My list</th><th>Opponent</th><th>Mission</th><th className="text-right">Score</th><th className="text-right">Result</th></tr>
+            <tr><th>Date</th><th>My list</th><th>Opponent</th><th>Mission</th><th className="text-right">Score</th><th className="text-right">Result</th><th /></tr>
           </thead>
           <tbody>
             {done.map((g) => {
@@ -263,10 +264,13 @@ function History() {
                   <td>{g.mission || '—'}</td>
                   <td className="text-right tabular-nums">{totals(g.me).total}–{totals(g.them).total}</td>
                   <td className={`text-right font-semibold ${RESULT_CLASS[r]}`}>{RESULT[r]}</td>
+                  <td className="w-8 text-right">
+                    <button className="px-1 text-muted hover:text-danger" aria-label={`Delete game vs ${g.them.name}`} title="Delete game" onClick={(e) => { e.stopPropagation(); if (confirm('Delete this game?')) void deleteGame(g.id) }}>✕</button>
+                  </td>
                 </tr>,
                 open === g.id && (
                   <tr key={`${g.id}-d`}>
-                    <td colSpan={6} className="bg-panel-2/40 p-3">
+                    <td colSpan={7} className="bg-panel-2/40 p-3">
                       <RoundTable game={g} />
                       <p className="mt-2 text-sm">Lost: {g.me.destroyed.length ? entries(lists.find((l) => l.id === g.me.listId)).filter((u) => g.me.destroyed.includes(u.id)).map((u) => u.name).join(', ') || `${g.me.destroyed.length} units` : 'none'}</p>
                       <p className="text-sm">Destroyed: {g.them.destroyed.length ? entries(g.them.list).filter((u) => g.them.destroyed.includes(u.id)).map((u) => u.name).join(', ') || `${g.them.destroyed.length} units` : 'none'}</p>

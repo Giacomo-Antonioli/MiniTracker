@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ctx, useStore } from '../../app/store'
+import { MissingPaints } from './MissingPaints'
 import {
   AREAS, TECHNIQUES, addSection, addStep, colourStrip, duplicateStep, makeVariant, missingPaints, moveSection, moveStep,
   removeSection, removeStep, schemeFile, updateSection, updateStep, validateScheme, variantDiff,
@@ -196,7 +197,7 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
         <div className="grid gap-2 border-b border-line p-4 text-sm">
           {missing.length > 0 && (
             <p>
-              <b className="text-danger">Missing paints ({missing.length}):</b> {missing.map(paintName).join(', ')}
+              <MissingPaints ids={missing} name={paintName} />
             </p>
           )}
           {base && (() => {

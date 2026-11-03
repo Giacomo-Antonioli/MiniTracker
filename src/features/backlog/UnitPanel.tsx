@@ -1,3 +1,4 @@
+import { money, purchaseShares, type Purchase } from '../../domain/costs/costs'
 import { useEffect, useState, type ReactNode } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { pointsFor } from '../../domain/catalogue/points'
@@ -35,7 +36,7 @@ interface Props {
 
 export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage, onOpenDatasheet, onOpenScheme }: Props) {
   const page = variant === 'page'
-  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, library, loadLibrary, paints, loadPaints, paintStock } = useStore()
+  const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, library, loadLibrary, paints, loadPaints, paintStock, purchases, currency } = useStore()
   const allSchemes = [...schemes, ...library]
   const scheme = unit.schemeId ? allSchemes.find((s) => s.id === unit.schemeId) : undefined
   const photos = allPhotos[unit.id] ?? []
@@ -190,6 +191,8 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
 
       <PhotoGallery unit={unit} photos={photos} events={events[unit.id]} thumbSize={page ? 'h-40 w-40' : undefined} />
 
+      <UnitCost unit={unit} purchases={purchases} currency={currency} onSave={(price) => void saveUnit({ ...unit, price, updatedAt: new Date().toISOString() })} />
+
       <section className="border-b border-line p-4">
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">History</h3>
         {history.length === 0 && <p className="text-sm text-muted">No changes yet.</p>}
@@ -254,4 +257,19 @@ function GamesPlayed({ unitId }: { unitId: string }) {
   const r = unitRecord(unitId, games, lists, (id, l) => [...listOwnership(l, units, pipeline).byEntry].filter(([, o]) => o.from.some((f) => f.unitId === id)).map(([entryId]) => entryId))
   if (!r.played) return null
   return <p className="mt-1 text-sm text-muted" aria-label="Games played">⚔ Played in {r.played} game{r.played === 1 ? '' : 's'}{r.destroyed ? ` · destroyed in ${r.destroyed}` : ''}</p>
+}
+
+/** Price paid for the unit on its own, plus what it got from shared purchases. */
+function UnitCost({ unit, purchases, currency, onSave }: { unit: OwnedUnit; purchases: Purchase[]; currency: string; onSave: (price: number | undefined) => void }) {
+  const mine = purchases.filter((p) => p.unitIds.includes(unit.id))
+  const share = purchaseShares(mine, useStore.getState().units).get(unit.id)
+  const value = unit.price?.toString() ?? ''
+  return (
+    <section className="flex flex-wrap items-center gap-2 border-b border-line p-4 text-sm" aria-label="Cost">
+      <span className="text-xs font-semibold uppercase tracking-wider text-muted">Price paid</span>
+      <input key={value} className="input w-24" type="number" min={0} step="0.01" aria-label="Price paid" defaultValue={value} onBlur={(e) => e.target.value !== value && onSave(e.target.value === '' ? undefined : Number(e.target.value))} />
+      <span className="text-muted">{currency}</span>
+      {mine.length > 0 && <span className="text-muted">+ {mine.map((p) => p.name).join(', ')}{share !== undefined ? ` (share ${money(share, currency)})` : ''}</span>}
+    </section>
+  )
 }
