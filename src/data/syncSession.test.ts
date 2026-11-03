@@ -1,0 +1,91 @@
+import 'fake-indexeddb/auto'
+import { afterEach, beforeEach, expect, it } from 'vitest'
+import { MiniTrackerDb } from './db'
+import type { Channel } from './syncChannel'
+import { runSync, type SyncPlan } from './syncSession'
+import type { OwnedUnit } from '../domain/collection/types'
+import type { Photo } from '../domain/photos/types'
+
+/** One end of an in-memory connection; messages arrive asynchronously like on a network. */
+class FakeEnd implements Channel {
+  peer!: FakeEnd
+  private messageFns: ((t: string) => void)[] = []
+  private closeFns: (() => void)[] = []
+  send(t: string) {
+    setTimeout(() => this.peer.messageFns.forEach((f) => f(t)), 0)
+  }
+  onMessage(f: (t: string) => void) {
+    this.messageFns.push(f)
+  }
+  onClose(f: () => void) {
+    this.closeFns.push(f)
+  }
+  close() {
+    setTimeout(() => this.peer.closeFns.forEach((f) => f()), 0)
+  }
+}
+
+function pair(): [Channel, Channel] {
+  const a = new FakeEnd()
+  const b = new FakeEnd()
+  a.peer = b
+  b.peer = a
+  return [a, b]
+}
+
+let a: MiniTrackerDb
+let b: MiniTrackerDb
+const unit = (id: string) => ({ id, customName: id, lifecycle: 'active', groups: [] }) as unknown as OwnedUnit
+const photo = (id: string) => ({ id, unitId: 'ua', fileName: id + '.jpg', createdAt: '2026-11-01' }) as unknown as Photo
+const yes = { confirmChanges: async () => true, confirmPlan: async () => true }
+
+beforeEach(async () => {
+  a = new MiniTrackerDb('sessA-' + Math.random())
+  b = new MiniTrackerDb('sessB-' + Math.random())
+  await a.units.put(unit('ua'))
+  await a.photos.put(photo('p1'))
+  await a.photoFiles.put({ id: 'p1', display: new Blob([new Uint8Array([1, 2, 3])], { type: 'image/webp' }) })
+  await b.units.put(unit('ub'))
+})
+afterEach(async () => {
+  await a.delete()
+  await b.delete()
+})
+
+const run = (plan: SyncPlan, hooksB = yes) => {
+  const [ca, cb] = pair()
+  return Promise.all([
+    runSync(a, ca, { deviceId: 'A', deviceName: 'PC' }, { starts: true, plan }, yes),
+    runSync(b, cb, { deviceId: 'B', deviceName: 'Phone' }, { starts: false }, hooksB),
+  ])
+}
+
+it('two-way merge with photos: both devices end up the same', async () => {
+  const [ra, rb] = await run({ mode: 'merge', direction: 'both', applyDeletions: true, photos: true })
+  expect(ra.applied && rb.applied).toBe(true)
+  expect(rb.other?.deviceName).toBe('PC')
+  for (const db of [a, b]) expect((await db.units.toCollection().primaryKeys()).sort()).toEqual(['ua', 'ub'])
+  const f = await b.photoFiles.get('p1')
+  expect(new Uint8Array(await f!.display.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]))
+  expect(f!.display.type).toBe('image/webp')
+})
+
+it('send-only overwrite without photos: receiver becomes the sender, sender unchanged', async () => {
+  const [ra, rb] = await run({ mode: 'overwrite', direction: 'send', applyDeletions: false, photos: false })
+  expect(ra.applied).toBe(false)
+  expect(rb.summary?.units).toEqual({ added: 1, updated: 0, deleted: 1, kept: 0 })
+  expect(await b.units.toCollection().primaryKeys()).toEqual(['ua'])
+  expect(await b.photos.count()).toBe(0)
+  expect(await a.units.toCollection().primaryKeys()).toEqual(['ua'])
+})
+
+it('the other device can decline', async () => {
+  await expect(run({ mode: 'merge', direction: 'both', applyDeletions: true, photos: false }, { ...yes, confirmPlan: async () => false })).rejects.toThrow('Phone declined the sync')
+  expect(await b.units.toCollection().primaryKeys()).toEqual(['ub'])
+})
+
+it('declining the preview changes nothing', async () => {
+  const [, rb] = await run({ mode: 'merge', direction: 'send', applyDeletions: true, photos: true }, { ...yes, confirmChanges: async () => false })
+  expect(rb.applied).toBe(false)
+  expect(await b.units.toCollection().primaryKeys()).toEqual(['ub'])
+})
