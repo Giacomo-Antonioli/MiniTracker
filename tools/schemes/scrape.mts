@@ -4,6 +4,7 @@ import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { buildDraft, matchPaint } from '../../src/domain/schemes/extract.ts'
 import type { PaintDef } from '../../src/domain/paints/types.ts'
 import type { PaintScheme } from '../../src/domain/schemes/types.ts'
+import { dedupeSchemes } from '../../src/domain/schemes/dedupe.ts'
 import { blogPost, paintPad, paintPadListing, type Scraped } from './adapters.mts'
 import { getPage } from './fetch.mts'
 
@@ -50,8 +51,8 @@ for (const f of sources.factions) {
     report.push(`${verdict === 'ok' ? 'OK  ' : 'DROP'}  ${id}  "${s.title}" by ${s.author ?? '?'}  steps=${d.stats.steps} paints=${d.stats.paints} matched=${Math.round(ratio * 100)}%  ${verdict === 'ok' ? '' : `(${verdict})`}`)
     if (verdict !== 'ok') continue
 
-    const septs = f.septs.filter((t: string) => norm(s.title).includes(norm(t)))
-    const appliesTo = f.unitTypes.filter((t: string) => norm(s.title).includes(norm(t)))
+    const septs = (f.septs ?? []).filter((t: string) => norm(s.title).includes(norm(t)))
+    const appliesTo = (f.unitTypes ?? []).filter((t: string) => norm(s.title).includes(norm(t)))
     const tags = [...septs, ...appliesTo]
     let n = 0
     const scheme: PaintScheme = {
@@ -66,7 +67,7 @@ for (const f of sources.factions) {
       tips: '',
       tutorials: [],
       source: { title: `${s.title} (${s.site})`, url: job.url, ...(s.author ? { author: s.author } : {}) },
-      sections: d.sections.map((sec) => ({ id: `${id}/a${++n}`, area: sec.area, steps: sec.steps.map((st) => ({ ...st, id: `${id}/s${++n}` })) })),
+      sections: d.sections.map((sec) => ({ id: `${id}/a${++n}`, area: sec.area.replace(/\s*:\s*$/, ''), steps: sec.steps.map((st) => ({ ...st, id: `${id}/s${++n}` })) })),
       createdAt: s.date ? new Date(s.date).toISOString() : '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-11-02T00:00:00.000Z',
       ...(curation.overrides[id] ?? {}),
@@ -107,6 +108,12 @@ for (const file of readdirSync(new URL('./manual/', import.meta.url))) {
   })
   report.push(`MANUAL ${m.id}  "${m.name}"`)
 }
+
+// The same recipe can be listed under several factions, or posted twice by its author.
+const { kept, dropped } = dedupeSchemes(schemes)
+for (const d of dropped) report.push(`DUP   ${d.id}  "${d.name}"  (same as ${d.duplicateOf})`)
+schemes.length = 0
+schemes.push(...kept)
 
 schemes.sort((a, b) => (a.factionName ?? '').localeCompare(b.factionName ?? '') || a.name.localeCompare(b.name))
 const usedLib = new Set(schemes.flatMap((s) => s.sections.flatMap((x) => x.steps.flatMap((st) => st.paints.map((p) => p.paintId)))))

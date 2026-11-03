@@ -1,6 +1,773 @@
 {
-  "note": "Recipe sources for the bundled scheme library. Only facts (areas, steps, paints) plus credit and link are kept. septs = army-wide tags; unitTypes = the scheme only applies to units of that type.",
+  "note": "Recipe sources for the bundled scheme library. Only facts (areas, steps, paints) plus credit and link are kept. septs = army-wide tags; unitTypes = the scheme only applies to units of that type. List more specific listings first (chapters before Space Marines): duplicates keep the first faction they were found under. septs/unitTypes are optional.",
   "factions": [
+    {
+      "faction": "Ultramarines",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/ultramarines",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "unitTypes": [
+        "Intercessor",
+        "Terminator",
+        "Dreadnought",
+        "Captain",
+        "Librarian",
+        "Chaplain",
+        "Scout",
+        "Eliminator",
+        "Inceptor",
+        "Gravis",
+        "Phobos",
+        "Vehicle",
+        "Tank"
+      ]
+    },
+    {
+      "faction": "Blood Angels",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/blood-angels",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Sanguinary Guard",
+        "Death Company"
+      ],
+      "unitTypes": [
+        "Intercessor",
+        "Terminator",
+        "Dreadnought",
+        "Captain",
+        "Librarian",
+        "Chaplain",
+        "Scout",
+        "Eliminator",
+        "Inceptor",
+        "Gravis",
+        "Phobos",
+        "Vehicle",
+        "Tank"
+      ]
+    },
+    {
+      "faction": "Space Wolves",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/space-wolves",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "unitTypes": [
+        "Intercessor",
+        "Terminator",
+        "Dreadnought",
+        "Captain",
+        "Librarian",
+        "Chaplain",
+        "Scout",
+        "Eliminator",
+        "Inceptor",
+        "Gravis",
+        "Phobos",
+        "Vehicle",
+        "Tank"
+      ]
+    },
+    {
+      "faction": "Dark Angels",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/dark-angels",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Deathwing",
+        "Ravenwing"
+      ],
+      "unitTypes": [
+        "Intercessor",
+        "Terminator",
+        "Dreadnought",
+        "Captain",
+        "Librarian",
+        "Chaplain",
+        "Scout",
+        "Eliminator",
+        "Inceptor",
+        "Gravis",
+        "Phobos",
+        "Vehicle",
+        "Tank"
+      ]
+    },
+    {
+      "faction": "Salamanders",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/salamanders",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "unitTypes": [
+        "Intercessor",
+        "Terminator",
+        "Dreadnought",
+        "Captain",
+        "Librarian",
+        "Chaplain",
+        "Scout",
+        "Eliminator",
+        "Inceptor",
+        "Gravis",
+        "Phobos",
+        "Vehicle",
+        "Tank"
+      ]
+    },
+    {
+      "faction": "Imperial Fists",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/imperial-fists",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "unitTypes": [
+        "Intercessor",
+        "Terminator",
+        "Dreadnought",
+        "Captain",
+        "Librarian",
+        "Chaplain",
+        "Scout",
+        "Eliminator",
+        "Inceptor",
+        "Gravis",
+        "Phobos",
+        "Vehicle",
+        "Tank"
+      ]
+    },
+    {
+      "faction": "Deathwatch",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/deathwatch",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "unitTypes": [
+        "Intercessor",
+        "Terminator",
+        "Dreadnought",
+        "Captain",
+        "Librarian",
+        "Chaplain",
+        "Scout",
+        "Eliminator",
+        "Inceptor",
+        "Gravis",
+        "Phobos",
+        "Vehicle",
+        "Tank"
+      ]
+    },
+    {
+      "faction": "Grey Knights",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/grey-knights",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "unitTypes": [
+        "Terminator",
+        "Paladin",
+        "Dreadknight",
+        "Strike Squad"
+      ]
+    },
+    {
+      "faction": "Space Marines",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/space-marines",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Ultramarines",
+        "Blood Angels",
+        "Dark Angels",
+        "Space Wolves",
+        "Imperial Fists",
+        "Salamanders",
+        "Raven Guard",
+        "White Scars",
+        "Iron Hands",
+        "Black Templars",
+        "Crimson Fists",
+        "Primaris"
+      ],
+      "unitTypes": [
+        "Intercessor",
+        "Terminator",
+        "Dreadnought",
+        "Captain",
+        "Librarian",
+        "Chaplain",
+        "Scout",
+        "Eliminator",
+        "Inceptor",
+        "Gravis",
+        "Phobos",
+        "Vehicle",
+        "Tank"
+      ]
+    },
+    {
+      "faction": "Adepta Sororitas",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/adepta-sororitas",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Our Martyred Lady",
+        "Bloody Rose",
+        "Valorous Heart",
+        "Ebon Chalice",
+        "Argent Shroud",
+        "Sacred Rose"
+      ],
+      "unitTypes": [
+        "Battle Sister",
+        "Seraphim",
+        "Retributor",
+        "Repentia",
+        "Penitent Engine",
+        "Exorcist",
+        "Canoness"
+      ]
+    },
+    {
+      "faction": "Adeptus Custodes",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/adeptus-custodes",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "unitTypes": [
+        "Custodian Guard",
+        "Allarus",
+        "Wardens",
+        "Sisters of Silence",
+        "Contemptor",
+        "Trajann"
+      ]
+    },
+    {
+      "faction": "Adeptus Mechanicus",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/adeptus-mechanicus",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Mars",
+        "Lucius",
+        "Agripinaa",
+        "Stygies",
+        "Ryza",
+        "Graia",
+        "Metalica"
+      ],
+      "unitTypes": [
+        "Skitarii",
+        "Ranger",
+        "Vanguard",
+        "Kataphron",
+        "Kastelan",
+        "Onager",
+        "Tech-Priest",
+        "Electro-Priest"
+      ]
+    },
+    {
+      "faction": "Astra Militarum",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/death-korps-of-krieg",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Krieg"
+      ]
+    },
+    {
+      "faction": "Astra Militarum",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/astra-militarum",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Cadian",
+        "Catachan",
+        "Krieg",
+        "Tallarn",
+        "Mordian",
+        "Vostroyan",
+        "Valhallan"
+      ],
+      "unitTypes": [
+        "Guardsmen",
+        "Leman Russ",
+        "Chimera",
+        "Sentinel",
+        "Ogryn",
+        "Kasrkin",
+        "Tempestus",
+        "Basilisk"
+      ]
+    },
+    {
+      "faction": "Imperial Knights",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/imperial-knights",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "House Terryn",
+        "House Griffith",
+        "House Hawkshroud",
+        "House Cadmus",
+        "House Raven",
+        "House Taranis",
+        "House Krast",
+        "House Vulker"
+      ],
+      "unitTypes": [
+        "Armiger",
+        "Questoris",
+        "Dominus"
+      ]
+    },
+    {
+      "faction": "Imperial Agents",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/imperial-agents",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Inquisition",
+        "Officio Assassinorum",
+        "Ordo Malleus",
+        "Ordo Hereticus",
+        "Ordo Xenos"
+      ]
+    },
+    {
+      "faction": "Aeldari",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/harlequins",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Harlequins"
+      ]
+    },
+    {
+      "faction": "Aeldari",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/aeldari",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Ulthwé",
+        "Iyanden",
+        "Biel-Tan",
+        "Saim-Hann",
+        "Alaitoc",
+        "Harlequins",
+        "Ynnari"
+      ],
+      "unitTypes": [
+        "Guardian",
+        "Wraith",
+        "Aspect",
+        "Dire Avenger",
+        "Howling Banshee",
+        "Striking Scorpion",
+        "Fire Dragon",
+        "Wave Serpent",
+        "Falcon",
+        "Farseer",
+        "Warlock"
+      ]
+    },
+    {
+      "faction": "Drukhari",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/drukhari",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Kabal",
+        "Wych Cult",
+        "Haemonculus"
+      ],
+      "unitTypes": [
+        "Kabalite",
+        "Wych",
+        "Incubi",
+        "Raider",
+        "Venom",
+        "Talos",
+        "Grotesque"
+      ]
+    },
+    {
+      "faction": "Necrons",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/necrons",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Szarekhan",
+        "Sautekh",
+        "Mephrit",
+        "Novokh",
+        "Nihilakh",
+        "Nephrekh"
+      ],
+      "unitTypes": [
+        "Warrior",
+        "Immortal",
+        "Lychguard",
+        "Destroyer",
+        "Canoptek",
+        "Scarab",
+        "Overlord",
+        "C'tan",
+        "Monolith",
+        "Doom Scythe"
+      ]
+    },
+    {
+      "faction": "Orks",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/orks",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Goff",
+        "Evil Sunz",
+        "Bad Moonz",
+        "Deathskulls",
+        "Snakebites",
+        "Blood Axes",
+        "Freebooterz"
+      ],
+      "unitTypes": [
+        "Boyz",
+        "Nob",
+        "Gretchin",
+        "Grot",
+        "Meganob",
+        "Stormboyz",
+        "Warboss",
+        "Deff Dread",
+        "Killa Kan",
+        "Trukk",
+        "Squig"
+      ]
+    },
+    {
+      "faction": "Tyranids",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/tyranids",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Leviathan",
+        "Kraken",
+        "Behemoth",
+        "Hydra",
+        "Jormungandr",
+        "Gorgon",
+        "Hive Fleet"
+      ],
+      "unitTypes": [
+        "Termagant",
+        "Hormagaunt",
+        "Genestealer",
+        "Warrior",
+        "Carnifex",
+        "Hive Tyrant",
+        "Gargoyle",
+        "Lictor",
+        "Zoanthrope"
+      ]
+    },
+    {
+      "faction": "Genestealer Cults",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/genestealer-cults",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Pauper Princes",
+        "Twisted Helix",
+        "Bladed Cog",
+        "Rusted Claw",
+        "Hivecult",
+        "Four-Armed Emperor"
+      ],
+      "unitTypes": [
+        "Neophyte",
+        "Acolyte",
+        "Aberrant",
+        "Patriarch",
+        "Goliath",
+        "Ridgerunner",
+        "Atalan"
+      ]
+    },
+    {
+      "faction": "Leagues of Votann",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/leagues-of-votann",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Greater Thurian",
+        "Trans-Hyperian",
+        "Kronus",
+        "Urani-Surtr",
+        "Ymyr"
+      ],
+      "unitTypes": [
+        "Hearthkyn",
+        "Einhyr",
+        "Hernkyn",
+        "Brokhyr",
+        "Kâhl"
+      ]
+    },
+    {
+      "faction": "Death Guard",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/death-guard",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "unitTypes": [
+        "Plague Marine",
+        "Poxwalker",
+        "Blightlord",
+        "Deathshroud",
+        "Plagueburst",
+        "Daemon Engine",
+        "Mortarion",
+        "Lord"
+      ]
+    },
+    {
+      "faction": "Thousand Sons",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/thousand-sons",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "unitTypes": [
+        "Rubric",
+        "Scarab Occult",
+        "Tzaangor",
+        "Sorcerer",
+        "Magnus",
+        "Daemon Engine"
+      ]
+    },
+    {
+      "faction": "World Eaters",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/world-eaters",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "unitTypes": [
+        "Berzerker",
+        "Eightbound",
+        "Jakhal",
+        "Angron",
+        "Lord"
+      ]
+    },
+    {
+      "faction": "Emperor's Children",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/emperors-children",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "unitTypes": [
+        "Noise Marine",
+        "Flawless Blade",
+        "Fulgrim",
+        "Lucius",
+        "Lord"
+      ]
+    },
+    {
+      "faction": "Chaos Daemons",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/chaos-daemons",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Khorne",
+        "Nurgle",
+        "Tzeentch",
+        "Slaanesh"
+      ],
+      "unitTypes": [
+        "Bloodletter",
+        "Plaguebearer",
+        "Horror",
+        "Daemonette",
+        "Greater Daemon",
+        "Daemon Prince",
+        "Nurgling"
+      ]
+    },
+    {
+      "faction": "Chaos Space Marines",
+      "listings": [
+        {
+          "site": "paintpad",
+          "url": "https://paintpad.app/recipes/for/chaos-space-marines",
+          "maxPages": 3
+        }
+      ],
+      "pages": [],
+      "septs": [
+        "Black Legion",
+        "Night Lords",
+        "Iron Warriors",
+        "Word Bearers",
+        "Alpha Legion",
+        "Red Corsairs",
+        "Emperor's Children",
+        "World Eaters"
+      ],
+      "unitTypes": [
+        "Legionaries",
+        "Chosen",
+        "Terminator",
+        "Cultist",
+        "Havoc",
+        "Raptor",
+        "Obliterator",
+        "Helbrute",
+        "Daemon Engine",
+        "Lord"
+      ]
+    },
     {
       "faction": "T'au Empire",
       "listings": [
