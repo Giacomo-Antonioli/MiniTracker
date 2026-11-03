@@ -7,6 +7,7 @@ import { CatalogueBanner } from './CatalogueBanner'
 import { UnitFormDialog } from './UnitFormDialog'
 import { UnitPanel } from './UnitPanel'
 import { BacklogTable, StageBar } from './BacklogTable'
+import { BacklogBoard } from './BacklogBoard'
 
 /** How long a single click waits for a possible second click. */
 const DOUBLE_CLICK_MS = 250
@@ -15,6 +16,22 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
   const { units, pipeline, backlogFilter: filter, setBacklogFilter: setFilter } = useStore()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<OwnedUnit | 'new' | null>(null)
+  // Table or board; remembered per browser (storage can be blocked, so it is only a convenience).
+  const [view, setView] = useState<'table' | 'board'>(() => {
+    try {
+      return localStorage.getItem('backlogView') === 'board' ? 'board' : 'table'
+    } catch {
+      return 'table'
+    }
+  })
+  const chooseView = (v: 'table' | 'board') => {
+    setView(v)
+    try {
+      localStorage.setItem('backlogView', v)
+    } catch {
+      /* not saved */
+    }
+  }
 
   const shown = useMemo(() => filterUnits(units, filter), [units, filter])
   const factions = useMemo(() => factionsOf(units), [units])
@@ -40,7 +57,16 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
     <div className="flex h-full gap-4">
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <header className="flex items-center justify-between">
-          <h1 className="font-display text-2xl text-accent">Backlog</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="font-display text-2xl text-accent">Backlog</h1>
+            <div role="tablist" aria-label="Backlog view" className="flex gap-1">
+              {(['table', 'board'] as const).map((v) => (
+                <button key={v} role="tab" aria-selected={view === v} className={`btn text-sm ${view === v ? 'btn-primary' : ''}`} onClick={() => chooseView(v)}>
+                  {v === 'table' ? '☰ Table' : '▦ Board'}
+                </button>
+              ))}
+            </div>
+          </div>
           <button className="btn btn-primary" onClick={() => setEditing('new')}>+ Add unit</button>
         </header>
 
@@ -79,6 +105,9 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
           <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={!!filter.favouritesOnly} onChange={(e) => set({ favouritesOnly: e.target.checked })} /> Favourites</label>
         </section>
 
+        {view === 'board' ? (
+          <BacklogBoard units={shown} selectedId={selectedId} onCardClick={onRowClick} />
+        ) : (
         <div className="panel overflow-auto">
           <BacklogTable units={shown} selectedId={selectedId} onRowClick={onRowClick} />
           {shown.length === 0 && (
@@ -87,6 +116,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
             </p>
           )}
         </div>
+        )}
       </div>
 
       {selected && (

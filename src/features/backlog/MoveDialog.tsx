@@ -5,12 +5,12 @@ import { Dialog } from '../../ui/Dialog'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
-export function MoveDialog({ unit, group, onClose }: { unit: OwnedUnit; group: ModelGroup; onClose: () => void }) {
+export function MoveDialog({ unit, group, initialTo, onClose }: { unit: OwnedUnit; group: ModelGroup; initialTo?: string; onClose: () => void }) {
   const { pipeline, move } = useStore()
   const currentIdx = pipeline.stages.findIndex((s) => s.id === group.status)
   const next = pipeline.stages[currentIdx + 1] ?? pipeline.stages.find((s) => s.id !== group.status)!
   const [count, setCount] = useState(group.count)
-  const [to, setTo] = useState(next.id)
+  const [to, setTo] = useState(initialTo ?? next.id)
   const [date, setDate] = useState(today())
   const [note, setNote] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
