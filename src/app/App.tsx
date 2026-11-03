@@ -65,9 +65,17 @@ export default function App() {
   }, [])
 
   // Opening a companion from anywhere shows it under its own tab.
+  // Remember where a companion was opened from, to go back there.
+  const [from, setFrom] = useState<Page | null>(null)
   useEffect(() => {
-    if (companion) setPage('companion')
+    // Back in the picker: the next companion goes back to the picker.
+    if (!companion) return setFrom(null)
+    setPage((p) => {
+      if (p !== 'companion') setFrom(p)
+      return 'companion'
+    })
   }, [companion])
+  const PAGE_NAME: Partial<Record<Page, string>> = { home: 'Home', backlog: 'Backlog', unit: 'unit page' }
 
   useEffect(() => {
     void load()
@@ -133,7 +141,7 @@ export default function App() {
         {!ready ? (
           <p className="text-muted">Loading…</p>
         ) : page === 'companion' ? (
-          companion ? <WorkCompanion key={`${companion.mode}/${companion.unitId}`} /> : <CompanionHub />
+          companion ? <WorkCompanion key={`${companion.mode}/${companion.unitId}`} backTo={from && PAGE_NAME[from] ? { label: PAGE_NAME[from]!, go: () => { useStore.getState().closeCompanion(); setPage(from); setFrom(null) } } : undefined} /> : <CompanionHub />
         ) : page === 'home' ? (
           <HomePage onOpenUnit={openUnit} onGo={(p) => go(p)} onAddUnit={() => go('backlog')} />
         ) : page === 'backlog' ? (

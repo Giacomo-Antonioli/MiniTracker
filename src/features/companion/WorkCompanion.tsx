@@ -47,7 +47,7 @@ function Checklist({ unitId, items, empty }: { unitId: string; items: CheckItem[
 }
 
 /** Full page next to the hobby desk: timers, what to do, and quick actions for one unit. */
-export function WorkCompanion() {
+export function WorkCompanion({ backTo }: { backTo?: { label: string; go: () => void } } = {}) {
   const { companion, closeCompanion, openCompanion, units, paintTimers, saveTimer, stopTimer, schemes, library, paints, loadPaints, loadLibrary, pipeline, supplies, saveSupply, addPhotos, saveUnit, clearTicks, companionTicks } = useStore()
   const unit = units.find((u) => u.id === companion?.unitId)
   const mode = companion?.mode ?? 'paint'
@@ -59,6 +59,7 @@ export function WorkCompanion() {
   const [moving, setMoving] = useState<ModelGroup | null>(null)
   const [notes, setNotes] = useState(unit?.notes ?? '')
   const [saved, setSaved] = useState('')
+  const [paused, setPaused] = useState(false)
   const scheme = unit?.schemeId ? [...schemes, ...library].find((s) => s.id === unit.schemeId) : undefined
 
   useEffect(() => {
@@ -99,7 +100,7 @@ export function WorkCompanion() {
     <div className="grid gap-4" aria-label={TITLE[mode]}>
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <button className="text-sm text-muted hover:text-accent" onClick={closeCompanion}>← Back</button>
+          <button className="text-sm text-muted hover:text-accent" onClick={backTo?.go ?? closeCompanion}>← Back{backTo ? ` to ${backTo.label}` : ''}</button>
           <h1 className="font-display text-2xl text-accent">{TITLE[mode]}</h1>
           <p className="text-muted">{unit.customName}{unit.factionName ? ` · ${unit.factionName}` : ''}</p>
         </div>
@@ -111,7 +112,17 @@ export function WorkCompanion() {
       <div className="grid gap-4 lg:grid-cols-2">
         <section className="panel grid content-start gap-2 p-4" aria-label="Timers">
           <h2 className="font-display text-lg">Timer</h2>
-          {mine.length > 0 && <ul className="grid gap-2">{mine.map((t) => <TimerRow key={t.id} t={t} now={now} />)}</ul>}
+          {mine.length > 0 && <ul className="grid gap-2">{mine.map((t) => <TimerRow key={t.id} t={t} now={now} onPaused={() => setPaused(true)} />)}</ul>}
+          {paused && !mine.some((t) => t.runningSince) && (
+            <div className="grid gap-2 rounded border border-accent/50 p-2 text-sm" role="status" aria-label="Paused">
+              <span>⏸ Paused and saved. Resume it any time from here, Home or the Companion tab.</span>
+              <div className="flex flex-wrap gap-2">
+                <button className="btn btn-primary" onClick={closeCompanion}>Pick another unit</button>
+                {backTo && <button className="btn" onClick={backTo.go}>← Back to {backTo.label}</button>}
+                <button className="btn" onClick={() => setPaused(false)}>Stay here</button>
+              </div>
+            </div>
+          )}
           {groups.length > 0 ? (
             <div className="flex flex-wrap items-center gap-2">
               <StageSelect label="Companion timer stage" value={stage} onChange={setStage} />

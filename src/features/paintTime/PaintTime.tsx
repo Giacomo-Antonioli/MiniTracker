@@ -97,7 +97,7 @@ function StartTimer({ onDone }: { onDone: () => void }) {
   )
 }
 
-export function TimerRow({ t, now }: { t: PaintTimer; now: string }) {
+export function TimerRow({ t, now, onPaused }: { t: PaintTimer; now: string; onPaused?: () => void }) {
   const { saveTimer, deleteTimer, stopTimer, openCompanion, companion } = useStore()
   const { group, stage } = useLabels()
   const running = !!t.runningSince
@@ -108,7 +108,7 @@ export function TimerRow({ t, now }: { t: PaintTimer; now: string }) {
         <span className={`font-mono text-xl ${running ? 'text-accent' : 'text-muted'}`}>{formatClock(elapsedMs(t, now))}{running ? '' : ' ⏸'}</span>
         <div className="flex gap-1">
           {running
-            ? <button className="btn" onClick={() => void saveTimer(pauseTimer(t, new Date().toISOString()))}>⏸ Pause</button>
+            ? <button className="btn" onClick={() => void saveTimer(pauseTimer(t, new Date().toISOString())).then(onPaused)}>⏸ Pause</button>
             : <button className="btn" onClick={() => void saveTimer(resumeTimer(t, new Date().toISOString()))}>▶ Resume</button>}
           <button className="btn btn-primary" onClick={() => void stopTimer(t.id)}>■ Stop</button>
           {!companion && <button className="btn" title="Painter companion" aria-label="Open painter companion" onClick={() => openCompanion('paint', t.targets[0].unitId, t.id)}>🎨</button>}
