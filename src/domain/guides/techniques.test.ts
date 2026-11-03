@@ -42,3 +42,7 @@ describe('technique details', () => {
     }
   })
 })
+
+it('every technique has a diagram', () => {
+  for (const t of TECHNIQUES_GUIDE) expect(t.detail?.diagram, t.id).toBeDefined()
+})

@@ -3,7 +3,7 @@
  * rewritten in our own words; the guides are linked as sources. Diagrams are drawn by MiniTracker.
  */
 
-export type DiagramId = 'light' | 'consistency' | 'wash' | 'layers' | 'edge' | 'drybrush' | 'glaze' | 'blend' | 'order'
+export type DiagramId = 'light' | 'consistency' | 'wash' | 'layers' | 'edge' | 'drybrush' | 'glaze' | 'blend' | 'order' | 'spray' | 'varnish' | 'contrast' | 'stipple' | 'chips' | 'lens' | 'freehand' | 'weathering'
 
 export interface TechniqueDetail {
   /** Step-by-step method. */
@@ -35,6 +35,7 @@ export const TECHNIQUE_DETAILS: Record<string, TechniqueDetail> = {
       { title: 'Golden Goblin Games: Priming your miniatures', url: 'https://goldengoblingames.com/painting-guide-priming' },
       { title: 'Spikey Bits: Hobby basics, priming 101', url: 'https://spikeybits.com/hobby-basics-priming-101/' },
     ],
+    diagram: 'spray',
   },
   zenithal: {
     how: [
@@ -97,6 +98,7 @@ export const TECHNIQUE_DETAILS: Record<string, TechniqueDetail> = {
       { title: 'Golden Goblin Games: Using the Citadel Contrast method', url: 'https://goldengoblingames.com/painting-guide-using-the-citadel-contrast-method' },
       { title: 'Wargamer: Contrast paint', url: 'https://www.wargamer.com/warhammer-40k/contrast-paint' },
     ],
+    diagram: 'contrast',
   },
   shade: {
     how: [
@@ -283,6 +285,7 @@ export const TECHNIQUE_DETAILS: Record<string, TechniqueDetail> = {
       { title: 'UrArtStudio: Stippling technique', url: 'https://urartstudio.com/painting-tips/stippling-technique/' },
       { title: 'Creative Twilight: Painting leather', url: 'https://creativetwilight.com/painting-leather-miniatures/' },
     ],
+    diagram: 'stipple',
   },
   sponge: {
     how: [
@@ -302,6 +305,7 @@ export const TECHNIQUE_DETAILS: Record<string, TechniqueDetail> = {
       { title: 'Camospecs: How to weathering', url: 'https://camospecs.com/articles/how-to/how-to-weathering/' },
       { title: 'The Army Painter: Chipping brushes and weathering', url: 'https://thearmypainter.com/blogs/explore/miniature-chipping-brushes-weathering' },
     ],
+    diagram: 'chips',
   },
   details: {
     how: [
@@ -321,6 +325,7 @@ export const TECHNIQUE_DETAILS: Record<string, TechniqueDetail> = {
       { title: 'Spikey Bits: Gemstones and lenses', url: 'https://spikeybits.com/gemstones-lenses-learn-to-paint-tutorial/' },
       { title: 'Tale of Painters: How to paint eyes more easily', url: 'https://taleofpainters.com/2021/01/tutorial-how-to-paint-eyes-more-easily-on-your-miniatures/' },
     ],
+    diagram: 'lens',
   },
   freehand: {
     how: [
@@ -340,6 +345,7 @@ export const TECHNIQUE_DETAILS: Record<string, TechniqueDetail> = {
       { title: 'Creative Twilight: Freehand', url: 'https://creativetwilight.com/freehand/' },
       { title: 'Spikey Bits: Black Templars freehand guide', url: 'https://spikeybits.com/nothing-is-impossible-black-templars-freehand-guide/' },
     ],
+    diagram: 'freehand',
   },
   weathering: {
     how: [
@@ -359,6 +365,7 @@ export const TECHNIQUE_DETAILS: Record<string, TechniqueDetail> = {
       { title: 'Dakka Dakka: Modelling FAQ, weathering', url: 'https://www.dakkadakka.com/wiki/en/Dakka_Modeling_FAQ:_Weathering' },
       { title: 'Spikey Bits: Rusted and weathered armour', url: 'https://spikeybits.com/rusted-and-weathered-armor-jack-of-clubs-hobby-tutorial/' },
     ],
+    diagram: 'weathering',
   },
   basing: {
     how: [
@@ -398,5 +405,6 @@ export const TECHNIQUE_DETAILS: Record<string, TechniqueDetail> = {
       { title: 'Goonhammer: How to use varnish', url: 'https://goonhammer.com/hobby-101-how-to-use-varnish-with-miniatures' },
       { title: 'Age of Miniatures: Best varnish for miniatures', url: 'https://ageofminiatures.com/best-varnish-for-miniatures/' },
     ],
+    diagram: 'varnish',
   },
 }
