@@ -18,6 +18,7 @@ import { missingForSchemes } from '../../domain/paints/missing'
 import { AddToShoppingButton } from '../shopping/AddToShoppingDialog'
 import { unitTag } from '../../domain/photos/naming'
 import { MoveDialog } from './MoveDialog'
+import { UnitStorage } from '../storage/Storage'
 import { QuickMove } from './QuickMove'
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
@@ -147,6 +148,8 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
           ))}
         </ul>
       </section>
+
+      <UnitStorage unit={unit} />
 
       <section className="grid gap-2 border-b border-line p-4" aria-label="Scheme">
         <div className="flex items-center justify-between gap-2">

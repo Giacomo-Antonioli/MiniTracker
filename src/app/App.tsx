@@ -20,9 +20,10 @@ import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeIm
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { readStartPage, useStore } from './store'
 import { HomePage } from '../features/home/HomePage'
+import { StoragePage } from '../features/storage/Storage'
 import { CompanionHub, WorkCompanion } from '../features/companion/WorkCompanion'
 
-type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'settings'
+type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'storage' | 'settings'
 
 const SOON: string[] = []
 
@@ -113,6 +114,7 @@ export default function App() {
         {nav('browse', 'Catalogue')}
         {nav('rules', 'Rules')}
         {nav('paints', 'Paints')}
+        {nav('storage', 'Storage')}
         {nav('supplies', lowSupplies ? `Supplies ⚠${lowSupplies}` : 'Supplies')}
         {nav('schemes', 'Schemes')}
         {nav('guides', 'Guides')}
@@ -142,6 +144,8 @@ export default function App() {
           <p className="text-muted">Loading…</p>
         ) : page === 'companion' ? (
           companion ? <WorkCompanion key={`${companion.mode}/${companion.unitId}`} backTo={from && PAGE_NAME[from] ? { label: PAGE_NAME[from]!, go: () => { useStore.getState().closeCompanion(); setPage(from); setFrom(null) } } : undefined} /> : <CompanionHub />
+        ) : page === 'storage' ? (
+          <StoragePage onOpenUnit={openUnit} />
         ) : page === 'home' ? (
           <HomePage onOpenUnit={openUnit} onGo={(p) => go(p)} onAddUnit={() => go('backlog')} />
         ) : page === 'backlog' ? (
