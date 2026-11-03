@@ -4,6 +4,11 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-03
+
+### Added
+- Box barcode scanner (#93): 📷 Scan box on Backlog, Shopping and Home (the Storage scanner reads barcodes too). Unknown boxes are looked up in Open Products Facts, with links to UPCitemdb and Barcode Spider; teach the app what's in the box once and it remembers. Known boxes show what you own, where it's stored, and tick it off the shopping list.
+
 ## [0.13.0] - 2026-11-03
 
 ### Added
@@ -239,7 +244,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.2...v0.12.0
 [0.11.2]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.1...v0.11.2
