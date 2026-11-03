@@ -13,6 +13,8 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // The scheme library chunk is ~2 MB; keep it in the offline cache (default limit is 2 MiB).
+      workbox: { maximumFileSizeToCacheInBytes: 5 * 1024 * 1024 },
       manifest: {
         name: 'MiniTracker',
         short_name: 'MiniTracker',

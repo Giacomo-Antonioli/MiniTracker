@@ -12,6 +12,8 @@ import type { RecipePayload } from './recipeImport'
 
 const ORDER: SchemeOrigin[] = ['official', 'community', 'personal']
 
+const PAGE = 60
+
 export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { openId?: string; payload?: RecipePayload; onPayloadUsed?: () => void; onOpenUnit?: (id: string) => void }) {
   const { schemes: mine, library, loadLibrary, paints, paintStock, units, pipelines, schemeDefaults, loadPaints, saveScheme, importSchemes } = useStore()
   const [showLibrary, setShowLibrary] = useState(true)
@@ -23,6 +25,10 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
   const [selectedId, setSelectedId] = useState<string | null>(openId ?? null)
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
   const [adding, setAdding] = useState(false)
+  // The library has hundreds of schemes: draw them a page at a time; new filters start again at one page.
+  const filterKey = JSON.stringify([text, faction, origin, stage, showLibrary])
+  const [more, setMore] = useState({ key: filterKey, n: PAGE })
+  const limit = more.key === filterKey ? more.n : PAGE
 
   useEffect(() => {
     if (!paints.length) void loadPaints()
@@ -35,7 +41,8 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
     return schemes
       .filter((s) => (!faction || s.factionName === faction) && (!origin || s.origin === origin) && (!stage || s.stage === stage))
       .filter((s) => words.every((w) => `${s.name} ${s.factionName ?? ''} ${s.tags.join(' ')}`.toLowerCase().includes(w)))
-      .sort((a, b) => ORDER.indexOf(a.origin) - ORDER.indexOf(b.origin) || a.name.localeCompare(b.name))
+      // Your own schemes first, then the library; each by origin, then name.
+      .sort((a, b) => Number(a.id.startsWith('lib/')) - Number(b.id.startsWith('lib/')) || ORDER.indexOf(a.origin) - ORDER.indexOf(b.origin) || a.name.localeCompare(b.name))
   }, [schemes, text, faction, origin, stage])
   const selected = [...mine, ...library].find((s) => s.id === selectedId)
   const usedBy = (id: string) => units.filter((u) => u.schemeId === id).length
@@ -99,7 +106,7 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
         </section>
 
         <ul className={`grid gap-2 overflow-y-auto pb-4 ${selected ? '' : 'grid-cols-[repeat(auto-fill,minmax(260px,1fr))]'}`} aria-label="Schemes">
-          {shown.map((s) => (
+          {shown.slice(0, limit).map((s) => (
             <SchemeCard
               key={s.id}
               s={s}
@@ -114,6 +121,11 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
             />
           ))}
         </ul>
+        {shown.length > limit && (
+          <button className="btn mx-auto" onClick={() => setMore({ key: filterKey, n: limit + PAGE })}>
+            Show more ({shown.length - limit} left)
+          </button>
+        )}
         {schemes.length === 0 && <p className="text-center text-muted">No schemes yet. Create one, browse the library, or import a scheme file from a friend.</p>}
         {schemes.length > 0 && shown.length === 0 && <p className="text-center text-muted">No schemes match these filters.</p>}
       </div>
