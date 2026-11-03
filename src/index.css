@@ -75,6 +75,8 @@ body {
 }
 
 .panel {
+  /* Grid items default to min-width: auto, so wide charts would push the card out. */
+  min-width: 0;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
