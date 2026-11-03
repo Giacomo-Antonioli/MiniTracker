@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useStore } from '../../app/store'
 import { modelsByStatus } from '../../domain/collection/ownedUnit'
 import { WISHLISTED } from '../../domain/collection/pipeline'
+import { TimerPanel } from '../paintTime/PaintTime'
 import { addCard, CARDS, DEFAULT_LAYOUT, hiddenCards, moveCard, optionOf, removeCard, setOption, setSize, type CardLayout, type CardSize } from '../../domain/home/layout'
 import { missingForSchemes } from '../../domain/paints/missing'
 import { totals } from '../../domain/shopping/shopping'
@@ -192,6 +193,8 @@ export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: st
           ),
         } : null
       }
+      case 'timers':
+        return { action: <Link onClick={stats()}>Stats →</Link>, content: <TimerPanel /> }
       case 'goals': {
         if (!goals.length) return null
         const rows = goals.map((g) => ({ g, p: goalProgress(g, units, events, pipeline, now) }))

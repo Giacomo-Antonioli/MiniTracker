@@ -17,6 +17,7 @@ import { DEFAULT_LAYOUT, parseLayout, type CardLayout } from '../domain/home/lay
 import { parseGames, type Game } from '../domain/games/games'
 import { parseWahapedia, type StratagemData } from '../domain/stratagems/stratagems'
 import { parseGoals, type Goal } from '../domain/goals/goals'
+import { parseSessions, parseTimers, pruneTimers, stopTimer as endTimer, type PaintSession, type PaintTimer } from '../domain/paintTime/paintTime'
 import { parsePurchases, type Purchase } from '../domain/costs/costs'
 import { becameLow, lowPaints, parseSupplies, supplyItem, type Supply } from '../domain/supplies/supplies'
 import type { ArmyList, EditionKey } from '../domain/lists/types'
@@ -185,6 +186,15 @@ interface State {
   goals: Goal[]
   saveGoal(g: Goal): Promise<void>
   deleteGoal(id: string): Promise<void>
+  /** Painting time (#89): logged sessions and running or paused timers; saved in the backup. */
+  paintSessions: PaintSession[]
+  paintTimers: PaintTimer[]
+  saveSession(s: PaintSession): Promise<void>
+  deleteSession(id: string): Promise<void>
+  saveTimer(t: PaintTimer): Promise<void>
+  deleteTimer(id: string): Promise<void>
+  /** Stops a timer and logs its time as sessions split over its groups. */
+  stopTimer(id: string): Promise<void>
   savePurchase(p: Purchase): Promise<void>
   deletePurchase(id: string): Promise<void>
   /** Currency symbol for prices, e.g. €. */
@@ -337,7 +347,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals] = await Promise.all([
+    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals, paintSessions, paintTimers] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
@@ -357,6 +367,8 @@ export const useStore = create<State>((set, get) => ({
       settingsRepo.getValue<unknown>('purchases', []),
       settingsRepo.getValue<string>('currency', '€'),
       settingsRepo.getValue<unknown>('goals', []),
+      settingsRepo.getValue<unknown>('paintSessions', []),
+      settingsRepo.getValue<unknown>('paintTimers', []),
     ])
     const catalogue = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
     set({
@@ -378,6 +390,8 @@ export const useStore = create<State>((set, get) => ({
       supplies: parseSupplies(supplies),
       purchases: parsePurchases(purchases),
       goals: parseGoals(goals),
+      paintSessions: parseSessions(paintSessions),
+      paintTimers: pruneTimers(parseTimers(paintTimers), units),
       currency: typeof currency === 'string' && currency ? currency : '€',
       ready: true,
     })
@@ -610,6 +624,36 @@ export const useStore = create<State>((set, get) => ({
     const list = get().goals.filter((x) => x.id !== id)
     set({ goals: list })
     await settingsRepo.setValue('goals', list)
+  },
+  paintSessions: [],
+  paintTimers: [],
+  async saveSession(x) {
+    const list = get().paintSessions.some((y) => y.id === x.id) ? get().paintSessions.map((y) => (y.id === x.id ? x : y)) : [...get().paintSessions, x]
+    set({ paintSessions: list })
+    await settingsRepo.setValue('paintSessions', list)
+  },
+  async deleteSession(id) {
+    const list = get().paintSessions.filter((y) => y.id !== id)
+    set({ paintSessions: list })
+    await settingsRepo.setValue('paintSessions', list)
+  },
+  async saveTimer(t) {
+    const list = get().paintTimers.some((y) => y.id === t.id) ? get().paintTimers.map((y) => (y.id === t.id ? t : y)) : [...get().paintTimers, t]
+    set({ paintTimers: list })
+    await settingsRepo.setValue('paintTimers', list)
+  },
+  async deleteTimer(id) {
+    const list = get().paintTimers.filter((y) => y.id !== id)
+    set({ paintTimers: list })
+    await settingsRepo.setValue('paintTimers', list)
+  },
+  async stopTimer(id) {
+    const t = get().paintTimers.find((y) => y.id === id)
+    if (!t) return
+    const list = [...get().paintSessions, ...endTimer(t, ctx())]
+    set({ paintSessions: list })
+    await settingsRepo.setValue('paintSessions', list)
+    await get().deleteTimer(id)
   },
   purchases: [],
   async savePurchase(p) {
