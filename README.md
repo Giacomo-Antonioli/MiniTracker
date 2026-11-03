@@ -15,52 +15,43 @@ No account, no server: your collection stays in your browser. Install it from th
 
 ## Features
 
-**v0.1**
+**Collection**
 
-- **Units with model groups.** "6 built + 4 painted" in one unit, each group with its own loadout and magnetised weapon slots.
-- **Painting pipeline.** Move models through your stages (sprue → built → primed → basecoated → painted → based → varnished). Rename, reorder or add your own stages.
-- **History.** Every move is saved with date, note and direction, so going back (stripping, repainting) is recorded too.
-- **Backlog dashboard.** Overall painted progress, models per stage, search and filters by faction, stage, state, favourites and "next up".
-- **Unit states.** Active, on hold, sold, traded, gifted, lost.
-- **Tutorials and notes.** Keep build and painting guide links on each unit.
-- **Backup.** Export everything to one JSON file; restore it on any device.
-- **Themes.** *Grimdark* (modern dark) and *Forum 2005* (old-school fantasy forum).
+- **Home dashboard.** Pile size, painted this month, streak, finish estimate, the units to continue, a year activity calendar, records, recent moves, games, shopping and running-low items. Reorder, resize, add or remove cards (✎ Customise).
+- **Units with model groups.** "6 built + 4 painted" in one unit, each group with its own loadout and magnetised weapon slots; Wishlisted models you don't own yet.
+- **Painting pipeline.** Move models through your stages (wishlisted → sprue → built → primed → basecoated → painted → based → varnished), with a quick move on each row. Rename, reorder or add stages.
+- **History and photos.** Every move is saved with date, note and photo; a photo timeline per unit shows it from bare plastic to finished.
+- **Backlog.** Grouped table with stage bars, sortable and hideable columns, filters, side panel and unit page.
+- **Stats.** Models painted per month or week, pile in vs out, pile size and age, points painted, where the work goes, time per stage, painted by faction and role, spending, paint usage, records and game results.
 
-**New in v0.8**
+**Catalogue and rules**
 
-Games, game stats and match companion
+- **Unit catalogue.** Every Warhammer 40,000 datasheet (10th and/or 11th edition) from BSData, downloaded and converted on your device: sizes, points, stats, weapons, abilities, wargear.
+- **Rules.** Every core and faction rule explained, in the catalogue and on a searchable Rules page.
+- **Stratagems.** Import Wahapedia's stratagem and detachment-rule files once; they show on the army PDF and in the match companion.
 
-**New in v0.7**
+**Armies and games**
 
-Stratagem cards, running-low paints and supplies, photo timeline
-
-**New in v0.6**
-
-Home dashboard, Stats page and customisable cards
-
-**New in v0.2**
-
-- **Unit catalogue.** Download every Warhammer 40,000 datasheet (10th and/or 11th edition) (unit sizes, points, keywords, wargear, abilities) from BSData in Settings → Catalogue data. The data is downloaded and converted on your device; MiniTracker never hosts it.
-- **Searchable unit picker.** Type to find the exact datasheet when adding a unit; faction, size and live points fill in.
-- **Catalogue browser.** Every unit with points by size, abilities, wargear and keywords, plus how many you own.
-
-**New in v0.3**
-
-- **Rules.** Every core and faction rule and ability explained, in the catalogue and on a searchable Rules page.
-- **Schemes.** Official, community and personal paint schemes with variants; a bundled library of community recipes (credited); "Add from link" and a **Send to MiniTracker** bookmarklet that turns any recipe page you're reading into a draft scheme.
-- **Paints.** ~1,500 Citadel, Army Painter, Vallejo and AK paints with colour swatches; inventory with stages (wishlist → in use → running low → empty), pots, price, shop, storage location, barcode, rating and notes; custom paints; CSV import/export.
-
-**New in v0.5**
-
-- **Wargear loadouts.** Set the models and weapons of each list unit; starts from your linked models or the datasheet default, checked against the datasheet limits, and read from imported rosters.
-
-**New in v0.4**
-
-- **Army lists.** Build lists for 10th or 11th edition, Combat Patrol to Onslaught, from legal units of your faction; owned / partly owned / missing per unit, painted progress, "Add all my units".
-- **Rule checks.** Points, unit limits per battle size, Characters and Warlord, detachments and detachment points, enhancements, Leaders — read from BSData for each edition. Lists that break rules can still be saved; problems are flagged.
-- **Buy list.** What you still need for a list, as text or a printable PDF.
+- **Army lists.** Build lists for 10th or 11th edition from legal units of your faction: detachments, enhancements, one Warlord (only Characters), Leaders, wargear loadouts. Owned / partly owned / missing per unit and painted progress.
+- **Rule checks.** Points, unit limits, detachment points, enhancements, Leaders and Warlord, read from BSData for each edition; hover a warning for the rule behind it.
+- **Army PDF.** Roster, datasheet cards (stats, weapons the loadout carries, abilities), a legend of every rule and keyword, and stratagem cards; owned/painted counts only if you ask.
+- **Buy list.** What you still need for a list (models and scheme paints), as text, PDF or straight to the shopping list.
 - **Import / export.** BattleScribe and NewRecruit rosters (`.rosz`), GW-app / NewRecruit text lists, and MiniTracker files.
-- **Datasheets on your units.** Stats, weapons, abilities, rules and wargear on every backlog unit.
+- **Games.** Live score board (primary and secondary per round, CP, turns, units destroyed on both sides, opponent's list), history and results per list and opponent faction.
+- **Match companion.** Phone-friendly screen for a game: phase bar, stratagems you can use now, abilities for the phase, wounds per model, chess clock.
+
+**Paints and shopping**
+
+- **Schemes.** Official, community and personal paint schemes with variants, a credited library of community recipes, and a **Send to MiniTracker** bookmarklet.
+- **Paints.** ~1,500 Citadel, Army Painter, Vallejo and AK paints with swatches; inventory with stages, pots, price, shop and notes; CSV import/export; paints missing for your schemes.
+- **Shopping lists.** One main list plus your own lists; models, paints and anything else, with shop and price; ticking a kit bought moves its models into your collection.
+- **Supplies.** Primer, glue, brushes… with stock and an alert level. Paints marked running low and supplies at their alert level go on the shopping list.
+
+**Everywhere**
+
+- **Backup.** Everything (photos included) in one file; restore it on any device.
+- **Themes.** *Grimdark* (modern dark) and *Forum 2005* (old-school fantasy forum).
+- **Private.** Your collection, lists and games stay in your browser; there is no account or server.
 
 | Forum 2005 theme | Moving models |
 |---|---|
@@ -68,16 +59,9 @@ Home dashboard, Stats page and customisable cards
 
 ## Roadmap
 
-| Version | Focus | Status |
-|---|---|---|
-| [v0.1](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/1) | Backlog tracker | ✅ released |
-| [v0.2](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/2) | Warhammer 40k catalogue from BSData, searchable unit picker, catalogue browser | ✅ released |
-| [v0.3](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/3) | Paint inventory (pre-filled Citadel, Army Painter, Vallejo, Green Stuff World…), paint schemes and recipes, photos | ✅ released |
-| [v0.4](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/4) | Army builder from owned models: points, rules, "what's missing", import/export BattleScribe `.rosz` and text lists | ✅ released |
-| [v0.5](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/5) | Wargear loadouts (v0.5.0 ✅), shopping list, game tracking, sharing via files | 🔨 in progress |
-| [v0.6](https://github.com/Giacomo-Antonioli/MiniTracker/milestone/6) | Desktop app (Tauri), Google Drive sync | planned |
+Released: collection tracker (v0.1), catalogue (v0.2), paints, schemes and photos (v0.3), army builder (v0.4), loadouts and shopping (v0.5), Home and Stats (v0.6), stratagems, supplies and photo timeline (v0.7), games and match companion (v0.8). See the [changelog](CHANGELOG.md).
 
-Later ideas: QR/NFC tags under bases linking each mini to its page ([#10](https://github.com/Giacomo-Antonioli/MiniTracker/issues/10)), storage boxes with pick and put-back lists ([#18](https://github.com/Giacomo-Antonioli/MiniTracker/issues/18)), Age of Sigmar and Kill Team.
+Next, from the [open issues](https://github.com/Giacomo-Antonioli/MiniTracker/issues): magnet editor ([#32](https://github.com/Giacomo-Antonioli/MiniTracker/issues/32)), closest paint match ([#30](https://github.com/Giacomo-Antonioli/MiniTracker/issues/30)), cost tracking ([#94](https://github.com/Giacomo-Antonioli/MiniTracker/issues/94)), Kanban board ([#91](https://github.com/Giacomo-Antonioli/MiniTracker/issues/91)), painting time ([#89](https://github.com/Giacomo-Antonioli/MiniTracker/issues/89)), storage boxes ([#18](https://github.com/Giacomo-Antonioli/MiniTracker/issues/18)). Later: more paint brands, barcode scan, share links, a buy optimiser, Kill Team / Age of Sigmar, QR/NFC tags, phone layout.
 
 ## How it works
 
@@ -132,6 +116,7 @@ Bug reports and ideas are welcome as [issues](https://github.com/Giacomo-Antonio
 - Paint list: [minipainter](https://github.com/ArturSkowronski/minipainter) by Artur Skowronski (MIT), see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 - Scheme library: recipe facts (areas, steps, paints) from community authors on [Paint Pad](https://paintpad.app) and [Tale of Painters](https://taleofpainters.com), each credited and linked to its source inside the app. No text or images are copied. Authors who want a recipe removed can [open an issue](https://github.com/Giacomo-Antonioli/MiniTracker/issues/new/choose). Rebuilt with `npm run schemes:scrape` (polite: identifies itself, waits between requests, respects robots.txt and sites that block bots).
 - Unit and points data: the community-maintained [BSData](https://github.com/BSData) files ([wh40k-10e](https://github.com/BSData/wh40k-10e)). MiniTracker does not include or redistribute this data: each user's browser downloads it from BSData. A [daily check](.github/workflows/bsdata-check.yml) makes sure the download still works.
+- Stratagems and detachment rules: [Wahapedia](https://wahapedia.ru)'s data export. Not included in MiniTracker: each user downloads the files and imports them. Powered by Wahapedia.
 
 ## License
 
