@@ -12,6 +12,7 @@ import { SchemesPage } from '../features/schemes/SchemesPage'
 import { StatsPage } from '../features/stats/StatsPage'
 import { SuppliesPage } from '../features/supplies/SuppliesPage'
 import { GoalsPage } from '../features/goals/GoalsPage'
+import { GuidesPage } from '../features/guides/GuidesPage'
 import { isLow } from '../domain/supplies/supplies'
 import { GamesPage } from '../features/games/GamesPage'
 import { ShoppingPage } from '../features/shopping/ShoppingPage'
@@ -20,7 +21,7 @@ import { SettingsPage, type SettingsSection } from '../features/settings/Setting
 import { readStartPage, useStore } from './store'
 import { HomePage } from '../features/home/HomePage'
 
-type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'games' | 'settings'
+type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'guides' | 'games' | 'settings'
 
 const SOON: string[] = []
 
@@ -97,6 +98,7 @@ export default function App() {
         {nav('paints', 'Paints')}
         {nav('supplies', lowSupplies ? `Supplies ⚠${lowSupplies}` : 'Supplies')}
         {nav('schemes', 'Schemes')}
+        {nav('guides', 'Guides')}
         {nav('shopping', 'Shopping')}
         {nav('stats', 'Stats')}
         {nav('goals', 'Goals')}
@@ -142,6 +144,8 @@ export default function App() {
           <SuppliesPage />
         ) : page === 'games' ? (
           <GamesPage />
+        ) : page === 'guides' ? (
+          <GuidesPage />
         ) : page === 'goals' ? (
           <GoalsPage />
         ) : page === 'stats' ? (
