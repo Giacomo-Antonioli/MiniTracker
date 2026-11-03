@@ -20,17 +20,20 @@ export interface MergeOptions<T> {
   /** False: deletions from the other device are ignored. */
   applyDeletions: boolean
   key?: (x: T) => string
+  /** Field holding the edit time (default updatedAt). */
+  stamp?: (x: T) => string | undefined
 }
 
-type Stamped = { updatedAt?: string }
+type Stamped = object
 const KEEP_DAYS = 90
 
 const idOf = (x: unknown) => (x as { id: string }).id
-const stamp = (x: Stamped) => x.updatedAt ?? ''
+const defaultStamp = (x: object) => (x as { updatedAt?: string }).updatedAt
 
 /** Newest edit wins per record; on a tie the local copy stays. Summary counts changes to local. */
 export function mergeRecords<T extends Stamped>(local: T[], remote: T[], opts: MergeOptions<T>): { records: T[]; summary: MergeSummary } {
   const key = opts.key ?? idOf
+  const stamp = (x: T) => (opts.stamp ?? defaultStamp)(x) ?? ''
   const deletedAt = new Map<string, string>()
   if (opts.applyDeletions) {
     for (const t of opts.tombstones) if ((deletedAt.get(t.id) ?? '') < t.deletedAt) deletedAt.set(t.id, t.deletedAt)
