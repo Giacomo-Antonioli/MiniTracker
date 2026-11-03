@@ -62,8 +62,9 @@ const DIAGRAMS: Record<DiagramId, { caption: string; svg: React.ReactNode }> = {
         <path d="M10,40 L60,40 L70,80 L100,80 L110,40 L160,40 L170,80 L200,80 L210,40 L230,40 L230,110 L10,110 Z" fill="#8a8f98" />
         <path d="M66,64 L70,80 L100,80 L104,64 Z M166,64 L170,80 L200,80 L204,64 Z" fill="#2a2f3a" />
         <path d="M10,40 L60,40 M110,40 L160,40 M210,40 L230,40" stroke="#2a2f3a" strokeWidth="1.5" opacity="0.4" />
-        <text x="85" y="30" textAnchor="middle" fill={ink} fontSize="10">recess: shade pools here</text>
-        <text x="35" y="30" textAnchor="middle" fill={ink} fontSize="10">thin</text>
+        <text x="120" y="100" textAnchor="middle" fill="#1b1e24" fontSize="10">raised areas keep only a thin film</text>
+        <text x="120" y="12" textAnchor="middle" fill={ink} fontSize="10">shade pools in the recesses</text>
+        <path d="M95,15 L85,58 M145,15 L185,58" stroke={ink} strokeWidth="1" opacity="0.6" />
       </>
     ),
   },
