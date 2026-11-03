@@ -888,6 +888,11 @@
         "faction": "Tyranids"
       }
     ],
-    "basesPage": "https://eavy-archive.com/40k/"
+    "basesPage": "https://eavy-archive.com/40k/",
+    "terrain": [
+      "battlezone-mechanicus",
+      "adepta-sororitas-battle-sanctum",
+      "boarding-actions"
+    ]
   }
 }

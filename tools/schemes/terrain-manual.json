@@ -1,0 +1,43 @@
+{
+  "note": "Terrain recipes written for MiniTracker (own words, common Citadel paints). Paint names must exist in the paint list.",
+  "terrain": [
+    { "id": "imperial-ruins", "name": "Grey Imperial ruins", "kinds": ["stone", "walls"], "steps": [
+      ["prime", ["Mechanicus Standard Grey"], "Spray the whole piece."],
+      ["shade", ["Nuln Oil"], "Into the brickwork and cracks; it does not need to be neat."],
+      ["drybrush", ["Dawnstone"], "Large, soft drybrush over everything."],
+      ["drybrush", ["Administratum Grey"], "Lighter, on edges and top surfaces."],
+      ["details", ["Rhinox Hide"], "Pick out some wooden beams and doors."],
+      ["glaze", ["Agrax Earthshade"], "Low down on the walls, for dirt."]
+    ] },
+    { "id": "rusted-metal", "name": "Rusted metal", "kinds": ["metal", "rust"], "steps": [
+      ["prime", ["Leadbelcher"], ""],
+      ["shade", ["Nuln Oil"], ""],
+      ["sponge", ["Skrag Brown"], "Patches of rust on panels and around bolts."],
+      ["drybrush", ["Ryza Rust"], "Over the rust patches."],
+      ["glaze", ["Fuegan Orange"], "Streaks running down from bolts and edges."],
+      ["edge highlight", ["Stormhost Silver"], "A few bright scratches on edges."]
+    ] },
+    { "id": "weathered-wood", "name": "Weathered wood", "kinds": ["wood"], "steps": [
+      ["basecoat", ["Rhinox Hide"], ""],
+      ["drybrush", ["Gorthor Brown"], "Along the grain."],
+      ["drybrush", ["Baneblade Brown"], "Lighter, on edges and plank ends."],
+      ["shade", ["Agrax Earthshade"], "In the gaps between planks."],
+      ["details", ["Leadbelcher"], "Nails and metal bands."]
+    ] },
+    { "id": "sci-fi-panels", "name": "Sci-fi panels", "kinds": ["metal", "walls", "floor"], "steps": [
+      ["prime", ["Abaddon Black"], ""],
+      ["basecoat", ["Dark Reaper"], "Spray or big brush over the panels."],
+      ["recess shade", ["Nuln Oil"], "In the panel lines."],
+      ["edge highlight", ["Thunderhawk Blue"], "Panel edges."],
+      ["details", ["Averland Sunset"], "Hazard stripes or markings."],
+      ["sponge", ["Leadbelcher"], "A few chips on edges and corners."]
+    ] },
+    { "id": "crystal-ice", "name": "Ice crystals", "kinds": ["glow", "ice"], "steps": [
+      ["prime", ["Grey Seer"], ""],
+      ["contrast", ["Talassar Blue"], "Thin it with Contrast Medium so the bottom stays dark and the tips light."],
+      ["drybrush", ["Blue Horror"], "On the facets."],
+      ["edge highlight", ["White Scar"], "Sharp edges and tips."],
+      ["varnish", ["Ardcoat"], "Gloss, so it looks like ice."]
+    ] }
+  ]
+}
