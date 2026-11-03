@@ -5,7 +5,7 @@ import type { ModelGroup } from '../../domain/collection/types'
 import { WISHLISTED } from '../../domain/collection/pipeline'
 import { newTimer, pauseOthers, resumeTimer, timersForUnit } from '../../domain/paintTime/paintTime'
 import { MoveDialog } from '../backlog/MoveDialog'
-import { StageSelect, TimerRow, useLabels, useTick } from '../paintTime/PaintTime'
+import { StageSelect, TimerPanel, TimerRow, useLabels, useTick } from '../paintTime/PaintTime'
 
 const TITLE: Record<CompanionMode, string> = { paint: '🎨 Painter companion', build: '🔨 Builder companion' }
 
@@ -226,6 +226,50 @@ export function WorkCompanion() {
           }}
         />
       )}
+    </div>
+  )
+}
+
+/** The Companion tab with nothing open: pick a unit and Painter or Builder, or continue from a timer. */
+export function CompanionHub() {
+  const { units, openCompanion, pipeline } = useStore()
+  const [mode, setMode] = useState<CompanionMode>('paint')
+  const [q, setQ] = useState('')
+  const stage = (id: string) => pipeline.stages.find((s) => s.id === id)?.name ?? id
+  const shown = units
+    .filter((u) => u.lifecycle === 'active' && u.groups.some((g) => g.status !== WISHLISTED) && u.customName.toLowerCase().includes(q.toLowerCase()))
+    .sort((a, b) => Number(b.nextUp) - Number(a.nextUp) || a.customName.localeCompare(b.customName))
+  return (
+    <div className="grid gap-4">
+      <header className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="font-display text-2xl text-accent">Companion</h1>
+        <div className="flex overflow-hidden rounded border border-line" role="group" aria-label="Companion mode">
+          {(['paint', 'build'] as const).map((m) => (
+            <button key={m} aria-pressed={mode === m} className={`px-3 py-1 ${mode === m ? 'bg-accent text-accent-fg' : 'hover:bg-panel-2'}`} onClick={() => setMode(m)}>{TITLE[m]}</button>
+          ))}
+        </div>
+      </header>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <section className="panel grid content-start gap-2 p-4" aria-label="Pick a unit">
+          <h2 className="font-display text-lg">Pick a unit</h2>
+          <input className="input" placeholder="Search units…" aria-label="Search companion units" value={q} onChange={(e) => setQ(e.target.value)} />
+          <ul className="grid max-h-[60vh] gap-1 overflow-auto">
+            {shown.map((u) => (
+              <li key={u.id}>
+                <button className="w-full rounded px-2 py-1 text-left hover:bg-panel-2" onClick={() => openCompanion(mode, u.id)}>
+                  {u.nextUp ? '⏭ ' : ''}{u.customName}
+                  <span className="text-sm text-muted"> · {u.groups.filter((g) => g.status !== WISHLISTED).map((g) => `${g.count}× ${stage(g.status)}`).join(', ')}</span>
+                </button>
+              </li>
+            ))}
+            {!shown.length && <li className="text-sm text-muted">No units found</li>}
+          </ul>
+        </section>
+        <section className="panel grid content-start gap-2 p-4" aria-label="Saved timers">
+          <h2 className="font-display text-lg">Timers</h2>
+          <TimerPanel />
+        </section>
+      </div>
     </div>
   )
 }

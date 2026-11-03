@@ -20,15 +20,16 @@ import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeIm
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { readStartPage, useStore } from './store'
 import { HomePage } from '../features/home/HomePage'
-import { WorkCompanion } from '../features/companion/WorkCompanion'
+import { CompanionHub, WorkCompanion } from '../features/companion/WorkCompanion'
 
-type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'guides' | 'games' | 'settings'
+type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'settings'
 
 const SOON: string[] = []
 
 export default function App() {
   const { ready, load, theme } = useStore()
   const companion = useStore((s) => s.companion)
+  const timing = useStore((s) => s.paintTimers.some((t) => t.runningSince))
   const lowSupplies = useStore((s) => s.supplies.filter(isLow).length)
   const liveGame = useStore((s) => s.games.some((g) => g.status === 'live'))
   // A recipe sent by the bookmarklet arrives in the URL (#recipe=…): start on Schemes with it.
@@ -63,6 +64,11 @@ export default function App() {
     if (location.hash.startsWith('#recipe=') || location.hash.startsWith(SHARE_HASH)) history.replaceState(null, '', location.pathname + location.search)
   }, [])
 
+  // Opening a companion from anywhere shows it under its own tab.
+  useEffect(() => {
+    if (companion) setPage('companion')
+  }, [companion])
+
   useEffect(() => {
     void load()
   }, [load])
@@ -72,7 +78,7 @@ export default function App() {
   }, [theme])
 
   const go = (p: Page, s?: SettingsSection) => {
-    useStore.getState().closeCompanion()
+    if (p !== 'companion') useStore.getState().closeCompanion()
     setPage(p)
     setSection(s)
     setDatasheetId(undefined)
@@ -103,6 +109,7 @@ export default function App() {
         {nav('schemes', 'Schemes')}
         {nav('guides', 'Guides')}
         {nav('shopping', 'Shopping')}
+        {nav('companion', timing ? 'Companion ●' : 'Companion')}
         {nav('stats', 'Stats')}
         {nav('goals', 'Goals')}
         {nav('games', liveGame ? 'Games ●' : 'Games')}
@@ -125,8 +132,8 @@ export default function App() {
         {ready && shared && <SharedSchemeBanner token={shared} onDone={(id) => { setShared(null); if (id) openScheme(id) }} />}
         {!ready ? (
           <p className="text-muted">Loading…</p>
-        ) : companion ? (
-          <WorkCompanion key={`${companion.mode}/${companion.unitId}`} />
+        ) : page === 'companion' ? (
+          companion ? <WorkCompanion key={`${companion.mode}/${companion.unitId}`} /> : <CompanionHub />
         ) : page === 'home' ? (
           <HomePage onOpenUnit={openUnit} onGo={(p) => go(p)} onAddUnit={() => go('backlog')} />
         ) : page === 'backlog' ? (
