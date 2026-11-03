@@ -152,6 +152,9 @@ function Header({ list, cat, onBack, onSave, onDelete }: { list: ArmyList; cat?:
       {printAsk && cat && (
         <div className="relative">
           <ArmyPrintDialog
+            list={list}
+            cat={cat}
+            onSave={onSave}
             onCancel={() => setPrintAsk(false)}
             onPrint={(o) => {
               setPrintAsk(false)

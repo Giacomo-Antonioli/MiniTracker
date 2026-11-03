@@ -50,7 +50,52 @@ export function CataloguePage() {
           />
         </label>
       </section>
+      <StratagemImport />
     </div>
+  )
+}
+
+const WAHA = 'https://wahapedia.ru/wh40k11ed'
+
+/** Stratagems can't be downloaded by the app (Wahapedia sends no CORS headers): you download the CSVs and pick them here. */
+function StratagemImport() {
+  const { stratagemData: data, importStratagems, removeStratagems } = useStore()
+  const [error, setError] = useState('')
+  return (
+    <section className="panel grid gap-2 p-4" aria-label="Stratagems">
+      <h3 className="font-semibold">Stratagems (Wahapedia)</h3>
+      <p className="text-sm text-muted">
+        For stratagem cards in the army PDF. Download{' '}
+        <a className="underline hover:text-accent" href={`${WAHA}/Stratagems.csv`} target="_blank" rel="noreferrer">Stratagems.csv</a> and, for detachment rules,{' '}
+        <a className="underline hover:text-accent" href={`${WAHA}/Detachment_abilities.csv`} target="_blank" rel="noreferrer">Detachment_abilities.csv</a>, then choose them here. Data powered by{' '}
+        <a className="underline hover:text-accent" href={`${WAHA}/the-rules/data-export`} target="_blank" rel="noreferrer">Wahapedia</a>.
+      </p>
+      {data && (
+        <p className="text-sm" role="status">
+          {data.stratagems.length} stratagems, {data.detachmentRules.length} detachment rules · imported {new Date(data.importedAt).toLocaleDateString()}
+        </p>
+      )}
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="btn w-fit">
+          {data ? 'Import again…' : 'Choose CSV files…'}
+          <input
+            type="file"
+            multiple
+            accept=".csv"
+            aria-label="Stratagem files"
+            className="sr-only"
+            onChange={(e) => {
+              const files = [...(e.target.files ?? [])]
+              e.target.value = ''
+              setError('')
+              if (files.length) importStratagems(files).catch((err: Error) => setError(err.message))
+            }}
+          />
+        </label>
+        {data && <button className="btn btn-danger" onClick={() => void removeStratagems()}>Remove</button>}
+      </div>
+      {error && <p className="text-sm text-danger" role="alert">{error}</p>}
+    </section>
   )
 }
 

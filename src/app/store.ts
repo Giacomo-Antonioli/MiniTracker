@@ -14,6 +14,7 @@ import { newStock } from '../domain/paints/inventory'
 import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Catalogue } from '../domain/catalogue/types'
 import { DEFAULT_LAYOUT, parseLayout, type CardLayout } from '../domain/home/layout'
+import { parseWahapedia, type StratagemData } from '../domain/stratagems/stratagems'
 import type { ArmyList, EditionKey } from '../domain/lists/types'
 import { addItems, newList, syncWishlisted, withoutList } from '../domain/shopping/shopping'
 import type { NewShopItem, ShopItem, ShopList } from '../domain/shopping/types'
@@ -168,6 +169,10 @@ interface State {
   loadLibrary(): Promise<void>
   /** Default scheme per faction name. */
   schemeDefaults: Record<string, string>
+  /** Stratagems and detachment rules imported from Wahapedia (#98); null until imported. */
+  stratagemData: StratagemData | null
+  importStratagems(files: File[]): Promise<void>
+  removeStratagems(): Promise<void>
   /** Cards on Home, in order, with sizes (saved in the backup). */
   homeLayout: CardLayout[]
   saveHomeLayout(l: CardLayout[]): Promise<void>
@@ -306,7 +311,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout] = await Promise.all([
+    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, stratagemData] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
@@ -320,6 +325,7 @@ export const useStore = create<State>((set, get) => ({
       listRepo.list(),
       shopRepo.load(),
       settingsRepo.getValue<CardLayout[] | null>('homeLayout', null),
+      settingsRepo.getValue<StratagemData | null>('stratagems', null),
     ])
     const catalogue = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
     set({
@@ -336,6 +342,7 @@ export const useStore = create<State>((set, get) => ({
       shopItems: shopping.items,
       shopLists: shopping.lists,
       homeLayout: homeLayout ? parseLayout(JSON.stringify(homeLayout)) : DEFAULT_LAYOUT,
+      stratagemData,
       ready: true,
     })
     if (get().paints.length) await get().loadPaints()
@@ -533,6 +540,19 @@ export const useStore = create<State>((set, get) => ({
   schemes: [],
   schemeDefaults: {},
   homeLayout: DEFAULT_LAYOUT,
+  stratagemData: null,
+  async importStratagems(files) {
+    const data = parseWahapedia(await Promise.all(files.map((f) => f.text())), ctx().now)
+    // A file of one kind keeps the other kind from the earlier import.
+    const old = get().stratagemData
+    const merged = { ...data, stratagems: data.stratagems.length ? data.stratagems : old?.stratagems ?? [], detachmentRules: data.detachmentRules.length ? data.detachmentRules : old?.detachmentRules ?? [] }
+    await settingsRepo.setValue('stratagems', merged)
+    set({ stratagemData: merged })
+  },
+  async removeStratagems() {
+    await settingsRepo.setValue('stratagems', null)
+    set({ stratagemData: null })
+  },
   async saveHomeLayout(l) {
     set({ homeLayout: l })
     await settingsRepo.setValue('homeLayout', l)
