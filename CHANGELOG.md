@@ -4,8 +4,12 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-11-03
+
 ### Added
 - Backlog board (#91): a Table | Board switch on the Backlog. One column per painting stage (your custom stages too), one card per group of models, so a unit split across stages shows up in each. Drag a card to another stage, or use its "Move…" menu (works on touch); both open the usual Move dialog, so you can move only some models and add a date, note or photo. The view is remembered.
+- Painting time (#89): start a timer on Home for one unit or a batch of model groups; pause and resume (paused timers are saved, also across days); Stop logs the time, split over the groups by number of minis. Add or edit sessions by hand. Stats › Painting time shows hours per month, by army, unit and stage.
+- Companion tab: a Painter and a Builder companion per unit, opened from the tab, the unit page, Backlog rows, Kanban cards or a timer. Both have the unit's timers (switch between saved timers, Pick another unit pauses the running one), Done → next stage (also logs the time), progress photo and notes. Painter: scheme steps checklist in painting order with paints and technique tips. Builder: wargear and magnets checklist, build links and supplies with "Used one".
 
 ## [0.11.2] - 2026-11-03
 
@@ -228,7 +232,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.2...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.2...v0.12.0
 [0.11.2]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.1...v0.11.2
 [0.11.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.10.0...v0.11.0
