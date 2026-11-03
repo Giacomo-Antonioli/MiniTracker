@@ -17,6 +17,13 @@ export function terrainKinds(text: string): string[] {
 
 /** How to paint terrain: what several published guides agree on, in our own words. */
 export const TERRAIN_GUIDE: { title: string; points: string[] }[] = [
+  { title: 'Build and lay out', points: [
+    'Cheap materials work: XPS foam for rocks and hills, cardboard and coffee stirrers for buildings, cork for rubble.',
+    'Seal foam with PVA or a brush-on primer before any spray: spray solvents melt foam.',
+    'Build in batches to save time and keep a matching look across the table.',
+    'Mix big pieces that block line of sight with small scatter terrain; use height (walkways, hills), not only flat pieces.',
+    'Do not push everything to the table edges; keep pieces modular so they store and transport easily.',
+  ] },
   { title: 'Prepare', points: [
     'Wash resin and 3D-printed pieces in warm soapy water; glue and fill gaps before priming.',
     'Plan the colours: muted, natural terrain makes a bright army stand out (and the other way round).',
@@ -46,6 +53,9 @@ export const TERRAIN_GUIDE: { title: string; points: string[] }[] = [
 ]
 
 export const TERRAIN_SOURCES = [
+  { title: 'Tista Minis: Cinematic Warhammer terrain on a budget', url: 'https://tistaminis.com/blogs/blog/how-to-build-cinematic-warhammer-terrain-on-a-budget-step-by-step' },
+  { title: 'Tista Minis: Building better battlefields', url: 'https://tistaminis.com/blogs/blog/star-wars-legion-terrain-guide-building-better-battlefields' },
+  { title: 'Mind Games: Tabletop terrain guide', url: 'https://www.m-g.com.au/tabletop-terrain-guide-better-battlefields/' },
   { title: 'Warhammer Community: Stone scenery step by step', url: 'https://www.warhammer-community.com/en-gb/articles/IhR0bYqC/turn-simple-stone-scenery-into-works-of-art-with-this-step-by-step-painting-guide/' },
   { title: 'Printable Scenery: How to drybrush terrain', url: 'https://www.printablescenery.com/2021/05/20/how-to-drybrush-terrain/' },
   { title: 'Frontline Gaming: Quick and easy Gothic ruins', url: 'https://frontlinegaming.org/2018/06/01/hobby-tutorial-quick-and-easy-painting-of-the-gothic-ruins-itc-terrain-set/' },

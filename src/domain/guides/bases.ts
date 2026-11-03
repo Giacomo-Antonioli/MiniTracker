@@ -39,3 +39,38 @@ export function filterBases(bases: BaseRecipe[], kind: string, text: string): Ba
   const words = text.toLowerCase().split(/\s+/).filter(Boolean)
   return bases.filter((b) => (!kind || b.kinds.includes(kind)) && words.every((w) => `${b.name} ${b.factionName ?? ''} ${b.kinds.join(' ')}`.toLowerCase().includes(w)))
 }
+
+/** How to base miniatures: what several published guides agree on, in our own words. */
+export const BASES_GUIDE: { title: string; points: string[] }[] = [
+  { title: 'Plan', points: [
+    'Pick one base style for the whole army: it ties the models together on the table.',
+    'Match where the army fights, and keep the ground colours different from the army\'s main colour.',
+    'Base before gluing the model when you can (or paint the base last): drips on the base do not matter.',
+  ] },
+  { title: 'Texture', points: [
+    'Texture paint straight from the pot, or thinned PVA dipped in sand and grit; tap off the excess.',
+    'Add a few bigger pieces (cork, rocks, skulls, debris) first, then fill around them.',
+    'Keep it low and leave room for the feet; seal sand with watered-down PVA so it does not shed.',
+  ] },
+  { title: 'Paint', points: [
+    'Basecoat or prime the texture dark, then shade.',
+    'Drybrush one or two lighter colours: heavier first, lighter and smaller second.',
+    'Pick out rocks in a different, colder colour from the ground.',
+  ] },
+  { title: 'Rim', points: [
+    'Paint the edge one solid colour: black makes bright models pop, a dark earth tone is softer.',
+    'Use the same rim colour across the army; do it before tufts, which hang over the edge.',
+  ] },
+  { title: 'Finish', points: [
+    'Glue tufts and static grass last, with PVA or super glue; two or three tufts are usually enough.',
+    'Put tufts against rocks and feet, where grass would grow, not in the middle of a path.',
+    'A matt varnish takes the shine off grass and protects the drybrushing.',
+  ] },
+]
+
+export const BASES_SOURCES = [
+  { title: 'The Army Painter: Finishing the miniature\'s base', url: 'https://thearmypainter.com/blogs/explore/finishing-the-miniature-s-base' },
+  { title: 'Chest of Colors: Simple bases in 5 steps', url: 'https://chestofcolors.com/simple-bases-in-5-steps/' },
+  { title: 'Flames of War: Basing your troops', url: 'https://bigfour.flamesofwar.com/595/' },
+  { title: 'Golden Goblin Games: Basing', url: 'https://www.goldengoblingames.com/painting-guide-basing' },
+]

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { BasesBrowser, BasesTab } from './Bases'
 import { Diagram } from './Diagram'
 import { TERRAIN_GUIDE, TERRAIN_SOURCES } from '../../domain/guides/terrain'
+import type { DiagramId } from '../../domain/guides/techniqueDetails'
 import { GETTING_STARTED, TECHNIQUES_GUIDE, videoSearch, type Technique } from '../../domain/guides/techniques'
 
 type Tab = 'techniques' | 'bases' | 'terrain' | 'start'
@@ -34,7 +35,7 @@ export function Guides({ initialTab = 'techniques' }: { initialTab?: Tab }) {
       {tab === 'bases' && <BasesTab />}
       {tab === 'terrain' && (
         <>
-          <TerrainHowTo />
+          <HowTo title="How to paint terrain" sections={TERRAIN_GUIDE} sources={TERRAIN_SOURCES} diagrams={['terrain-steps', 'grime', 'army-contrast']} />
           <BasesBrowser set="terrain" />
         </>
       )}
@@ -110,18 +111,16 @@ export function GuidesPage() {
   )
 }
 
-/** How to paint terrain, above the terrain recipes. */
-function TerrainHowTo() {
+/** A short "how to" guide with diagrams and credited sources, above a recipe list. */
+export function HowTo({ title, sections, sources, diagrams }: { title: string; sections: { title: string; points: string[] }[]; sources: { title: string; url: string }[]; diagrams: DiagramId[] }) {
   return (
-    <details className="panel p-4 text-sm" open aria-label="How to paint terrain">
-      <summary className="cursor-pointer font-semibold text-accent">How to paint terrain</summary>
+    <details className="panel p-4 text-sm" open aria-label={title}>
+      <summary className="cursor-pointer font-semibold text-accent">{title}</summary>
       <div className="mt-3 grid gap-3 md:grid-cols-3">
-        <Diagram id="terrain-steps" />
-        <Diagram id="grime" />
-        <Diagram id="army-contrast" />
+        {diagrams.map((d) => <Diagram key={d} id={d} />)}
       </div>
       <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {TERRAIN_GUIDE.map((s) => (
+        {sections.map((s) => (
           <section key={s.title} aria-label={s.title}>
             <h3 className="mb-1 font-semibold">{s.title}</h3>
             <ul className="grid list-disc gap-1 pl-5">{s.points.map((p) => <li key={p}>{p}</li>)}</ul>
@@ -130,7 +129,7 @@ function TerrainHowTo() {
       </div>
       <p className="mt-3 text-xs text-muted">
         Based on:{' '}
-        {TERRAIN_SOURCES.map((s, i) => (
+        {sources.map((s, i) => (
           <span key={s.url}>{i > 0 && ' · '}<a className="hover:text-accent hover:underline" href={s.url} target="_blank" rel="noreferrer">{s.title}</a></span>
         ))}
       </p>

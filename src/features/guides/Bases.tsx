@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../../app/store'
-import { BASE_KINDS, filterBases, type BaseRecipe } from '../../domain/guides/bases'
+import { BASE_KINDS, BASES_GUIDE, BASES_SOURCES, filterBases, type BaseRecipe } from '../../domain/guides/bases'
 import { TERRAIN_KINDS } from '../../domain/guides/terrain'
 import { techniqueFor, type Technique } from '../../domain/guides/techniques'
-import { TechniquePanel } from './GuidesPage'
+import { HowTo, TechniquePanel } from './GuidesPage'
 import { materialsFor, type Material } from '../../domain/guides/materials'
 import { MaterialPanel, MaterialsList } from './Materials'
 
@@ -144,7 +144,14 @@ export function BasesTab() {
         <button role="tab" aria-selected={view === 'recipes'} className={`btn text-sm ${view === 'recipes' ? 'btn-primary' : ''}`} onClick={() => setView('recipes')}>Recipes</button>
         <button role="tab" aria-selected={view === 'materials'} className={`btn text-sm ${view === 'materials' ? 'btn-primary' : ''}`} onClick={() => setView('materials')}>Materials</button>
       </div>
-      {view === 'recipes' ? <BasesBrowser /> : <MaterialsList />}
+      {view === 'recipes' ? (
+        <>
+          <HowTo title="How to base miniatures" sections={BASES_GUIDE} sources={BASES_SOURCES} diagrams={['order', 'drybrush', 'tufts']} />
+          <BasesBrowser />
+        </>
+      ) : (
+        <MaterialsList />
+      )}
     </div>
   )
 }

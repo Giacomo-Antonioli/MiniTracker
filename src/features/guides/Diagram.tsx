@@ -301,6 +301,22 @@ const DIAGRAMS: Record<DiagramId, { caption: string; svg: React.ReactNode }> = {
       </>
     ),
   },
+  tufts: {
+    caption: 'Tufts where grass would grow: against rocks and the feet, not in the open; rim left clean.',
+    svg: (
+      <>
+        <ellipse cx="120" cy="70" rx="104" ry="36" fill="#111" />
+        <ellipse cx="120" cy="64" rx="100" ry="32" fill="#7a6247" />
+        <path d="M150,50 l14,-14 l18,4 l8,16 l-14,8 Z" fill="#8a8f98" />
+        <ellipse cx="100" cy="62" rx="12" ry="6" fill="#333" />
+        <ellipse cx="124" cy="66" rx="12" ry="6" fill="#333" />
+        {[[146, 58], [190, 60], [80, 72], [140, 76]].map(([x, y]) => <path key={`${x}`} d={`M${x},${y} l3,-10 l3,10 l3,-12 l3,12`} stroke="#6f9a3a" strokeWidth="2" fill="none" />)}
+        <text x="112" y="44" textAnchor="middle" fill={ink} fontSize="9">feet</text>
+        <text x="200" y="30" fill={ink} fontSize="9">rock</text>
+        <text x="20" y="112" fill={ink} fontSize="9">neat black rim</text>
+      </>
+    ),
+  },
   order: {
     caption: 'Basing order: texture → shade → drybrush → rim → tufts.',
     svg: (
