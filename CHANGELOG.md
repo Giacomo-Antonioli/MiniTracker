@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Guides › Terrain: Materials and Beginner projects (rubble piles, ruined walls, forest bases, modular ruins), terrain density per game, from Tista Minis' terrain guide (credited).
+
 ## [0.11.1] - 2026-11-03
 
 ### Added
