@@ -1,4 +1,5 @@
 import { CostsSection } from '../costs/CostsSection'
+import { PaintTimeSection } from '../paintTime/PaintTime'
 import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../../app/store'
 import { pointsFor } from '../../domain/catalogue/points'
@@ -130,6 +131,8 @@ export function StatsPage() {
       </section>
 
       <CostsSection />
+
+      <PaintTimeSection months={months} keyOf={keyOf} faction={faction || undefined} />
 
       <section className="panel grid grid-cols-2 gap-2 p-4 sm:grid-cols-3 lg:grid-cols-5" aria-label="Records">
         <Tile label="Best month" value={best.bestMonth?.count ?? 0} hint={bucketName(best.bestMonth?.key)} />

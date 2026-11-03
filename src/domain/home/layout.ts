@@ -14,6 +14,7 @@ export const CARDS: CardDef[] = [
   { id: 'activity', title: 'Activity', size: 'L' },
   { id: 'continue', title: 'Continue painting', size: 'M', options: { count: { label: 'Units', values: [3, 5, 8] } } },
   { id: 'painted', title: 'Painted per month', size: 'M', options: { months: { label: 'Months', values: [6, 12, 24] } } },
+  { id: 'timers', title: 'Painting timer', size: 'M' },
   { id: 'games', title: 'Games', size: 'M' },
   { id: 'goals', title: 'Goals', size: 'M', options: { count: { label: 'Goals', values: [3, 5, 10] } } },
   { id: 'records', title: 'Records', size: 'M' },
@@ -36,7 +37,7 @@ export interface CardLayout {
   options?: Record<string, number>
 }
 
-const DEFAULT_IDS = ['tiles', 'activity', 'continue', 'goals', 'games', 'painted', 'records', 'oldest', 'closest', 'recent', 'shopping', 'low']
+const DEFAULT_IDS = ['tiles', 'activity', 'continue', 'timers', 'goals', 'games', 'painted', 'records', 'oldest', 'closest', 'recent', 'shopping', 'low']
 export const DEFAULT_LAYOUT: CardLayout[] = DEFAULT_IDS.map((id) => ({ id, size: CARDS.find((c) => c.id === id)!.size }))
 
 const SIZES: CardSize[] = ['S', 'M', 'L']
