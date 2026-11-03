@@ -113,8 +113,8 @@ Bug reports and ideas are welcome as [issues](https://github.com/Giacomo-Antonio
 
 ## Credits
 
-- Paint list: [minipainter](https://github.com/ArturSkowronski/minipainter) by Artur Skowronski (MIT), see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-- Scheme library: recipe facts (areas, steps, paints) from community authors on [Paint Pad](https://paintpad.app) and [Tale of Painters](https://taleofpainters.com), each credited and linked to its source inside the app. No text or images are copied. Authors who want a recipe removed can [open an issue](https://github.com/Giacomo-Antonioli/MiniTracker/issues/new/choose). Rebuilt with `npm run schemes:scrape` (polite: identifies itself, waits between requests, respects robots.txt and sites that block bots).
+- Paint list: [minipainter](https://github.com/ArturSkowronski/minipainter) by Artur Skowronski (MIT) and [miniature-paints](https://github.com/Arcturus5404/miniature-paints) by Rick Fleuren (MIT, Green Stuff World, Scale75 and Pro Acryl), see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+- Scheme library: recipe facts (areas, steps, paints) from community authors on [Paint Pad](https://paintpad.app), ['Eavy Archive](https://eavy-archive.com) and [Tale of Painters](https://taleofpainters.com), each credited and linked to its source inside the app. No text or images are copied. Authors who want a recipe removed can [open an issue](https://github.com/Giacomo-Antonioli/MiniTracker/issues/new/choose). Rebuilt with `npm run schemes:scrape` (polite: identifies itself, waits between requests, respects robots.txt and sites that block bots).
 - Unit and points data: the community-maintained [BSData](https://github.com/BSData) files ([wh40k-10e](https://github.com/BSData/wh40k-10e)). MiniTracker does not include or redistribute this data: each user's browser downloads it from BSData. A [daily check](.github/workflows/bsdata-check.yml) makes sure the download still works.
 - Stratagems and detachment rules: [Wahapedia](https://wahapedia.ru)'s data export. Not included in MiniTracker: each user downloads the files and imports them. Powered by Wahapedia.
 

@@ -1,0 +1,24 @@
+{
+  "note": "Paint data sources for src/data/paints/seed.json. Add a brand here (no code change), then run npm run paints:seed. Types: base, layer, shade, contrast, dry, technical, metallic, ink, air, speedpaint.",
+  "minipainter": {
+    "repo": "ArturSkowronski/minipainter",
+    "commit": "fe3fd9b34f93ffcc5cad147b397f9493e90db9d6",
+    "license": "MIT",
+    "files": { "citadel": "Citadel", "army_painter": "Army Painter", "vallejo": "Vallejo", "ak_interactive": "AK Interactive" }
+  },
+  "miniaturePaints": {
+    "repo": "Arcturus5404/miniature-paints",
+    "commit": "22791a682e1d155da388f4f856cd7196cd9f2677",
+    "license": "MIT",
+    "files": {
+      "GreenStuffWorld": { "brand": "Green Stuff World", "id": "green_stuff_world", "types": {
+        "Acrylic Colors": "base", "Dipping Inks": "contrast", "Metallic Colors": "metallic", "Chameleon Colorshift Metallic": "metallic",
+        "Intensity Ink": "ink", "Fluor Metallic": "metallic", "Wash Ink": "shade", "Candy Ink Metallic": "metallic", "Matt Surface": "technical", "Gloss Surface": "technical" } },
+      "Scale75": { "brand": "Scale75", "id": "scale75", "types": {
+        "Artist Range": "base", "Warfront  Range": "base", "Scale Color Range": "base", "Instant Colors Range": "contrast", "Fantasy & Games Range": "base",
+        "Metal N Alchemy Range": "metallic", "Soil Works": "technical", "FX Range": "technical", "Inktensity Range": "ink", "Primers": "technical" } },
+      "Monument": { "brand": "Pro Acryl", "id": "pro_acryl", "types": {
+        "Monument Pro Acrylic Paints": "base", "Monument Pro Signature Series": "base", "Monument Pro Acrylic Primer": "technical", "Monument Pro Acrylic Wash": "shade" } }
+    }
+  }
+}
