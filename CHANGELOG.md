@@ -6,6 +6,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ### Added
 - Scheme library grows from 43 T'au schemes to 473 community recipes for 28 Warhammer 40k factions (#57): the scraper now reads every faction listing on Paint Pad, tags sub-factions (chapters, craftworlds, hive fleets…) and unit types, and drops duplicate recipes.
+- Home: a Goals card with progress bars (unfinished goals first; 3, 5 or 10 goals).
 
 ### Added
 - Recipes (#95): video/tutorial links on each scheme step (shown in the scheme view and on the printed recipe card), step photos shown in the scheme view, and "🔗 Share link": the scheme packed into a link anyone can open to import it (no server, photos not included).

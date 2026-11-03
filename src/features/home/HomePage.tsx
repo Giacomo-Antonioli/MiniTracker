@@ -1,3 +1,5 @@
+import { goalProgress, goalTitle } from '../../domain/goals/goals'
+import { GoalBar } from '../goals/GoalBar'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useStore } from '../../app/store'
 import { modelsByStatus } from '../../domain/collection/ownedUnit'
@@ -14,7 +16,7 @@ import { StageBar, stageColour } from '../backlog/BacklogTable'
 import { ActivityCalendar, HBars, MonthArea, MonthBars } from '../stats/charts'
 import { forecast, Tile, useAllEvents, usePointsOf } from '../stats/StatsPage'
 
-type Go = 'backlog' | 'stats' | 'shopping' | 'paints' | 'supplies' | 'games'
+type Go = 'backlog' | 'stats' | 'shopping' | 'paints' | 'supplies' | 'games' | 'goals'
 
 const AGO = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
 /** "today", "yesterday", "3 days ago", "2 months ago". */
@@ -31,7 +33,7 @@ const Link = ({ onClick, children }: { onClick?: () => void; children: ReactNode
   onClick ? <button className="text-sm text-muted hover:text-accent" onClick={onClick}>{children}</button> : null
 
 export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: string) => void; onGo?: (p: Go) => void; onAddUnit?: () => void }) {
-  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints, homeLayout, saveHomeLayout, supplies, games } = useStore()
+  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints, homeLayout, saveHomeLayout, supplies, games, goals } = useStore()
   const events = useAllEvents()
   const { pointsOf, roleOf, factionName } = usePointsOf()
   const [editing, setEditing] = useState(false)
@@ -189,6 +191,25 @@ export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: st
             </div>
           ),
         } : null
+      }
+      case 'goals': {
+        if (!goals.length) return null
+        const rows = goals.map((g) => ({ g, p: goalProgress(g, units, events, pipeline, now) }))
+        // Unfinished goals first, so the card shows what still needs work.
+        rows.sort((a, b) => Number(a.p.done) - Number(b.p.done))
+        return {
+          action: <Link onClick={onGo && (() => onGo('goals'))}>Goals →</Link>,
+          content: (
+            <ul className="grid gap-3 text-sm" aria-label="Goal progress">
+              {rows.slice(0, opt('count')).map(({ g, p }) => (
+                <li key={g.id} className="grid gap-1">
+                  <span className={p.overdue ? 'text-danger' : undefined}>{p.done ? '✅ ' : ''}{goalTitle(g)}{p.when ? <span className="text-muted"> · {p.when}</span> : null}</span>
+                  <GoalBar p={p} />
+                </li>
+              ))}
+            </ul>
+          ),
+        }
       }
       case 'games': {
         const live = games.find((g) => g.status === 'live')
