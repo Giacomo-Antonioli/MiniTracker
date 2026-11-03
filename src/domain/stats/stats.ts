@@ -29,7 +29,7 @@ function finishedBy(e: StatusEvent, p: Pipeline, t: number) {
   return from === to ? 0 : to ? e.count : -e.count
 }
 
-function finishedIn(events: StatusEvent[], p: Pipeline, keep: (date: string) => boolean, target: StageId) {
+export function finishedIn(events: StatusEvent[], p: Pipeline, keep: (date: string) => boolean, target: StageId) {
   const t = targetIndex(p, target)
   return events.reduce((sum, e) => (keep(e.date) ? sum + finishedBy(e, p, t) : sum), 0)
 }
@@ -85,7 +85,7 @@ export function pileLevel(pile: number): string {
   return 'Everest'
 }
 
-function addedIn(units: OwnedUnit[], p: Pipeline, keep: (date: string) => boolean) {
+export function addedIn(units: OwnedUnit[], p: Pipeline, keep: (date: string) => boolean) {
   const t = targetIndex(p, 'painted')
   return units.filter((u) => !isGone(u.lifecycle) && keep(u.createdAt)).reduce((s, u) => s + counts(u, p, t).owned, 0)
 }

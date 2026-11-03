@@ -16,6 +16,7 @@ import type { Catalogue } from '../domain/catalogue/types'
 import { DEFAULT_LAYOUT, parseLayout, type CardLayout } from '../domain/home/layout'
 import { parseGames, type Game } from '../domain/games/games'
 import { parseWahapedia, type StratagemData } from '../domain/stratagems/stratagems'
+import { parseGoals, type Goal } from '../domain/goals/goals'
 import { parsePurchases, type Purchase } from '../domain/costs/costs'
 import { becameLow, lowPaints, parseSupplies, supplyItem, type Supply } from '../domain/supplies/supplies'
 import type { ArmyList, EditionKey } from '../domain/lists/types'
@@ -180,6 +181,10 @@ interface State {
   supplies: Supply[]
   /** Boxes/orders covering several units (#94); saved in the backup. */
   purchases: Purchase[]
+  /** Hobby goals (#90); saved in the backup. */
+  goals: Goal[]
+  saveGoal(g: Goal): Promise<void>
+  deleteGoal(id: string): Promise<void>
   savePurchase(p: Purchase): Promise<void>
   deletePurchase(id: string): Promise<void>
   /** Currency symbol for prices, e.g. €. */
@@ -332,7 +337,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency] = await Promise.all([
+    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
@@ -351,6 +356,7 @@ export const useStore = create<State>((set, get) => ({
       settingsRepo.getValue<unknown>('supplies', []),
       settingsRepo.getValue<unknown>('purchases', []),
       settingsRepo.getValue<string>('currency', '€'),
+      settingsRepo.getValue<unknown>('goals', []),
     ])
     const catalogue = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
     set({
@@ -371,6 +377,7 @@ export const useStore = create<State>((set, get) => ({
       stratagemData,
       supplies: parseSupplies(supplies),
       purchases: parsePurchases(purchases),
+      goals: parseGoals(goals),
       currency: typeof currency === 'string' && currency ? currency : '€',
       ready: true,
     })
@@ -592,6 +599,17 @@ export const useStore = create<State>((set, get) => ({
   async removeStratagems() {
     await settingsRepo.setValue('stratagems', null)
     set({ stratagemData: null })
+  },
+  goals: [],
+  async saveGoal(g) {
+    const list = get().goals.some((x) => x.id === g.id) ? get().goals.map((x) => (x.id === g.id ? g : x)) : [...get().goals, g]
+    set({ goals: list })
+    await settingsRepo.setValue('goals', list)
+  },
+  async deleteGoal(id) {
+    const list = get().goals.filter((x) => x.id !== id)
+    set({ goals: list })
+    await settingsRepo.setValue('goals', list)
   },
   purchases: [],
   async savePurchase(p) {
