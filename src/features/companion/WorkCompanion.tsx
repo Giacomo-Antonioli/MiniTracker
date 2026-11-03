@@ -104,9 +104,12 @@ export function WorkCompanion({ backTo }: { backTo?: { label: string; go: () => 
           <h1 className="font-display text-2xl text-accent">{TITLE[mode]}</h1>
           <p className="text-muted">{unit.customName}{unit.factionName ? ` · ${unit.factionName}` : ''}</p>
         </div>
+        <div className="flex flex-wrap gap-2">
+        <button className="btn" onClick={closeCompanion}>Pick another unit</button>
         <button className="btn" onClick={() => openCompanion(mode === 'paint' ? 'build' : 'paint', unit.id, companion.timerId)}>
           Switch to {mode === 'paint' ? '🔨 Builder' : '🎨 Painter'}
         </button>
+        </div>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-2">
