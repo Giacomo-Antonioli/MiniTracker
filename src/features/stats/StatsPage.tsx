@@ -5,6 +5,7 @@ import { factionsOf } from '../../domain/collection/backlog'
 import { ownedModels } from '../../domain/collection/ownedUnit'
 import type { OwnedUnit, StatusEvent } from '../../domain/collection/types'
 import { stageColour } from '../backlog/BacklogTable'
+import { gameStats, resultsOver, streaks } from '../../domain/games/games'
 import { activityByDay, byRole, paintUsage, pileAge, pointsOverTime, records, spending, stageFlow, stageTimes } from '../../domain/stats/more'
 import { ActivityCalendar, HBars, MonthArea, MonthBars, monthLabel } from './charts'
 import { byMonth, byWeek, lastWeeks, monthsSince, byFaction, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileFlow, pileLevel, pileNow, streakWeeks } from '../../domain/stats/stats'
@@ -56,7 +57,7 @@ export function usePointsOf() {
 }
 
 export function StatsPage() {
-  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints } = useStore()
+  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints, games: allGames, lists } = useStore()
   useEffect(() => {
     void loadPaints()
   }, [loadPaints])
@@ -83,6 +84,10 @@ export function StatsPage() {
   const streak = streakWeeks(events, pipeline, now)
   const flow = pileFlow(shown, events, pipeline, months, 'painted', keyOf)
   const armies = byFaction(shown, events, pipeline, now, pointsOf, factionName)
+  const games = allGames.filter((g) => g.status === 'done' && (!faction || g.me.faction === faction) && months.some((m) => keyOf(g.date) === m))
+  const gStats = gameStats(games, (id) => lists.find((l) => l.id === id)?.name)
+  const gOver = resultsOver(games, months, keyOf)
+  const gStreak = streaks(allGames.filter((g) => !faction || g.me.faction === faction))
   const best = records(events, pipeline)
   const times = stageTimes(shown, events, pipeline)
   const age = pileAge(shown, pipeline, now)
@@ -244,6 +249,45 @@ export function StatsPage() {
           ) : <p className="text-sm text-muted">Give your units a paint scheme to see which paints they use most.</p>}
         </section>
       </div>
+      {games.length > 0 && (
+        <section className="panel grid gap-4 p-4" aria-label="Game stats">
+          <h2 className="font-display text-lg">Games</h2>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+            <Tile label="Played" value={gStats.overall.played} />
+            <Tile label="Win rate" value={`${Math.round((gStats.overall.wins / gStats.overall.played) * 100)}%`} hint={`${gStats.overall.wins}-${gStats.overall.losses}-${gStats.overall.draws}`} />
+            <Tile label="Avg score" value={`${gStats.overall.avgFor}–${gStats.overall.avgAgainst}`} />
+            <Tile label="Win streak" value={gStreak.current} hint={`Best: ${gStreak.best}`} />
+            <Tile label="Best list" value={[...gStats.byList].sort((a, b) => b.wins / b.played - a.wins / a.played)[0]?.key ?? '—'} />
+          </div>
+          <div className="grid gap-4 xl:grid-cols-2">
+            <div className="grid gap-1">
+              <h3 className="text-sm text-muted">Results</h3>
+              <MonthBars stacked label="Game results" months={months} series={[
+                { name: 'Wins', values: gOver.wins, fill: 'fill-ok', swatch: 'bg-ok' },
+                { name: 'Draws', values: gOver.draws, fill: 'fill-muted/60', swatch: 'bg-muted/60' },
+                { name: 'Losses', values: gOver.losses, fill: 'fill-danger', swatch: 'bg-danger' },
+              ]} />
+            </div>
+            <div className="grid gap-1">
+              <h3 className="text-sm text-muted">Average score</h3>
+              <MonthBars label="Average score" months={months} series={[
+                { name: 'Me', values: gOver.avgFor, fill: 'fill-accent', swatch: 'bg-accent' },
+                { name: 'Opponent', values: gOver.avgAgainst, fill: 'fill-muted/60', swatch: 'bg-muted/60' },
+              ]} />
+            </div>
+          </div>
+          <div className="grid gap-4 xl:grid-cols-2">
+            <div className="grid gap-1">
+              <h3 className="text-sm text-muted">Wins by opponent faction</h3>
+              <HBars label="Wins by opponent faction" rows={gStats.byOpponent.map((r) => ({ key: r.key, name: r.key, value: r.wins, of: r.played }))} />
+            </div>
+            <div className="grid gap-1">
+              <h3 className="text-sm text-muted">Wins by list</h3>
+              <HBars label="Wins by list" rows={gStats.byList.map((r) => ({ key: r.key, name: r.key, value: r.wins, of: r.played }))} />
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   )
 }

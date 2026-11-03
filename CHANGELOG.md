@@ -5,7 +5,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Added
-- Games (#71): start a game from an army list (or without one), with the opponent, their faction and optionally their list (.rosz, .ros, .json or text). Live score board: primary and secondary per round with +1/+5/−1, CP for both (+1 each at every turn), round and turn, units destroyed on both sides (ticked off their lists, or counted). End the game with notes; the history shows score by round, units lost and destroyed, and results overall, per list and per opponent faction. A Games card on Home, and each unit shows how many games it played and how often it was destroyed. The game saves after every tap.
+- Games (#71): start a game from an army list (or without one), with the opponent, their faction and optionally their list (.rosz, .ros, .json or text). Live score board: primary and secondary per round with +1/+5/−1, CP for both (+1 each at every turn), round and turn, units destroyed on both sides (ticked off their lists, or counted). End the game with notes; the history shows score by round, units lost and destroyed, and results overall, per list and per opponent faction. A Games card on Home, and each unit shows how many games it played and how often it was destroyed. The Stats page gets a Games section: played, win rate, average score, win streak, best list, results and average score over time, and wins by opponent faction and by list. The game saves after every tap.
 
 ## [0.7.0] - 2026-11-03
 

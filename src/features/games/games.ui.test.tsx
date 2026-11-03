@@ -22,7 +22,7 @@ beforeEach(async () => {
 describe('Games', () => {
   it('plays a game live with both lists, saves it to the history and shows it on Home and on the unit', async () => {
     await appDb.catalogues.put(catalogue as never)
-    await appDb.units.put(createUnit({ customName: 'My walker', datasheetId: 'u-walker', factionId: 'cat-testers', groups: [{ count: 1, status: 'painted' }] }, { now: '2026-11-01T00:00:00Z', newId: () => 'u1' }))
+    await appDb.units.put(createUnit({ customName: 'My walker', datasheetId: 'u-walker', factionId: 'cat-testers', factionName: 'Testers', groups: [{ count: 1, status: 'painted' }] }, { now: '2026-11-01T00:00:00Z', newId: () => 'u1' }))
     await appDb.lists.put({ id: 'L', name: 'Walkers', edition: '11e', factionId: 'cat-testers', battleSize: 'bs-sf', pointsLimit: 2000, status: 'planned', detachmentIds: [], entries: [{ id: 'e1', datasheetId: 'u-walker', models: 1, wargear: [] }], createdAt: 't', updatedAt: 't' } as never)
     const user = userEvent.setup()
     render(<App />)
@@ -79,6 +79,16 @@ describe('Games', () => {
     expect(within(screen.getByRole('table', { name: 'By list' }))).toBeTruthy()
     expect(screen.getByRole('table', { name: 'Overall' })).toHaveTextContent('All games11-0-0100%6–1')
     expect((await appDb.settings.get('games'))!.value).toHaveLength(1)
+
+    await user.click(screen.getByRole('button', { name: 'Stats' }))
+    const gs = await screen.findByRole('region', { name: 'Game stats' })
+    expect(gs).toHaveTextContent('Played1Win rate100%1-0-0Avg score6–1Win streak1Best: 1Best listWalkers')
+    expect(within(gs).getByRole('img', { name: 'Game results' }).querySelectorAll('[data-bar]')).toHaveLength(1)
+    expect(within(gs).getByLabelText('Wins by opponent faction')).toHaveTextContent('Sub Testers1 / 1')
+    await user.selectOptions(screen.getByLabelText('Faction'), 'Testers')
+    expect(screen.getByRole('region', { name: 'Game stats' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '1M' }))
+    expect(screen.getByRole('region', { name: 'Game stats' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Home' }))
     expect(await screen.findByRole('region', { name: 'Games' })).toHaveTextContent('1 played · 1-0-0 · 100% wins')

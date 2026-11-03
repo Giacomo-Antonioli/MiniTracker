@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ArmyList } from '../lists/types'
-import { addPoints, endGame, gameStats, newGame, nextTurn, parseGames, result, setCp, toggleDestroyed, totals, unitRecord } from './games'
+import { resultsOver, streaks, addPoints, endGame, gameStats, newGame, nextTurn, parseGames, result, setCp, toggleDestroyed, totals, unitRecord } from './games'
 
 let n = 0
 const ctx = { now: '2026-11-03T10:00:00Z', newId: () => `g${++n}` }
@@ -79,5 +79,21 @@ describe('history', () => {
   it('reads saved games, dropping broken ones', () => {
     expect(parseGames([newGame({}, ctx), { id: 1 }, null])).toHaveLength(1)
     expect(parseGames('x')).toEqual([])
+  })
+})
+
+describe('games over time', () => {
+  const at = (date: string, me: number, them: number) => ({ ...endGame(addPoints(addPoints(newGame({}, ctx), 'me', 'primary', me, ctx), 'them', 'primary', them, ctx), '', ctx), date })
+  const gs = [at('2026-01-05', 80, 60), at('2026-01-20', 40, 70), at('2026-03-02', 60, 60), at('2026-03-09', 90, 10), at('2026-03-10', 70, 20)]
+
+  it('counts results and average scores per bucket', () => {
+    expect(resultsOver(gs, ['2026-01', '2026-02', '2026-03'], (d) => d.slice(0, 7))).toEqual({
+      wins: [1, 0, 2], losses: [1, 0, 0], draws: [0, 0, 1], avgFor: [60, 0, 73], avgAgainst: [65, 0, 30],
+    })
+  })
+
+  it('finds the current and the best winning streak', () => {
+    expect(streaks(gs)).toEqual({ current: 2, best: 2 })
+    expect(streaks([])).toEqual({ current: 0, best: 0 })
   })
 })

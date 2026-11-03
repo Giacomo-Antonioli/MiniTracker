@@ -169,3 +169,35 @@ export function parseGames(raw: unknown): Game[] {
   if (!Array.isArray(raw)) return []
   return raw.filter((g): g is Game => !!g && typeof g.id === 'string' && !!g.me && !!g.them && Array.isArray(g.me.rounds))
 }
+
+/** Finished games per bucket (month or week): results and average scores. */
+export function resultsOver(games: Game[], keys: string[], keyOf: (date: string) => string) {
+  const at = new Map(keys.map((k, i) => [k, i]))
+  const zero = () => keys.map(() => 0)
+  const out = { wins: zero(), losses: zero(), draws: zero(), avgFor: zero(), avgAgainst: zero() }
+  const n = zero()
+  for (const g of games) {
+    const i = at.get(keyOf(g.date))
+    if (g.status !== 'done' || i === undefined) continue
+    const r = result(g)
+    out[r === 'win' ? 'wins' : r === 'loss' ? 'losses' : 'draws'][i]++
+    out.avgFor[i] += totals(g.me).total
+    out.avgAgainst[i] += totals(g.them).total
+    n[i]++
+  }
+  out.avgFor = out.avgFor.map((v, i) => (n[i] ? Math.round(v / n[i]) : 0))
+  out.avgAgainst = out.avgAgainst.map((v, i) => (n[i] ? Math.round(v / n[i]) : 0))
+  return out
+}
+
+/** Wins in a row: the current run (up to the latest game) and the best ever. */
+export function streaks(games: Game[]) {
+  const done = games.filter((g) => g.status === 'done').sort((a, b) => a.date.localeCompare(b.date))
+  let run = 0
+  let best = 0
+  for (const g of done) {
+    run = result(g) === 'win' ? run + 1 : 0
+    best = Math.max(best, run)
+  }
+  return { current: run, best }
+}
