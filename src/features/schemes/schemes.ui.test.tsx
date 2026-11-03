@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../app/App'
@@ -51,10 +51,19 @@ describe('Schemes', () => {
     const user = await openSchemes()
     const ed = await buildScheme(user)
     expect(ed).toHaveTextContent('Missing paints (1): Macragge Blue (Citadel)')
+    expect(ed).not.toHaveTextContent('(use ')
     const s = useStore.getState().schemes[0]
     expect(s).toMatchObject({ name: 'Ultramarines Studio', factionName: 'Ultramarines', origin: 'personal', stage: 'idea' })
     expect(s.sections[0]).toMatchObject({ area: 'Armour', steps: [{ technique: 'basecoat', paints: [{ paintId: expect.stringContaining('macragge') }] }] })
     expect(screen.getByRole('button', { name: 'Scheme Ultramarines Studio' })).toHaveTextContent('1 paint missing')
+  })
+
+  it('suggests the closest owned paint for a missing one', async () => {
+    const user = await openSchemes()
+    const ed = await buildScheme(user)
+    const kantor = useStore.getState().paints.find((p) => p.name === 'Kantor Blue')!
+    act(() => useStore.setState({ paintStock: new Map([[kantor.id, { paintId: kantor.id, quantity: 1 } as never]]) }))
+    expect(ed).toHaveTextContent(/Macragge Blue \(Citadel\) \(use Kantor Blue, (close|very close|rough)\)/)
   })
 
   it('community schemes need a source; saving shows the error', async () => {
