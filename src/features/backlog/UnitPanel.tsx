@@ -185,7 +185,7 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
         </details>
       )}
 
-      <PhotoGallery unit={unit} photos={photos} thumbSize={page ? 'h-40 w-40' : undefined} />
+      <PhotoGallery unit={unit} photos={photos} events={events[unit.id]} thumbSize={page ? 'h-40 w-40' : undefined} />
 
       <section className="border-b border-line p-4">
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">History</h3>

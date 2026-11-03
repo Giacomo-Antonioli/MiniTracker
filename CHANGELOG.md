@@ -7,6 +7,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ### Added
 - Stratagem cards (#98): import Wahapedia's Stratagems.csv and Detachment_abilities.csv in Settings → Catalogue (links there; kept in your data and backups). The Army PDF can add the rules and stratagem cards of the list's detachments plus the core stratagems; a detachment whose name differs is picked once from a list. Powered by Wahapedia.
 - Running low (#92): marking a paint "Running low" puts it on the shopping list. New Supplies page (primer, glue, brushes…) with stock and an alert level: reaching it flags the supply, adds it to the shopping list and shows a ⚠ count in the menu. A "Running low" card on Home lists both.
+- Photo timeline per unit (#96): a Grid / Timeline switch in the unit's photos shows them by date, each with the stage it shows (its history step, or the stage reached by that day). The choice is remembered.
 
 ### Fixed
 - Home no longer breaks when a unit has no valid creation date.
