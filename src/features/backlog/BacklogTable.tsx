@@ -138,6 +138,10 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
             onClick={(e) => { e.stopPropagation(); setOpenUnits(openUnits.includes(u.id) ? openUnits.filter((x) => x !== u.id) : [...openUnits, u.id]) }}
           >{openUnits.includes(u.id) ? '▾' : '▸'}</button> : <span className="mr-1 inline-block w-4" />}
           {u.customName}
+          <span className="ml-2 opacity-60 hover:opacity-100">
+            <button title="Painter companion" aria-label={`Paint ${u.customName}`} onClick={(e) => { e.stopPropagation(); useStore.getState().openCompanion('paint', u.id) }}>🎨</button>
+            <button title="Builder companion" aria-label={`Build ${u.customName}`} onClick={(e) => { e.stopPropagation(); useStore.getState().openCompanion('build', u.id) }}>🔨</button>
+          </span>
           {u.lifecycle !== 'active' && <span className="text-muted"> ({u.lifecycle})</span>}
         </td>
         {show.map((c) => (

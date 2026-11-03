@@ -20,6 +20,7 @@ import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeIm
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { readStartPage, useStore } from './store'
 import { HomePage } from '../features/home/HomePage'
+import { WorkCompanion } from '../features/companion/WorkCompanion'
 
 type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'guides' | 'games' | 'settings'
 
@@ -27,6 +28,7 @@ const SOON: string[] = []
 
 export default function App() {
   const { ready, load, theme } = useStore()
+  const companion = useStore((s) => s.companion)
   const lowSupplies = useStore((s) => s.supplies.filter(isLow).length)
   const liveGame = useStore((s) => s.games.some((g) => g.status === 'live'))
   // A recipe sent by the bookmarklet arrives in the URL (#recipe=…): start on Schemes with it.
@@ -70,6 +72,7 @@ export default function App() {
   }, [theme])
 
   const go = (p: Page, s?: SettingsSection) => {
+    useStore.getState().closeCompanion()
     setPage(p)
     setSection(s)
     setDatasheetId(undefined)
@@ -122,6 +125,8 @@ export default function App() {
         {ready && shared && <SharedSchemeBanner token={shared} onDone={(id) => { setShared(null); if (id) openScheme(id) }} />}
         {!ready ? (
           <p className="text-muted">Loading…</p>
+        ) : companion ? (
+          <WorkCompanion key={`${companion.mode}/${companion.unitId}`} />
         ) : page === 'home' ? (
           <HomePage onOpenUnit={openUnit} onGo={(p) => go(p)} onAddUnit={() => go('backlog')} />
         ) : page === 'backlog' ? (

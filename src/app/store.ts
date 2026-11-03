@@ -17,6 +17,7 @@ import { DEFAULT_LAYOUT, parseLayout, type CardLayout } from '../domain/home/lay
 import { parseGames, type Game } from '../domain/games/games'
 import { parseWahapedia, type StratagemData } from '../domain/stratagems/stratagems'
 import { parseGoals, type Goal } from '../domain/goals/goals'
+import { parseTicks, toggleTick as flipTick, clearTicks, type CompanionMode, type Ticks } from '../domain/companion/companion'
 import { parseSessions, parseTimers, pruneTimers, stopTimer as endTimer, type PaintSession, type PaintTimer } from '../domain/paintTime/paintTime'
 import { parsePurchases, type Purchase } from '../domain/costs/costs'
 import { becameLow, lowPaints, parseSupplies, supplyItem, type Supply } from '../domain/supplies/supplies'
@@ -195,6 +196,14 @@ interface State {
   deleteTimer(id: string): Promise<void>
   /** Stops a timer and logs its time as sessions split over its groups. */
   stopTimer(id: string): Promise<void>
+  /** Open painter/builder companion, if any (not saved). */
+  companion: { mode: CompanionMode; unitId: string; timerId?: string } | null
+  openCompanion(mode: CompanionMode, unitId: string, timerId?: string): void
+  closeCompanion(): void
+  /** Companion checklist ticks per unit; saved in the backup. */
+  companionTicks: Ticks
+  toggleTick(unitId: string, key: string): Promise<void>
+  clearTicks(unitId: string, prefix: string): Promise<void>
   savePurchase(p: Purchase): Promise<void>
   deletePurchase(id: string): Promise<void>
   /** Currency symbol for prices, e.g. €. */
@@ -347,7 +356,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals, paintSessions, paintTimers] = await Promise.all([
+    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals, paintSessions, paintTimers, companionTicks] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
@@ -369,6 +378,7 @@ export const useStore = create<State>((set, get) => ({
       settingsRepo.getValue<unknown>('goals', []),
       settingsRepo.getValue<unknown>('paintSessions', []),
       settingsRepo.getValue<unknown>('paintTimers', []),
+      settingsRepo.getValue<unknown>('companionTicks', {}),
     ])
     const catalogue = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
     set({
@@ -392,6 +402,7 @@ export const useStore = create<State>((set, get) => ({
       goals: parseGoals(goals),
       paintSessions: parseSessions(paintSessions),
       paintTimers: pruneTimers(parseTimers(paintTimers), units),
+      companionTicks: parseTicks(companionTicks),
       currency: typeof currency === 'string' && currency ? currency : '€',
       ready: true,
     })
@@ -627,6 +638,24 @@ export const useStore = create<State>((set, get) => ({
   },
   paintSessions: [],
   paintTimers: [],
+  companion: null,
+  openCompanion(mode, unitId, timerId) {
+    set({ companion: { mode, unitId, timerId } })
+  },
+  closeCompanion() {
+    set({ companion: null })
+  },
+  companionTicks: {},
+  async toggleTick(unitId, key) {
+    const t = flipTick(get().companionTicks, unitId, key)
+    set({ companionTicks: t })
+    await settingsRepo.setValue('companionTicks', t)
+  },
+  async clearTicks(unitId, prefix) {
+    const t = clearTicks(get().companionTicks, unitId, prefix)
+    set({ companionTicks: t })
+    await settingsRepo.setValue('companionTicks', t)
+  },
   async saveSession(x) {
     const list = get().paintSessions.some((y) => y.id === x.id) ? get().paintSessions.map((y) => (y.id === x.id ? x : y)) : [...get().paintSessions, x]
     set({ paintSessions: list })

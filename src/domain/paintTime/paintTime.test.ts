@@ -70,3 +70,13 @@ it('validate, parse, prune', () => {
   const t3 = newTimer([{ unitId: 'z', groupId: 'g', count: 1 }], c(T0))
   expect(pruneTimers([t2, t3], units).map((x) => x.targets.length)).toEqual([1])
 })
+
+it('timers per unit and switching', async () => {
+  const { timersForUnit, pauseOthers } = await import('./paintTime')
+  const a = newTimer([{ unitId: 'a', groupId: 'g', count: 1 }], c(T0))
+  const b = newTimer([{ unitId: 'b', groupId: 'g', count: 1 }], c(T0))
+  const p = pauseTimer(newTimer([{ unitId: 'a', groupId: 'h', count: 1 }], c(T0)), at(1))
+  expect(timersForUnit([a, b, p], 'a')).toEqual([a, p])
+  const out = pauseOthers([a, b, p], a.id, at(10))
+  expect(out.map((t) => [t.id, t.runningSince, t.elapsedMs])).toEqual([[b.id, undefined, 600000]])
+})

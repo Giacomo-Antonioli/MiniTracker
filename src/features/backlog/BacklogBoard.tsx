@@ -50,6 +50,10 @@ export function BacklogBoard({ units, selectedId, onCardClick }: { units: OwnedU
               <div className="font-medium">{card.unit.customName}</div>
               <div className="flex items-center justify-between gap-2 text-xs text-muted">
                 <span className="truncate">{card.group.count} model{card.group.count === 1 ? '' : 's'}{card.unit.factionName ? ` · ${card.unit.factionName}` : ''}</span>
+                <span className="flex gap-1">
+                  <button className="hover:text-accent" title="Painter companion" aria-label={`Paint ${card.unit.customName}`} onClick={(e) => { e.stopPropagation(); useStore.getState().openCompanion('paint', card.unit.id) }}>🎨</button>
+                  <button className="hover:text-accent" title="Builder companion" aria-label={`Build ${card.unit.customName}`} onClick={(e) => { e.stopPropagation(); useStore.getState().openCompanion('build', card.unit.id) }}>🔨</button>
+                </span>
                 <select
                   className="max-w-24 rounded border border-line bg-transparent text-xs"
                   aria-label={`Move ${card.unit.customName} to`}
