@@ -1,4 +1,7 @@
-import { useMemo, useState } from 'react'
+import { httpUrl } from '../../domain/schemes/share'
+import { PhotoThumb } from '../photos/PhotoThumb'
+import { PhotoViewer } from '../photos/PhotoViewer'
+import { useEffect, useMemo, useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { MissingPaints } from './MissingPaints'
 import { colourStrip, makeVariant, missingPaints } from '../../domain/schemes/scheme'
@@ -9,7 +12,12 @@ import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
 
 /** Read-only view of a library scheme, with ways to make it your own. */
 export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: PaintScheme; onOpen: (id: string) => void; onClose: () => void; onOpenUnit?: (id: string) => void }) {
-  const { paints, paintStock, saveScheme, units } = useStore()
+  const { paints, paintStock, saveScheme, units, photos: allPhotos, loadSchemePhotos } = useStore()
+  useEffect(() => {
+    void loadSchemePhotos(scheme.id)
+  }, [scheme.id, loadSchemePhotos])
+  const [viewing, setViewing] = useState<{ stepId: string; photoId: string } | null>(null)
+  const stepPhotos = (stepId: string) => (allPhotos[scheme.id] ?? []).filter((p) => p.owner.kind === 'scheme' && p.owner.stepId === stepId)
   const usedBy = units.filter((u) => u.schemeId === scheme.id)
   const byId = useMemo(() => new Map(paints.map((p) => [p.id, p])), [paints])
   const missing = missingPaints(scheme, paintStock)
@@ -98,12 +106,18 @@ export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: Pa
                   })}
                   {st.thinning && <span className="text-xs text-muted">({st.thinning})</span>}
                   {st.note && <span className="text-xs italic text-muted">{st.note}</span>}
+                  {st.links?.map((l) => {
+                    const u = httpUrl(l.url)
+                    return u ? <a key={l.url} className="text-xs text-accent underline" href={u.href} target="_blank" rel="noreferrer">▶ {l.title || u.hostname}</a> : <span key={l.url} className="text-xs text-muted">{l.title || l.url}</span>
+                  })}
+                  {stepPhotos(st.id).map((p) => <PhotoThumb key={p.id} photo={p} size="h-10 w-10" onClick={() => setViewing({ stepId: st.id, photoId: p.id })} />)}
                 </li>
               ))}
             </ol>
           </section>
         ))}
       </div>
+      {viewing && <PhotoViewer photos={stepPhotos(viewing.stepId)} startId={viewing.photoId} onClose={() => setViewing(null)} />}
       {printing && <RecipeCard scheme={scheme} onDone={() => setPrinting(false)} />}
     </section>
   )

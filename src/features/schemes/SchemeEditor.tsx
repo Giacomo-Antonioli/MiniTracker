@@ -1,3 +1,5 @@
+import { shareUrl } from '../../domain/schemes/share'
+import type { StepLink } from '../../domain/schemes/types'
 import { useMemo, useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { MissingPaints } from './MissingPaints'
@@ -20,6 +22,7 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
   const [draft, setDraft] = useState(scheme)
   const [error, setError] = useState('')
   const [printing, setPrinting] = useState(false)
+  const [linkNote, setLinkNote] = useState('')
   const coverUrl = usePhotoUrl(draft.coverPhotoId)
   const dirty = JSON.stringify(draft) !== JSON.stringify(scheme)
   const byId = useMemo(() => new Map(paints.map((p) => [p.id, p])), [paints])
@@ -35,7 +38,7 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
     try {
       validateScheme(draft)
       setError('')
-      const saved = { ...draft, updatedAt: new Date().toISOString() }
+      const saved = { ...dropEmptyLinks(draft), updatedAt: new Date().toISOString() }
       await saveScheme(saved)
       setDraft(saved)
     } catch (e) {
@@ -48,6 +51,16 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
     const v = makeVariant(scheme, c())
     await saveScheme(v)
     onOpen(v.id)
+  }
+
+  async function shareLink() {
+    const url = await shareUrl(location.href, schemeFile([scheme], paints, new Date().toISOString()))
+    try {
+      await navigator.clipboard.writeText(url)
+      setLinkNote('Link copied. Anyone opening it can import this scheme (photos are not included).')
+    } catch {
+      setLinkNote(url)
+    }
   }
 
   function share() {
@@ -110,6 +123,7 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
           )
         )}
         <button className="btn" onClick={share}>⬇ Share file</button>
+        <button className="btn" onClick={() => void shareLink()}>🔗 Share link</button>
         <button className="btn" onClick={() => setPrinting(true)}>🖨 Recipe card</button>
         <button
           className="btn btn-danger ml-auto"
@@ -118,6 +132,7 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
           Delete
         </button>
       </div>
+      {linkNote && <p className="break-all border-b border-line px-4 py-2 text-sm" role="status">{linkNote}</p>}
 
       <div className="grid gap-3 border-b border-line p-4 md:grid-cols-2">
         <label className="grid gap-1">
@@ -346,6 +361,7 @@ function StepRow(props: {
         {step.paints.length > 1 && <span className="text-xs text-muted">mix {step.paints.map((x) => x.parts ?? 1).join(':')}</span>}
       </div>
       <input className="input ml-8" placeholder="note" aria-label="Step note" value={step.note} onChange={(e) => props.onChange({ note: e.target.value })} />
+      <StepLinks links={step.links ?? []} onChange={(links) => props.onChange({ links: links.length ? links : undefined })} />
       {stepPhotos.length > 0 && (
         <div className="ml-8 flex gap-2">
           {stepPhotos.map((p) => <PhotoThumb key={p.id} photo={p} size="h-14 w-14" onClick={() => setViewing(p.id)} />)}
@@ -354,4 +370,35 @@ function StepRow(props: {
       {viewing && <PhotoViewer photos={stepPhotos} startId={viewing} onClose={() => setViewing(null)} />}
     </li>
   )
+}
+
+/** Video/tutorial links of one step. */
+function StepLinks({ links, onChange }: { links: StepLink[]; onChange: (l: StepLink[]) => void }) {
+  const patch = (i: number, p: Partial<StepLink>) => onChange(links.map((l, j) => (j === i ? { ...l, ...p } : l)))
+  return (
+    <div className="ml-8 grid gap-1" aria-label="Step links">
+      {links.map((l, i) => (
+        <div key={i} className="flex gap-1">
+          <input className="input flex-1" placeholder="https://… video or tutorial" aria-label="Link URL" value={l.url} onChange={(e) => patch(i, { url: e.target.value })} />
+          <input className="input w-36" placeholder="title" aria-label="Link title" value={l.title ?? ''} onChange={(e) => patch(i, { title: e.target.value || undefined })} />
+          <button className="btn btn-danger" aria-label="Remove link" onClick={() => onChange(links.filter((_, j) => j !== i))}>✕</button>
+        </div>
+      ))}
+      <button className="w-fit text-xs text-muted underline" onClick={() => onChange([...links, { url: '' }])}>+ video / tutorial link</button>
+    </div>
+  )
+}
+
+/** Blank link rows typed and left empty are not saved. */
+function dropEmptyLinks(s: PaintScheme): PaintScheme {
+  return {
+    ...s,
+    sections: s.sections.map((sec) => ({
+      ...sec,
+      steps: sec.steps.map((st) => {
+        const links = st.links?.map((l) => ({ ...l, url: l.url.trim() })).filter((l) => l.url)
+        return { ...st, links: links?.length ? links : undefined }
+      }),
+    })),
+  }
 }
