@@ -10,6 +10,7 @@ import { detectTechnique } from '../../src/domain/schemes/extract.ts'
 import { getPage } from './fetch.mts'
 import { areaStage } from '../../src/domain/guides/prepare.ts'
 import { baseKinds, type BaseRecipe } from '../../src/domain/guides/bases.ts'
+import { terrainKinds } from '../../src/domain/guides/terrain.ts'
 
 const read = (p: string) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'))
 const sources = read('./sources.json')
@@ -210,6 +211,38 @@ for (const sc of schemes)
       steps: sec.steps,
     })
   }
+// Terrain guide: 'Eavy Archive terrain recipes and hand-written ones.
+const terrain: BaseRecipe[] = []
+for (const e of eavyArchive(await getPage(sources.eavyArchive.basesPage)).filter((x) => sources.eavyArchive.terrain.includes(x.slug))) {
+  const set = e.title.replace(/^Terrain:\s*/, '')
+  for (const a of e.areas) {
+    const id = `terrain/eavy-${e.slug}-${slug(a.area)}`
+    let n = 0
+    terrain.push({
+      id, name: a.area, factionName: set, origin: 'community',
+      kinds: terrainKinds(`${a.area} ${a.tags.join(' ')}`),
+      source: { title: `${set}: ${a.area} ('Eavy Archive)`, url: `${sources.eavyArchive.basesPage}?modal=${e.slug}&block=${slug(a.area)}` },
+      steps: a.steps.map((st) => eavyStep(st, `${id}/s${++n}`).step),
+    })
+  }
+}
+for (const m of read('./terrain-manual.json').terrain) {
+  let n = 0
+  const id = `terrain/mt-${m.id}`
+  terrain.push({
+    id, name: m.name, kinds: m.kinds, origin: 'minitracker',
+    steps: m.steps.map(([technique, names, note]: [string, string[], string]) => ({
+      id: `${id}/s${++n}`, technique, note,
+      paints: names.map((name) => {
+        const paintId = matchPaint(name, 'Citadel', paints)
+        if (!paintId) throw new Error(`terrain-manual.json: unknown paint ${name}`)
+        return { paintId }
+      }),
+    })),
+  })
+}
+writeFileSync(new URL('../../src/data/guides/terrain.json', import.meta.url), JSON.stringify({ generatedBy: 'tools/schemes/scrape.mts', terrain }))
+console.log(`${terrain.length} terrain recipes written`)
 writeFileSync(new URL('../../src/data/guides/bases.json', import.meta.url), JSON.stringify({ generatedBy: 'tools/schemes/scrape.mts', bases }))
 console.log(`${bases.length} bases written`)
 

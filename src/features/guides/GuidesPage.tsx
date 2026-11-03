@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { BasesTab } from './Bases'
+import { BasesBrowser, BasesTab } from './Bases'
 import { Diagram } from './Diagram'
 import { GETTING_STARTED, TECHNIQUES_GUIDE, videoSearch, type Technique } from '../../domain/guides/techniques'
 
-type Tab = 'techniques' | 'bases' | 'start'
-const TABS: [Tab, string][] = [['techniques', 'Techniques'], ['bases', 'Bases'], ['start', 'Getting started']]
+type Tab = 'techniques' | 'bases' | 'terrain' | 'start'
+const TABS: [Tab, string][] = [['techniques', 'Techniques'], ['bases', 'Bases'], ['terrain', 'Terrain'], ['start', 'Getting started']]
 
 /** Painting guides: techniques, bases and the basics. Used as its own page and as a tab in Schemes. */
 export function Guides({ initialTab = 'techniques' }: { initialTab?: Tab }) {
@@ -31,6 +31,7 @@ export function Guides({ initialTab = 'techniques' }: { initialTab?: Tab }) {
         </>
       )}
       {tab === 'bases' && <BasesTab />}
+      {tab === 'terrain' && <BasesBrowser set="terrain" />}
       {tab === 'start' && (
         <div className="grid gap-3 md:grid-cols-2">
           {GETTING_STARTED.map((s) => (

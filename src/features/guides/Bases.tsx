@@ -1,27 +1,33 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../../app/store'
 import { BASE_KINDS, filterBases, type BaseRecipe } from '../../domain/guides/bases'
+import { TERRAIN_KINDS } from '../../domain/guides/terrain'
 import { techniqueFor, type Technique } from '../../domain/guides/techniques'
 import { TechniquePanel } from './GuidesPage'
 import { materialsFor, type Material } from '../../domain/guides/materials'
 import { MaterialPanel, MaterialsList } from './Materials'
 
-let cache: BaseRecipe[] | null = null
-/** Bases are loaded on first use, like the scheme library. */
-export function useBases(): BaseRecipe[] | null {
-  const [bases, setBases] = useState(cache)
+type RecipeSet = 'bases' | 'terrain'
+const cache: Partial<Record<RecipeSet, BaseRecipe[]>> = {}
+const LOAD: Record<RecipeSet, () => Promise<BaseRecipe[]>> = {
+  bases: () => import('../../data/guides/bases.json').then((m) => (m.default as { bases: BaseRecipe[] }).bases),
+  terrain: () => import('../../data/guides/terrain.json').then((m) => (m.default as { terrain: BaseRecipe[] }).terrain),
+}
+/** Base or terrain recipes, loaded on first use like the scheme library. */
+export function useBases(set: RecipeSet = 'bases'): BaseRecipe[] | null {
+  const [list, setList] = useState(cache[set] ?? null)
   useEffect(() => {
-    if (cache) return
-    void import('../../data/guides/bases.json').then((m) => setBases((cache = (m.default as { bases: BaseRecipe[] }).bases)))
-  }, [])
-  return bases
+    if (cache[set]) return
+    void LOAD[set]().then((l) => setList((cache[set] = l)))
+  }, [set])
+  return list
 }
 
-const KINDS = BASE_KINDS.map(([k]) => k)
+const KINDS: Record<RecipeSet, string[]> = { bases: BASE_KINDS.map(([k]) => k), terrain: TERRAIN_KINDS.map(([k]) => k) }
 
 /** Browse basing recipes; with onPick, each card gets a "Use this base" button. */
-export function BasesBrowser({ onPick }: { onPick?: (b: BaseRecipe) => void }) {
-  const bases = useBases()
+export function BasesBrowser({ onPick, set = 'bases' }: { onPick?: (b: BaseRecipe) => void; set?: RecipeSet }) {
+  const bases = useBases(set)
   const { paints, loadPaints } = useStore()
   useEffect(() => {
     if (!paints.length) void loadPaints()
@@ -40,18 +46,21 @@ export function BasesBrowser({ onPick }: { onPick?: (b: BaseRecipe) => void }) {
   return (
     <div className="grid gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <input className="input w-56" aria-label="Search bases" placeholder="Search bases or factions…" value={text} onChange={(e) => setText(e.target.value)} />
-        <div role="group" aria-label="Base type" className="flex flex-wrap gap-1">
-          {['', ...KINDS].map((k) => (
+        <input className="input w-56" aria-label={set === 'bases' ? 'Search bases' : 'Search terrain'} placeholder={set === 'bases' ? 'Search bases or factions…' : 'Search terrain…'} value={text} onChange={(e) => setText(e.target.value)} />
+        <div role="group" aria-label={set === 'bases' ? 'Base type' : 'Surface'} className="flex flex-wrap gap-1">
+          {['', ...KINDS[set]].map((k) => (
             <button key={k || 'all'} aria-pressed={kind === k} className={`btn text-sm ${kind === k ? 'btn-primary' : ''}`} onClick={() => setKind(k)}>
               {k || 'All'}
             </button>
           ))}
         </div>
       </div>
-      <p className="text-sm text-muted">{shown.length} recipes. Texture paints go on first; finish with drybrushing and a neat rim.</p>
+      <p className="text-sm text-muted">
+        {shown.length} recipes.{' '}
+        {set === 'bases' ? 'Texture paints go on first; finish with drybrushing and a neat rim.' : 'Spray or drybrush big areas, sponge on damage, and keep terrain colours different from your army so models stand out.'}
+      </p>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {shown.map((b) => <BaseCard key={b.id} base={b} onTechnique={setTechnique} onMaterial={setMaterial} onPick={onPick} />)}
+        {shown.map((b) => <BaseCard key={b.id} base={b} label={set === 'bases' ? 'Base' : 'Terrain'} onTechnique={setTechnique} onMaterial={setMaterial} onPick={onPick} />)}
       </div>
       {technique && <TechniquePanel technique={technique} onClose={() => setTechnique(null)} />}
       {material && <MaterialPanel material={material} onClose={() => setMaterial(null)} />}
@@ -59,11 +68,11 @@ export function BasesBrowser({ onPick }: { onPick?: (b: BaseRecipe) => void }) {
   )
 }
 
-function BaseCard({ base: b, onTechnique, onMaterial, onPick }: { base: BaseRecipe; onTechnique: (t: Technique) => void; onMaterial: (m: Material) => void; onPick?: (b: BaseRecipe) => void }) {
+function BaseCard({ base: b, label, onTechnique, onMaterial, onPick }: { base: BaseRecipe; label: string; onTechnique: (t: Technique) => void; onMaterial: (m: Material) => void; onPick?: (b: BaseRecipe) => void }) {
   const { paints } = useStore()
   const byId = useMemo(() => new Map(paints.map((p) => [p.id, p])), [paints])
   return (
-    <article className="panel grid content-start gap-2 p-3 text-sm" aria-label={`Base ${b.name}`}>
+    <article className="panel grid content-start gap-2 p-3 text-sm" aria-label={`${label} ${b.name}`}>
       <header>
         <h3 className="font-semibold text-accent">{b.name}</h3>
         <p className="text-xs text-muted">
@@ -88,7 +97,7 @@ function BaseCard({ base: b, onTechnique, onMaterial, onPick }: { base: BaseReci
                 return (
                   <span key={sp.paintId} className="flex items-center gap-1 rounded border border-line px-1.5">
                     <span className="h-3 w-3 rounded-sm border border-line" style={{ background: p?.hex ?? '#888' }} />
-                    {p?.name ?? sp.paintId.split('/').pop()}
+                    {p?.name ?? sp.paintId.split('/').pop()!.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
                     {sp.parts ? ` ×${sp.parts}` : ''}
                   </span>
                 )

@@ -120,3 +120,16 @@ it('shows basing materials, adds one to Supplies, and links materials from base 
   expect(within(screen.getByRole('article', { name: 'Material Grass tufts' })).getByText('✓ In Supplies')).toBeTruthy()
   expect(within(screen.getByRole('article', { name: 'Material PVA glue' })).getByRole('button', { name: '+ Add to Supplies' })).toBeTruthy()
 })
+
+it('shows terrain recipes filtered by surface', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  await waitFor(() => expect(useStore.getState().ready).toBe(true))
+  await user.click(screen.getByRole('button', { name: 'Guides' }))
+  await user.click(screen.getByRole('tab', { name: 'Terrain' }))
+  expect(await screen.findByRole('article', { name: 'Terrain Grey Imperial ruins' })).toBeTruthy()
+  expect(screen.getByRole('article', { name: 'Terrain Plasma Pipes' })).toBeTruthy()
+  await user.click(within(screen.getByRole('group', { name: 'Surface' })).getByRole('button', { name: 'wood' }))
+  expect(screen.queryByRole('article', { name: 'Terrain Grey Imperial ruins' })).toBeNull()
+  expect(screen.getByRole('article', { name: 'Terrain Weathered wood' })).toBeTruthy()
+})
