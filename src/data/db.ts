@@ -6,6 +6,7 @@ import type { OwnedUnit, StatusEvent } from '../domain/collection/types'
 import type { PaintDef, PaintStock } from '../domain/paints/types'
 import type { Photo, PhotoFiles } from '../domain/photos/types'
 import type { PaintScheme } from '../domain/schemes/types'
+import { trackSyncedTables } from './syncTracking'
 
 export interface SettingRow {
   key: string
@@ -57,5 +58,7 @@ export class MiniTrackerDb extends Dexie {
     this.version(7).stores({ lists: 'id, factionId, edition, updatedAt' })
     // v8: shopping lists (#87).
     this.version(8).stores({ shopItems: 'id, kind, bought', shopLists: 'id' })
+    // Sync (#161): edit times and deletion markers on every synced table.
+    trackSyncedTables(this)
   }
 }
