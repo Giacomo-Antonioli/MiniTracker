@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { KindsEditor } from '../storage/Storage'
 import { readStartPage, saveStartPage, THEMES, useStore, type RuleDisplay, type StartPage, type Theme } from '../../app/store'
 import { DEFAULT_PIPELINES } from '../../domain/pipelines'
 import { BackupPage } from './BackupPage'
@@ -17,7 +18,7 @@ const SECTIONS: { id: SettingsSection; label: string }[] = [
 
 export function SettingsPage({ section }: { section?: SettingsSection }) {
   const [start, setStart] = useState<StartPage>(readStartPage)
-  const { currency, setCurrency, theme, setTheme, ruleDisplay, setRuleDisplay, pipelines, savePipelineFor, units, paintStock, schemes } = useStore()
+  const { currency, setCurrency, theme, setTheme, ruleDisplay, setRuleDisplay, pipelines, savePipelineFor, units, paintStock, schemes, storage } = useStore()
 
   useEffect(() => {
     if (section) document.getElementById(`settings-${section}`)?.scrollIntoView?.({ block: 'start' })
@@ -102,6 +103,16 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
           usedLabel="schemes"
           onSave={(p) => savePipelineFor('scheme', p)}
         />
+        <PipelineEditor
+          title="Storage pipeline"
+          description="Where a unit is in its storage life. Checking out to a desk sets the stage with id 'desk', checking out anywhere else sets 'packed', and putting back sets 'stored'."
+          pipeline={pipelines.storage}
+          defaults={DEFAULT_PIPELINES.storage}
+          usedBy={(id) => Object.values(storage.flow).filter((x) => x === id).length}
+          usedLabel="units"
+          onSave={(p) => savePipelineFor('storage', p)}
+        />
+        <KindsEditor />
       </section>
 
       <section id="settings-catalogue" className="scroll-mt-4">

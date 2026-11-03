@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  FLOW_DESK, FLOW_PACKED, FLOW_STORED, kindOf, removeSite, saveKinds, saveSite, setFlow, siteOf, sitePlaces,
   checkOut, checkedOutTo, descendants, EMPTY_STORAGE, fill, homedIn, parseStorage, pathLabel, pickList, placePath, pruneStorage, putBack, putBackList,
   removePlace, savePlace, setHome, unitLog, validatePlace, whereIs, type Place, type Storage,
 } from './storage'
@@ -97,6 +98,41 @@ it('prune and parse', () => {
   expect(Object.keys(p.out)).toEqual([])
   expect(p.log.every((m) => m.unitId === 'u1')).toBe(true)
   expect(parseStorage(null)).toEqual(EMPTY_STORAGE)
-  expect(parseStorage({ places: [{ id: 'x', name: 'X', kind: 'weird' }, { id: 1 }], homes: [], out: 'x', log: 'x' })).toEqual({ places: [{ id: 'x', name: 'X', kind: 'box', location: '', note: '' }], homes: {}, out: {}, log: [] })
+  expect(parseStorage({ places: [{ id: 'x', name: 'X', kind: 'weird' }, { id: 1 }], homes: [], out: 'x', log: 'x' })).toMatchObject({ sites: [], flow: {}, places: [{ id: 'x', name: 'X', kind: 'box', location: '', note: '' }], homes: {}, out: {}, log: [] })
   expect(parseStorage({ homes: { u: { placeId: 'a' } }, out: { u: 'b' }, log: [] })).toMatchObject({ places: [], homes: { u: { placeId: 'a' } }, out: { u: 'b' } })
+})
+
+it('sites, kinds and storage flow', () => {
+  let s = world()
+  expect(pathLabel(s, 'bag')).toBe('Shelf 2 › Sprues › Bag 7')
+  expect(() => saveSite(s, { id: 'x', name: ' ', address: '', note: '' })).toThrow(/name/)
+  s = saveSite(s, { id: 'home', name: ' Home ', address: '', note: '' })
+  s = saveSite(s, { id: 'club', name: 'Club', address: 'Via Roma 1', note: '' })
+  s = saveSite(s, { ...s.sites[1], note: 'locker 4' })
+  s = savePlace(s, { ...s.places.find((p) => p.id === 'case')!, siteId: 'club' })
+  expect(siteOf(s, 'bag')?.name).toBe('Home')
+  expect(pathLabel(s, 'bag')).toBe('Home › Shelf 2 › Sprues › Bag 7')
+  expect(sitePlaces(s, 'club').map((p) => p.id)).toEqual(['case'])
+  expect(sitePlaces(s, 'home').map((p) => p.id).sort()).toEqual(['a', 'shelf'])
+  s = removeSite(s, 'club')
+  expect(s.places.find((p) => p.id === 'case')?.siteId).toBe('home')
+  expect(removeSite(s, 'ghost')).toBe(s)
+
+  expect(kindOf(s, 'bag').icon).toBeTruthy()
+  expect(kindOf(s, 'odd')).toMatchObject({ name: 'odd' })
+  expect(() => saveKinds(s, [])).toThrow(/one/)
+  expect(() => saveKinds(s, [{ id: 'a', name: ' ', icon: '' }])).toThrow(/name/)
+  expect(() => saveKinds(s, [{ id: 'a', name: 'A', icon: '' }, { id: 'a', name: 'B', icon: '' }])).toThrow(/different/)
+  expect(() => saveKinds(s, s.kinds.filter((k) => k.id !== 'bag'))).toThrow(/Bag/)
+  expect(saveKinds(s, [...s.kinds, { id: 'mag', name: 'Magnetic tray', icon: '🧲' }]).kinds.at(-1)?.id).toBe('mag')
+
+  s = savePlace(s, place('desk', 'Desk', undefined, { kind: 'desk' }))
+  s = checkOut(s, ['u1'], 'desk', c)
+  expect(s.flow.u1).toBe(FLOW_DESK)
+  s = checkOut(s, ['u1'], 'case', c)
+  expect(s.flow.u1).toBe(FLOW_PACKED)
+  s = putBack(s, ['u1'], c)
+  expect(s.flow.u1).toBe(FLOW_STORED)
+  expect(setFlow(s, ['u1'], undefined).flow).toEqual({})
+  expect(setFlow(s, ['u1'], 'lent').flow.u1).toBe('lent')
 })

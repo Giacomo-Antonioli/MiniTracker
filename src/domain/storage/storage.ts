@@ -3,22 +3,54 @@
  * Each unit has a home (place + optional slot) and may be checked out to another place
  * (a travel case, the painting desk) while keeping its home. Every change is logged.
  */
-export type PlaceKind = 'shelf' | 'box' | 'bag' | 'case' | 'tray' | 'desk'
+/** Place kind id; the list of kinds is user-editable (Settings). */
+export type PlaceKind = string
 
-export const PLACE_KINDS: { id: PlaceKind; name: string; icon: string }[] = [
+export interface KindDef {
+  id: PlaceKind
+  name: string
+  icon: string
+}
+
+export const PLACE_KINDS: KindDef[] = [
   { id: 'shelf', name: 'Shelf', icon: '🗄' },
   { id: 'box', name: 'Box', icon: '📦' },
   { id: 'bag', name: 'Bag', icon: '🛍' },
   { id: 'case', name: 'Case', icon: '🧳' },
   { id: 'tray', name: 'Tray', icon: '🧩' },
   { id: 'desk', name: 'Desk / table', icon: '🖌' },
+  { id: 'drawer', name: 'Drawer', icon: '🗃' },
 ]
+
+/** An independent storage: your home, a club locker, a friend's house. Top-level places belong to one. */
+export interface Site {
+  id: string
+  name: string
+  address: string
+  note: string
+}
+
+/** Stages of the storage flow (Settings ▸ Pipelines ▸ Storage); check-out and put-back move units along it. */
+export const FLOW_STORED = 'stored'
+export const FLOW_DESK = 'desk'
+export const FLOW_PACKED = 'packed'
+export const DEFAULT_STORAGE_FLOW = {
+  stages: [
+    { id: FLOW_STORED, name: 'In storage' },
+    { id: FLOW_DESK, name: 'On the desk' },
+    { id: FLOW_PACKED, name: 'Packed' },
+    { id: 'at-game', name: 'At a game' },
+    { id: 'lent', name: 'Lent out' },
+  ],
+}
 
 export interface Place {
   id: string
   name: string
   kind: PlaceKind
   parentId?: string
+  /** Storage it belongs to; only set on top-level places (children follow their parent). */
+  siteId?: string
   /** Room, shelf or anything that helps to find it. */
   location: string
   /** Number of slots; undefined = no fixed slots. */
@@ -43,14 +75,18 @@ export interface StorageMove {
 }
 
 export interface Storage {
+  sites: Site[]
+  kinds: KindDef[]
   places: Place[]
+  /** Storage-flow stage per unit. */
+  flow: Record<string, string>
   homes: Record<string, Home>
   /** Checked-out units: unit id → place it is in now. */
   out: Record<string, string>
   log: StorageMove[]
 }
 
-export const EMPTY_STORAGE: Storage = { places: [], homes: {}, out: {}, log: [] }
+export const EMPTY_STORAGE: Storage = { sites: [], kinds: PLACE_KINDS, places: [], flow: {}, homes: {}, out: {}, log: [] }
 
 type Ctx = { now: string; newId: () => string }
 
@@ -69,8 +105,55 @@ export function placePath(s: Storage, id: string | undefined): Place[] {
   return out
 }
 
-export const pathLabel = (s: Storage, id: string | undefined, slot?: number) =>
-  placePath(s, id).map((p) => p.name).join(' › ') + (slot !== undefined ? ` · slot ${slot}` : '')
+/** The storage a place belongs to (its top-level place's site; else the first storage). */
+export function siteOf(s: Storage, id: string | undefined): Site | undefined {
+  const root = placePath(s, id)[0]
+  return s.sites.find((x) => x.id === root?.siteId) ?? s.sites[0]
+}
+
+/** "Home › Shelf 2 › Box"; the storage name is shown only when there are several. */
+export function pathLabel(s: Storage, id: string | undefined, slot?: number): string {
+  const path = placePath(s, id).map((p) => p.name)
+  if (path.length && s.sites.length > 1) path.unshift(siteOf(s, id)!.name)
+  return path.join(' › ') + (slot !== undefined ? ` · slot ${slot}` : '')
+}
+
+export const kindOf = (s: Storage, id: PlaceKind) => s.kinds.find((k) => k.id === id) ?? { id, name: id, icon: '📦' }
+
+export function saveSite(s: Storage, x: Site): Storage {
+  if (!x.name.trim()) throw new Error('Give the storage a name')
+  const clean = { ...x, name: x.name.trim() }
+  return { ...s, sites: s.sites.some((y) => y.id === x.id) ? s.sites.map((y) => (y.id === x.id ? clean : y)) : [...s.sites, clean] }
+}
+
+/** Removes a storage; its top-level places move to the first remaining storage. */
+export function removeSite(s: Storage, id: string): Storage {
+  const sites = s.sites.filter((x) => x.id !== id)
+  if (sites.length === s.sites.length) return s
+  return { ...s, sites, places: s.places.map((p) => (p.siteId === id ? { ...p, siteId: sites[0]?.id } : p)) }
+}
+
+/** Top-level places of a storage (places with no site go to the first storage). */
+export const sitePlaces = (s: Storage, siteId: string | undefined) =>
+  s.places.filter((p) => !p.parentId && (p.siteId === siteId || (!s.sites.some((x) => x.id === p.siteId) && siteId === s.sites[0]?.id)))
+
+export function saveKinds(s: Storage, kinds: KindDef[]): Storage {
+  if (!kinds.length) throw new Error('Keep at least one kind')
+  for (const k of kinds) if (!k.name.trim() || !k.id) throw new Error('Every kind needs a name')
+  if (new Set(kinds.map((k) => k.id)).size !== kinds.length) throw new Error('Kinds must be different')
+  const gone = s.kinds.filter((k) => !kinds.some((x) => x.id === k.id)).find((k) => s.places.some((p) => p.kind === k.id))
+  if (gone) throw new Error(`"${gone.name}" is used by places`)
+  return { ...s, kinds }
+}
+
+export function setFlow(s: Storage, unitIds: string[], stage: string | undefined): Storage {
+  const flow = { ...s.flow }
+  for (const u of unitIds) {
+    if (stage) flow[u] = stage
+    else delete flow[u]
+  }
+  return { ...s, flow }
+}
 
 /** The place and everything inside it. */
 export function descendants(s: Storage, id: string): Set<string> {
@@ -141,14 +224,16 @@ export function checkOut(s: Storage, unitIds: string[], placeId: string, c: Ctx)
   const out = { ...s.out }
   const moved = unitIds.filter((u) => out[u] !== placeId)
   for (const u of moved) out[u] = placeId
-  return { ...s, out, log: [...s.log, ...moved.map((unitId) => ({ id: c.newId(), unitId, date: c.now, kind: 'out' as const, placeId }))] }
+  // Check-out moves units along the storage flow: to a desk = on the desk, anywhere else = packed.
+  const stage = placeById(s, placeId)!.kind === 'desk' ? FLOW_DESK : FLOW_PACKED
+  return setFlow({ ...s, out, log: [...s.log, ...moved.map((unitId) => ({ id: c.newId(), unitId, date: c.now, kind: 'out' as const, placeId }))] }, moved, stage)
 }
 
 export function putBack(s: Storage, unitIds: string[], c: Ctx): Storage {
   const out = { ...s.out }
   const moved = unitIds.filter((u) => out[u])
   for (const u of moved) delete out[u]
-  return { ...s, out, log: [...s.log, ...moved.map((unitId) => ({ id: c.newId(), unitId, date: c.now, kind: 'back' as const, placeId: s.homes[unitId]?.placeId }))] }
+  return setFlow({ ...s, out, log: [...s.log, ...moved.map((unitId) => ({ id: c.newId(), unitId, date: c.now, kind: 'back' as const, placeId: s.homes[unitId]?.placeId }))] }, moved, FLOW_STORED)
 }
 
 /** Where the unit is now: checked-out place, else home. */
@@ -199,16 +284,20 @@ export const unitLog = (s: Storage, unitId: string) => s.log.filter((m) => m.uni
 /** Drops homes, check-outs and log rows of units that no longer exist. */
 export function pruneStorage(s: Storage, unitIds: Set<string>): Storage {
   const keep = <T,>(r: Record<string, T>) => Object.fromEntries(Object.entries(r).filter(([u]) => unitIds.has(u)))
-  return { ...s, homes: keep(s.homes), out: keep(s.out), log: s.log.filter((m) => unitIds.has(m.unitId)) }
+  return { ...s, homes: keep(s.homes), out: keep(s.out), flow: keep(s.flow), log: s.log.filter((m) => unitIds.has(m.unitId)) }
 }
 
 const isObj = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x)
 
 export function parseStorage(x: unknown): Storage {
   if (!isObj(x)) return EMPTY_STORAGE
-  const places = Array.isArray(x.places) ? x.places.filter((p): p is Place => isObj(p) && typeof p.id === 'string' && typeof p.name === 'string').map((p) => ({ ...p, kind: PLACE_KINDS.some((k) => k.id === p.kind) ? p.kind : 'box', location: p.location ?? '', note: p.note ?? '' })) : []
+  const kinds = Array.isArray(x.kinds) && x.kinds.length ? (x.kinds as KindDef[]).filter((k) => isObj(k) && typeof k.id === 'string') : PLACE_KINDS
+  const places = Array.isArray(x.places) ? x.places.filter((p): p is Place => isObj(p) && typeof p.id === 'string' && typeof p.name === 'string').map((p) => ({ ...p, kind: kinds.some((k) => k.id === p.kind) ? p.kind : 'box', location: p.location ?? '', note: p.note ?? '' })) : []
   return {
+    sites: Array.isArray(x.sites) ? (x.sites as Site[]).filter((y) => isObj(y) && typeof y.id === 'string') : [],
+    kinds,
     places,
+    flow: isObj(x.flow) ? (x.flow as Record<string, string>) : {},
     homes: isObj(x.homes) ? (x.homes as Record<string, Home>) : {},
     out: isObj(x.out) ? (x.out as Record<string, string>) : {},
     log: Array.isArray(x.log) ? (x.log as StorageMove[]) : [],

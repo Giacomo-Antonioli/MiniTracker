@@ -37,6 +37,7 @@ interface Props {
 
 export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage, onOpenDatasheet, onOpenScheme }: Props) {
   const page = variant === 'page'
+  const [tab, setTab] = useState<'details' | 'storage'>('details')
   const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, library, loadLibrary, paints, loadPaints, paintStock, purchases, currency, openCompanion } = useStore()
   const allSchemes = [...schemes, ...library]
   const scheme = unit.schemeId ? allSchemes.find((s) => s.id === unit.schemeId) : undefined
@@ -128,6 +129,17 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
         </div>
       </header>
 
+      {page && (
+        <div className="flex gap-1 border-b border-line px-4 pt-2" role="tablist" aria-label="Unit sections">
+          {(['details', 'storage'] as const).map((t) => (
+            <button key={t} role="tab" aria-selected={tab === t} className={`rounded-t px-3 py-1.5 ${tab === t ? 'bg-panel-2 text-accent' : 'text-muted hover:text-fg'}`} onClick={() => setTab(t)}>
+              {t === 'details' ? 'Details' : '📦 Storage'}
+            </button>
+          ))}
+        </div>
+      )}
+      {page && tab === 'storage' && <UnitStorage unit={unit} />}
+      {(!page || tab === 'details') && <>
       <section className="border-b border-line p-4">
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Models</h3>
         <ul className="grid gap-2">
@@ -149,7 +161,7 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
         </ul>
       </section>
 
-      <UnitStorage unit={unit} />
+      {!page && <UnitStorage unit={unit} />}
 
       <section className="grid gap-2 border-b border-line p-4" aria-label="Scheme">
         <div className="flex items-center justify-between gap-2">
@@ -240,6 +252,8 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
           </div>
         </section>
       )}
+
+      </>}
 
       {viewing && <PhotoViewer photos={photos} startId={viewing} onClose={() => setViewing(null)} />}
       {moving && <MoveDialog unit={unit} group={moving} onClose={() => setMoving(null)} />}

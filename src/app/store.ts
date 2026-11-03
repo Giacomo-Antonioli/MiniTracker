@@ -360,11 +360,12 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals, paintSessions, paintTimers, companionTicks, storage] = await Promise.all([
+    const [units, painting, paint, scheme, storageFlow, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals, paintSessions, paintTimers, companionTicks, storage] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
       settingsRepo.getPipeline('scheme'),
+      settingsRepo.getPipeline('storage'),
       catalogueRepo.list(),
       paintRepo.listStock(),
       schemeRepo.list(),
@@ -389,7 +390,7 @@ export const useStore = create<State>((set, get) => ({
     set({
       units,
       pipeline: painting,
-      pipelines: { painting, paint, scheme },
+      pipelines: { painting, paint, scheme, storage: storageFlow },
       catalogue: catalogue ?? null,
       catalogues,
       paintStock: new Map(stock.map((s) => [s.paintId, s])),
