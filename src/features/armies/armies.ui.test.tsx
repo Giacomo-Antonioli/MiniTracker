@@ -376,7 +376,7 @@ describe('Armies', () => {
 
     await user.click(screen.getByRole('button', { name: '⚙ Settings' }))
     await user.click(within(screen.getByRole('region', { name: 'Stratagems' })).getByRole('button', { name: 'Remove' }))
-    expect(within(screen.getByRole('region', { name: 'Stratagems' })).queryByRole('status')).toBeNull()
+    await waitFor(() => expect(within(screen.getByRole('region', { name: 'Stratagems' })).queryByRole('status')).toBeNull())
   })
 
   it('only lets Characters be the Warlord', async () => {

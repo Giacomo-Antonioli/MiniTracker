@@ -6,6 +6,7 @@ import type { ShopItem, ShopList } from '../domain/shopping/types'
 import type { PaintScheme } from '../domain/schemes/types'
 import { buildBackupZip, isZip, readBackupZip, type PhotoEntry, type PhotoFileRef } from './backupZip'
 import type { MiniTrackerDb, SettingRow } from './db'
+import { flushSyncStamps } from './syncStamps'
 
 export const BACKUP_FORMAT = 'minitracker-backup'
 /** Bump when the file layout changes; parseBackup must keep reading older versions. */
@@ -36,6 +37,7 @@ export interface Backup {
 }
 
 export async function exportBackup(db: MiniTrackerDb, now: string): Promise<Backup> {
+  await flushSyncStamps()
   const [units, statusEvents, settings, paintStock, customPaints, schemes, lists, shopItems, shopLists] = await Promise.all([
     db.units.toArray(),
     db.statusEvents.toArray(),

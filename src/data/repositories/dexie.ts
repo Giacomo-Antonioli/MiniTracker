@@ -11,6 +11,7 @@ import { DEFAULT_PIPELINES, type PipelineKey } from '../../domain/pipelines'
 import { withWishlisted } from '../../domain/collection/pipeline'
 import type { OwnedUnit, Pipeline, StatusEvent } from '../../domain/collection/types'
 import type { MiniTrackerDb } from '../db'
+import { putSetting } from '../syncStamps'
 import type { EventRepository, SettingsRepository, UnitRepository } from './types'
 
 export class DexieUnitRepository implements UnitRepository {
@@ -97,12 +98,12 @@ export class DexieSettingsRepository implements SettingsRepository {
   }
 
   async setValue(key: string, value: unknown): Promise<void> {
-    await this.db.settings.put({ key, value })
+    await putSetting(this.db, key, value)
   }
 
   async savePipeline(pipeline: Pipeline, key: PipelineKey = 'painting') {
     validatePipeline(pipeline)
-    await this.db.settings.put({ key: storageKey(key), value: pipeline })
+    await putSetting(this.db, storageKey(key), pipeline)
   }
 }
 

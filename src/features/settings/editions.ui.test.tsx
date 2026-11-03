@@ -37,7 +37,7 @@ describe('Editions', () => {
     const card11 = screen.getByRole('region', { name: 'Catalogue 11th edition' })
     expect(within(screen.getByRole('region', { name: 'Catalogue 10th edition' })).getByText('active')).toBeInTheDocument()
     await user.click(within(card11).getByRole('button', { name: 'Use this edition' }))
-    expect(within(card11).getByText('active')).toBeInTheDocument()
+    expect(await within(card11).findByText('active')).toBeInTheDocument()
     expect((await appDb.settings.get('activeCatalogue'))?.value).toBe('sys-11')
 
     await user.click(screen.getByRole('button', { name: /^Catalogue$/ }))
