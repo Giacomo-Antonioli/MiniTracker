@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.11.2] - 2026-11-03
+
 ### Added
 - Guides › Terrain: Materials and Beginner projects (rubble piles, ruined walls, forest bases, modular ruins), terrain density per game, from Tista Minis' terrain guide (credited).
 
@@ -223,7 +225,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.1...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.2...HEAD
+[0.11.2]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.1...v0.11.2
 [0.11.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.9.0...v0.10.0
