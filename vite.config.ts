@@ -34,7 +34,7 @@ export default defineConfig({
     testTimeout: 15_000,
     coverage: {
       include: ['src/domain/**', 'src/data/**'],
-      exclude: ['**/*.test.ts', '**/types.ts', '**/fixtures/**', 'src/data/catalogue/convert.ts', 'src/data/catalogue/parse.worker.ts', 'src/data/photos/compress.ts'] /* browser-only glue: covered by e2e/catalogue.spec.ts and e2e/photos.spec.ts */,
+      exclude: ['**/*.test.ts', '**/types.ts', '**/fixtures/**', 'src/data/catalogue/convert.ts', 'src/data/catalogue/parse.worker.ts', 'src/data/photos/compress.ts', 'src/data/syncChannel.ts'] /* browser-only glue: covered by e2e/catalogue.spec.ts, e2e/photos.spec.ts and (sync, #161) e2e/sync.spec.ts with the sync screen */,
       thresholds: { lines: 90, branches: 90, functions: 90, statements: 90 },
     },
   },
