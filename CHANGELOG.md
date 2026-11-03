@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Guides › Terrain: "How to paint terrain" (prepare, prime, drybrush and shade, details and weathering, finish), merged from four published guides and credited, with three diagrams drawn for MiniTracker.
+
 ## [0.11.0] - 2026-11-03
 
 ### Added

@@ -3,7 +3,7 @@
  * rewritten in our own words; the guides are linked as sources. Diagrams are drawn by MiniTracker.
  */
 
-export type DiagramId = 'light' | 'consistency' | 'wash' | 'layers' | 'edge' | 'drybrush' | 'glaze' | 'blend' | 'order' | 'spray' | 'varnish' | 'contrast' | 'stipple' | 'chips' | 'lens' | 'freehand' | 'weathering'
+export type DiagramId = 'light' | 'consistency' | 'wash' | 'layers' | 'edge' | 'drybrush' | 'glaze' | 'blend' | 'order' | 'spray' | 'varnish' | 'contrast' | 'stipple' | 'chips' | 'lens' | 'freehand' | 'weathering' | 'terrain-steps' | 'grime' | 'army-contrast'
 
 export interface TechniqueDetail {
   /** Step-by-step method. */

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BasesBrowser, BasesTab } from './Bases'
 import { Diagram } from './Diagram'
+import { TERRAIN_GUIDE, TERRAIN_SOURCES } from '../../domain/guides/terrain'
 import { GETTING_STARTED, TECHNIQUES_GUIDE, videoSearch, type Technique } from '../../domain/guides/techniques'
 
 type Tab = 'techniques' | 'bases' | 'terrain' | 'start'
@@ -31,7 +32,12 @@ export function Guides({ initialTab = 'techniques' }: { initialTab?: Tab }) {
         </>
       )}
       {tab === 'bases' && <BasesTab />}
-      {tab === 'terrain' && <BasesBrowser set="terrain" />}
+      {tab === 'terrain' && (
+        <>
+          <TerrainHowTo />
+          <BasesBrowser set="terrain" />
+        </>
+      )}
       {tab === 'start' && (
         <div className="grid gap-3 md:grid-cols-2">
           {GETTING_STARTED.map((s) => (
@@ -101,5 +107,33 @@ export function GuidesPage() {
       <h1 className="font-display text-2xl text-accent">Guides</h1>
       <Guides />
     </div>
+  )
+}
+
+/** How to paint terrain, above the terrain recipes. */
+function TerrainHowTo() {
+  return (
+    <details className="panel p-4 text-sm" open aria-label="How to paint terrain">
+      <summary className="cursor-pointer font-semibold text-accent">How to paint terrain</summary>
+      <div className="mt-3 grid gap-3 md:grid-cols-3">
+        <Diagram id="terrain-steps" />
+        <Diagram id="grime" />
+        <Diagram id="army-contrast" />
+      </div>
+      <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {TERRAIN_GUIDE.map((s) => (
+          <section key={s.title} aria-label={s.title}>
+            <h3 className="mb-1 font-semibold">{s.title}</h3>
+            <ul className="grid list-disc gap-1 pl-5">{s.points.map((p) => <li key={p}>{p}</li>)}</ul>
+          </section>
+        ))}
+      </div>
+      <p className="mt-3 text-xs text-muted">
+        Based on:{' '}
+        {TERRAIN_SOURCES.map((s, i) => (
+          <span key={s.url}>{i > 0 && ' · '}<a className="hover:text-accent hover:underline" href={s.url} target="_blank" rel="noreferrer">{s.title}</a></span>
+        ))}
+      </p>
+    </details>
   )
 }
