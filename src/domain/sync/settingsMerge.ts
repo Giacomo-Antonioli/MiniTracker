@@ -23,6 +23,7 @@ export const SETTINGS_SHAPES: Record<string, Shape> = {
   },
   games: list(),
   supplies: list(),
+  tools: list(),
   purchases: list(),
   goals: list(),
   paintSessions: list(),

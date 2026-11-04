@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Tools: a Tools tab for owned tools (airbrush, clippers, lamp…) with brand, category, condition, storage place, bought date, price and notes. Repeating maintenance jobs (e.g. deep clean every 14 days, with suggestions per category) show as due in the tab and in the nav (Tools ⚠n). A wishlist, plus worn or broken tools, can be sent to the shopping list. Saved in the backup and merged tool by tool when syncing.
+
 ### Changed
 - Labels: a unit gets one code per model (U-001-1 … U-001-5) for stickers and stencils, and the unit page lists them; scanning or typing any of them opens the unit. Single-model units keep the plain code.
 

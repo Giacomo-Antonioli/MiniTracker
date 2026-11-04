@@ -26,6 +26,7 @@ import { becameLow, lowPaints, parseSupplies, supplyItem, type Supply } from '..
 import type { ArmyList, EditionKey } from '../domain/lists/types'
 import { addItems, newList, syncWishlisted, withoutList } from '../domain/shopping/shopping'
 import type { NewShopItem, ShopItem, ShopList } from '../domain/shopping/types'
+import { parseTools, type Tool } from '../domain/tools/tools'
 import type { BacklogFilter } from '../domain/collection/backlog'
 import { DEFAULT_PIPELINES, type PipelineKey } from '../domain/pipelines'
 import { DEFAULT_PIPELINE, firstOwnedStage, moveModels, WISHLISTED, type MoveOptions } from '../domain/collection/pipeline'
@@ -219,6 +220,10 @@ interface State {
   setCurrency(c: string): Promise<void>
   saveSupply(s: Supply): Promise<void>
   deleteSupply(id: string): Promise<void>
+  /** Hobby tools with maintenance jobs and a wishlist; saved in the backup. */
+  tools: Tool[]
+  saveTool(t: Tool): Promise<void>
+  deleteTool(id: string): Promise<void>
   /** Games, live and finished (#71); saved in the backup. */
   games: Game[]
   saveGame(g: Game): Promise<void>
@@ -364,7 +369,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, storageFlow, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals, paintSessions, paintTimers, companionTicks, storage, barcodes] = await Promise.all([
+    const [units, painting, paint, scheme, storageFlow, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals, paintSessions, paintTimers, companionTicks, storage, barcodes, tools] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
@@ -390,6 +395,7 @@ export const useStore = create<State>((set, get) => ({
       settingsRepo.getValue<unknown>('companionTicks', {}),
       settingsRepo.getValue<unknown>('storage', null),
       settingsRepo.getValue<unknown>('barcodes', []),
+      settingsRepo.getValue<unknown>('tools', []),
     ])
     const catalogue = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
     set({
@@ -409,6 +415,7 @@ export const useStore = create<State>((set, get) => ({
       games: parseGames(games),
       stratagemData,
       supplies: parseSupplies(supplies),
+      tools: parseTools(tools),
       purchases: parsePurchases(purchases),
       goals: parseGoals(goals),
       paintSessions: parseSessions(paintSessions),
@@ -737,6 +744,17 @@ export const useStore = create<State>((set, get) => ({
     const list = get().supplies.filter((x) => x.id !== id)
     set({ supplies: list })
     await settingsRepo.setValue('supplies', list)
+  },
+  tools: [],
+  async saveTool(tool) {
+    const list = get().tools.some((x) => x.id === tool.id) ? get().tools.map((x) => (x.id === tool.id ? tool : x)) : [...get().tools, tool]
+    set({ tools: list })
+    await settingsRepo.setValue('tools', list)
+  },
+  async deleteTool(id) {
+    const list = get().tools.filter((x) => x.id !== id)
+    set({ tools: list })
+    await settingsRepo.setValue('tools', list)
   },
   async saveHomeLayout(l) {
     set({ homeLayout: l })
