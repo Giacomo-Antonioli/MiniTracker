@@ -25,7 +25,7 @@ function tree(s: Storage, siteId?: string | null): { place: Place; depth: number
   return out
 }
 
-function PlaceSelect({ value, onChange, label, exclude, empty = 'None', only }: { value?: string; onChange: (id?: string) => void; label: string; exclude?: Set<string>; empty?: string; only?: string[] }) {
+export function PlaceSelect({ value, onChange, label, exclude, empty = 'None', only }: { value?: string; onChange: (id?: string) => void; label: string; exclude?: Set<string>; empty?: string; only?: string[] }) {
   const { storage } = useStore()
   return (
     <select className="input" aria-label={label} value={value ?? ''} onChange={(e) => onChange(e.target.value || undefined)}>

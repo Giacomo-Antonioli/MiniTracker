@@ -19,12 +19,14 @@ import { ShoppingPage } from '../features/shopping/ShoppingPage'
 import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeImport'
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { readStartPage, useStore } from './store'
+import { dueTasks } from '../domain/tools/tools'
+import { ToolsPage } from '../features/tools/ToolsPage'
 import { HomePage } from '../features/home/HomePage'
 import { codeFromText, findCode } from '../domain/storage/codes'
 import { PlacePage, StoragePage } from '../features/storage/Storage'
 import { CompanionHub, WorkCompanion } from '../features/companion/WorkCompanion'
 
-type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'storage' | 'place' | 'settings'
+type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'tools' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'storage' | 'place' | 'settings'
 
 const SOON: string[] = []
 
@@ -33,6 +35,7 @@ export default function App() {
   const companion = useStore((s) => s.companion)
   const timing = useStore((s) => s.paintTimers.some((t) => t.runningSince))
   const lowSupplies = useStore((s) => s.supplies.filter(isLow).length)
+  const dueTools = useStore((s) => dueTasks(s.tools, new Date().toISOString()).length)
   const liveGame = useStore((s) => s.games.some((g) => g.status === 'live'))
   // A recipe sent by the bookmarklet arrives in the URL (#recipe=…): start on Schemes with it.
   const [recipe, setRecipe] = useState<RecipePayload | null>(() => readRecipeHash(location.hash))
@@ -143,6 +146,7 @@ export default function App() {
         {nav('paints', 'Paints')}
         {nav('storage', 'Storage')}
         {nav('supplies', lowSupplies ? `Supplies ⚠${lowSupplies}` : 'Supplies')}
+        {nav('tools', dueTools ? `Tools ⚠${dueTools}` : 'Tools')}
         {nav('schemes', 'Schemes')}
         {nav('guides', 'Guides')}
         {nav('shopping', 'Shopping')}
@@ -196,6 +200,8 @@ export default function App() {
           <ShoppingPage />
         ) : page === 'supplies' ? (
           <SuppliesPage />
+        ) : page === 'tools' ? (
+          <ToolsPage />
         ) : page === 'games' ? (
           <GamesPage />
         ) : page === 'guides' ? (
