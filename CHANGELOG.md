@@ -4,6 +4,12 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Workshop: one tab with tools and supplies together; ▸ next to it opens the separate Tools and Supplies pages. The nav shows low stock plus due maintenance (Workshop ⚠n).
+
+### Changed
+- Tools and supplies have the same options: brand, category, stock with an alert level (going low adds it to the shopping list), condition, storage place, bought date, price, notes, repeating maintenance jobs and a wishlist. Existing supplies keep their data.
+
 ## [0.15.0] - 2026-11-04
 
 ### Added
