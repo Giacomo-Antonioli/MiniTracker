@@ -10,23 +10,20 @@ import { PaintsPage } from '../features/paints/PaintsPage'
 import { RulesPage } from '../features/rules/RulesPage'
 import { SchemesPage } from '../features/schemes/SchemesPage'
 import { StatsPage } from '../features/stats/StatsPage'
-import { SuppliesPage } from '../features/supplies/SuppliesPage'
 import { GoalsPage } from '../features/goals/GoalsPage'
 import { GuidesPage } from '../features/guides/GuidesPage'
-import { isLow } from '../domain/supplies/supplies'
 import { GamesPage } from '../features/games/GamesPage'
 import { ShoppingPage } from '../features/shopping/ShoppingPage'
 import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeImport'
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { readStartPage, useStore } from './store'
-import { dueTasks } from '../domain/tools/tools'
-import { ToolsPage } from '../features/tools/ToolsPage'
+import { WorkshopPage, workshopAlerts } from '../features/workshop/WorkshopPage'
 import { HomePage } from '../features/home/HomePage'
 import { codeFromText, findCode } from '../domain/storage/codes'
 import { PlacePage, StoragePage } from '../features/storage/Storage'
 import { CompanionHub, WorkCompanion } from '../features/companion/WorkCompanion'
 
-type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'supplies' | 'tools' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'storage' | 'place' | 'settings'
+type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'workshop' | 'supplies' | 'tools' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'storage' | 'place' | 'settings'
 
 const SOON: string[] = []
 
@@ -34,8 +31,9 @@ export default function App() {
   const { ready, load, theme } = useStore()
   const companion = useStore((s) => s.companion)
   const timing = useStore((s) => s.paintTimers.some((t) => t.runningSince))
-  const lowSupplies = useStore((s) => s.supplies.filter(isLow).length)
-  const dueTools = useStore((s) => dueTasks(s.tools, new Date().toISOString()).length)
+  const alerts = useStore((s) => [workshopAlerts(s), workshopAlerts(s, 'tool'), workshopAlerts(s, 'supply')].join())
+  const [allAlerts, toolAlerts, supplyAlerts] = alerts.split(',').map(Number)
+  const [workshopOpen, setWorkshopOpen] = useState(false)
   const liveGame = useStore((s) => s.games.some((g) => g.status === 'live'))
   // A recipe sent by the bookmarklet arrives in the URL (#recipe=…): start on Schemes with it.
   const [recipe, setRecipe] = useState<RecipePayload | null>(() => readRecipeHash(location.hash))
@@ -145,8 +143,18 @@ export default function App() {
         {nav('rules', 'Rules')}
         {nav('paints', 'Paints')}
         {nav('storage', 'Storage')}
-        {nav('supplies', lowSupplies ? `Supplies ⚠${lowSupplies}` : 'Supplies')}
-        {nav('tools', dueTools ? `Tools ⚠${dueTools}` : 'Tools')}
+        <div className="flex items-center gap-1">
+          {nav('workshop', allAlerts ? `Workshop ⚠${allAlerts}` : 'Workshop')}
+          <button className="rounded px-1.5 py-1.5 text-muted hover:bg-panel-2" aria-expanded={workshopOpen || page === 'tools' || page === 'supplies'} aria-label="Workshop pages" onClick={() => setWorkshopOpen(!workshopOpen)}>
+            {workshopOpen || page === 'tools' || page === 'supplies' ? '▾' : '▸'}
+          </button>
+        </div>
+        {(workshopOpen || page === 'tools' || page === 'supplies') && (
+          <div className="ml-3 grid gap-1 border-l border-line pl-1 text-sm">
+            {nav('tools', toolAlerts ? `Tools ⚠${toolAlerts}` : 'Tools')}
+            {nav('supplies', supplyAlerts ? `Supplies ⚠${supplyAlerts}` : 'Supplies')}
+          </div>
+        )}
         {nav('schemes', 'Schemes')}
         {nav('guides', 'Guides')}
         {nav('shopping', 'Shopping')}
@@ -198,10 +206,12 @@ export default function App() {
           <PaintsPage />
         ) : page === 'shopping' ? (
           <ShoppingPage />
+        ) : page === 'workshop' ? (
+          <WorkshopPage key="all" />
         ) : page === 'supplies' ? (
-          <SuppliesPage />
+          <WorkshopPage key="supply" kind="supply" />
         ) : page === 'tools' ? (
-          <ToolsPage />
+          <WorkshopPage key="tool" kind="tool" />
         ) : page === 'games' ? (
           <GamesPage />
         ) : page === 'guides' ? (

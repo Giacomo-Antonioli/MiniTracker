@@ -1,34 +1,18 @@
 import type { Ctx } from '../collection/types'
 import type { PaintDef, PaintStock } from '../paints/types'
 import type { NewShopItem } from '../shopping/types'
+import { becameLow, isLow, newItem, parseItems, shopItem, type NewItem, type WorkshopItem } from '../workshop/item'
 
-/** Hobby supplies with a stock and an alert level (#92). */
-export interface Supply {
-  id: string
-  name: string
-  category: string
-  quantity: number
-  /** Alert when the quantity is at or under this. */
-  lowAt: number
-  notes: string
-  updatedAt: string
-}
+/** Hobby supplies with a stock and an alert level (#92); same fields as tools. */
+export type Supply = WorkshopItem
 
-export const SUPPLY_CATEGORIES = ['Primer', 'Glue', 'Brushes', 'Varnish', 'Basing', 'Tools', 'Other']
+export const SUPPLY_CATEGORIES = ['Primer', 'Glue', 'Brushes', 'Varnish', 'Basing', 'Blades', 'Other']
 export const LOW_SOURCE = 'Running low'
+export { becameLow, isLow }
 
-export function newSupply(input: Pick<Supply, 'name' | 'category' | 'quantity' | 'lowAt'>, ctx: Ctx): Supply {
-  const name = input.name.trim()
-  if (!name) throw new Error('A supply needs a name')
-  return { id: ctx.newId(), name, category: input.category, quantity: input.quantity, lowAt: input.lowAt, notes: '', updatedAt: ctx.now }
-}
+export const newSupply = (input: NewItem & { quantity: number; lowAt: number }, ctx: Ctx): Supply => newItem(input, ctx, 'A supply')
 
-export const isLow = (s: Supply) => s.quantity <= s.lowAt
-
-/** True when this change takes the supply to its alert level (or it is new and already there). */
-export const becameLow = (before: Supply | undefined, after: Supply) => isLow(after) && (!before || !isLow(before))
-
-export const supplyItem = (s: Supply): NewShopItem => ({ kind: 'other', name: s.name, refId: `supply:${s.id}`, qty: 1, sources: [LOW_SOURCE] })
+export const supplyItem = (s: Supply): NewShopItem => shopItem(s, 'supply', LOW_SOURCE)
 
 /** Shopping items for the paints marked running low. */
 export function lowPaints(stocks: Map<string, PaintStock>, paints: PaintDef[], lowStage = 'low'): NewShopItem[] {
@@ -41,8 +25,6 @@ export function lowPaints(stocks: Map<string, PaintStock>, paints: PaintDef[], l
     })
 }
 
-/** Saved supplies, keeping only well-formed rows. */
-export function parseSupplies(raw: unknown): Supply[] {
-  if (!Array.isArray(raw)) return []
-  return raw.filter((x): x is Supply => !!x && typeof x.id === 'string' && typeof x.name === 'string' && typeof x.quantity === 'number' && typeof x.lowAt === 'number')
-}
+/** Saved supplies (a row needs a quantity); older rows get the new fields. */
+export const parseSupplies = (raw: unknown): Supply[] =>
+  parseItems(Array.isArray(raw) ? raw.filter((x) => typeof x?.quantity === 'number' && typeof x?.lowAt === 'number') : [], { quantity: 0 })

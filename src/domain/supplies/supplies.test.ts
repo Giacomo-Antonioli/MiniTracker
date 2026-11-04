@@ -6,7 +6,8 @@ const ctx = { now: 't', newId: () => 'id1' }
 describe('supplies', () => {
   it('creates a supply, low when at or under its alert level', () => {
     const s = newSupply({ name: ' Primer ', category: 'Primer', quantity: 2, lowAt: 1 }, ctx)
-    expect(s).toEqual({ id: 'id1', name: 'Primer', category: 'Primer', quantity: 2, lowAt: 1, notes: '', updatedAt: 't' })
+    expect(s).toEqual({ id: 'id1', name: 'Primer', category: 'Primer', brand: '', status: 'owned', condition: 'good', quantity: 2, lowAt: 1, notes: '', tasks: [], createdAt: 't', updatedAt: 't' })
+    expect(isLow({ ...s, quantity: 0, status: 'wishlist' })).toBe(false)
     expect([isLow(s), isLow({ ...s, quantity: 1 }), isLow({ ...s, quantity: 0, lowAt: 0 })]).toEqual([false, true, true])
     expect(() => newSupply({ name: ' ', category: 'Glue', quantity: 1, lowAt: 0 }, ctx)).toThrow(/name/)
   })
@@ -28,4 +29,8 @@ describe('supplies', () => {
     expect(parseSupplies([{ id: 'a', name: 'Glue', category: 'Glue', quantity: 1, lowAt: 0, notes: '', updatedAt: 't' }, { id: 'b' }, null])).toHaveLength(1)
     expect(parseSupplies('x')).toEqual([])
   })
+})
+
+it('old saved supplies get the tool fields', () => {
+  expect(parseSupplies([{ id: 'a', name: 'Glue', category: 'Glue', quantity: 1, lowAt: 0, notes: '', updatedAt: 't' }])[0]).toMatchObject({ brand: '', status: 'owned', condition: 'good', tasks: [] })
 })

@@ -22,11 +22,12 @@ import { parseMappings, saveMapping, type BoxMapping } from '../domain/barcodes/
 import { parseStorage, pruneStorage, EMPTY_STORAGE, type Storage } from '../domain/storage/storage'
 import { parseSessions, parseTimers, pruneTimers, stopTimer as endTimer, type PaintSession, type PaintTimer } from '../domain/paintTime/paintTime'
 import { parsePurchases, type Purchase } from '../domain/costs/costs'
-import { becameLow, lowPaints, parseSupplies, supplyItem, type Supply } from '../domain/supplies/supplies'
+import { becameLow, LOW_SOURCE, lowPaints, parseSupplies, supplyItem, type Supply } from '../domain/supplies/supplies'
 import type { ArmyList, EditionKey } from '../domain/lists/types'
 import { addItems, newList, syncWishlisted, withoutList } from '../domain/shopping/shopping'
 import type { NewShopItem, ShopItem, ShopList } from '../domain/shopping/types'
 import { parseTools, type Tool } from '../domain/tools/tools'
+import { shopItem } from '../domain/workshop/item'
 import type { BacklogFilter } from '../domain/collection/backlog'
 import { DEFAULT_PIPELINES, type PipelineKey } from '../domain/pipelines'
 import { DEFAULT_PIPELINE, firstOwnedStage, moveModels, WISHLISTED, type MoveOptions } from '../domain/collection/pipeline'
@@ -747,9 +748,11 @@ export const useStore = create<State>((set, get) => ({
   },
   tools: [],
   async saveTool(tool) {
-    const list = get().tools.some((x) => x.id === tool.id) ? get().tools.map((x) => (x.id === tool.id ? tool : x)) : [...get().tools, tool]
+    const before = get().tools.find((x) => x.id === tool.id)
+    const list = before ? get().tools.map((x) => (x.id === tool.id ? tool : x)) : [...get().tools, tool]
     set({ tools: list })
     await settingsRepo.setValue('tools', list)
+    if (becameLow(before, tool)) await get().addToShopping([shopItem(tool, 'tool', LOW_SOURCE)], [])
   },
   async deleteTool(id) {
     const list = get().tools.filter((x) => x.id !== id)
