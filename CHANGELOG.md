@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Changed
+- Labels: a unit gets one code per model (U-001-1 … U-001-5) for stickers and stencils, and the unit page lists them; scanning or typing any of them opens the unit. Single-model units keep the plain code.
+
 ## [0.14.0] - 2026-11-03
 
 ### Added

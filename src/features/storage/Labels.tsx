@@ -1,11 +1,16 @@
 import QRCode from 'qrcode'
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../../app/store'
-import { assignCodes, codeFromText, codeLink, findCode, stencilPath, type CodeTarget } from '../../domain/storage/codes'
+import { assignCodes, codeFromText, codeLink, findCode, modelCodes, stencilPath, type CodeTarget } from '../../domain/storage/codes'
 import { homedIn, kindOf, pathLabel, type Storage } from '../../domain/storage/storage'
 import { Dialog } from '../../ui/Dialog'
 import { isBarcode } from '../../domain/barcodes/barcodes'
 import { decodeFrame } from './decode'
+import { WISHLISTED } from '../../domain/collection/pipeline'
+import type { OwnedUnit } from '../../domain/collection/types'
+
+/** Owned models of a unit (wishlisted ones have no base to label yet). */
+export const ownedModels = (u: OwnedUnit | undefined) => (u ? u.groups.reduce((n, g) => n + (g.status === WISHLISTED ? 0 : g.count), 0) : 0)
 
 export type LabelLayout = 'stickers' | 'boxes' | 'stencil'
 export interface LabelItem { code: string; name: string; sub: string; contents: string[]; qr: string }
@@ -56,13 +61,13 @@ export function LabelsDialog({ onClose, unitIds: preset, placeIds: presetPlaces 
   const [msg, setMsg] = useState('')
   const toggle = (list: string[], set: (x: string[]) => void, id: string) => set(list.includes(id) ? list.filter((x) => x !== id) : [...list, id])
   const name = (id: string) => units.find((u) => u.id === id)?.customName ?? ''
+  const codesOf = (st: Storage, id: string) => modelCodes(st.codes[id], ownedModels(units.find((u) => u.id === id)))
 
   const build = async (): Promise<{ html: string; next: Storage }> => {
     const next = assignCodes(s, units_, places)
     const items: LabelItem[] = []
-    const ids = layout === 'boxes' ? places : [...units_, ...places]
-    for (const id of ids) {
-      const code = next.codes[id]
+    const rows = (layout === 'boxes' ? [] : units_.flatMap((id) => codesOf(next, id).map((code) => ({ id, code })))).concat(places.map((id) => ({ id, code: next.codes[id] })))
+    for (const { id, code } of rows) {
       const place = next.places.find((p) => p.id === id)
       items.push({
         code,
@@ -86,7 +91,7 @@ export function LabelsDialog({ onClose, unitIds: preset, placeIds: presetPlaces 
   const download = async () => {
     const next = assignCodes(s, units_, places)
     await saveStorage(next)
-    const svg = stencilSvg([...units_, ...places].map((id) => next.codes[id]), Math.max(6, size / 2))
+    const svg = stencilSvg([...units_.flatMap((id) => codesOf(next, id)), ...places.map((id) => next.codes[id])], Math.max(6, size / 2))
     const a = document.createElement('a')
     a.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
     a.download = 'minitracker-stencils.svg'
@@ -115,8 +120,8 @@ export function LabelsDialog({ onClose, unitIds: preset, placeIds: presetPlaces 
         <div className="grid gap-3 sm:grid-cols-2">
           {layout !== 'boxes' && (
             <fieldset className="grid max-h-56 content-start gap-1 overflow-auto text-sm">
-              <legend className="text-xs text-muted">Units ({units_.length})</legend>
-              {stored.map((u) => <label key={u.id} className="flex items-center gap-2"><input type="checkbox" checked={units_.includes(u.id)} onChange={() => toggle(units_, setUnits, u.id)} />{u.customName}{s.codes[u.id] ? <span className="text-muted"> · {s.codes[u.id]}</span> : null}</label>)}
+              <legend className="text-xs text-muted">Units ({units_.length}, one label per model)</legend>
+              {stored.map((u) => <label key={u.id} className="flex items-center gap-2"><input type="checkbox" checked={units_.includes(u.id)} onChange={() => toggle(units_, setUnits, u.id)} />{u.customName}<span className="text-muted"> · {ownedModels(u) || 1} {ownedModels(u) > 1 ? 'labels' : 'label'}{s.codes[u.id] ? ` · ${s.codes[u.id]}` : ''}</span></label>)}
             </fieldset>
           )}
           <fieldset className="grid max-h-56 content-start gap-1 overflow-auto text-sm">
@@ -136,13 +141,17 @@ export function LabelsDialog({ onClose, unitIds: preset, placeIds: presetPlaces 
 
 /** The code shown big, to copy under a base with a paint pen; gives one if missing. */
 export function CodeBadge({ id, kind }: { id: string; kind: 'unit' | 'place' }) {
-  const { storage: s, saveStorage } = useStore()
+  const { storage: s, saveStorage, units } = useStore()
   const code = s.codes[id]
+  const models = kind === 'unit' ? modelCodes(code ?? '', ownedModels(units.find((u) => u.id === id))) : []
   if (!code) return <button className="btn w-fit" onClick={() => void saveStorage(assignCodes(s, kind === 'unit' ? [id] : [], kind === 'place' ? [id] : []))}>🏷 Give it a code</button>
   return (
-    <div className="flex items-center gap-3" aria-label="Code">
+    <div className="flex flex-wrap items-center gap-3" aria-label="Code">
       <span className="rounded border-2 border-dashed border-line px-3 py-1 font-mono text-3xl font-bold tracking-wider">{code}</span>
-      <span className="text-xs text-muted">Write this under the base with a paint pen, or print a sticker or stencil from Storage ▸ Labels.</span>
+      <span className="text-xs text-muted">
+        {models.length > 1 ? 'Write one code under each base with a paint pen, or print a sticker per model or a stencil from Storage ▸ Labels.' : 'Write this under the base with a paint pen, or print a sticker or stencil from Storage ▸ Labels.'}
+      </span>
+      {models.length > 1 && <ul className="flex w-full flex-wrap gap-1 font-mono text-sm" aria-label="Model codes">{models.map((c) => <li key={c} className="rounded border border-line px-1.5">{c}</li>)}</ul>}
     </div>
   )
 }
