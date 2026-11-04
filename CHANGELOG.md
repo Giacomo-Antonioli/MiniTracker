@@ -4,8 +4,10 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-04
+
 ### Added
-- Tools: a Tools tab for owned tools (airbrush, clippers, lamp…) with brand, category, condition, storage place, bought date, price and notes. Repeating maintenance jobs (e.g. deep clean every 14 days, with suggestions per category) show as due in the tab and in the nav (Tools ⚠n). A wishlist, plus worn or broken tools, can be sent to the shopping list. Saved in the backup and merged tool by tool when syncing.
+- Tools: a Tools tab for owned tools (airbrush, clippers, lamp…) with brand, category, condition, storage place, bought date, price and notes. Repeating maintenance jobs (e.g. deep clean every 14 days, with suggestions per category) show as due in the tab and in the nav (Tools ⚠n). A wishlist, plus worn or broken tools, can be sent to the shopping list. Saved in the backup.
 
 ### Changed
 - Labels: a unit gets one code per model (U-001-1 … U-001-5) for stickers and stencils, and the unit page lists them; scanning or typing any of them opens the unit. Single-model units keep the plain code.
@@ -250,7 +252,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.11.2...v0.12.0
