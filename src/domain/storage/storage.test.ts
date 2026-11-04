@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  FLOW_DESK, FLOW_PACKED, FLOW_STORED, kindOf, removeSite, saveKinds, saveSite, setFlow, siteOf, sitePlaces,
+  FLOW_DESK, FLOW_PACKED, FLOW_STORED, kindOf, moveHomes, movePlace, planMove, placeById, removeSite, saveKinds, saveSite, setFlow, siteOf, sitePlaces,
   checkOut, checkedOutTo, descendants, EMPTY_STORAGE, fill, homedIn, parseStorage, pathLabel, pickList, placePath, pruneStorage, putBack, putBackList,
   removePlace, savePlace, setHome, unitLog, validatePlace, whereIs, type Place, type Storage,
 } from './storage'
@@ -135,4 +135,43 @@ it('sites, kinds and storage flow', () => {
   expect(s.flow.u1).toBe(FLOW_STORED)
   expect(setFlow(s, ['u1'], undefined).flow).toEqual({})
   expect(setFlow(s, ['u1'], 'lent').flow.u1).toBe('lent')
+})
+
+describe('moving many at once', () => {
+  const c = { now: '2026-11-04T00:00:00Z', newId: (() => { let n = 0; return () => `m${++n}` })() }
+  const base = (): Storage => {
+    let s = savePlace(EMPTY_STORAGE, { id: 'a', name: 'A', kind: 'box', location: '', note: '', createdAt: '', capacity: 4 })
+    s = savePlace(s, { id: 'b', name: 'B', kind: 'box', location: '', note: '', createdAt: '', capacity: 3 })
+    s = savePlace(s, { id: 'shelf', name: 'Shelf', kind: 'shelf', location: '', note: '', createdAt: '' })
+    s = setHome(s, 'u1', { placeId: 'a', slot: 1 }, c)
+    s = setHome(s, 'u2', { placeId: 'a', slot: 3 }, c)
+    s = setHome(s, 'u3', { placeId: 'a', slot: 4 }, c)
+    s = setHome(s, 'x', { placeId: 'b', slot: 1 }, c)
+    return s
+  }
+
+  it('keeps free slots, fills gaps, and says what does not fit', () => {
+    const s = base()
+    expect(planMove(s, ['u1', 'u2', 'u3'], 'b')).toEqual({ slots: { u2: 3, u1: 2, u3: undefined }, noSlot: ['u3'] })
+    expect(planMove(s, ['u1', 'u2'], 'shelf')).toEqual({ slots: { u1: undefined, u2: undefined }, noSlot: [] })
+  })
+
+  it('moves homes and logs each move; units already there stay put', () => {
+    let s = base()
+    const before = s.log.length
+    s = moveHomes(s, ['u1', 'u2', 'x'], 'b', c)
+    expect(s.homes).toMatchObject({ u1: { placeId: 'b', slot: 2 }, u2: { placeId: 'b', slot: 3 }, x: { placeId: 'b', slot: 1 } })
+    expect(s.log.length - before).toBe(2)
+    expect(() => moveHomes(s, ['u1'], 'nope', c)).toThrow()
+  })
+
+  it('moves a whole place, not into itself', () => {
+    let s = savePlace(base(), { id: 'inner', name: 'Inner', kind: 'bag', parentId: 'a', location: '', note: '', createdAt: '' })
+    s = movePlace(s, 'a', { parentId: 'shelf' })
+    expect(placeById(s, 'a')!.parentId).toBe('shelf')
+    expect(pathLabel(s, 'inner')).toMatch(/Shelf.*A.*Inner/)
+    expect(() => movePlace(s, 'shelf', { parentId: 'inner' })).toThrow(/inside itself/)
+    s = movePlace(s, 'a', { siteId: 'club' })
+    expect(placeById(s, 'a')).toMatchObject({ parentId: undefined, siteId: 'club' })
+  })
 })

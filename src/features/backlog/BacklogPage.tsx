@@ -9,6 +9,7 @@ import { UnitFormDialog } from './UnitFormDialog'
 import { UnitPanel } from './UnitPanel'
 import { BacklogTable, StageBar } from './BacklogTable'
 import { BacklogBoard } from './BacklogBoard'
+import { MassMoveDialog } from '../storage/MassMove'
 
 /** How long a single click waits for a possible second click. */
 const DOUBLE_CLICK_MS = 250
@@ -17,6 +18,8 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
   const { units, pipeline, backlogFilter: filter, setBacklogFilter: setFilter } = useStore()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<OwnedUnit | 'new' | null>(null)
+  const [storing, setStoring] = useState(false)
+  const hasPlaces = useStore((s) => s.storage.places.length > 0)
   // Table or board; remembered per browser (storage can be blocked, so it is only a convenience).
   const [view, setView] = useState<'table' | 'board'>(() => {
     try {
@@ -105,7 +108,9 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
           </select>
           <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={!!filter.nextUpOnly} onChange={(e) => set({ nextUpOnly: e.target.checked })} /> Next up</label>
           <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={!!filter.favouritesOnly} onChange={(e) => set({ favouritesOnly: e.target.checked })} /> Favourites</label>
+          {hasPlaces && shown.length > 0 && <button className="btn ml-auto text-sm" onClick={() => setStoring(true)}>📦 Store shown units… ({shown.length})</button>}
         </section>
+        {storing && <MassMoveDialog title="Store the shown units" unitIds={shown.filter((u) => u.lifecycle === 'active' || u.lifecycle === 'on-hold').map((u) => u.id)} onClose={() => setStoring(false)} />}
 
         {view === 'board' ? (
           <BacklogBoard units={shown} selectedId={selectedId} onCardClick={onRowClick} />
