@@ -53,7 +53,9 @@ it('labels dialog assigns codes and prints; find code opens the unit; code badge
   expect(await d.findByText(/Allow pop-ups/)).toBeTruthy()
   await user.click(d.getByRole('button', { name: '🖨 Print' }))
   await waitFor(() => expect(win.document.write).toHaveBeenCalled())
-  expect(win.document.write.mock.calls[0][0]).toMatch(/U-001/)
+  expect(win.document.write.mock.calls[0][0]).toMatch(/U-001-1/)
+  expect(win.document.write.mock.calls[0][0]).toMatch(/U-001-5/)
+  expect(win.document.write.mock.calls[0][0]).not.toMatch(/U-001-6/)
   expect(useStore.getState().storage.codes).toEqual({ [a.id]: 'U-001', box: 'B-01' })
   await user.click(d.getByRole('button', { name: '📦 Box labels' }))
   await user.click(d.getByLabelText(/Box A/))
@@ -80,6 +82,7 @@ it('labels dialog assigns codes and prints; find code opens the unit; code badge
   await user.type(await screen.findByLabelText('Find code'), 'U-001{enter}')
   await user.click(await screen.findByRole('tab', { name: '📦 Storage' }))
   expect(within(screen.getByLabelText('Code')).getByText('U-001')).toBeTruthy()
+  expect(within(screen.getByLabelText('Model codes')).getAllByRole('listitem').map((li) => li.textContent)).toEqual(['U-001-1', 'U-001-2', 'U-001-3', 'U-001-4', 'U-001-5'])
 
   // Scan: jsdom has no camera
   await user.click(screen.getByRole('button', { name: 'Storage' }))

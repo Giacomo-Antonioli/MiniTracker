@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import { assignCodes, codeFromText, codeLink, findCode, normCode, placePrefix, stencilChars, stencilPath } from './codes'
+import { assignCodes, codeFromText, codeLink, findCode, modelCodes, normCode, placePrefix, stencilChars, stencilPath } from './codes'
 import { EMPTY_STORAGE, parseStorage, type Storage } from './storage'
 
 const s0: Storage = { ...EMPTY_STORAGE, places: [
@@ -40,4 +40,17 @@ it('stencil font draws every prefix and digit', () => {
   expect(p.width).toBeGreaterThan(20)
   expect(stencilPath('N', 10).d).toMatch(/L/)
   expect(stencilPath('?', 10).d).toBe('')
+})
+
+it('gives each model of a unit its own code that leads back to the unit', () => {
+  const s = assignCodes(s0, ['u1'], ['b'])
+  expect(modelCodes('U-001', 3)).toEqual(['U-001-1', 'U-001-2', 'U-001-3'])
+  expect(modelCodes('U-001', 1)).toEqual(['U-001'])
+  expect(modelCodes('U-001', 0)).toEqual(['U-001'])
+  expect(findCode(s, 'u001-2')).toEqual({ kind: 'unit', id: 'u1' })
+  expect(findCode(s, 'U-001-2')).toEqual({ kind: 'unit', id: 'u1' })
+  expect(findCode(s, 'B-01-2')).toBeUndefined()
+  expect(codeFromText(codeLink('https://x.io/', 'U-001-2'))).toBe('U-001-2')
+  expect(codeFromText('u001-12')).toBe('U-001-12')
+  expect(stencilPath('U-001-2', 6).width).toBeGreaterThan(stencilPath('U-001', 6).width)
 })

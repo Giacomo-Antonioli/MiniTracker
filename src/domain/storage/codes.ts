@@ -35,10 +35,16 @@ export const normCode = (text: string) => text.trim().toUpperCase().replace(/\s+
 
 export function findCode(s: Storage, text: string): CodeTarget | undefined {
   const code = normCode(text)
-  const id = Object.keys(s.codes).find((k) => s.codes[k] === code)
+  const byCode = (c: string) => Object.keys(s.codes).find((k) => s.codes[k] === c)
+  // a model code (U-001-2) leads to its unit
+  const id = byCode(code) ?? (/^U-\d+-\d+$/.test(code) ? byCode(code.replace(/-\d+$/, '')) : undefined)
   if (!id) return undefined
   return { kind: s.places.some((p) => p.id === id) ? 'place' : 'unit', id }
 }
+
+/** One code per model of a unit: U-001-1 … U-001-n; a single model keeps the unit code. */
+export const modelCodes = (unitCode: string, models: number): string[] =>
+  models > 1 ? Array.from({ length: models }, (_, i) => `${unitCode}-${i + 1}`) : [unitCode]
 
 /** The link a QR holds: the app address with #code=… */
 export const codeLink = (base: string, code: string) => `${base.replace(/#.*$/, '')}#code=${encodeURIComponent(code)}`
@@ -47,7 +53,7 @@ export const codeLink = (base: string, code: string) => `${base.replace(/#.*$/, 
 export function codeFromText(text: string): string | undefined {
   const m = /#code=([^&\s]+)/.exec(text)
   if (m) return normCode(decodeURIComponent(m[1]))
-  return /^[A-Za-z]-?\d+$/.test(text.trim()) ? normCode(text) : undefined
+  return /^[A-Za-z]-?\d+(-\d+)?$/.test(text.trim()) ? normCode(text) : undefined
 }
 
 /*
