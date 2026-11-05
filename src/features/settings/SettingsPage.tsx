@@ -6,14 +6,16 @@ import { BackupPage } from './BackupPage'
 import { CataloguePage } from './CataloguePage'
 import { PipelineEditor } from './PipelineEditor'
 import { WorkshopSettings } from './WorkshopSettings'
+import { SyncSettings } from './SyncSettings'
 
-export type SettingsSection = 'catalogue' | 'appearance' | 'pipelines' | 'workshop' | 'storage' | 'backup'
+export type SettingsSection = 'catalogue' | 'appearance' | 'pipelines' | 'workshop' | 'sync' | 'storage' | 'backup'
 
 const SECTIONS: { id: SettingsSection; label: string }[] = [
   { id: 'catalogue', label: 'Catalogue data' },
   { id: 'appearance', label: 'Appearance' },
   { id: 'pipelines', label: 'Pipelines' },
   { id: 'workshop', label: 'Workshop' },
+  { id: 'sync', label: 'Sync' },
   { id: 'storage', label: 'Storage' },
   { id: 'backup', label: 'Backup' },
 ]
@@ -135,6 +137,11 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
       {tab === 'workshop' && <section role="tabpanel" aria-labelledby="tab-workshop" id="settings-workshop" className="grid gap-3">
         <h2 className="font-display text-xl text-accent">Workshop</h2>
         <WorkshopSettings />
+      </section>}
+
+      {tab === 'sync' && <section role="tabpanel" aria-labelledby="tab-sync" id="settings-sync" className="grid gap-3">
+        <h2 className="font-display text-xl text-accent">Sync</h2>
+        <SyncSettings />
       </section>}
 
       {tab === 'catalogue' && <section role="tabpanel" aria-labelledby="tab-catalogue" id="settings-catalogue">
