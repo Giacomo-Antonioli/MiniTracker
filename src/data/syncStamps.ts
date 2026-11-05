@@ -6,6 +6,13 @@ import type { MiniTrackerDb } from './db'
 export interface SyncPrefs {
   /** Mark deletions so a merge can apply them on other devices. */
   tagDeletions?: boolean
+  /** Remembered answers for the sync questions. */
+  mode?: 'merge' | 'overwrite'
+  direction?: 'send' | 'receive' | 'both'
+  applyDeletions?: boolean
+  photos?: boolean
+  /** Optional TURN server for networks where a direct connection fails. */
+  turn?: { urls: string; username?: string; credential?: string }
 }
 
 // Edit times are recorded in order, after the save, so saving stays as fast as before.

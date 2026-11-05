@@ -158,7 +158,7 @@ export async function runSync(
   return result
 }
 
-function withoutMissingPhotos(s: Snapshot, mine: Snapshot): Snapshot {
+export function withoutMissingPhotos(s: Snapshot, mine: Snapshot): Snapshot {
   const have = new Set((mine.tables.photos ?? []).map((p) => (p as { id: string }).id))
   return { ...s, tables: { ...s.tables, photos: (s.tables.photos ?? []).filter((p) => have.has((p as { id: string }).id)) } }
 }
@@ -171,7 +171,7 @@ async function servePhotos(db: MiniTrackerDb, next: (t: 'want') => Promise<{ typ
   }
 }
 
-interface WirePhoto {
+export interface WirePhoto {
   id: string
   display: string
   displayType: string
@@ -187,7 +187,7 @@ async function toBase64(b: Blob): Promise<string> {
 }
 const fromBase64 = (s: string, type: string) => new Blob([Uint8Array.from(atob(s), (c) => c.charCodeAt(0))], { type })
 
-async function toWire(f: PhotoFiles): Promise<WirePhoto> {
+export async function toWire(f: PhotoFiles): Promise<WirePhoto> {
   return {
     id: f.id,
     display: await toBase64(f.display),
@@ -195,7 +195,7 @@ async function toWire(f: PhotoFiles): Promise<WirePhoto> {
     ...(f.original ? { original: await toBase64(f.original), originalType: f.original.type } : {}),
   }
 }
-const fromWire = (w: WirePhoto): PhotoFiles => ({
+export const fromWire = (w: WirePhoto): PhotoFiles => ({
   id: w.id,
   display: fromBase64(w.display, w.displayType),
   ...(w.original ? { original: fromBase64(w.original, w.originalType ?? '') } : {}),

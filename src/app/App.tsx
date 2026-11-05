@@ -20,10 +20,12 @@ import { readStartPage, useStore } from './store'
 import { WorkshopPage, workshopAlerts } from '../features/workshop/WorkshopPage'
 import { HomePage } from '../features/home/HomePage'
 import { codeFromText, findCode } from '../domain/storage/codes'
+import { parsePairCode } from '../domain/sync/protocol'
+import { SyncPage } from '../features/sync/SyncPage'
 import { PlacePage, StoragePage } from '../features/storage/Storage'
 import { CompanionHub, WorkCompanion } from '../features/companion/WorkCompanion'
 
-type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'workshop' | 'supplies' | 'tools' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'storage' | 'place' | 'settings'
+type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'workshop' | 'supplies' | 'tools' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'storage' | 'place' | 'sync' | 'settings'
 
 const SOON: string[] = []
 
@@ -84,6 +86,22 @@ export default function App() {
     })
   }, [companion])
   const PAGE_NAME: Partial<Record<Page, string>> = { home: 'Home', backlog: 'Backlog', unit: 'unit page' }
+
+  // A pairing link (#sync=K7P42QX) opens Sync and connects.
+  const [syncCode, setSyncCode] = useState<string>()
+  useEffect(() => {
+    if (!ready) return
+    const open = () => {
+      const code = parsePairCode(location.hash)
+      if (!code || !/[#&]sync=/.test(location.hash)) return
+      history.replaceState(null, '', location.pathname + location.search)
+      setSyncCode(code)
+      setPage('sync')
+    }
+    open()
+    addEventListener('hashchange', open)
+    return () => removeEventListener('hashchange', open)
+  }, [ready])
 
   // A scanned QR opens the app with #code=U-007: open that unit or place.
   const [missingCode, setMissingCode] = useState('')
@@ -166,6 +184,7 @@ export default function App() {
           <span key={s} className="px-3 py-1.5 text-muted/60" title="Coming in a later sprint">{s} ⌛</span>
         ))}
         <div className="mt-auto grid gap-1">
+          {nav('sync', '⇄ Sync')}
           {nav('settings', '⚙ Settings')}
           <a
             className="px-3 pt-2 text-xs text-muted hover:text-accent"
@@ -222,6 +241,8 @@ export default function App() {
           <StatsPage />
         ) : page === 'browse' ? (
           <CatalogueBrowser key={datasheetId ?? 'all'} openId={datasheetId} onOpenSettings={() => go('settings', 'catalogue')} />
+        ) : page === 'sync' ? (
+          <SyncPage key={syncCode ?? 'sync'} code={syncCode} onOpenSettings={() => go('settings', 'sync')} />
         ) : (
           <SettingsPage section={section} />
         )}

@@ -4,6 +4,11 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Sync between devices (#161): ⇄ Sync pairs two devices by a short code, its QR or a pairing link (the data goes directly between them, encrypted), or in private mode with no relay by copying or scanning a connection text each way. Choose both ways, send or receive, merge (newest wins) or overwrite, deletions and photos; the other device accepts, and each side sees a preview of the changes before anything is saved. Progress, cancel, clock check, and a list of devices synced with (warning after 90 days).
+- Sync file: save this device's data (optionally with photos) to a shared folder, USB stick or chat and open it on another device to merge or overwrite.
+- Settings › Sync: device name, default choices, marking deletions for sync, an optional TURN server, and forgetting devices.
+
 ## [0.17.0] - 2026-11-05
 
 ### Added
