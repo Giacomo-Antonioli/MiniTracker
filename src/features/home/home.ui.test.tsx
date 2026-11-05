@@ -95,6 +95,7 @@ describe('Home', () => {
     const user = userEvent.setup()
     render(<App />)
     await user.click(await screen.findByRole('button', { name: '⚙ Settings' }))
+    await user.click(await screen.findByRole('tab', { name: 'Appearance' }))
     await user.selectOptions(screen.getByLabelText('Start page'), 'backlog')
     expect(localStorage.getItem('startPage')).toBe('backlog')
   })

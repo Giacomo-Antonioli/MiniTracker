@@ -149,7 +149,8 @@ it('separate storages with tabs, place page, editable kinds', async () => {
 
   // Settings: kinds
   await user.click(screen.getByRole('button', { name: /Settings/ }))
-  const kinds = within(await screen.findByRole('region', { name: 'Place kinds' }))
+  await user.click(await screen.findByRole('tab', { name: 'Pipelines' }))
+  const kinds = within(await screen.findByRole('group', { name: 'Place kinds' }))
   expect((kinds.getByRole('button', { name: 'Delete Drawer' }) as HTMLButtonElement).disabled).toBe(true)
   await user.click(kinds.getByRole('button', { name: '+ Add kind' }))
   const names = kinds.getAllByLabelText(/^Name of/)

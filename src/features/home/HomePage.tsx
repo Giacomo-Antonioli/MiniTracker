@@ -35,7 +35,7 @@ const Link = ({ onClick, children }: { onClick?: () => void; children: ReactNode
   onClick ? <button className="text-sm text-muted hover:text-accent" onClick={onClick}>{children}</button> : null
 
 export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: string) => void; onGo?: (p: Go) => void; onAddUnit?: () => void }) {
-  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints, homeLayout, saveHomeLayout, supplies, games, goals } = useStore()
+  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints, homeLayout, saveHomeLayout, supplies, games, goals, pipelines } = useStore()
   const events = useAllEvents()
   const { pointsOf, roleOf, factionName } = usePointsOf()
   const [editing, setEditing] = useState(false)
@@ -243,7 +243,7 @@ export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: st
       }
       case 'low': {
         const paintsLow = lowPaints(paintStock, paints)
-        const suppliesLow = supplies.filter(isLow)
+        const suppliesLow = supplies.filter((s) => isLow(s, pipelines.level))
         if (!paintsLow.length && !suppliesLow.length) return null
         const onList = (ref?: string) => shopItems.some((x) => !x.bought && x.refId === ref)
         return {

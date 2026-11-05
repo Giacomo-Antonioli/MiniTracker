@@ -6,7 +6,9 @@ import { becameLow, isLow, newItem, parseItems, shopItem, type NewItem, type Wor
 /** Hobby supplies with a stock and an alert level (#92); same fields as tools. */
 export type Supply = WorkshopItem
 
-export const SUPPLY_CATEGORIES = ['Primer', 'Glue', 'Brushes', 'Varnish', 'Basing', 'Blades', 'Other']
+export const SUPPLY_CATEGORIES = ['Primer', 'Glue', 'Varnish', 'Mediums', 'Brushes', 'Basing', 'Blades', 'Other']
+/** Supply categories that are liquids by default: they track a level (Full … Empty). */
+export const LIQUID_CATEGORIES = ['Primer', 'Glue', 'Varnish', 'Mediums']
 export const LOW_SOURCE = 'Running low'
 export { becameLow, isLow }
 

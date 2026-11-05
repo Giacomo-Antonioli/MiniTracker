@@ -1,5 +1,7 @@
 import type { Ctx } from '../collection/types'
 import type { NewShopItem } from '../shopping/types'
+import type { Pipeline } from '../collection/types'
+import { DEFAULT_PIPELINES } from '../pipelines'
 
 /** A maintenance job that repeats, e.g. "Clean the airbrush" every 7 days. */
 export interface ItemTask {
@@ -23,6 +25,8 @@ export interface WorkshopItem {
   status: ItemStatus
   condition: ItemCondition
   quantity: number
+  /** Liquid supplies: stage id in the level pipeline (Full … Empty); unset = the first stage. */
+  level?: string
   /** Alert when the quantity is at or under this. */
   lowAt: number
   /** Storage place it lives in. */
@@ -58,11 +62,45 @@ export function newItem(input: NewItem, ctx: Ctx, what = 'An item'): WorkshopIte
   }
 }
 
-/** Owned and at or under its alert level. */
-export const isLow = (s: WorkshopItem) => s.status === 'owned' && s.quantity <= s.lowAt
+export const LOW_LEVEL = 'low'
+
+/** True when the level is at or past the "running low" stage of the level pipeline. */
+export function levelIsLow(level: string | undefined, levels: Pipeline = DEFAULT_PIPELINES.level): boolean {
+  if (!level) return false
+  const ids = levels.stages.map((s) => s.id)
+  const at = ids.indexOf(level)
+  const low = ids.indexOf(LOW_LEVEL)
+  return at >= 0 && low >= 0 ? at >= low : level === LOW_LEVEL
+}
+
+/** Owned and at or under its alert level, or (liquids) its level is running low. */
+export const isLow = (s: WorkshopItem, levels?: Pipeline) => s.status === 'owned' && (s.quantity <= s.lowAt || levelIsLow(s.level, levels))
 
 /** True when this change takes the item to its alert level (or it is new and already there). */
-export const becameLow = (before: WorkshopItem | undefined, after: WorkshopItem) => isLow(after) && (!before || !isLow(before))
+export const becameLow = (before: WorkshopItem | undefined, after: WorkshopItem, levels?: Pipeline) => isLow(after, levels) && (!before || !isLow(before, levels))
+
+/** Editable categories of tools and supplies; supply categories in `liquid` track a level instead of a condition. */
+export interface WorkshopCategories {
+  tools: string[]
+  supplies: string[]
+  liquid: string[]
+}
+
+export const isLiquid = (item: WorkshopItem, kind: WorkshopKind, cats: WorkshopCategories) => kind === 'supply' && cats.liquid.includes(item.category)
+
+export function parseCategories(raw: unknown, defaults: WorkshopCategories): WorkshopCategories {
+  const r = (raw ?? {}) as Partial<WorkshopCategories>
+  const list = (x: unknown, d: string[]) => (Array.isArray(x) ? x.filter((y): y is string => typeof y === 'string' && !!y.trim()) : d)
+  return { tools: list(r.tools, defaults.tools), supplies: list(r.supplies, defaults.supplies), liquid: list(r.liquid, defaults.liquid) }
+}
+
+/** Adds a category (trimmed, no duplicates ignoring case). */
+export function addCategory(list: string[], name: string): string[] {
+  const n = name.trim()
+  if (!n) throw new Error('Give the category a name')
+  if (list.some((x) => x.toLowerCase() === n.toLowerCase())) throw new Error(`"${n}" is already there`)
+  return [...list, n]
+}
 
 export function addTask(t: WorkshopItem, input: { name: string; everyDays: number }, ctx: Ctx): WorkshopItem {
   const name = input.name.trim()

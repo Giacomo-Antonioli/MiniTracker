@@ -34,11 +34,14 @@ export function PipelineEditor({ title, description, pipeline, defaults, usedBy,
   }
 
   return (
-    <section className="panel grid gap-3 p-4" aria-label={title}>
-      <div>
+    <details className="panel group" aria-label={title}>
+      <summary className="flex cursor-pointer list-none items-center gap-2 p-4">
+        <span className="text-muted group-open:rotate-90">▸</span>
         <h3 className="font-display text-lg">{title}</h3>
-        <p className="text-sm text-muted">{description}</p>
-      </div>
+        <span className="ml-auto truncate text-xs text-muted">{pipeline.stages.map((s) => s.name).join(' → ')}</span>
+      </summary>
+      <div className="grid gap-3 px-4 pb-4">
+      <p className="text-sm text-muted">{description}</p>
       <ol className="divide-y divide-line rounded border border-line">
         {pipeline.stages.map((s, i) => (
           <li key={s.id} className="flex items-center gap-2 p-2">
@@ -85,6 +88,7 @@ export function PipelineEditor({ title, description, pipeline, defaults, usedBy,
         </button>
       </form>
       {error && <p className="text-danger" role="alert">{error}</p>}
-    </section>
+      </div>
+    </details>
   )
 }

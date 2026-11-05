@@ -1,16 +1,17 @@
 import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { pathLabel } from '../../domain/storage/storage'
-import { SUPPLY_CATEGORIES } from '../../domain/supplies/supplies'
-import { SUGGESTED_TASKS, TOOL_CATEGORIES, TOOL_SOURCE } from '../../domain/tools/tools'
+import { SUGGESTED_TASKS, TOOL_SOURCE } from '../../domain/tools/tools'
+import type { Pipeline } from '../../domain/collection/types'
 import {
-  addTask, CONDITIONS, daysLeft, dueTasks, isLow, markDone, newItem, refPrefix, removeTask, shopItem,
-  type ItemCondition, type ItemStatus, type WorkshopItem, type WorkshopKind,
+  addTask, CONDITIONS, daysLeft, dueTasks, isLiquid, isLow, levelIsLow, markDone, newItem, refPrefix, removeTask, shopItem,
+  type ItemCondition, type ItemStatus, type WorkshopCategories, type WorkshopItem, type WorkshopKind,
 } from '../../domain/workshop/item'
 import { PlaceSelect } from '../storage/Storage'
 
 const dueText = (d: number) => (d < 0 ? `${-d} day${d === -1 ? '' : 's'} overdue` : d === 0 ? 'due today' : `in ${d} day${d === 1 ? '' : 's'}`)
-const KIND = { tool: { one: 'tool', title: 'Tools', icon: '🔧', categories: TOOL_CATEGORIES }, supply: { one: 'supply', title: 'Supplies', icon: '🧴', categories: SUPPLY_CATEGORIES } } as const
+const KIND = { tool: { one: 'tool', title: 'Tools', icon: '🔧' }, supply: { one: 'supply', title: 'Supplies', icon: '🧴' } } as const
+const catsOf = (c: WorkshopCategories, k: WorkshopKind) => (k === 'tool' ? c.tools : c.supplies)
 
 type Row = { kind: WorkshopKind; item: WorkshopItem }
 
@@ -26,29 +27,31 @@ function useWorkshop() {
 }
 
 /** Counts for the nav: low stock and due maintenance, over both lists or one. */
-export function workshopAlerts(s: { tools: WorkshopItem[]; supplies: WorkshopItem[] }, kind?: WorkshopKind) {
+export function workshopAlerts(s: { tools: WorkshopItem[]; supplies: WorkshopItem[]; pipelines: { level: Pipeline } }, kind?: WorkshopKind) {
   const items = kind === 'tool' ? s.tools : kind === 'supply' ? s.supplies : [...s.tools, ...s.supplies]
-  return items.filter(isLow).length + dueTasks(items, new Date().toISOString()).length
+  return items.filter((x) => isLow(x, s.pipelines.level)).length + dueTasks(items, new Date().toISOString()).length
 }
 
 /** Tools and supplies: stock with alerts, condition, storage place, maintenance jobs and a wishlist. `kind` shows one list only. */
 export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
   const { rows: all, save } = useWorkshop()
+  const { workshopCategories: cats, pipelines } = useStore()
+  const levels = pipelines.level
   const [tab, setTab] = useState<ItemStatus>('owned')
   const [newKind, setNewKind] = useState<WorkshopKind>(kind ?? 'tool')
   const addKind = kind ?? newKind
   const [name, setName] = useState('')
-  const [category, setCategory] = useState<string>(KIND[addKind].categories[0])
+  const [category, setCategory] = useState<string>(catsOf(cats, addKind)[0] ?? 'Other')
   const [qty, setQty] = useState('1')
   const [lowAt, setLowAt] = useState('0')
   const [error, setError] = useState('')
   const now = ctx().now
   const rows = all.filter((r) => !kind || r.kind === kind)
   const due = dueTasks(rows.map((r) => r.item), now).map((d) => ({ ...d, kind: rows.find((r) => r.item === d.item)!.kind }))
-  const low = rows.filter((r) => isLow(r.item)).length
+  const low = rows.filter((r) => isLow(r.item, levels)).length
   const shown = rows
     .filter((r) => r.item.status === tab)
-    .sort((a, b) => Number(isLow(b.item)) - Number(isLow(a.item)) || a.item.category.localeCompare(b.item.category) || a.item.name.localeCompare(b.item.name))
+    .sort((a, b) => Number(isLow(b.item, levels)) - Number(isLow(a.item, levels)) || a.item.category.localeCompare(b.item.category) || a.item.name.localeCompare(b.item.name))
   const title = kind ? KIND[kind].title : 'Workshop'
   const what = kind ? KIND[kind].one : 'item'
 
@@ -97,14 +100,14 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
       >
         {!kind && (
           <label className="grid gap-0.5 text-xs text-muted">Type
-            <select className="input" value={newKind} onChange={(e) => { const k = e.target.value as WorkshopKind; setNewKind(k); setCategory(KIND[k].categories[0]); }}>
+            <select className="input" value={newKind} onChange={(e) => { const k = e.target.value as WorkshopKind; setNewKind(k); setCategory(catsOf(cats, k)[0] ?? 'Other'); }}>
               <option value="tool">🔧 Tool</option>
               <option value="supply">🧴 Supply</option>
             </select>
           </label>
         )}
         <label className="grid gap-0.5 text-xs text-muted">Name<input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder={addKind === 'tool' ? 'e.g. Sprue cutters' : 'e.g. Plastic glue'} /></label>
-        <label className="grid gap-0.5 text-xs text-muted">Category<select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>{KIND[addKind].categories.map((c) => <option key={c}>{c}</option>)}</select></label>
+        <label className="grid gap-0.5 text-xs text-muted">Category<select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>{catsOf(cats, addKind).map((c) => <option key={c}>{c}</option>)}</select></label>
         <label className="grid gap-0.5 text-xs text-muted">{tab === 'owned' ? 'How many' : 'Want'}<input className="input w-20" type="number" min={0} value={qty} onChange={(e) => setQty(e.target.value)} /></label>
         {tab === 'owned' && <label className="grid gap-0.5 text-xs text-muted">Alert at<input className="input w-20" type="number" min={0} value={lowAt} onChange={(e) => setLowAt(e.target.value)} /></label>}
         <button className="btn btn-primary">{tab === 'owned' ? '+ Add' : '+ Add to wishlist'}</button>
@@ -126,7 +129,9 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
 }
 
 function ItemCard({ row: { kind, item: t }, now, showKind }: { row: Row; now: string; showKind: boolean }) {
-  const { storage, shopItems, addToShopping } = useStore()
+  const { storage, shopItems, addToShopping, workshopCategories: cats, pipelines } = useStore()
+  const levels = pipelines.level
+  const liquid = isLiquid(t, kind, cats)
   const { save: saveAny, remove } = useWorkshop()
   const [open, setOpen] = useState(false)
   const [taskName, setTaskName] = useState('')
@@ -134,7 +139,8 @@ function ItemCard({ row: { kind, item: t }, now, showKind }: { row: Row; now: st
   const [err, setErr] = useState('')
   const save = (patch: Partial<WorkshopItem>) => saveAny(kind, { ...t, ...patch, updatedAt: ctx().now })
   const onList = shopItems.some((x) => !x.bought && x.refId === `${refPrefix(kind)}${t.id}`)
-  const low = isLow(t)
+  const low = isLow(t, levels)
+  const levelName = levels.stages.find((s) => s.id === (t.level ?? levels.stages[0]?.id))?.name
   const owned = t.status === 'owned'
   const suggestions = (SUGGESTED_TASKS[t.category] ?? []).filter((s) => !t.tasks.some((x) => x.name.toLowerCase() === s.name.toLowerCase()))
   const add = (input: { name: string; everyDays: number }) => {
@@ -146,15 +152,21 @@ function ItemCard({ row: { kind, item: t }, now, showKind }: { row: Row; now: st
       setErr((e as Error).message)
     }
   }
-  const buyLabel = !owned ? '🛒 Add to shopping' : t.condition !== 'good' ? '🛒 Buy a replacement' : '🛒 Restock'
-  const wantsBuying = !owned || t.condition !== 'good' || low
+  const worn = !liquid && t.condition !== 'good'
+  const buyLabel = !owned ? '🛒 Add to shopping' : worn ? '🛒 Buy a replacement' : '🛒 Restock'
+  const wantsBuying = !owned || worn || low
 
   return (
     <li className={`panel grid gap-2 p-3 ${t.condition === 'broken' || low ? 'border-danger' : ''}`} aria-label={`${kind === 'tool' ? 'Tool' : 'Supply'} ${t.name}`}>
       <div className="flex flex-wrap items-center gap-2">
         <button className="text-left font-semibold" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? '▾' : '▸'} {showKind ? `${KIND[kind].icon} ` : ''}{t.name}</button>
         <span className="text-xs text-muted">{[t.brand, t.category, t.placeId && pathLabel(storage, t.placeId)].filter(Boolean).join(' · ')}</span>
-        {owned && t.condition !== 'good' && <span className={`text-xs ${t.condition === 'broken' ? 'text-danger' : 'text-muted'}`}>{t.condition === 'broken' ? '✕ Broken' : '◐ Worn'}</span>}
+        {owned && liquid && (
+          <select className={`input py-0 text-xs ${levelIsLow(t.level, levels) ? 'text-danger' : ''}`} aria-label={`Level of ${t.name}`} value={t.level ?? levels.stages[0]?.id} onChange={(e) => save({ level: e.target.value })}>
+            {levels.stages.map((s) => <option key={s.id} value={s.id}>💧 {s.name}</option>)}
+          </select>
+        )}
+        {owned && worn && <span className={`text-xs ${t.condition === 'broken' ? 'text-danger' : 'text-muted'}`}>{t.condition === 'broken' ? '✕ Broken' : '◐ Worn'}</span>}
         {low && <span className="text-xs text-danger">⚠ Low{onList ? ' · on shopping list' : ''}</span>}
         <span className="ml-auto flex flex-wrap items-center gap-1">
           {owned && (
@@ -193,11 +205,11 @@ function ItemCard({ row: { kind, item: t }, now, showKind }: { row: Row; now: st
           <div className="flex flex-wrap items-end gap-2">
             <label className="grid gap-0.5 text-xs text-muted">Name<input className="input" value={t.name} onChange={(e) => save({ name: e.target.value })} /></label>
             <label className="grid gap-0.5 text-xs text-muted">Brand<input className="input w-32" value={t.brand} onChange={(e) => save({ brand: e.target.value })} /></label>
-            <label className="grid gap-0.5 text-xs text-muted">Category<select className="input" value={t.category} onChange={(e) => save({ category: e.target.value })}>{[...new Set([...KIND[kind].categories, t.category])].map((c) => <option key={c}>{c}</option>)}</select></label>
+            <label className="grid gap-0.5 text-xs text-muted">Category<select className="input" value={t.category} onChange={(e) => save({ category: e.target.value })}>{[...new Set([...catsOf(cats, kind), t.category])].map((c) => <option key={c}>{c}</option>)}</select></label>
             {owned && (
               <>
                 <label className="grid gap-0.5 text-xs text-muted">Alert at<input className="input w-16" type="number" min={0} aria-label={`Alert level for ${t.name}`} value={t.lowAt} onChange={(e) => save({ lowAt: Math.max(0, Number(e.target.value) || 0) })} /></label>
-                <label className="grid gap-0.5 text-xs text-muted">Condition<select className="input" value={t.condition} onChange={(e) => save({ condition: e.target.value as ItemCondition })}>{CONDITIONS.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
+                {liquid ? <span className="grid gap-0.5 text-xs text-muted">Level<span className="py-1 text-sm text-fg">{levelName}</span></span> : <label className="grid gap-0.5 text-xs text-muted">Condition<select className="input" value={t.condition} onChange={(e) => save({ condition: e.target.value as ItemCondition })}>{CONDITIONS.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>}
                 {storage.places.length > 0 && <label className="grid gap-0.5 text-xs text-muted">Kept in<PlaceSelect label="Kept in" empty="Not set" value={t.placeId} onChange={(id) => save({ placeId: id })} /></label>}
                 <label className="grid gap-0.5 text-xs text-muted">Bought<input className="input" type="date" value={t.boughtAt ?? ''} onChange={(e) => save({ boughtAt: e.target.value || undefined })} /></label>
               </>
