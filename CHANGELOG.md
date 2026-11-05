@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-11-05
+
 ### Added
 - Liquid supplies (primer, glue, varnish, mediums…) show a 💧 level, Full → Half → Running low → Empty, instead of a condition; running low or empty puts them on the shopping list. The levels are a pipeline in Settings › Pipelines › Liquid level.
 - Settings › Workshop: add, reorder and delete tool and supply categories, and mark which supply categories are liquids.
@@ -268,7 +270,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.13.0...v0.14.0
