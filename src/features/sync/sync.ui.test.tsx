@@ -26,9 +26,14 @@ class FakeEnd implements Channel {
 // The other device: a second database answering on the other end of the connection.
 let other: MiniTrackerDb
 let otherRun: Promise<unknown> | undefined
+const joined: string[] = []
+let joinFails: string | undefined
 vi.mock('../../data/syncChannel', () => ({
   PIECE_SIZE: 16_000,
-  joinByCode: async () => {
+  NO_DIRECT: "These devices can't reach each other directly",
+  joinByCode: async (code: string) => {
+    joined.push(code)
+    if (joinFails) throw new Error(joinFails)
     const a = new FakeEnd()
     const b = new FakeEnd()
     a.peer = b
@@ -53,7 +58,11 @@ beforeEach(async () => {
   await appDb.units.put(unit('From PC'))
   useStore.setState({ ready: false, units: [], homeLayout: DEFAULT_LAYOUT, pipeline: DEFAULT_PIPELINE })
 })
-afterEach(() => other.delete())
+afterEach(() => {
+  joinFails = undefined
+  joined.length = 0
+  return other.delete()
+})
 
 it('syncs both ways by pairing code, with a preview, and remembers the device', async () => {
   const user = userEvent.setup()
@@ -105,4 +114,27 @@ it('opens a sync file from another device', async () => {
   await user.click(d.getByRole('button', { name: 'Apply' }))
   await waitFor(() => expect(useStore.getState().units.map((u) => u.customName).sort()).toEqual(['From PC', 'From phone']))
   expect(screen.getByText('Applied the sync file from My phone.')).toBeInTheDocument()
+})
+
+it('Sync now reaches a known device by its own code; a failed connection says what to do', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  await user.click(await screen.findByRole('button', { name: '⇄ Sync' }))
+  await user.type(await screen.findByLabelText('Pairing code'), 'K7P42QX{enter}')
+  await user.click(within(await screen.findByRole('dialog', { name: 'Apply these changes?' })).getByRole('button', { name: 'Apply' }))
+  await screen.findByText('✓ Synced with My phone.')
+  await otherRun
+
+  const { deviceCodeFor } = await import('../../domain/sync/protocol')
+  joinFails = 'No device is waiting with this code'
+  await user.click(screen.getByRole('button', { name: 'Sync now with My phone' }))
+  expect(joined.at(-1)).toBe(deviceCodeFor('phone'))
+  expect(await screen.findByText(/My phone isn't reachable right now/)).toBeInTheDocument()
+
+  joinFails = "These devices can't reach each other directly"
+  await user.click(screen.getByRole('button', { name: 'Sync now with My phone' }))
+  expect(await screen.findByRole('button', { name: 'TURN server settings' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Use the QR carousel' })).toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: 'TURN server settings' }))
+  expect(await screen.findByLabelText('TURN address')).toBeInTheDocument()
 })

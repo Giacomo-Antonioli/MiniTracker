@@ -41,3 +41,12 @@ describe('pieces', () => {
     expect(toPieces('e', '', 5)).toEqual([{ id: 'e', seq: 0, total: 1, data: '' }])
   })
 })
+
+it('a device code is fixed per device and looks like a pairing code', async () => {
+  const { deviceCodeFor, parsePairCode } = await import('./protocol')
+  const a = deviceCodeFor('3f2a-uuid-a')
+  expect(deviceCodeFor('3f2a-uuid-a')).toBe(a)
+  expect(deviceCodeFor('3f2a-uuid-b')).not.toBe(a)
+  expect(parsePairCode(a)).toBe(a)
+  expect(a.startsWith('D')).toBe(true)
+})

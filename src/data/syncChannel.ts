@@ -23,6 +23,29 @@ export interface ConnectOptions {
 const STUN = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }]
 export const iceServers = (o: ConnectOptions = {}): RTCIceServer[] => (o.turn?.urls ? [...STUN, o.turn] : STUN)
 
+/** Shown when the pairing worked but the direct connection did not. */
+export const NO_DIRECT = "These devices can't reach each other directly (usually: different networks). Add a TURN server in Settings › Sync, or use the QR carousel or a sync file."
+
+/** How long a connection may take to open once both devices are paired. */
+export const CONNECT_TIMEOUT_MS = 25_000
+
+/** Rejects with NO_DIRECT when the connection fails or does not open in time. */
+function guard<T>(p: Promise<T>, pc: () => RTCPeerConnection | undefined, ms = CONNECT_TIMEOUT_MS): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const fail = () => reject(new Error(NO_DIRECT))
+    const timer = setTimeout(fail, ms)
+    const watch = (c: RTCPeerConnection) =>
+      c.addEventListener('iceconnectionstatechange', () => c.iceConnectionState === 'failed' && fail())
+    const c = pc()
+    if (c) watch(c)
+    else setTimeout(() => { const later = pc(); if (later) watch(later) }, 0)
+    p.then(
+      (v) => (clearTimeout(timer), resolve(v)),
+      (e) => (clearTimeout(timer), reject(e)),
+    )
+  })
+}
+
 /** Keep pieces under the size every browser accepts on a data channel. */
 export const PIECE_SIZE = 16_000
 
@@ -92,7 +115,7 @@ export async function hostByCode(code: string, o: ConnectOptions = {}): Promise<
   const channel = new Promise<Channel>((resolve, reject) => {
     peer.on('connection', (conn) => {
       const ch = fromPeerJs(conn, peer)
-      void opened(conn).then(() => resolve(ch), reject)
+      void guard(opened(conn), () => conn.peerConnection).then(() => resolve(ch), reject)
     })
     peer.on('error', (e) => reject(new Error(relayError(e))))
   })
@@ -105,7 +128,7 @@ export async function joinByCode(code: string, o: ConnectOptions = {}): Promise<
   const conn = peer.connect(peerIdFor(code), { reliable: true, serialization: 'raw' })
   const ch = fromPeerJs(conn, peer)
   const failed = new Promise<never>((_, reject) => peer.on('error', (e) => reject(new Error(relayError(e)))))
-  await Promise.race([opened(conn), failed])
+  await guard(Promise.race([opened(conn), failed]), () => conn.peerConnection)
   return ch
 }
 
@@ -154,7 +177,7 @@ export async function privateOffer(o: ConnectOptions = {}): Promise<{ offer: str
     offer: await gathered(pc),
     accept: async (answer) => {
       await pc.setRemoteDescription(parseDescription(answer, 'answer'))
-      await isOpen
+      await guard(isOpen, () => pc)
       return ch
     },
     cancel: () => pc.close(),
@@ -172,7 +195,8 @@ export async function privateAnswer(offer: string, o: ConnectOptions = {}): Prom
   })
   await pc.setRemoteDescription(parseDescription(offer, 'offer'))
   await pc.setLocalDescription(await pc.createAnswer())
-  return { answer: await gathered(pc), channel }
+  // the first device still has to paste our reply, so allow it time before giving up
+  return { answer: await gathered(pc), channel: guard(channel, () => pc, 5 * 60_000) }
 }
 
 function parseDescription(text: string, type: 'offer' | 'answer'): RTCSessionDescriptionInit {
