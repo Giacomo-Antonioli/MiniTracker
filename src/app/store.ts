@@ -27,7 +27,8 @@ import type { ArmyList, EditionKey } from '../domain/lists/types'
 import { addItems, newList, syncWishlisted, withoutList } from '../domain/shopping/shopping'
 import type { NewShopItem, ShopItem, ShopList } from '../domain/shopping/types'
 import { parseTools, type Tool } from '../domain/tools/tools'
-import { shopItem } from '../domain/workshop/item'
+import { parseCategories, shopItem, type WorkshopCategories } from '../domain/workshop/item'
+import { DEFAULT_CATEGORIES } from '../domain/workshop/categories'
 import type { BacklogFilter } from '../domain/collection/backlog'
 import { DEFAULT_PIPELINES, type PipelineKey } from '../domain/pipelines'
 import { DEFAULT_PIPELINE, firstOwnedStage, moveModels, WISHLISTED, type MoveOptions } from '../domain/collection/pipeline'
@@ -223,6 +224,9 @@ interface State {
   deleteSupply(id: string): Promise<void>
   /** Hobby tools with maintenance jobs and a wishlist; saved in the backup. */
   tools: Tool[]
+  /** Tool and supply categories, and which supply categories are liquids (Settings › Workshop). */
+  workshopCategories: WorkshopCategories
+  saveWorkshopCategories(c: WorkshopCategories): Promise<void>
   saveTool(t: Tool): Promise<void>
   deleteTool(id: string): Promise<void>
   /** Games, live and finished (#71); saved in the backup. */
@@ -370,12 +374,14 @@ export const useStore = create<State>((set, get) => ({
   },
 
   async load() {
-    const [units, painting, paint, scheme, storageFlow, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals, paintSessions, paintTimers, companionTicks, storage, barcodes, tools] = await Promise.all([
+    const [units, painting, paint, scheme, storageFlow, level, workshopCategories, catalogues, stock, schemes, schemeDefaults, recipeLinks, activeCatalogue, lists, shopping, homeLayout, games, stratagemData, supplies, purchases, currency, goals, paintSessions, paintTimers, companionTicks, storage, barcodes, tools] = await Promise.all([
       unitsRepo.list(),
       settingsRepo.getPipeline('painting'),
       settingsRepo.getPipeline('paint'),
       settingsRepo.getPipeline('scheme'),
       settingsRepo.getPipeline('storage'),
+      settingsRepo.getPipeline('level'),
+      settingsRepo.getValue<unknown>('workshopCategories', undefined),
       catalogueRepo.list(),
       paintRepo.listStock(),
       schemeRepo.list(),
@@ -402,7 +408,8 @@ export const useStore = create<State>((set, get) => ({
     set({
       units,
       pipeline: painting,
-      pipelines: { painting, paint, scheme, storage: storageFlow },
+      pipelines: { painting, paint, scheme, storage: storageFlow, level },
+      workshopCategories: parseCategories(workshopCategories, DEFAULT_CATEGORIES),
       catalogue: catalogue ?? null,
       catalogues,
       paintStock: new Map(stock.map((s) => [s.paintId, s])),
@@ -739,12 +746,17 @@ export const useStore = create<State>((set, get) => ({
     set({ supplies: list })
     await settingsRepo.setValue('supplies', list)
     // Reaching the alert level puts it on the shopping list.
-    if (becameLow(before, supply)) await get().addToShopping([supplyItem(supply)], [])
+    if (becameLow(before, supply, get().pipelines.level)) await get().addToShopping([supplyItem(supply)], [])
   },
   async deleteSupply(id) {
     const list = get().supplies.filter((x) => x.id !== id)
     set({ supplies: list })
     await settingsRepo.setValue('supplies', list)
+  },
+  workshopCategories: DEFAULT_CATEGORIES,
+  async saveWorkshopCategories(c) {
+    set({ workshopCategories: c })
+    await settingsRepo.setValue('workshopCategories', c)
   },
   tools: [],
   async saveTool(tool) {
@@ -752,7 +764,7 @@ export const useStore = create<State>((set, get) => ({
     const list = before ? get().tools.map((x) => (x.id === tool.id ? tool : x)) : [...get().tools, tool]
     set({ tools: list })
     await settingsRepo.setValue('tools', list)
-    if (becameLow(before, tool)) await get().addToShopping([shopItem(tool, 'tool', LOW_SOURCE)], [])
+    if (becameLow(before, tool, get().pipelines.level)) await get().addToShopping([shopItem(tool, 'tool', LOW_SOURCE)], [])
   },
   async deleteTool(id) {
     const list = get().tools.filter((x) => x.id !== id)

@@ -70,6 +70,7 @@ describe('Rules page', () => {
   it('the setting lives in Settings → Appearance and is remembered', async () => {
     const user = await start()
     await user.click(screen.getByRole('button', { name: /Settings/ }))
+    await user.click(await screen.findByRole('tab', { name: 'Appearance' }))
     await user.selectOptions(screen.getByLabelText('Rule explanations'), 'expanded')
     expect(useStore.getState().ruleDisplay).toBe('expanded')
     expect(localStorage.getItem('ruleDisplay')).toBe('expanded')

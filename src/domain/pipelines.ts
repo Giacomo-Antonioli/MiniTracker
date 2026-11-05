@@ -3,7 +3,7 @@ import type { Pipeline } from './collection/types'
 import { DEFAULT_STORAGE_FLOW } from './storage/storage'
 
 /** Every editable pipeline in the app. Units use 'painting'; paints and schemes get theirs in #26/#27. */
-export type PipelineKey = 'painting' | 'paint' | 'scheme' | 'storage'
+export type PipelineKey = 'painting' | 'paint' | 'scheme' | 'storage' | 'level'
 
 export const DEFAULT_PIPELINES: Record<PipelineKey, Pipeline> = {
   painting: DEFAULT_PIPELINE,
@@ -18,6 +18,15 @@ export const DEFAULT_PIPELINES: Record<PipelineKey, Pipeline> = {
     ],
   },
   storage: DEFAULT_STORAGE_FLOW,
+  /** How full a liquid supply is (primer, glue, varnish…); 'low' and later count as running low. */
+  level: {
+    stages: [
+      { id: 'full', name: 'Full' },
+      { id: 'half', name: 'Half' },
+      { id: 'low', name: 'Running low' },
+      { id: 'empty', name: 'Empty' },
+    ],
+  },
   scheme: {
     stages: [
       { id: 'idea', name: 'Idea' },

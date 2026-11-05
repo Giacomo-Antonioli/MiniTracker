@@ -344,8 +344,13 @@ export function KindsEditor() {
     setRows(r)
   }
   return (
-    <section className="panel grid gap-2 p-4" aria-label="Place kinds">
-      <h3 className="font-display text-lg">Storage place kinds</h3>
+    <details className="panel group" aria-label="Place kinds">
+      <summary className="flex cursor-pointer list-none items-center gap-2 p-4">
+        <span className="text-muted group-open:rotate-90">▸</span>
+        <h3 className="font-display text-lg">Storage place kinds</h3>
+        <span className="ml-auto truncate text-xs text-muted">{s.kinds.map((k) => `${k.icon} ${k.name}`).join(', ')}</span>
+      </summary>
+      <div className="grid gap-2 px-4 pb-4">
       <p className="text-sm text-muted">Kinds of places in Storage. Kinds used by places can't be deleted.</p>
       <ul className="grid gap-1">
         {rows.map((k, i) => (
@@ -364,7 +369,8 @@ export function KindsEditor() {
         <button className="btn btn-primary" onClick={() => run((x) => saveKinds(x, rows))}>Save kinds</button>
       </div>
       {err && <p className="text-sm text-danger" role="alert">{err}</p>}
-    </section>
+      </div>
+    </details>
   )
 }
 

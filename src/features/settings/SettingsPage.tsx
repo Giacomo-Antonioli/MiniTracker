@@ -5,23 +5,32 @@ import { DEFAULT_PIPELINES } from '../../domain/pipelines'
 import { BackupPage } from './BackupPage'
 import { CataloguePage } from './CataloguePage'
 import { PipelineEditor } from './PipelineEditor'
+import { WorkshopSettings } from './WorkshopSettings'
 
-export type SettingsSection = 'appearance' | 'pipelines' | 'catalogue' | 'storage' | 'backup'
+export type SettingsSection = 'catalogue' | 'appearance' | 'pipelines' | 'workshop' | 'storage' | 'backup'
 
 const SECTIONS: { id: SettingsSection; label: string }[] = [
+  { id: 'catalogue', label: 'Catalogue data' },
   { id: 'appearance', label: 'Appearance' },
   { id: 'pipelines', label: 'Pipelines' },
-  { id: 'catalogue', label: 'Catalogue data' },
+  { id: 'workshop', label: 'Workshop' },
   { id: 'storage', label: 'Storage' },
   { id: 'backup', label: 'Backup' },
 ]
 
+/** Tab shown when Settings opens again without a section. */
+let lastTab: SettingsSection = 'catalogue'
+
 export function SettingsPage({ section }: { section?: SettingsSection }) {
   const [start, setStart] = useState<StartPage>(readStartPage)
-  const { currency, setCurrency, theme, setTheme, ruleDisplay, setRuleDisplay, pipelines, savePipelineFor, units, paintStock, schemes, storage } = useStore()
-
+  const { currency, setCurrency, theme, setTheme, ruleDisplay, setRuleDisplay, pipelines, savePipelineFor, units, paintStock, schemes, storage, supplies } = useStore()
+  const [tab, setTabState] = useState<SettingsSection>(section ?? lastTab)
+  const setTab = (t: SettingsSection) => {
+    lastTab = t
+    setTabState(t)
+  }
   useEffect(() => {
-    if (section) document.getElementById(`settings-${section}`)?.scrollIntoView?.({ block: 'start' })
+    if (section) setTab(section)
   }, [section])
 
   const modelsInStage = (id: string) =>
@@ -31,19 +40,18 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
     <div className="grid max-w-3xl gap-6">
       <header className="grid gap-2">
         <h1 className="font-display text-2xl text-accent">Settings</h1>
-        <nav className="flex flex-wrap gap-2" aria-label="Settings sections">
+        <div className="flex flex-wrap gap-1 border-b border-line" role="tablist" aria-label="Settings sections">
           {SECTIONS.map((s) => (
-            <a key={s.id} href={`#settings-${s.id}`} className="btn text-sm" onClick={(e) => {
-              e.preventDefault()
-              document.getElementById(`settings-${s.id}`)?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
-            }}>
+            <button key={s.id} role="tab" id={`tab-${s.id}`} aria-selected={tab === s.id} aria-controls={`settings-${s.id}`}
+              className={`-mb-px rounded-t border border-b-0 px-3 py-1.5 text-sm ${tab === s.id ? 'border-line bg-panel text-accent' : 'border-transparent text-muted hover:text-fg'}`}
+              onClick={() => setTab(s.id)}>
               {s.label}
-            </a>
+            </button>
           ))}
-        </nav>
+        </div>
       </header>
 
-      <section id="settings-appearance" className="grid scroll-mt-4 gap-3">
+      {tab === 'appearance' && <section role="tabpanel" aria-labelledby="tab-appearance" id="settings-appearance" className="grid gap-3">
         <h2 className="font-display text-xl text-accent">Appearance</h2>
         <div className="panel grid gap-3 p-4">
           <label className="flex items-center gap-3">
@@ -72,9 +80,9 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
             </select>
           </label>
         </div>
-      </section>
+      </section>}
 
-      <section id="settings-pipelines" className="grid scroll-mt-4 gap-3">
+      {tab === 'pipelines' && <section role="tabpanel" aria-labelledby="tab-pipelines" id="settings-pipelines" className="grid gap-3">
         <h2 className="font-display text-xl text-accent">Pipelines</h2>
         <PipelineEditor
           title="Painting pipeline"
@@ -112,21 +120,35 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
           usedLabel="units"
           onSave={(p) => savePipelineFor('storage', p)}
         />
+        <PipelineEditor
+          title="Liquid level"
+          description="How full a liquid supply is (primer, glue, varnish…). The stage with id 'low' and the ones after it count as running low and go on the shopping list."
+          pipeline={pipelines.level}
+          defaults={DEFAULT_PIPELINES.level}
+          usedBy={(id) => supplies.filter((s) => (s.level ?? pipelines.level.stages[0]?.id) === id).length}
+          usedLabel="supplies"
+          onSave={(p) => savePipelineFor('level', p)}
+        />
         <KindsEditor />
-      </section>
+      </section>}
 
-      <section id="settings-catalogue" className="scroll-mt-4">
+      {tab === 'workshop' && <section role="tabpanel" aria-labelledby="tab-workshop" id="settings-workshop" className="grid gap-3">
+        <h2 className="font-display text-xl text-accent">Workshop</h2>
+        <WorkshopSettings />
+      </section>}
+
+      {tab === 'catalogue' && <section role="tabpanel" aria-labelledby="tab-catalogue" id="settings-catalogue">
         <CataloguePage />
-      </section>
+      </section>}
 
-      <section id="settings-storage" className="grid scroll-mt-4 gap-3">
+      {tab === 'storage' && <section role="tabpanel" aria-labelledby="tab-storage" id="settings-storage" className="grid gap-3">
         <h2 className="font-display text-xl text-accent">Storage</h2>
         <StorageInfo />
-      </section>
+      </section>}
 
-      <section id="settings-backup" className="scroll-mt-4">
+      {tab === 'backup' && <section role="tabpanel" aria-labelledby="tab-backup" id="settings-backup">
         <BackupPage />
-      </section>
+      </section>}
     </div>
   )
 }

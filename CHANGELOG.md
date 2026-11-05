@@ -4,6 +4,13 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Liquid supplies (primer, glue, varnish, mediums…) show a 💧 level, Full → Half → Running low → Empty, instead of a condition; running low or empty puts them on the shopping list. The levels are a pipeline in Settings › Pipelines › Liquid level.
+- Settings › Workshop: add, reorder and delete tool and supply categories, and mark which supply categories are liquids.
+
+### Changed
+- Settings: the sections are real tabs (one shown at a time, Catalogue data first). Each pipeline is a row that expands to show its stages.
+
 ## [0.16.0] - 2026-11-05
 
 ### Added
