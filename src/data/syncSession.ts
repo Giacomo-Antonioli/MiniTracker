@@ -14,6 +14,9 @@ import { SYNCED_TABLES } from './syncTracking'
 
 export type Direction = 'send' | 'receive' | 'both'
 
+const HELLO_RETRY_MS = 2000
+const HELLO_GIVE_UP_MS = 30_000
+
 export interface SyncPlan {
   mode: SyncMode
   /** Seen from the device that starts. */
@@ -23,7 +26,7 @@ export interface SyncPlan {
 }
 
 type Msg =
-  | Hello
+  | (Hello & { seen?: boolean })
   | { type: 'plan'; plan: SyncPlan }
   | { type: 'accept' }
   | { type: 'decline'; reason: string }
@@ -61,12 +64,37 @@ export async function runSync(
   const inbox: Msg[] = []
   const waiters: (() => void)[] = []
   let closed = false
+  let gotTheirs: Hello | undefined
+  let theyHaveMine = false
+  let gotIt!: (h: Hello) => void
+  let noHello!: (e: Error) => void
+  let gotConfirm!: () => void
+  let finish!: () => void
+  const theirHello = new Promise<Hello>((r, j) => ((gotIt = r), (noHello = j)))
+  const confirmed = new Promise<void>((r) => (gotConfirm = r))
+  const finished = new Promise<void>((r) => (finish = r))
+  const sendHello = () => {
+    try {
+      send({ type: 'hello', protocol: PROTOCOL_VERSION, ...me, clock: now(), seen: !!gotTheirs })
+    } catch {
+      // the connection is gone; the close handler ends the sync
+    }
+  }
   channel.onMessage((t) => {
-    inbox.push(JSON.parse(t) as Msg)
+    const m = JSON.parse(t) as Msg
+    if (m.type === 'hello') {
+      if (!gotTheirs) (gotTheirs = m), gotIt(m)
+      if (m.seen) (theyHaveMine = true), gotConfirm()
+      else sendHello() // they don't have ours yet (or lost it): answer
+      return
+    }
+    inbox.push(m)
     waiters.splice(0).forEach((w) => w())
   })
   channel.onClose(() => {
     closed = true
+    finish()
+    if (!gotTheirs) noHello(new Error('The other device disconnected'))
     waiters.splice(0).forEach((w) => w())
   })
   const send = (m: Msg) => channel.send(JSON.stringify(m))
@@ -99,9 +127,22 @@ export async function runSync(
     }
   }
 
-  // 1. Hello both ways.
-  send({ type: 'hello', protocol: PROTOCOL_VERSION, ...me, clock: now() })
-  const other = await next('hello')
+  // 1. Hello both ways, handled as they arrive (see onMessage). Each hello says whether we have
+  // theirs; we repeat ours until they confirm, in case one is lost while the connection settles.
+  const again = setInterval(() => !theyHaveMine && sendHello(), HELLO_RETRY_MS)
+  sendHello()
+  let other: Hello
+  try {
+    other = await theirHello
+  } finally {
+    // keep repeating in the background only until they confirm
+    const stop = () => clearInterval(again)
+    if (theyHaveMine) stop()
+    else void confirmed.then(stop)
+    void finished.then(stop)
+    setTimeout(stop, HELLO_GIVE_UP_MS) // never repeat forever, even if the sync fails later
+  }
+
   if (other.protocol !== PROTOCOL_VERSION) {
     send({ type: 'decline', reason: 'The two devices run different MiniTracker versions; update both' })
     throw new Error('The two devices run different MiniTracker versions; update both')
@@ -119,6 +160,7 @@ export async function runSync(
     plan = { ...p, direction: flip(p.direction) }
     if (!(await (hooks.confirmPlan?.(plan, other) ?? Promise.resolve(true)))) {
       send({ type: 'decline', reason: `${me.deviceName} declined the sync` })
+      finish()
       return { applied: false, other }
     }
     send({ type: 'accept' })
@@ -154,6 +196,7 @@ export async function runSync(
   await serving
   send({ type: 'done' })
   await next('done')
+  finish()
   channel.close()
   return result
 }

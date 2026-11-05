@@ -26,6 +26,29 @@ export const iceServers = (o: ConnectOptions = {}): RTCIceServer[] => (o.turn?.u
 /** Keep pieces under the size every browser accepts on a data channel. */
 export const PIECE_SIZE = 16_000
 
+/**
+ * Listens from the moment the connection exists and keeps messages (and a close) until someone listens:
+ * the other device may speak first, before the sync conversation has attached its handler.
+ */
+export function buffered(listen: (fn: (t: string) => void) => void, listenClose: (fn: () => void) => void): Pick<Channel, 'onMessage' | 'onClose'> {
+  const early: string[] = []
+  let handler: ((t: string) => void) | undefined
+  let closed = false
+  let closeHandler: (() => void) | undefined
+  listen((t) => (handler ? handler(t) : early.push(t)))
+  listenClose(() => (closeHandler ? closeHandler() : (closed = true)))
+  return {
+    onMessage: (fn) => {
+      handler = fn
+      early.splice(0).forEach(fn)
+    },
+    onClose: (fn) => {
+      closeHandler = fn
+      if (closed) fn()
+    },
+  }
+}
+
 // ---------- relay (PeerJS) ----------
 
 async function newPeer(id: string | undefined, o: ConnectOptions): Promise<PeerType> {
@@ -49,8 +72,7 @@ function relayError(e: { type?: string; message?: string }): string {
 function fromPeerJs(conn: DataConnection, peer: PeerType): Channel {
   return {
     send: (t) => void conn.send(t),
-    onMessage: (fn) => void conn.on('data', (d) => fn(String(d))),
-    onClose: (fn) => void conn.on('close', fn),
+    ...buffered((fn) => void conn.on('data', (d) => fn(String(d))), (fn) => void conn.on('close', fn)),
     close: () => {
       conn.close()
       peer.destroy()
@@ -68,7 +90,10 @@ const opened = (conn: DataConnection) =>
 export async function hostByCode(code: string, o: ConnectOptions = {}): Promise<{ channel: Promise<Channel>; cancel: () => void }> {
   const peer = await newPeer(peerIdFor(code), o)
   const channel = new Promise<Channel>((resolve, reject) => {
-    peer.on('connection', (conn) => void opened(conn).then(() => resolve(fromPeerJs(conn, peer)), reject))
+    peer.on('connection', (conn) => {
+      const ch = fromPeerJs(conn, peer)
+      void opened(conn).then(() => resolve(ch), reject)
+    })
     peer.on('error', (e) => reject(new Error(relayError(e))))
   })
   return { channel, cancel: () => peer.destroy() }
@@ -78,9 +103,10 @@ export async function hostByCode(code: string, o: ConnectOptions = {}): Promise<
 export async function joinByCode(code: string, o: ConnectOptions = {}): Promise<Channel> {
   const peer = await newPeer(undefined, o)
   const conn = peer.connect(peerIdFor(code), { reliable: true, serialization: 'raw' })
+  const ch = fromPeerJs(conn, peer)
   const failed = new Promise<never>((_, reject) => peer.on('error', (e) => reject(new Error(relayError(e)))))
   await Promise.race([opened(conn), failed])
-  return fromPeerJs(conn, peer)
+  return ch
 }
 
 // ---------- private (no relay) ----------
@@ -88,8 +114,7 @@ export async function joinByCode(code: string, o: ConnectOptions = {}): Promise<
 function fromDataChannel(dc: RTCDataChannel, pc: RTCPeerConnection): Channel {
   return {
     send: (t) => dc.send(t),
-    onMessage: (fn) => dc.addEventListener('message', (e) => fn(String(e.data))),
-    onClose: (fn) => dc.addEventListener('close', fn),
+    ...buffered((fn) => dc.addEventListener('message', (e) => fn(String(e.data))), (fn) => dc.addEventListener('close', fn)),
     close: () => {
       dc.close()
       pc.close()
@@ -120,13 +145,17 @@ const channelOpen = (dc: RTCDataChannel) =>
 export async function privateOffer(o: ConnectOptions = {}): Promise<{ offer: string; accept: (answer: string) => Promise<Channel>; cancel: () => void }> {
   const pc = new RTCPeerConnection({ iceServers: iceServers(o) })
   const dc = pc.createDataChannel('sync', { ordered: true })
+  const ch = fromDataChannel(dc, pc)
+  // listen for "open" now: on a busy device it can fire before setRemoteDescription's promise resolves
+  const isOpen = channelOpen(dc)
+  isOpen.catch(() => {})
   await pc.setLocalDescription(await pc.createOffer())
   return {
     offer: await gathered(pc),
     accept: async (answer) => {
       await pc.setRemoteDescription(parseDescription(answer, 'answer'))
-      await channelOpen(dc)
-      return fromDataChannel(dc, pc)
+      await isOpen
+      return ch
     },
     cancel: () => pc.close(),
   }
@@ -136,7 +165,10 @@ export async function privateOffer(o: ConnectOptions = {}): Promise<{ offer: str
 export async function privateAnswer(offer: string, o: ConnectOptions = {}): Promise<{ answer: string; channel: Promise<Channel> }> {
   const pc = new RTCPeerConnection({ iceServers: iceServers(o) })
   const channel = new Promise<Channel>((resolve, reject) => {
-    pc.addEventListener('datachannel', (e) => void channelOpen(e.channel).then(() => resolve(fromDataChannel(e.channel, pc)), reject))
+    pc.addEventListener('datachannel', (e) => {
+      const ch = fromDataChannel(e.channel, pc)
+      void channelOpen(e.channel).then(() => resolve(ch), reject)
+    })
   })
   await pc.setRemoteDescription(parseDescription(offer, 'offer'))
   await pc.setLocalDescription(await pc.createAnswer())
