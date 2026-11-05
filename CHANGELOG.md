@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- QR carousel (#161): sync with no network at all. ▶ Show QR carousel loops this device's data (no photos, compressed) as QR codes; 📷 Read QR carousel on the other device collects them with the camera in any order, then shows the changes before applying. QR size and speed are adjustable.
+
 ## [0.18.0] - 2026-11-05
 
 ### Fixed

@@ -101,6 +101,7 @@ it('opens a sync file from another device', async () => {
   const file = new File([JSON.stringify(f)], 'x.json', { type: 'application/json' })
   await user.upload(await screen.findByLabelText('Open sync file'), file)
   const d = within(await screen.findByRole('dialog', { name: 'Apply the sync file?' }))
+  await d.findByRole('table', { name: 'Changes' })
   await user.click(d.getByRole('button', { name: 'Apply' }))
   await waitFor(() => expect(useStore.getState().units.map((u) => u.customName).sort()).toEqual(['From PC', 'From phone']))
   expect(screen.getByText('Applied the sync file from My phone.')).toBeInTheDocument()

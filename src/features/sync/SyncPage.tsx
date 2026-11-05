@@ -10,6 +10,7 @@ import { runSync, type Direction, type SyncPlan } from '../../data/syncSession'
 import type { SyncPrefs } from '../../data/syncStamps'
 import { Dialog } from '../../ui/Dialog'
 import { ScanDialog } from '../storage/Labels'
+import { QrReceiver, QrSender } from './QrCarousel'
 
 const TABLE_NAMES: Record<string, string> = {
   units: 'Units', statusEvents: 'Painting history', paintStock: 'Paint stock', customPaints: 'Custom paints', photos: 'Photos',
@@ -95,6 +96,8 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
   const [scan, setScan] = useState<'code' | 'offer' | 'answer'>()
   const [pasted, setPasted] = useState('')
   const channel = useRef<Channel | undefined>(undefined)
+  const [carousel, setCarousel] = useState<'send' | 'read'>()
+  const [qrFile, setQrFile] = useState<SyncFile>()
 
   const refresh = async () => {
     setMe(await getDevice(appDb))
@@ -323,6 +326,20 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
         else void finishPrivate(t)
       }} />}
 
+      {me && (
+        <section className="panel grid gap-2 p-4" aria-label="QR carousel">
+          <h2 className="font-display text-lg">QR carousel (no network)</h2>
+          <p className="text-sm text-muted">No Wi-Fi, no relay: one screen shows a loop of QR codes and the other device reads them with its camera. Data only, no photos. For both ways, do it once in each direction.</p>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn" disabled={busy} onClick={() => setCarousel('send')}>▶ Show QR carousel</button>
+            <button className="btn" disabled={busy} onClick={() => setCarousel('read')}>📷 Read QR carousel</button>
+          </div>
+          {carousel === 'send' && <QrSender me={me} onClose={() => setCarousel(undefined)} />}
+          {carousel === 'read' && <QrReceiver onClose={() => setCarousel(undefined)} onFile={(f) => { setCarousel(undefined); setQrFile(f) }} />}
+          {qrFile && <ApplyFileDialog file={qrFile} mode={plan.direction === 'send' ? 'merge' : plan.mode} applyDeletions={plan.applyDeletions} onClose={() => setQrFile(undefined)} onApplied={async () => { setQrFile(undefined); setStep({ kind: 'done', text: `Applied the data from ${qrFile.device.deviceName}.` }); await load(); setDevices(await getKnownDevices(appDb)) }} />}
+        </section>
+      )}
+
       {me && <SyncFileSection me={me} plan={plan} disabled={busy} onApplied={async () => { await load(); setDevices(await getKnownDevices(appDb)) }} />}
 
       <section className="panel grid gap-2 p-4" aria-label="Devices">
@@ -348,7 +365,6 @@ function SyncFileSection({ me, plan, disabled, onApplied }: { me: Device; plan: 
   const [photos, setPhotos] = useState(false)
   const [msg, setMsg] = useState('')
   const [file, setFile] = useState<SyncFile>()
-  const [preview, setPreview] = useState<Awaited<ReturnType<typeof previewSyncFile>>>()
   const mode = plan.direction === 'send' ? 'merge' : plan.mode
 
   const exportFile = async () => {
@@ -361,9 +377,7 @@ function SyncFileSection({ me, plan, disabled, onApplied }: { me: Device; plan: 
   }
   const open = async (f: File) => {
     try {
-      const parsed = parseSyncFile(await f.text())
-      setFile(parsed)
-      setPreview(await previewSyncFile(appDb, parsed, { mode, applyDeletions: plan.applyDeletions }))
+      setFile(parseSyncFile(await f.text()))
       setMsg('')
     } catch (e) {
       setMsg((e as Error).message)
@@ -379,24 +393,33 @@ function SyncFileSection({ me, plan, disabled, onApplied }: { me: Device; plan: 
         <label className="btn cursor-pointer">⬆ Open sync file<input type="file" accept=".json,application/json" className="hidden" aria-label="Open sync file" disabled={disabled} onChange={(e) => e.target.files?.[0] && void open(e.target.files[0])} /></label>
       </div>
       {msg && <p className="text-sm" role="status">{msg}</p>}
-      {file && preview && (
-        <Dialog title="Apply the sync file?" onClose={() => setFile(undefined)}>
-          <div className="grid gap-3 text-sm">
-            <p>From <b>{file.device.deviceName}</b>, saved {file.createdAt.slice(0, 16).replace('T', ' ')} · {mode === 'merge' ? 'merge, newest wins' : 'overwrite this device'}{file.photos ? ' · with photos' : ''}</p>
-            <ChangesTable summary={preview.result.summary} />
-            <div className="flex gap-2">
-              <button className="btn btn-primary" onClick={async () => {
-                await applySyncFile(appDb, file, preview)
-                await recordSync(appDb, file.device, new Date().toISOString())
-                setFile(undefined)
-                setMsg(`Applied the sync file from ${file.device.deviceName}.`)
-                await onApplied()
-              }}>Apply</button>
-              <button className="btn" onClick={() => setFile(undefined)}>Cancel</button>
-            </div>
-          </div>
-        </Dialog>
-      )}
+      {file && <ApplyFileDialog file={file} mode={mode} applyDeletions={plan.applyDeletions} onClose={() => setFile(undefined)} onApplied={async () => { setFile(undefined); setMsg(`Applied the sync file from ${file.device.deviceName}.`); await onApplied() }} />}
     </section>
+  )
+}
+
+/** Preview what a sync file (or QR carousel) changes here, then apply it. */
+export function ApplyFileDialog({ file, mode, applyDeletions, onClose, onApplied }: { file: SyncFile; mode: SyncPlan['mode']; applyDeletions: boolean; onClose: () => void; onApplied: () => Promise<void> }) {
+  const [preview, setPreview] = useState<Awaited<ReturnType<typeof previewSyncFile>>>()
+  const [err, setErr] = useState('')
+  useEffect(() => {
+    previewSyncFile(appDb, file, { mode, applyDeletions }).then(setPreview, (e: Error) => setErr(e.message))
+  }, [file, mode, applyDeletions])
+  return (
+    <Dialog title="Apply the sync file?" onClose={onClose}>
+      <div className="grid gap-3 text-sm">
+        <p>From <b>{file.device.deviceName}</b>, saved {file.createdAt.slice(0, 16).replace('T', ' ')} · {mode === 'merge' ? 'merge, newest wins' : 'overwrite this device'}{file.photos ? ' · with photos' : ''}</p>
+        {preview ? <ChangesTable summary={preview.result.summary} /> : !err && <p className="text-muted">Working out the changes…</p>}
+        {err && <p className="text-danger" role="alert">{err}</p>}
+        <div className="flex gap-2">
+          <button className="btn btn-primary" disabled={!preview} onClick={async () => {
+            await applySyncFile(appDb, file, preview!)
+            await recordSync(appDb, file.device, new Date().toISOString())
+            await onApplied()
+          }}>Apply</button>
+          <button className="btn" onClick={onClose}>Cancel</button>
+        </div>
+      </div>
+    </Dialog>
   )
 }
