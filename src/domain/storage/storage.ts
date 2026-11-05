@@ -306,3 +306,47 @@ export function parseStorage(x: unknown): Storage {
     log: Array.isArray(x.log) ? (x.log as StorageMove[]) : [],
   }
 }
+
+/**
+ * Slots for units moving into `placeId`: each keeps its slot if it is free there, else takes the next free one;
+ * `noSlot` lists the units that do not fit (the place is full). Places without slots give no slots.
+ */
+export function planMove(s: Storage, unitIds: string[], placeId: string): { slots: Record<string, number | undefined>; noSlot: string[] } {
+  const cap = placeById(s, placeId)?.capacity
+  const moving = new Set(unitIds)
+  const slots: Record<string, number | undefined> = {}
+  const noSlot: string[] = []
+  if (!cap) {
+    for (const u of unitIds) slots[u] = undefined
+    return { slots, noSlot }
+  }
+  const taken = new Set(homedIn(s, placeId).filter((x) => !moving.has(x.unitId) && x.slot !== undefined).map((x) => x.slot!))
+  const order = [...unitIds].sort((a, b) => (s.homes[a]?.slot ?? 1e9) - (s.homes[b]?.slot ?? 1e9))
+  // first pass keeps slots, second fills the gaps, so keepers are never pushed out
+  for (const u of order) {
+    const cur = s.homes[u]?.slot
+    if (cur !== undefined && cur <= cap && !taken.has(cur)) (slots[u] = cur, taken.add(cur))
+  }
+  for (const u of order) {
+    if (u in slots) continue
+    const free = Array.from({ length: cap }, (_, i) => i + 1).find((n) => !taken.has(n))
+    if (free === undefined) (slots[u] = undefined, noSlot.push(u))
+    else (slots[u] = free, taken.add(free))
+  }
+  return { slots, noSlot }
+}
+
+/** Gives all these units a new home in `placeId`, slots from planMove; units already homed there stay as they are. */
+export function moveHomes(s: Storage, unitIds: string[], placeId: string, c: Ctx): Storage {
+  if (!placeById(s, placeId)) throw new Error('Unknown place')
+  const todo = unitIds.filter((u) => s.homes[u]?.placeId !== placeId)
+  const { slots } = planMove(s, todo, placeId)
+  return todo.reduce((x, u) => setHome(x, u, { placeId, slot: slots[u] }, c), s)
+}
+
+/** Puts a place (and all inside it) into another place, or at the top level of a storage. */
+export function movePlace(s: Storage, id: string, to: { parentId?: string; siteId?: string }): Storage {
+  const p = placeById(s, id)
+  if (!p) throw new Error('Unknown place')
+  return savePlace(s, { ...p, parentId: to.parentId, siteId: to.parentId ? undefined : to.siteId ?? p.siteId })
+}

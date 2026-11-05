@@ -5,6 +5,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Added
+- Mass move: 📦 Move contents… on a place page moves the ticked units, tools and supplies to another place, for good (new home, slots kept where free, warning when full) or for now (check out). ↦ Move this place puts a box on another shelf or storage with everything inside. 📦 Store shown units… on the Backlog gives the filtered units one home. 📷 Scan into here moves each scanned unit or box sticker into the place.
 - Workshop: one tab with tools and supplies together; ▸ next to it opens the separate Tools and Supplies pages. The nav shows low stock plus due maintenance (Workshop ⚠n).
 
 ### Changed

@@ -8,6 +8,7 @@ import {
 } from '../../domain/storage/storage'
 import { Dialog } from '../../ui/Dialog'
 import { CodeBadge, FindCode, LabelsDialog } from './Labels'
+import { itemsIn, MassMoveDialog, MovePlaceDialog, ScanMoveDialog } from './MassMove'
 
 const icon = (k: string) => kindOf(useStore.getState().storage, k).icon
 
@@ -112,9 +113,11 @@ function FillBar({ s, id }: { s: Storage; id: string }) {
 }
 
 function PlaceDetail({ id, onOpenUnit, onEdit, onDeleted, onOpenPlace, full }: { id: string; onOpenUnit: (id: string) => void; onEdit: () => void; onDeleted: () => void; onOpenPlace?: (id: string) => void; full?: boolean }) {
-  const { storage: s, units } = useStore()
+  const { storage: s, units, tools, supplies } = useStore()
   const { run } = useSave()
+  const [moving, setMoving] = useState<'contents' | 'place' | 'scan'>()
   const p = placeById(s, id)!
+  const items = itemsIn({ tools, supplies }, id)
   const name = (u: string) => units.find((x) => x.id === u)?.customName ?? 'Deleted unit'
   const homed = homedIn(s, id)
   const here = checkedOutTo(s, id)
@@ -133,10 +136,18 @@ function PlaceDetail({ id, onOpenUnit, onEdit, onDeleted, onOpenPlace, full }: {
         <div className="flex gap-2">
           {!full && onOpenPlace && <button className="btn" title="Open the full page of this place" onClick={() => onOpenPlace(id)}>⤢ Open page</button>}
           <button className="btn" onClick={onEdit}>Edit</button>
+          <button className="btn" onClick={() => setMoving('place')}>↦ Move this place</button>
           <button className="btn" onClick={() => { if (confirm(`Remove "${p.name}"? What is inside moves up one level and its units lose this home.`)) { run((x) => removePlace(x, id, ctx())); onDeleted() } }}>Delete</button>
         </div>
       </header>
       {full && <CodeBadge id={id} kind="place" />}
+      <div className="flex flex-wrap gap-2">
+        <button className="btn" disabled={!homed.length && !here.length && !items.length} onClick={() => setMoving('contents')}>📦 Move contents…</button>
+        <button className="btn" onClick={() => setMoving('scan')}>📷 Scan into here</button>
+      </div>
+      {moving === 'contents' && <MassMoveDialog title={`Move from ${p.name}`} unitIds={[...new Set([...homed.map((x) => x.unitId), ...here])]} items={items} fromPlaceId={id} onClose={() => setMoving(undefined)} />}
+      {moving === 'place' && <MovePlaceDialog placeId={id} onClose={() => setMoving(undefined)} />}
+      {moving === 'scan' && <ScanMoveDialog placeId={id} onClose={() => setMoving(undefined)} />}
       {inside.length > 0 && (
         <p className="flex flex-wrap gap-2 text-sm">Inside:{inside.map((x) => onOpenPlace ? <button key={x.id} className="text-accent underline" onClick={() => onOpenPlace(x.id)}>{icon(x.kind)} {x.name}</button> : <span key={x.id}>{icon(x.kind)} {x.name}</span>)}</p>
       )}
@@ -157,6 +168,12 @@ function PlaceDetail({ id, onOpenUnit, onEdit, onDeleted, onOpenPlace, full }: {
           </ul>
         ) : <p className="text-sm text-muted">Nothing stored here yet. Set a unit's home on its page.</p>}
       </div>
+      {items.length > 0 && (
+        <div>
+          <h3 className="text-sm text-muted">Tools and supplies kept here</h3>
+          <ul className="text-sm" aria-label="Tools and supplies here">{items.map((r) => <li key={`${r.kind}:${r.id}`}>{r.kind === 'tool' ? '🔧' : '🧴'} {r.name}</li>)}</ul>
+        </div>
+      )}
       {here.length > 0 && (
         <div className="grid gap-2">
           <h3 className="text-sm text-muted">In here now (checked out)</h3>
