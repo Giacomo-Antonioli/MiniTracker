@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-11-05
+
 ### Added
 - QR carousel (#161): sync with no network at all. ▶ Show QR carousel loops this device's data (no photos, compressed) as QR codes; 📷 Read QR carousel on the other device collects them with the camera in any order, then shows the changes before applying. QR size and speed are adjustable.
 
@@ -284,7 +286,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.15.0...v0.16.0

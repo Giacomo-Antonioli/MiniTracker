@@ -2,6 +2,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+
 import App from '../../app/App'
 import { appDb, useStore } from '../../app/store'
 import { DEFAULT_PIPELINE } from '../../domain/collection/pipeline'
@@ -66,7 +67,8 @@ describe('Paints page', () => {
     const panel = screen.getByRole('complementary', { name: 'Paint details' })
     await user.click(within(panel).getByRole('button', { name: 'I own it' }))
 
-    expect(within(panel).getByLabelText('Pots owned')).toHaveTextContent('1')
+    // saving is async: wait for the stock row to appear
+    expect(await within(panel).findByLabelText('Pots owned')).toHaveTextContent('1')
     await user.click(within(panel).getByRole('button', { name: 'One pot more' }))
     await waitFor(() => expect(within(panel).getByLabelText('Pots owned')).toHaveTextContent('2'))
     await user.type(within(panel).getByLabelText('Location'), 'Drawer A')
@@ -86,7 +88,7 @@ describe('Paints page', () => {
     await user.type(screen.getByPlaceholderText(/Search name or brand/), 'macragge blue')
     await user.click(screen.getByRole('button', { name: 'Macragge Blue (Citadel)' }))
     await user.click(within(screen.getByRole('complementary', { name: 'Paint details' })).getByRole('button', { name: 'Add to wishlist' }))
-    expect(screen.getByRole('region', { name: 'Paint stats' })).toHaveTextContent('1 on wishlist')
+    await waitFor(() => expect(screen.getByRole('region', { name: 'Paint stats' })).toHaveTextContent('1 on wishlist'))
     await user.click(screen.getByLabelText('Owned'))
     expect(screen.queryByRole('button', { name: 'Macragge Blue (Citadel)' })).not.toBeInTheDocument()
   })
@@ -105,7 +107,7 @@ describe('Paints page', () => {
     const panel = await screen.findByRole('complementary', { name: 'Paint details' })
     expect(panel).toHaveTextContent('Rocket Green')
     expect(panel).toHaveTextContent('Green Stuff World')
-    expect(within(panel).getByLabelText('Pots owned')).toHaveTextContent('1')
+    expect(await within(panel).findByLabelText('Pots owned')).toHaveTextContent('1')
     await user.click(within(panel).getByRole('button', { name: 'Delete custom paint' }))
     await waitFor(() => expect(screen.queryByRole('complementary', { name: 'Paint details' })).not.toBeInTheDocument())
     expect(useStore.getState().paintStock.size).toBe(0)
