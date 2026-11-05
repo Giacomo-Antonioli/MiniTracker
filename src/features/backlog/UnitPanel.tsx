@@ -72,7 +72,7 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
 
   return (
     <Container
-      className={page ? 'panel mx-auto flex w-full max-w-4xl flex-col' : 'panel flex h-full w-[420px] shrink-0 flex-col overflow-y-auto'}
+      className={page ? 'panel mx-auto flex w-full max-w-4xl flex-col' : 'panel fixed inset-0 z-40 flex flex-col overflow-y-auto rounded-none md:static md:z-auto md:h-full md:w-[420px] md:shrink-0 md:rounded-[inherit]'}
       aria-label={page ? 'Unit page' : 'Unit details'}
     >
       <header className="border-b border-line p-4">
@@ -81,9 +81,9 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
             ← Back to backlog
           </button>
         )}
-        <div className="flex items-start justify-between gap-2">
-          <h2 className={`font-display text-accent ${page ? 'text-3xl' : 'text-xl'}`}>{unit.customName}</h2>
-          <div className="flex gap-1">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <h2 className={`min-w-0 break-words font-display text-accent ${page ? 'text-3xl' : 'text-xl'}`}>{unit.customName}</h2>
+          <div className="flex flex-wrap gap-1">
             <button className="btn" aria-pressed={unit.favourite} title="Favourite" onClick={() => toggle('favourite')}>{unit.favourite ? '★' : '☆'}</button>
             <button className="btn" title="Painter companion" onClick={() => openCompanion('paint', unit.id)}>🎨 Paint</button>
             <button className="btn" title="Builder companion" onClick={() => openCompanion('build', unit.id)}>🔨 Build</button>

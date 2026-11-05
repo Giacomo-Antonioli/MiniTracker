@@ -17,6 +17,7 @@ import { ShoppingPage } from '../features/shopping/ShoppingPage'
 import { readRecipeHash, type RecipePayload } from '../features/schemes/recipeImport'
 import { SettingsPage, type SettingsSection } from '../features/settings/SettingsPage'
 import { readStartPage, useStore } from './store'
+import { useIsPhone } from '../ui/useIsPhone'
 import { WorkshopPage, workshopAlerts } from '../features/workshop/WorkshopPage'
 import { HomePage } from '../features/home/HomePage'
 import { codeFromText, findCode } from '../domain/storage/codes'
@@ -36,6 +37,8 @@ export default function App() {
   const alerts = useStore((s) => [workshopAlerts(s), workshopAlerts(s, 'tool'), workshopAlerts(s, 'supply')].join())
   const [allAlerts, toolAlerts, supplyAlerts] = alerts.split(',').map(Number)
   const [workshopOpen, setWorkshopOpen] = useState(false)
+  const phone = useIsPhone()
+  const [menuOpen, setMenuOpen] = useState(false)
   const liveGame = useStore((s) => s.games.some((g) => g.status === 'live'))
   // A recipe sent by the bookmarklet arrives in the URL (#recipe=…): start on Schemes with it.
   const [recipe, setRecipe] = useState<RecipePayload | null>(() => readRecipeHash(location.hash))
@@ -133,6 +136,7 @@ export default function App() {
   }, [theme])
 
   const go = (p: Page, s?: SettingsSection) => {
+    setMenuOpen(false)
     if (p !== 'companion') useStore.getState().closeCompanion()
     setPage(p)
     setSection(s)
@@ -150,9 +154,8 @@ export default function App() {
     </button>
   )
 
-  return (
-    <div className="flex h-screen">
-      <nav className="panel m-2 mr-0 flex w-52 shrink-0 flex-col gap-1 p-3" aria-label="Main">
+  const navItems = (
+    <>
         <div className="mb-4 font-display text-lg tracking-wide text-accent">MiniTracker</div>
         {nav('home', 'Home')}
         {nav('backlog', 'Backlog')}
@@ -195,8 +198,34 @@ export default function App() {
             v{__APP_VERSION__}
           </a>
         </div>
-      </nav>
-      <main className="min-w-0 flex-1 overflow-auto p-4">
+      </>
+  )
+  const tab = (id: Page, icon: string, label: string) => (
+    <button className={`flex flex-1 flex-col items-center gap-0.5 py-1.5 text-xs ${page === id ? 'text-accent' : 'text-muted'}`} aria-current={page === id ? 'page' : undefined} onClick={() => go(id)}>
+      <span className="text-lg leading-none" aria-hidden>{icon}</span>{label}
+    </button>
+  )
+
+  return (
+    <div className={phone ? 'flex h-dvh flex-col' : 'flex h-screen'}>
+      {phone ? (
+        <header className="panel m-2 mb-0 flex items-center gap-2 px-2 py-1.5">
+          <button className="btn px-2 py-1" aria-label="Menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>☰</button>
+          <span className="flex-1 font-display text-lg tracking-wide text-accent">MiniTracker</span>
+          <button className="btn px-2 py-1" aria-label="Sync" onClick={() => go('sync')}>⇄</button>
+        </header>
+      ) : (
+        <nav className="panel m-2 mr-0 flex w-52 shrink-0 flex-col gap-1 overflow-y-auto p-3" aria-label="Main">{navItems}</nav>
+      )}
+      {phone && menuOpen && (
+        <div className="fixed inset-0 z-50 flex bg-black/50" onClick={() => setMenuOpen(false)}>
+          <nav className="panel m-0 flex h-full w-64 max-w-[85vw] flex-col gap-1 overflow-y-auto rounded-none p-3" aria-label="Main" onClick={(e) => e.stopPropagation()}>
+            <button className="btn mb-2 w-fit px-2 py-1" aria-label="Close menu" onClick={() => setMenuOpen(false)}>✕</button>
+            {navItems}
+          </nav>
+        </div>
+      )}
+      <main className={phone ? 'min-h-0 min-w-0 flex-1 overflow-auto p-2 pb-4' : 'min-w-0 flex-1 overflow-auto p-4'}>
         {ready && shared && <SharedSchemeBanner token={shared} onDone={(id) => { setShared(null); if (id) openScheme(id) }} />}
         {missingCode && <p className="panel mb-3 p-3 text-sm" role="alert">No unit or place with code {missingCode} on this device. Restore a backup from the device where you made the labels. <button className="underline" onClick={() => setMissingCode('')}>Dismiss</button></p>}
         {!ready ? (
@@ -247,6 +276,15 @@ export default function App() {
           <SettingsPage section={section} />
         )}
       </main>
+      {phone && (
+        <nav className="panel m-2 mt-0 flex shrink-0 items-stretch pb-[env(safe-area-inset-bottom)]" aria-label="Quick">
+          {tab('home', '🏠', 'Home')}
+          {tab('backlog', '📋', 'Backlog')}
+          {tab('paints', '🎨', 'Paints')}
+          {tab('workshop', '🧰', allAlerts ? `Workshop ⚠${allAlerts}` : 'Workshop')}
+          <button className="flex flex-1 flex-col items-center gap-0.5 py-1.5 text-xs text-muted" onClick={() => setMenuOpen(true)}><span className="text-lg leading-none" aria-hidden>☰</span>More</button>
+        </nav>
+      )}
     </div>
   )
 }

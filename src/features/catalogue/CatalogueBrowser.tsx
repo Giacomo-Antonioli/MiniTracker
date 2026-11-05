@@ -147,7 +147,7 @@ function DatasheetPanel({
     )
 
   return (
-    <aside className="panel flex h-full w-[420px] shrink-0 flex-col overflow-y-auto" aria-label="Datasheet details">
+    <aside className="panel fixed inset-0 z-40 flex flex-col overflow-y-auto rounded-none md:static md:z-auto md:h-full md:w-[420px] md:shrink-0 md:rounded-[inherit]" aria-label="Datasheet details">
       <header className="border-b border-line p-4">
         <div className="flex items-start justify-between gap-2">
           <h2 className="font-display text-xl text-accent">{d.name}</h2>

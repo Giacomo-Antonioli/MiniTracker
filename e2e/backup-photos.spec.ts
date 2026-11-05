@@ -34,6 +34,7 @@ async function unitWithPhoto(page: Page, original: Buffer) {
 
 async function exportAndWipe(page: Page, kind: 'Light' | 'Full', path: string) {
   await page.getByRole('button', { name: /Settings/ }).click()
+  await page.getByRole('tab', { name: 'Backup' }).click()
   await page.getByRole('radio', { name: new RegExp(`^${kind}`) }).check()
   const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: new RegExp(`Download ${kind.toLowerCase()} backup`) }).click()])
   await dl.saveAs(path)
@@ -45,6 +46,7 @@ async function exportAndWipe(page: Page, kind: 'Light' | 'Full', path: string) {
 
 async function restore(page: Page, path: string) {
   await page.getByRole('button', { name: /Settings/ }).click()
+  await page.getByRole('tab', { name: 'Backup' }).click()
   await page.getByLabel('Backup file').setInputFiles(path)
   await expect(page.getByText(/Restored 1 units and 1 photos/)).toBeVisible()
   await page.getByRole('button', { name: 'Backlog', exact: true }).click()
@@ -89,6 +91,7 @@ test('remove originals frees space but keeps photos visible', async ({ page }) =
   await page.goto('./')
   await unitWithPhoto(page, await makeJpeg(page))
   await page.getByRole('button', { name: /Settings/ }).click()
+  await page.getByRole('tab', { name: 'Storage' }).click()
   await page.getByRole('button', { name: /Remove originals/ }).click()
   await expect(page.getByText(/^Freed /)).toBeVisible()
   await expect(page.getByLabel('Storage usage')).toContainText('originals 0.0 MB')

@@ -7,7 +7,8 @@ import type { OwnedUnit } from '../../domain/collection/types'
 import { CatalogueBanner } from './CatalogueBanner'
 import { UnitFormDialog } from './UnitFormDialog'
 import { UnitPanel } from './UnitPanel'
-import { BacklogTable, StageBar } from './BacklogTable'
+import { BacklogCards, BacklogTable, StageBar } from './BacklogTable'
+import { useIsPhone } from '../../ui/useIsPhone'
 import { BacklogBoard } from './BacklogBoard'
 import { MassMoveDialog } from '../storage/MassMove'
 
@@ -19,6 +20,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<OwnedUnit | 'new' | null>(null)
   const [storing, setStoring] = useState(false)
+  const phone = useIsPhone()
   const hasPlaces = useStore((s) => s.storage.places.length > 0)
   // Table or board; remembered per browser (storage can be blocked, so it is only a convenience).
   const [view, setView] = useState<'table' | 'board'>(() => {
@@ -60,16 +62,16 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
   return (
     <div className="flex h-full gap-4">
       <div className="flex min-w-0 flex-1 flex-col gap-4">
-        <header className="flex items-center justify-between">
+        <header className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             <h1 className="font-display text-2xl text-accent">Backlog</h1>
-            <div role="tablist" aria-label="Backlog view" className="flex gap-1">
+            {!phone && <div role="tablist" aria-label="Backlog view" className="flex gap-1">
               {(['table', 'board'] as const).map((v) => (
                 <button key={v} role="tab" aria-selected={view === v} className={`btn text-sm ${view === v ? 'btn-primary' : ''}`} onClick={() => chooseView(v)}>
                   {v === 'table' ? '☰ Table' : '▦ Board'}
                 </button>
               ))}
-            </div>
+            </div>}
           </div>
           <ScanBoxButton onOpenUnit={onOpenUnit} />
           <button className="btn btn-primary" onClick={() => setEditing('new')}>+ Add unit</button>
@@ -92,7 +94,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
         </section>
 
         <section className="flex flex-wrap items-center gap-2" aria-label="Filters">
-          <input className="input w-56" placeholder="🔍 Search name, faction, tag" value={filter.text ?? ''} onChange={(e) => set({ text: e.target.value })} />
+          <input className="input w-full sm:w-56" placeholder="🔍 Search name, faction, tag" value={filter.text ?? ''} onChange={(e) => set({ text: e.target.value })} />
           <select className="input" aria-label="Faction" value={filter.faction ?? ''} onChange={(e) => set({ faction: e.target.value || undefined })}>
             <option value="">All factions</option>
             {factions.map((f) => <option key={f}>{f}</option>)}
@@ -112,7 +114,9 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
         </section>
         {storing && <MassMoveDialog title="Store the shown units" unitIds={shown.filter((u) => u.lifecycle === 'active' || u.lifecycle === 'on-hold').map((u) => u.id)} onClose={() => setStoring(false)} />}
 
-        {view === 'board' ? (
+        {phone ? (
+          shown.length ? <BacklogCards units={shown} selectedId={selectedId} onRowClick={onRowClick} /> : <p className="p-6 text-center text-muted">{units.length === 0 ? 'Your backlog is empty. Add your first unit!' : 'No units match these filters.'}</p>
+        ) : view === 'board' ? (
           <BacklogBoard units={shown} selectedId={selectedId} onCardClick={onRowClick} />
         ) : (
         <div className="panel overflow-auto">
