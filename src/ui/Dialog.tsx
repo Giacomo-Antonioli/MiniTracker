@@ -11,7 +11,7 @@ export function Dialog({ title, onClose, children, wide }: { title: string; onCl
       ref={ref}
       onClose={onClose}
       aria-label={title}
-      className={`panel m-auto p-0 text-fg ${wide ? 'w-[min(720px,95vw)]' : 'w-[min(440px,95vw)]'}`}
+      className={`panel m-auto max-h-[92dvh] overflow-y-auto p-0 text-fg ${wide ? 'w-[min(720px,95vw)]' : 'w-[min(440px,95vw)]'}`}
     >
       <div className="flex items-center justify-between border-b border-line px-4 py-3">
         <h2 className="font-display text-lg text-accent">{title}</h2>

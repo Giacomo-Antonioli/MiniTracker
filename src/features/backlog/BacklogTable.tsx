@@ -227,3 +227,30 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
     </>
   )
 }
+
+/** Phone version of the backlog: one card per entry, sorted by name; tap to open. */
+export function BacklogCards({ units, selectedId, onRowClick }: { units: OwnedUnit[]; selectedId: string | null; onRowClick: (id: string, clicks: number) => void }) {
+  const { pipeline } = useStore()
+  const sorted = [...units].sort((a, b) => a.customName.localeCompare(b.customName))
+  return (
+    <ul className="grid gap-2" aria-label="Units">
+      {sorted.map((u) => {
+        const p = unitProgress(u, pipeline)
+        const owned = u.groups.filter((g) => g.status !== WISHLISTED).reduce((n, g) => n + g.count, 0)
+        const stages = pipeline.stages.map((s) => ({ id: s.id, name: s.name, count: u.groups.filter((g) => g.status === s.id).reduce((n, g) => n + g.count, 0) })).filter((s) => s.count)
+        return (
+          <li key={u.id}>
+            <button className={`panel grid w-full gap-1 p-3 text-left ${u.id === selectedId ? 'border-accent' : ''}`} onClick={() => onRowClick(u.id, 1)} aria-label={u.customName}>
+              <span className="flex items-baseline gap-2">
+                <span className="flex-1 font-semibold">{u.favourite ? <span className="text-accent">★ </span> : null}{u.nextUp ? '⏭ ' : null}{u.customName}</span>
+                <span className="text-xs text-muted">{owned} models · {Math.round(p.ratio * 100)}%</span>
+              </span>
+              {u.factionName && <span className="text-xs text-muted">{u.factionName}</span>}
+              {stages.length > 0 && <StageBar stages={stages} pipeline={pipeline} />}
+            </button>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}

@@ -12,6 +12,7 @@ test('costs: unit price, currency, stats', async ({ page }) => {
   await page.getByLabel('Price paid').fill('42.5')
   await page.getByLabel('Price paid').blur()
   await page.getByRole('button', { name: /Settings/ }).click()
+  await page.getByRole('tab', { name: 'Appearance' }).click()
   await page.getByLabel('Currency').fill('£')
   await page.getByLabel('Currency').blur()
   await page.getByRole('button', { name: 'Stats' }).click()

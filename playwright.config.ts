@@ -13,9 +13,11 @@ export default defineConfig({
     storageState: { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: 'startPage', value: 'backlog' }] }] },
   },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } }, testIgnore: /phone\.spec/ },
     // iPad-sized screen in Chromium (keeps CI to one browser for now).
-    { name: 'ipad', use: { ...devices['Desktop Chrome'], viewport: { width: 1180, height: 820 }, hasTouch: true } },
+    { name: 'ipad', use: { ...devices['Desktop Chrome'], viewport: { width: 1180, height: 820 }, hasTouch: true }, testIgnore: /phone\.spec/ },
+    // Phone-sized screen (#31); only the phone flows run here.
+    { name: 'phone', use: { ...devices['Pixel 7'] }, testMatch: /phone\.spec/ },
   ],
   webServer: {
     command: 'npm run build && npx vite preview --port 4173 --strictPort',

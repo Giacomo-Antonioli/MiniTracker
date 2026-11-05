@@ -216,9 +216,9 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
           <p className="text-xs text-muted">These choices apply on the device that enters the code; the other device is asked to accept them.</p>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="grid content-start gap-2 rounded border border-line p-3">
-              <h2 className="font-semibold">On the other device</h2>
+              <h2 className="font-semibold">Show a code here</h2>
               <button className="btn btn-primary w-fit" onClick={() => void host()}>📱 Show a pairing code</button>
-              <p className="text-xs text-muted">Shows a code, QR and link to use on this device's partner.</p>
+              <p className="text-xs text-muted">Shows a code, QR and link; enter or scan it on the other device.</p>
             </div>
             <form className="grid content-start gap-2 rounded border border-line p-3" onSubmit={(e) => { e.preventDefault(); void join(typed) }}>
               <h2 className="font-semibold">Enter a code</h2>

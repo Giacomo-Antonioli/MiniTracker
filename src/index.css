@@ -148,3 +148,18 @@ dialog::backdrop {
     font-family: Georgia, serif;
   }
 }
+
+/* Phones: wide tables scroll sideways instead of stretching the page; bigger tap targets. */
+@media (max-width: 767px) {
+  main table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  .btn {
+    min-height: 2.25rem;
+  }
+  input, select, textarea {
+    font-size: 16px; /* stops iOS zooming into a field when it gets focus */
+  }
+}

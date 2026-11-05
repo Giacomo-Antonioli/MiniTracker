@@ -11,6 +11,8 @@ async function addUnit(page: Page, name: string) {
 // Two separate browser profiles = two devices; private mode needs no relay, so this runs offline.
 test('two devices sync both ways over a direct connection (private mode)', async ({ browser }, info) => {
   test.skip(info.project.name !== 'desktop', 'one run is enough')
+  // setting up two browsers and a direct connection is slow when the other tests run alongside
+  test.setTimeout(90_000)
   const state = { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: 'startPage', value: 'backlog' }] }] }
   const pc = await (await browser.newContext({ storageState: state })).newPage()
   const phone = await (await browser.newContext({ storageState: state })).newPage()
