@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-11-05
+
 ### Fixed
 - Sync could hang at "Connected…" on a busy device: the connection now listens from the start, keeps messages that arrive early, and the opening hello is repeated until the other device confirms it.
 
@@ -279,7 +281,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.14.0...v0.15.0
