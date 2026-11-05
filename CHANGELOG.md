@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-11-05
+
 ### Added
 - Mass move: 📦 Move contents… on a place page moves the ticked units, tools and supplies to another place, for good (new home, slots kept where free, warning when full) or for now (check out). ↦ Move this place puts a box on another shelf or storage with everything inside. 📦 Store shown units… on the Backlog gives the filtered units one home. 📷 Scan into here moves each scanned unit or box sticker into the place.
 - Workshop: one tab with tools and supplies together; ▸ next to it opens the separate Tools and Supplies pages. The nav shows low stock plus due maintenance (Workshop ⚠n).
@@ -259,7 +261,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.12.0...v0.13.0
