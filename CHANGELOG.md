@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Fixed
+- Sync could hang at "Connected…" on a busy device: the connection now listens from the start, keeps messages that arrive early, and the opening hello is repeated until the other device confirms it.
+
 ### Added
 - Phone layout (#31): under 768 px wide a top bar (☰ menu, ⇄ Sync) and a bottom bar (Home, Backlog, Paints, Workshop, More) replace the sidebar; the Backlog shows cards; unit and datasheet panels open full screen; dialogs and wide tables fit the screen; bigger tap targets and no zoom on iPhone when typing.
 - Sync between devices (#161): ⇄ Sync pairs two devices by a short code, its QR or a pairing link (the data goes directly between them, encrypted), or in private mode with no relay by copying or scanning a connection text each way. Choose both ways, send or receive, merge (newest wins) or overwrite, deletions and photos; the other device accepts, and each side sees a preview of the changes before anything is saved. Progress, cancel, clock check, and a list of devices synced with (warning after 90 days).

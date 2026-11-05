@@ -89,3 +89,26 @@ it('declining the preview changes nothing', async () => {
   expect(rb.applied).toBe(false)
   expect(await b.units.toCollection().primaryKeys()).toEqual(['ub'])
 })
+
+it('recovers when the first hello in either direction is lost', async () => {
+  for (const dropFrom of ['A', 'B'] as const) {
+    const [ca, cb] = pair()
+    const lossy = dropFrom === 'A' ? ca : cb
+    const real = lossy.send.bind(lossy)
+    let dropped = false
+    lossy.send = (t: string) => (dropped ? real(t) : void (dropped = true))
+    const [ra, rb] = await Promise.all([
+      runSync(a, ca, { deviceId: 'A', deviceName: 'PC' }, { starts: true, plan: { mode: 'merge', direction: 'both', applyDeletions: true, photos: false } }, yes),
+      runSync(b, cb, { deviceId: 'B', deviceName: 'Phone' }, { starts: false }, yes),
+    ])
+    expect(dropped).toBe(true)
+    expect(ra.applied && rb.applied).toBe(true)
+  }
+}, 15_000)
+
+it('stops when the other device disconnects before saying hello', async () => {
+  const [ca, cb] = pair()
+  const p = runSync(a, ca, { deviceId: 'A', deviceName: 'PC' }, { starts: true, plan: { mode: 'merge', direction: 'both', applyDeletions: true, photos: false } }, yes)
+  cb.close()
+  await expect(p).rejects.toThrow(/disconnected/)
+})
