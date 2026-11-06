@@ -26,3 +26,5 @@ coverage/
 playwright-report/
 test-results/
 tools/schemes/.cache/
+# Copied by @3d-dice/dice-box's install script; the app uses public/dice-box instead.
+public/assets/

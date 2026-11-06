@@ -1,4 +1,5 @@
 import { GamePhotos } from './GamePhotos'
+import { DiceRoller } from '../dice/DiceRoller'
 import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { editionOfRepo } from '../../data/catalogue/fetch'
@@ -164,6 +165,7 @@ function Side({ k, g, units }: { k: SideKey; g: Game; units: { id: string; name:
 function LiveGame({ game: g, onCompanion }: { game: Game; onCompanion: () => void }) {
   const { saveGame, deleteGame, lists } = useStore()
   const [ending, setEnding] = useState(false)
+  const [dice, setDice] = useState(false)
   const [notes, setNotes] = useState('')
   const entries = useEntryNames()
   const save = (next: Game) => void saveGame(next)
@@ -176,11 +178,13 @@ function LiveGame({ game: g, onCompanion }: { game: Game; onCompanion: () => voi
         <span className="font-display text-xl">Round {g.round} / {ROUNDS}</span>
         <span className="text-sm" role="status">{g.turn === 'me' ? 'Your turn' : `${g.them.name}'s turn`}</span>
         {g.mission && <span className="text-sm text-muted">{g.mission}{g.deployment ? ` · ${g.deployment}` : ''}</span>}
-        <button className="btn ml-auto" onClick={onCompanion}>📱 Companion</button>
+        <button className="btn ml-auto" onClick={() => setDice(true)}>🎲 Dice</button>
+        <button className="btn" onClick={onCompanion}>📱 Companion</button>
         <button className="btn btn-primary" disabled={g.round === ROUNDS && g.turn !== g.first} onClick={() => save(advanceTurn(g, c))}>Next turn ▶</button>
         <button className="btn" onClick={() => setEnding(true)}>End game</button>
         <button className="btn btn-danger" onClick={() => { if (confirm('Delete this game?')) void deleteGame(g.id) }}>Delete</button>
       </div>
+      {dice && <DiceRoller onClose={() => setDice(false)} />}
       {ending && (
         <div className="panel grid gap-2 border-accent/60 p-3" role="dialog" aria-label="End game">
           <p className="text-sm">Final score {totals(g.me).total}–{totals(g.them).total}: <b>{result(g) === 'win' ? 'win' : result(g) === 'loss' ? 'loss' : 'draw'}</b></p>
