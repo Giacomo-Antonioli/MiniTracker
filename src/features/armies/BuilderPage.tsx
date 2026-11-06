@@ -1,3 +1,4 @@
+import { ListQrSend } from './ListQr'
 import { useEffect, useMemo, useState } from 'react'
 import { catalogueFor, ctx, useStore } from '../../app/store'
 import { EDITIONS } from '../../data/catalogue/fetch'
@@ -759,6 +760,7 @@ function download(name: string, text: string, type: string) {
 /** Export as text (copy or .txt) or as a MiniTracker .json file. */
 function ExportMenu({ list, cat }: { list: ArmyList; cat?: Catalogue }) {
   const [msg, setMsg] = useState('')
+  const [qr, setQr] = useState(false)
   const label = EDITIONS.find((e) => e.key === list.edition)?.label ?? list.edition
   const file = list.name.replace(/[^\w\- ]+/g, '').trim() || 'list'
   return (
@@ -778,8 +780,10 @@ function ExportMenu({ list, cat }: { list: ArmyList; cat?: Catalogue }) {
         </button>
         <button className="btn text-left text-sm" onClick={() => download(`${file}.txt`, listToText(list, cat, label), 'text/plain')}>📄 Text file (.txt)</button>
         <button className="btn text-left text-sm" onClick={() => download(`${file}.json`, listToJson(list), 'application/json')}>🗂 MiniTracker file (.json)</button>
+        <button className="btn text-left text-sm" onClick={() => setQr(true)}>📱 Show as QR</button>
         {msg && <span className="text-xs text-muted" role="status">{msg}</span>}
       </div>
+      {qr && <ListQrSend list={list} onClose={() => setQr(false)} />}
     </details>
   )
 }

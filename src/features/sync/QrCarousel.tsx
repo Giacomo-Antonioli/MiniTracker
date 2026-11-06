@@ -1,6 +1,6 @@
 import jsQR from 'jsqr'
 import QRCode from 'qrcode'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { appDb } from '../../app/store'
 import { pieceFromText, Reassembler } from '../../domain/sync/protocol'
 import { carouselFrames, FRAME_SIZES, packSyncFile, unpackSyncFile, type FrameSize } from '../../data/syncCarousel'
@@ -13,6 +13,12 @@ type Speed = keyof typeof SPEEDS
 
 /** Shows this device's data (no photos) as a looping QR sequence. */
 export function QrSender({ me, onClose }: { me: Device; onClose: () => void }) {
+  const pack = useCallback(async () => packSyncFile(await makeSyncFile(appDb, me, { photos: false })), [me])
+  return <QrLoop title="QR carousel: send" intro="On the other device open Sync › QR carousel › Read, and point its camera at this screen. Keep going until it says it has everything. Photos are not included." pack={pack} onClose={onClose} />
+}
+
+/** Any packed data (see packText) as a looping QR sequence: a sync, or an army list (#193). */
+export function QrLoop({ title, intro, pack, onClose }: { title: string; intro: string; pack: () => Promise<string>; onClose: () => void }) {
   const [size, setSize] = useState<FrameSize>('medium')
   const [speed, setSpeed] = useState<Speed>('normal')
   const [frames, setFrames] = useState<string[]>()
@@ -23,7 +29,7 @@ export function QrSender({ me, onClose }: { me: Device; onClose: () => void }) {
   useEffect(() => {
     let live = true
     void (async () => {
-      const packed = await packSyncFile(await makeSyncFile(appDb, me, { photos: false }))
+      const packed = await pack()
       if (!live) return
       cache.current.clear()
       setFrames(carouselFrames(packed, size))
@@ -32,7 +38,7 @@ export function QrSender({ me, onClose }: { me: Device; onClose: () => void }) {
     return () => {
       live = false
     }
-  }, [me, size])
+  }, [pack, size])
   useEffect(() => {
     if (!frames) return
     const t = setInterval(() => setI((n) => (n + 1) % frames.length), 1000 / SPEEDS[speed])
@@ -50,9 +56,9 @@ export function QrSender({ me, onClose }: { me: Device; onClose: () => void }) {
 
   const secs = frames ? Math.ceil(frames.length / SPEEDS[speed]) : 0
   return (
-    <Dialog title="QR carousel: send" onClose={onClose} wide>
+    <Dialog title={title} onClose={onClose} wide>
       <div className="grid justify-items-center gap-2 text-sm">
-        <p className="text-center text-muted">On the other device open Sync › QR carousel › Read, and point its camera at this screen. Keep going until it says it has everything. Photos are not included.</p>
+        <p className="text-center text-muted">{intro}</p>
         <div className="aspect-square w-full max-w-[min(80vw,60dvh)] rounded bg-white p-2" aria-label="QR frame" dangerouslySetInnerHTML={{ __html: svg }} />
         <p role="status">{frames ? `Frame ${i + 1} of ${frames.length} · one loop ≈ ${secs} s` : 'Preparing…'}</p>
         <div className="flex flex-wrap items-center gap-2">
@@ -85,11 +91,16 @@ const nativeDetector = (): Detector | undefined => {
 
 /** Reads a QR carousel with the camera until every frame arrived; then hands over the sync file. */
 export function QrReceiver({ onFile, onClose }: { onFile: (f: SyncFile) => void; onClose: () => void }) {
+  return <QrRead title="QR carousel: read" hint="Point the camera at the QR carousel on the other device." read={async (t) => onFile(await unpackSyncFile(t))} onClose={onClose} />
+}
+
+/** Reads any QR carousel; `read` gets the packed text and may throw to show an error (#193). */
+export function QrRead({ title, hint, read: use, onClose }: { title: string; hint: string; read: (packed: string) => Promise<void>; onClose: () => void }) {
   const video = useRef<HTMLVideoElement>(null)
   const [have, setHave] = useState({ have: 0, total: 0 })
   const [err, setErr] = useState('')
-  const done = useRef(onFile)
-  done.current = onFile
+  const done = useRef(use)
+  done.current = use
   useEffect(() => {
     let stop = false
     let stream: MediaStream | undefined
@@ -119,7 +130,7 @@ export function QrReceiver({ onFile, onClose }: { onFile: (f: SyncFile) => void;
             stop = true
             stream?.getTracks().forEach((t) => t.stop())
             try {
-              return done.current(await unpackSyncFile(out))
+              return await done.current(out)
             } catch (e) {
               return setErr((e as Error).message)
             }
@@ -144,11 +155,11 @@ export function QrReceiver({ onFile, onClose }: { onFile: (f: SyncFile) => void;
     }
   }, [])
   return (
-    <Dialog title="QR carousel: read" onClose={onClose}>
+    <Dialog title={title} onClose={onClose}>
       <div className="grid gap-2 text-sm">
         {err ? <p className="text-danger" role="alert">{err}</p> : <video ref={video} className="w-full rounded" muted playsInline aria-label="Camera" />}
         <progress className="w-full" max={have.total || 1} value={have.have} aria-label="Frames read" />
-        <p role="status">{have.total ? `${have.have} of ${have.total} frames` : 'Point the camera at the QR carousel on the other device.'}</p>
+        <p role="status">{have.total ? `${have.have} of ${have.total} frames` : hint}</p>
         <p className="text-xs text-muted">Hold steady, fill most of the camera view with the code. Missed frames come round again.</p>
       </div>
     </Dialog>
