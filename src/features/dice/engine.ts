@@ -6,6 +6,24 @@ export interface DiceEngine {
   reroll(values: number[], indices: number[]): Promise<number[]>
 }
 
+const PREF = 'mt.dice3d'
+/** 3D dice on unless turned off here or the device asks for reduced motion. */
+export function read3d(): boolean {
+  try {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return false
+    return localStorage.getItem(PREF) !== 'off'
+  } catch {
+    return true
+  }
+}
+export function write3d(on: boolean) {
+  try {
+    localStorage.setItem(PREF, on ? 'on' : 'off')
+  } catch {
+    // Not saved: the choice lasts until the page reloads.
+  }
+}
+
 /** No animation: reduce motion, quick mode, tests, or when 3D can't start. */
 export const quickEngine: DiceEngine = {
   roll: async (n) => rollD6(n),
@@ -20,7 +38,8 @@ export const quickEngine: DiceEngine = {
 type DieRoll = { value: number; groupId: number; rollId: number | string; sides: number; qty?: number; theme?: string }
 type Box = {
   init(): Promise<unknown>
-  roll(n: string): Promise<DieRoll[]>
+  roll(n: string, o?: { themeColor?: string }): Promise<DieRoll[]>
+  add(n: string, o?: { themeColor?: string }): Promise<DieRoll[]>
   reroll(r: DieRoll[], o: { remove: boolean }): Promise<DieRoll[]>
   updateConfig(c: Record<string, unknown>): void
   clear(): void
@@ -69,4 +88,21 @@ export const boxEngine: DiceEngine = {
     indices.forEach((i, k) => (rolls[i] = fresh[k]))
     return rolls.map((r) => r.value)
   },
+}
+
+/** Colours of the two players' dice in a roll-off. */
+export const ME_COLOR = '#b3261e'
+export const THEM_COLOR = '#1e5bb3'
+
+/** Roll-off (#192): one D6 each, in each player's colour. Returns [mine, theirs]. */
+export async function rollOff(use3d: boolean): Promise<[number, number]> {
+  if (!use3d) {
+    const [a, b] = await quickEngine.roll(2)
+    return [a, b]
+  }
+  const b = await loadBox()
+  b.updateConfig({ scale: 8 })
+  rolls = []
+  const [mine, theirs] = await Promise.all([b.roll('1d6', { themeColor: ME_COLOR }), b.add('1d6', { themeColor: THEM_COLOR })])
+  return [mine[0].value, theirs[0].value]
 }

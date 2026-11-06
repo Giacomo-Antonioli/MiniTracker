@@ -1,23 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { carried, clampTarget, isSuccess, rerollIndices, saveTarget, sortedDesc, STEP_LABEL, STEPS, successes, unsaved, woundTarget, type Reroll, type Step, type StepRoll } from '../../domain/dice/dice'
-import { attachTray, boxEngine, quickEngine, type DiceEngine } from './engine'
-
-const PREF = 'mt.dice3d'
-const read3d = () => {
-  try {
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return false
-    return localStorage.getItem(PREF) !== 'off'
-  } catch {
-    return true
-  }
-}
-const write3d = (on: boolean) => {
-  try {
-    localStorage.setItem(PREF, on ? 'on' : 'off')
-  } catch {
-    // Not saved: the choice lasts until the roller closes.
-  }
-}
+import { attachTray, boxEngine, quickEngine, read3d, write3d, type DiceEngine } from './engine'
 
 const TARGETS = [2, 3, 4, 5, 6]
 const num = (s: string, d: number) => {
