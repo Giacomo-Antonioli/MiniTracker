@@ -1,3 +1,4 @@
+import { ShareCollection } from '../share/ShareCollection'
 import { CostsSection } from '../costs/CostsSection'
 import { PaintTimeSection } from '../paintTime/PaintTime'
 import { useEffect, useMemo, useState } from 'react'
@@ -59,6 +60,7 @@ export function usePointsOf() {
 }
 
 export function StatsPage() {
+  const [sharing, setSharing] = useState(false)
   const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints, games: allGames, lists } = useStore()
   useEffect(() => {
     void loadPaints()
@@ -107,6 +109,8 @@ export function StatsPage() {
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="font-display text-2xl text-accent">Stats</h1>
         <div className="flex gap-2">
+          <button className="btn" onClick={() => setSharing(true)}>🔗 Share</button>
+          {sharing && <ShareCollection onClose={() => setSharing(false)} />}
           <select className="input" aria-label="Faction" value={faction} onChange={(e) => setFaction(e.target.value)}>
             <option value="">All factions</option>
             {factionsOf(units).map((f) => <option key={f}>{f}</option>)}
