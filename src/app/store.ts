@@ -170,6 +170,9 @@ interface State {
   /** Photos of a scheme (cover, gallery, steps), stored under photos[schemeId]. */
   loadSchemePhotos(schemeId: string): Promise<void>
   addSchemePhotos(scheme: PaintScheme, files: File[], stepId?: string): Promise<Photo[]>
+  /** Photos of a game (#164), stored under photos[gameId]. */
+  loadGamePhotos(gameId: string): Promise<void>
+  addGamePhotos(game: Game, files: File[]): Promise<Photo[]>
   photoFiles(id: string): ReturnType<DexiePhotoRepository['files']>
   updatePhoto(photo: Photo): Promise<void>
   deletePhoto(photo: Photo): Promise<void>
@@ -602,6 +605,43 @@ export const useStore = create<State>((set, get) => ({
     return added
   },
 
+  async loadGamePhotos(gameId) {
+    set({ photos: { ...get().photos, [gameId]: await photoRepo.listForGame(gameId) } })
+  },
+
+  async addGamePhotos(game, files) {
+    const added: Photo[] = []
+    for (const file of files) {
+      const display = await makeDisplayCopy(file)
+      const now = new Date().toISOString()
+      let seq = 1
+      let fileName = ''
+      do {
+        fileName = photoFileName({ opponent: game.them.name, gameId: game.id, date: game.date || now, seq: seq++, ext: extensionOf(file) })
+      } while (await photoRepo.fileNameTaken(fileName))
+      const id = crypto.randomUUID()
+      const photo: Photo = {
+        id,
+        owner: { kind: 'game', gameId: game.id },
+        gameId: game.id,
+        fileName,
+        caption: '',
+        takenAt: file.lastModified ? new Date(file.lastModified).toISOString() : now,
+        createdAt: now,
+        width: display.width,
+        height: display.height,
+        originalType: file.type || 'application/octet-stream',
+        originalBytes: file.size,
+        displayBytes: display.blob.size,
+        hasOriginal: true,
+      }
+      await photoRepo.add(photo, { id, display: display.blob, original: file })
+      added.push(photo)
+    }
+    await get().loadGamePhotos(game.id)
+    return added
+  },
+
   photoFiles(id) {
     return photoRepo.files(id)
   },
@@ -610,11 +650,13 @@ export const useStore = create<State>((set, get) => ({
     await photoRepo.update(photo)
     if (photo.unitId) await get().loadPhotos(photo.unitId)
     if (photo.schemeId) await get().loadSchemePhotos(photo.schemeId)
+    if (photo.gameId) await get().loadGamePhotos(photo.gameId)
   },
 
   async deletePhoto(photo) {
     await photoRepo.delete(photo.id)
     if (photo.unitId) await get().loadPhotos(photo.unitId)
+    if (photo.gameId) await get().loadGamePhotos(photo.gameId)
     if (photo.schemeId) {
       await get().loadSchemePhotos(photo.schemeId)
       const s = get().schemes.find((x) => x.id === photo.schemeId)
@@ -639,6 +681,7 @@ export const useStore = create<State>((set, get) => ({
     const list = get().games.filter((x) => x.id !== id)
     set({ games: list })
     await settingsRepo.setValue('games', list)
+    await photoRepo.deleteForGame(id)
   },
   stratagemData: null,
   async importStratagems(files) {

@@ -34,6 +34,20 @@ describe('PhotoRepository', () => {
     await db.delete()
   })
 
+  it('lists and deletes the photos of a game', async () => {
+    const db = new MiniTrackerDb(`ph-${Math.random()}`)
+    const repo = new DexiePhotoRepository(db)
+    const g = (id: string, gameId: string): Photo => ({ ...photo(id, '', `${id}.jpg`), owner: { kind: 'game', gameId }, unitId: undefined, gameId })
+    await repo.add(g('g1', 'game1'), files('g1'))
+    await repo.add(g('g2', 'game2'), files('g2'))
+    expect((await repo.listForGame('game1')).map((p) => p.id)).toEqual(['g1'])
+    await repo.deleteForGame('game1')
+    expect(await repo.listForGame('game1')).toEqual([])
+    expect(await repo.files('g1')).toBeUndefined()
+    expect((await repo.listForGame('game2')).map((p) => p.id)).toEqual(['g2'])
+    await db.delete()
+  })
+
   it('drops originals but keeps the shown copies', async () => {
     const db = new MiniTrackerDb(`ph-${Math.random()}`)
     const repo = new DexiePhotoRepository(db)

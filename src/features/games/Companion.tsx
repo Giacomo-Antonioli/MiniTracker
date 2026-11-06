@@ -5,6 +5,9 @@ import type { Datasheet } from '../../domain/catalogue/types'
 import { abilitiesNow, clockTotals, damage, fullWounds, nextPhase, pauseClock, PHASES, startClock, stratagemsNow, woundsLeft } from '../../domain/games/companion'
 import { addPoints, setCp, totals, type Game } from '../../domain/games/games'
 import { stratagemsFor } from '../../domain/stratagems/stratagems'
+import { defaultLoadout } from '../../domain/lists/loadout'
+import type { ListEntry } from '../../domain/lists/types'
+import { GamePhotos } from './GamePhotos'
 
 const Text = ({ text }: { text: string }) => <>{formatRuleText(text).map((p, i) => (p.bold ? <b key={i}>{p.text}</b> : p.text))}</>
 const time = (msec: number) => {
@@ -12,6 +15,15 @@ const time = (msec: number) => {
   const h = Math.floor(s / 3600)
   const m = Math.floor((s % 3600) / 60)
   return `${h ? `${h}:` : ''}${String(m).padStart(h ? 2 : 1, '0')}:${String(s % 60).padStart(2, '0')}`
+}
+
+/** Model types of a list unit (its loadout, else the default one) with their counts. */
+function modelTypes(e: ListEntry, d: Datasheet) {
+  const rows = e.loadout ?? (d.models?.length ? defaultLoadout(d, e.models) : [])
+  return rows.flatMap((r) => {
+    const m = d.models?.find((x) => x.id === r.modelId)
+    return m ? [{ name: m.name, count: r.count }] : []
+  })
 }
 
 /** Phone-friendly match companion for the live game (#72). */
@@ -34,8 +46,20 @@ export function Companion({ game: g, onExit }: { game: Game; onExit: () => void 
   const detachments = (catalogue?.detachments ?? []).filter((d) => list?.detachmentIds?.includes(d.id)).map((d) => d.name)
   const strat = stratagemData ? stratagemsFor(detachments, stratagemData, list?.stratagemDetachments) : undefined
   const usable = strat ? stratagemsNow([...strat.detachments.flatMap((d) => d.stratagems), ...strat.core], myTurn, phase) : []
-  const rules = strat ? abilitiesNow(strat.detachments.flatMap((d) => d.rules), phase) : []
-  const abilities = abilitiesNow(units.filter((u) => !g.me.destroyed.includes(u.entry.id)).flatMap((u) => Object.entries(u.d.abilityTexts ?? {}).map(([name, text]) => ({ unit: u.d.name, name, text }))), phase)
+  const rules = strat ? abilitiesNow(strat.detachments.flatMap((d) => d.rules), phase, myTurn) : []
+  const catRules = new Map(catalogue?.rules?.map((r) => [r.id, r]) ?? [])
+  // Each living unit's abilities and the core/faction rules on its datasheet; a rule shared by several units shows once.
+  const unitRules = units
+    .filter((u) => !g.me.destroyed.includes(u.entry.id))
+    .flatMap((u) => [
+      ...Object.entries(u.d.abilityTexts ?? {}).map(([name, text]) => ({ unit: u.d.name, name, text })),
+      ...(u.d.ruleIds ?? []).flatMap((id) => (catRules.get(id) ? [{ unit: catRules.get(id)!.kind === 'core' ? 'Core' : 'Army', name: catRules.get(id)!.name, text: catRules.get(id)!.text }] : [])),
+    ])
+  const seen = new Set<string>()
+  const abilities = abilitiesNow(unitRules, phase, myTurn).filter((a) => {
+    const k = a.unit === 'Core' || a.unit === 'Army' ? a.name : `${a.unit}-${a.name}`
+    return !seen.has(k) && !!seen.add(k)
+  })
   const clock = clockTotals(g, now)
   const me = totals(g.me).total
   const them = totals(g.them).total
@@ -101,7 +125,7 @@ export function Companion({ game: g, onExit }: { game: Game; onExit: () => void 
 
       <section className="grid gap-2" aria-label="My units">
         {units.map(({ entry, d }) => {
-          const full = fullWounds(entry.models, d.stats)
+          const full = fullWounds(entry.models, d.stats, modelTypes(entry, d))
           const w = woundsLeft(g, entry.id, full)
           const dead = g.me.destroyed.includes(entry.id)
           return (
@@ -127,6 +151,8 @@ export function Companion({ game: g, onExit }: { game: Game; onExit: () => void 
         })}
         {!units.length && <p className="text-sm text-muted">Start the game from an army list to track your units here.</p>}
       </section>
+
+      <div className="panel p-3"><GamePhotos game={g} /></div>
 
       <footer className="fixed inset-x-0 bottom-0 z-10 flex justify-center gap-2 border-t border-line bg-panel p-3">
         <button className="btn" onClick={onExit}>Score board</button>

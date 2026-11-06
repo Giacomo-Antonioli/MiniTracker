@@ -1,3 +1,4 @@
+import { GamePhotos } from './GamePhotos'
 import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { editionOfRepo } from '../../data/catalogue/fetch'
@@ -196,6 +197,7 @@ function LiveGame({ game: g, onCompanion }: { game: Game; onCompanion: () => voi
         <Side k="them" g={g} units={entries(g.them.list)} />
       </div>
       <RoundTable game={g} />
+      <div className="panel p-3"><GamePhotos game={g} /></div>
     </div>
   )
 }
@@ -279,6 +281,7 @@ function History() {
                       <p className="mt-2 text-sm">Lost: {g.me.destroyed.length ? entries(lists.find((l) => l.id === g.me.listId)).filter((u) => g.me.destroyed.includes(u.id)).map((u) => u.name).join(', ') || `${g.me.destroyed.length} units` : 'none'}</p>
                       <p className="text-sm">Destroyed: {g.them.destroyed.length ? entries(g.them.list).filter((u) => g.them.destroyed.includes(u.id)).map((u) => u.name).join(', ') || `${g.them.destroyed.length} units` : 'none'}</p>
                       {g.notes && <p className="mt-1 whitespace-pre-line text-sm">{g.notes}</p>}
+                      <div className="mt-2"><GamePhotos game={g} /></div>
                       <button className="btn btn-danger mt-2 px-2 py-0.5 text-sm" onClick={() => { if (confirm('Delete this game?')) void deleteGame(g.id) }}>Delete game</button>
                     </td>
                   </tr>

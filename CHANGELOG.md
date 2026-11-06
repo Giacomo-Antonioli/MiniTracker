@@ -4,6 +4,13 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Game photos (#164): 📷 Add photos to a game, live or from the companion; they show in the game's history too and are deleted with the game.
+
+### Changed
+- Companion abilities (#164) are sorted by what they do, not only by the phase they name: ranged attacks in Shooting, melee in Fight, charges, Battle-shock, Deep Strike. Your turn and the opponent's are kept apart, and the core and army rules on each datasheet are included.
+- Companion wounds (#164) use each model's own stat line, so a leader or a model with a different W gets the right wounds.
+
 ## [0.20.0] - 2026-11-06
 
 ### Added

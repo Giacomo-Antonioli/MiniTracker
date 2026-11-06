@@ -17,6 +17,9 @@ describe('unitTag', () => {
 })
 
 describe('photoFileName', () => {
+  it('names game photos after the opponent and the game', () => {
+    expect(photoFileName({ opponent: 'Marco', gameId: 'ab12cd34-0000', date: '2026-11-06T10:00:00Z', seq: 2, ext: 'JPG' })).toBe('game_marco_gm-ab12cd34_20261106_02.jpg')
+  })
   const base = { faction: 'Ultramarines', unitName: 'Intercessor Squad', unitId: '3f9a2c1b-77aa', stage: 'painted', date: '2026-11-02T18:30:00.000Z', ext: 'jpg' }
 
   it('follows <faction>_<unit>_<tag>_<stage>_<date>_<nn>.<ext>', () => {

@@ -19,9 +19,13 @@ const nn = (n: number) => String(n).padStart(2, '0')
 
 type UnitPhoto = { faction?: string; unitName: string; unitId: string; stage?: string; date: string; seq: number; ext: string }
 type SchemePhoto = { scheme: string; schemeId: string; date: string; seq: number; ext: string }
+type GamePhoto = { opponent: string; gameId: string; date: string; seq: number; ext: string }
 
-export function photoFileName(p: UnitPhoto | SchemePhoto): string {
+export function photoFileName(p: UnitPhoto | SchemePhoto | GamePhoto): string {
   const ext = p.ext.toLowerCase()
+  if ('gameId' in p) {
+    return `game_${slug(p.opponent) || 'game'}_gm-${p.gameId.replace(/-/g, '').slice(0, 8).toLowerCase()}_${day(p.date)}_${nn(p.seq)}.${ext}`
+  }
   if ('scheme' in p) {
     return `scheme_${slug(p.scheme) || 'scheme'}_sc-${p.schemeId.replace(/-/g, '').slice(0, 8).toLowerCase()}_${day(p.date)}_${nn(p.seq)}.${ext}`
   }
