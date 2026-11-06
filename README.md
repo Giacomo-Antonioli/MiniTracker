@@ -7,7 +7,7 @@
 [![Release](https://img.shields.io/github/v/release/Giacomo-Antonioli/MiniTracker?sort=semver)](https://github.com/Giacomo-Antonioli/MiniTracker/releases)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE.md)
 
-### ▶ [Open the app](https://giacomo-antonioli.github.io/MiniTracker/)
+### ▶ [Open the app](https://giacomo-antonioli.github.io/MiniTracker/) · 📖 [User guide](docs/USER_GUIDE.md)
 
 No account, no server: your collection stays in your browser. Install it from the browser menu ("Install app" / "Add to Home Screen") and it works offline on desktop, iPad and phone.
 
@@ -26,7 +26,7 @@ No account, no server: your collection stays in your browser. Install it from th
 
 **Catalogue and rules**
 
-- **Unit catalogue.** Every Warhammer 40,000 datasheet (10th and/or 11th edition) from BSData, downloaded and converted on your device: sizes, points, stats, weapons, abilities, wargear.
+- **Unit catalogue.** Every Warhammer 40,000 datasheet (10th and/or 11th edition), Age of Sigmar 4th edition and Kill Team (2024) from BSData, downloaded and converted on your device: sizes, points, stats, weapons, abilities, wargear.
 - **Rules.** Every core and faction rule explained, in the catalogue and on a searchable Rules page.
 - **Stratagems.** Import Wahapedia's stratagem and detachment-rule files once; they show on the army PDF and in the match companion.
 
@@ -38,7 +38,8 @@ No account, no server: your collection stays in your browser. Install it from th
 - **Buy list.** What you still need for a list (models and scheme paints), as text, PDF or straight to the shopping list.
 - **Import / export.** BattleScribe and NewRecruit rosters (`.rosz`), GW-app / NewRecruit text lists, and MiniTracker files.
 - **Games.** Live score board (primary and secondary per round, CP, turns, units destroyed on both sides, opponent's list), history and results per list and opponent faction.
-- **Match companion.** Phone-friendly screen for a game: phase bar, stratagems you can use now, abilities for the phase, wounds per model, chess clock.
+- **Match companion.** Phone-friendly screen for a game: phase bar, stratagems you can use now, abilities for the phase and turn, wounds per model, chess clock, photos.
+- **Game tools.** 3D dice for hits, wounds and saves; roll-off or coin flip for who goes first; 40k mission cards (Force Dispositions, Primary Missions, Deployment, Twist); the opponent's list from a file, your lists or by QR.
 
 **Paints and shopping**
 
@@ -49,6 +50,8 @@ No account, no server: your collection stays in your browser. Install it from th
 
 **Everywhere**
 
+- **Sync.** Between your own devices by pairing code, QR carousel (no network) or a sync file.
+- **Share.** A read-only link to your collection and painting progress, with the data inside the link.
 - **Backup.** Everything (photos included) in one file; restore it on any device.
 - **Themes.** *Grimdark* (modern dark) and *Forum 2005* (old-school fantasy forum).
 - **Private.** Your collection, lists and games stay in your browser; there is no account or server.
@@ -59,7 +62,7 @@ No account, no server: your collection stays in your browser. Install it from th
 
 ## Roadmap
 
-Released: collection tracker (v0.1), catalogue (v0.2), paints, schemes and photos (v0.3), army builder (v0.4), loadouts and shopping (v0.5), Home and Stats (v0.6), stratagems, supplies and photo timeline (v0.7), games and match companion (v0.8), colour match, magnets and cost tracking (v0.9), goals, recipe links and share links, bigger scheme library (v0.10), guides: techniques, bases, materials, terrain; more paint brands (v0.11), painting time + companions (v0.12), storage + QR labels (v0.13), barcode scanner (v0.14), tools and per-model labels (v0.15), workshop and mass move (v0.16), liquid levels and settings tabs (v0.17), device sync and phone layout (v0.18), QR carousel sync (v0.19), Sync now with known devices (v0.20), game tools: 3D dice, roll-off, mission cards, opponent list by QR (v0.21). See the [changelog](CHANGELOG.md).
+Released: collection tracker (v0.1), catalogue (v0.2), paints, schemes and photos (v0.3), army builder (v0.4), loadouts and shopping (v0.5), Home and Stats (v0.6), stratagems, supplies and photo timeline (v0.7), games and match companion (v0.8), colour match, magnets and cost tracking (v0.9), goals, recipe links and share links, bigger scheme library (v0.10), guides: techniques, bases, materials, terrain; more paint brands (v0.11), painting time + companions (v0.12), storage + QR labels (v0.13), barcode scanner (v0.14), tools and per-model labels (v0.15), workshop and mass move (v0.16), liquid levels and settings tabs (v0.17), device sync and phone layout (v0.18), QR carousel sync (v0.19), Sync now with known devices (v0.20), game tools: 3D dice, roll-off, mission cards, opponent list by QR (v0.21), share link, Age of Sigmar and Kill Team, user guide (v0.22). See the [changelog](CHANGELOG.md).
 
 Next, from the [open issues](https://github.com/Giacomo-Antonioli/MiniTracker/issues): magnet editor ([#32](https://github.com/Giacomo-Antonioli/MiniTracker/issues/32)), closest paint match ([#30](https://github.com/Giacomo-Antonioli/MiniTracker/issues/30)), cost tracking ([#94](https://github.com/Giacomo-Antonioli/MiniTracker/issues/94)), Kanban board ([#91](https://github.com/Giacomo-Antonioli/MiniTracker/issues/91)), painting time ([#89](https://github.com/Giacomo-Antonioli/MiniTracker/issues/89)), storage boxes ([#18](https://github.com/Giacomo-Antonioli/MiniTracker/issues/18)). Later: more paint brands, barcode scan, share links, a buy optimiser, Kill Team / Age of Sigmar, QR/NFC tags, phone layout.
 

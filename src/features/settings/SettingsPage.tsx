@@ -41,7 +41,10 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
   return (
     <div className="grid max-w-3xl gap-6">
       <header className="grid gap-2">
-        <h1 className="font-display text-2xl text-accent">Settings</h1>
+        <div className="flex items-baseline justify-between gap-2">
+          <h1 className="font-display text-2xl text-accent">Settings</h1>
+          <a className="text-sm text-accent underline" href="https://github.com/Giacomo-Antonioli/MiniTracker/blob/main/docs/USER_GUIDE.md" target="_blank" rel="noreferrer">📖 User guide</a>
+        </div>
         <div className="flex flex-wrap gap-1 border-b border-line" role="tablist" aria-label="Settings sections">
           {SECTIONS.map((s) => (
             <button key={s.id} role="tab" id={`tab-${s.id}`} aria-selected={tab === s.id} aria-controls={`settings-${s.id}`}
