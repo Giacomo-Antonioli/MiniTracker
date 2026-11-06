@@ -1,3 +1,5 @@
+import { ShowcaseView } from '../features/share/ShowcaseView'
+import { SHOWCASE_HASH } from '../domain/share/showcase'
 import { SHARE_HASH, shareToken } from '../domain/schemes/share'
 import { SharedSchemeBanner } from '../features/schemes/SharedSchemeBanner'
 import { useEffect, useState } from 'react'
@@ -45,6 +47,8 @@ export default function App() {
   const [page, setPage] = useState<Page>(() => (readRecipeHash(location.hash) ? 'schemes' : readStartPage()))
   // A scheme shared by link arrives as #scheme=…: offer to import it.
   const [shared, setShared] = useState(() => shareToken(location.hash))
+  // Someone's collection shared by link (#97) arrives as #view=…: show it read-only instead of the app.
+  const [view, setView] = useState(() => (location.hash.startsWith(SHOWCASE_HASH) ? location.hash.slice(SHOWCASE_HASH.length) : null))
   const [section, setSection] = useState<SettingsSection | undefined>()
   const [unitId, setUnitId] = useState<string | null>(null)
   const [datasheetId, setDatasheetId] = useState<string | undefined>()
@@ -205,6 +209,17 @@ export default function App() {
       <span className="text-lg leading-none" aria-hidden>{icon}</span>{label}
     </button>
   )
+
+  if (view)
+    return (
+      <ShowcaseView
+        token={view}
+        onClose={() => {
+          history.replaceState(null, '', location.pathname + location.search)
+          setView(null)
+        }}
+      />
+    )
 
   return (
     <div className={phone ? 'flex h-dvh flex-col' : 'flex h-screen'}>

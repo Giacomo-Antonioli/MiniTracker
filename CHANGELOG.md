@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Share collection (#97): Stats › 🔗 Share makes a read-only link to your units and painting progress, overall and per faction. The data travels inside the link (no server, no photos); pick factions and whether to include the wishlist. Whoever opens it sees a snapshot, and nothing is saved on their device.
+
 ## [0.21.0] - 2026-11-06
 
 ### Added
