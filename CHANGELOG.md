@@ -5,6 +5,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Added
+- Other game systems (#99): Age of Sigmar 4th edition and Kill Team (2024) can be downloaded in Settings › Catalogue data next to 40k. Units come with points (Age of Sigmar), stat lines, weapons and abilities; lists, the backlog and the catalogue work with them. 40k-only parts (detachments, Combat Patrol, mission cards) are hidden for these games, and the dice roller's wound roll can be fixed (Wound on 4+) instead of S vs T.
+- Necromunda and Blackstone Fortress schemes from 'Eavy Archive (#163): 9 more recipes in the scheme library.
 - Share collection (#97): Stats › 🔗 Share makes a read-only link to your units and painting progress, overall and per faction. The data travels inside the link (no server, no photos); pick factions and whether to include the wishlist. Whoever opens it sees a snapshot, and nothing is saved on their device.
 
 ## [0.21.0] - 2026-11-06

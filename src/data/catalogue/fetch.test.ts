@@ -33,6 +33,12 @@ describe('BSData fetch', () => {
     expect(await listDataFiles('o/r', SHA, f)).toEqual(['Warhammer 40,000.json', "T'au Empire.json"])
   })
 
+  it('keeps only the 2024 Kill Team files from a repository with several editions (#99)', async () => {
+    const files = ['2021 - Kill Team.gst', '2021 - Kasrkin.cat', '2024 - Kill Team.gst', '2024 - Kasrkin.cat', 'Warhammer 40,000 Kill Team.gst']
+    const f = fakeFetch({ [`/git/trees/${SHA}`]: () => Response.json({ tree: files.map((path) => ({ path, type: 'blob' })) }) })
+    expect(await listDataFiles('BSData/wh40k-killteam', SHA, f)).toEqual(['2024 - Kill Team.gst', '2024 - Kasrkin.cat'])
+  })
+
   it('fails if the game system file is missing', async () => {
     const f = fakeFetch({ [`/git/trees/${SHA}`]: () => Response.json({ tree: [{ path: 'x.cat', type: 'blob' }] }) })
     await expect(listDataFiles('o/r', SHA, f)).rejects.toThrow(/game system/)

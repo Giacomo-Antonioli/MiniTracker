@@ -252,7 +252,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
           add(d)
         }}
       >
-        {cat.detachments && <DetachmentBar list={list} cat={cat} onSave={onSave} />}
+        {!!cat.detachments?.length && <DetachmentBar list={list} cat={cat} onSave={onSave} />}
         <section className={`panel grid gap-1 p-3 ${dropping ? 'border-accent' : ''}`} aria-label="List">
           {list.entries.length === 0 && <p className="text-muted">No units yet. Add them from the left: +, double-click, or drag them here.</p>}
           {list.entries.length > 0 && noWarlord && (

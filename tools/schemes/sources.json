@@ -813,7 +813,7 @@
     }
   ],
   "eavyArchive": {
-    "note": "'Eavy Archive faction pages (Necromunda and Blackstone Fortress left out for now; terrain/basing kept for a Bases page). A scheme whose title is a known faction (e.g. a chapter) is filed under that faction.",
+    "note": "'Eavy Archive faction pages, plus Necromunda and Blackstone Fortress (#163); terrain/basing kept for a Bases page. A scheme whose title is a known faction (e.g. a chapter) is filed under that faction.",
     "pages": [
       {
         "url": "https://eavy-archive.com/40k/adepta-sororitas/",
@@ -886,6 +886,14 @@
       {
         "url": "https://eavy-archive.com/40k/tyranids/",
         "faction": "Tyranids"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/necromunda/",
+        "faction": "Necromunda"
+      },
+      {
+        "url": "https://eavy-archive.com/40k/blackstone-fortress/",
+        "faction": "Blackstone Fortress"
       }
     ],
     "basesPage": "https://eavy-archive.com/40k/",

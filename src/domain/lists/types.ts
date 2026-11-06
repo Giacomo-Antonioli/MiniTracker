@@ -1,5 +1,6 @@
-/** Catalogue edition a list was built for (matches EDITIONS keys in data/catalogue/fetch.ts). */
-export type EditionKey = '11e' | '10e'
+/** Catalogue edition a list was built for (EDITIONS keys in domain/catalogue/editions.ts). */
+export type { EditionKey } from '../catalogue/editions'
+import type { EditionKey } from '../catalogue/editions'
 
 export type ListStatus = 'planned' | 'playable'
 

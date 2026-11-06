@@ -702,6 +702,15 @@ OK    lib/eavy-tyranids-hive-fleet-lotan  "Hive Fleet Lotan"  areas=2 matched=10
 OK    lib/eavy-tyranids-hive-fleet-tiamet  "Hive Fleet Tiamet"  areas=2 matched=100%
 OK    lib/eavy-tyranids-hive-fleet-typhon  "Hive Fleet Typhon"  areas=2 matched=100%
 OK    lib/eavy-tyranids-toxicrene  "Toxicrene"  areas=1 matched=88%
+OK    lib/eavy-necromunda-cawdor-redemptionists  "Cawdor Redemptionists"  areas=2 matched=100%
+OK    lib/eavy-necromunda-corpse-grinder-cult  "Corpse Grinder Cult"  areas=4 matched=77%
+OK    lib/eavy-necromunda-necromunda-nacht-ghuls  "Delaque Nacht-Ghuls"  areas=5 matched=93%
+OK    lib/eavy-necromunda-necromunda-escher-weapons-and-upgrades  "Escher Gang"  areas=2 matched=92%
+OK    lib/eavy-necromunda-orlock-gang  "Orlock Gang"  areas=1 matched=100%
+OK    lib/eavy-necromunda-palanite-enforcers  "Palanite Enforcers"  areas=3 matched=100%
+OK    lib/eavy-necromunda-van-saar-gang  "Van Saar Gang"  areas=7 matched=94%
+OK    lib/eavy-blackstone-fortress-ambull  "Ambull"  areas=3 matched=90%
+OK    lib/eavy-blackstone-fortress-techno-thralls  "Techno Thralls"  areas=5 matched=80%
 MANUAL lib/official-farsight-enclaves  "Farsight Enclaves (studio colours)"
 MANUAL lib/official-tau-sept  "T'au Sept (studio colours)"
 MANUAL lib/official-viorla  "Vior'la (studio colours)"

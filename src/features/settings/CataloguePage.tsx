@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../../app/store'
 import { EDITIONS, type Edition } from '../../data/catalogue/fetch'
+import { GAMES, type GameId } from '../../domain/catalogue/editions'
 import type { Catalogue } from '../../domain/catalogue/types'
 import { ProgressBar } from '../../ui/Dialog'
 
@@ -15,11 +16,16 @@ export function CataloguePage() {
       <p className="text-muted">
         Unit, points, rules and wargear data comes from the community{' '}
         <a className="text-accent underline" href="https://github.com/BSData" target="_blank" rel="noreferrer">BSData</a> project. Your browser downloads it
-        directly from BSData and converts it here; MiniTracker never hosts this data. You can install both editions and switch between them.
+        directly from BSData and converts it here; MiniTracker never hosts this data. You can install several games and editions and switch between them; the active one is used by the catalogue, the backlog and new lists.
       </p>
 
-      {EDITIONS.map((e) => (
-        <EditionCard key={e.key} edition={e} installed={catalogues.find((c) => c.source.repo === e.repo)} active={active} />
+      {(Object.keys(GAMES) as GameId[]).map((g) => (
+        <div key={g} className="grid gap-2">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">{GAMES[g]}</h3>
+          {EDITIONS.filter((e) => e.game === g).map((e) => (
+            <EditionCard key={e.key} edition={e} installed={catalogues.find((c) => c.source.repo === e.repo)} active={active} />
+          ))}
+        </div>
       ))}
       {local.map((c) => (
         <EditionCard key={c.gameId} installed={c} active={active} />

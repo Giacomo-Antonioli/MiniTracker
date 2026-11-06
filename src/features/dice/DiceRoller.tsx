@@ -16,6 +16,9 @@ export function DiceRoller({ onClose }: { onClose: () => void }) {
   const [target, setTarget] = useState(3)
   const [s, setS] = useState('4')
   const [t, setT] = useState('4')
+  // S vs T (40k) or a fixed wound roll from the weapon (Age of Sigmar, #99).
+  const [byST, setByST] = useState(true)
+  const [wound, setWound] = useState(4)
   const [sv, setSv] = useState('3')
   const [ap, setAp] = useState('0')
   const [inv, setInv] = useState('')
@@ -38,7 +41,7 @@ export function DiceRoller({ onClose }: { onClose: () => void }) {
 
   // The wound and save targets follow the characteristics typed in.
   const noSave = step === 'save' && saveTarget(num(sv, 7), num(ap, 0), inv ? num(inv, 7) : undefined) === undefined
-  const need = step === 'wound' ? woundTarget(num(s, 4), num(t, 4)) : step === 'save' ? (saveTarget(num(sv, 7), num(ap, 0), inv ? num(inv, 7) : undefined) ?? 7) : clampTarget(target)
+  const need = step === 'wound' ? (byST ? woundTarget(num(s, 4), num(t, 4)) : wound) : step === 'save' ? (saveTarget(num(sv, 7), num(ap, 0), inv ? num(inv, 7) : undefined) ?? 7) : clampTarget(target)
 
   const run = async (f: () => Promise<number[]>) => {
     setBusy(true)
@@ -103,6 +106,21 @@ export function DiceRoller({ onClose }: { onClose: () => void }) {
             </label>
           )}
           {step === 'wound' && (
+            <label className="grid gap-1">Roll
+              <select className="input" value={byST ? 'st' : 'fixed'} onChange={(e) => setByST(e.target.value === 'st')} aria-label="Wound roll from">
+                <option value="st">S vs T</option>
+                <option value="fixed">Fixed</option>
+              </select>
+            </label>
+          )}
+          {step === 'wound' && !byST && (
+            <label className="grid gap-1">Wound on
+              <select className="input" value={wound} onChange={(e) => setWound(Number(e.target.value))} aria-label="Wound on">
+                {TARGETS.map((x) => <option key={x} value={x}>{x}+</option>)}
+              </select>
+            </label>
+          )}
+          {step === 'wound' && byST && (
             <>
               <label className="grid gap-1">S<input className="input w-16" type="number" min={1} value={s} onChange={(e) => setS(e.target.value)} aria-label="Strength" /></label>
               <label className="grid gap-1">T<input className="input w-16" type="number" min={1} value={t} onChange={(e) => setT(e.target.value)} aria-label="Toughness" /></label>
@@ -111,7 +129,7 @@ export function DiceRoller({ onClose }: { onClose: () => void }) {
           {step === 'save' && (
             <>
               <label className="grid gap-1">Sv<input className="input w-16" type="number" min={2} max={7} value={sv} onChange={(e) => setSv(e.target.value)} aria-label="Save" /></label>
-              <label className="grid gap-1">AP<input className="input w-16" type="number" max={0} value={ap} onChange={(e) => setAp(e.target.value)} aria-label="AP" /></label>
+              <label className="grid gap-1">AP/Rend<input className="input w-16" type="number" max={0} value={ap} onChange={(e) => setAp(e.target.value)} aria-label="AP" /></label>
               <label className="grid gap-1">Invuln<input className="input w-16" type="number" min={2} max={6} placeholder="—" value={inv} onChange={(e) => setInv(e.target.value)} aria-label="Invulnerable save" /></label>
             </>
           )}
