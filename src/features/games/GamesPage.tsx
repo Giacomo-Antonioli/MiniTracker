@@ -2,6 +2,7 @@ import { GamePhotos } from './GamePhotos'
 import { DiceRoller } from '../dice/DiceRoller'
 import { WhoGoesFirst } from '../dice/WhoGoesFirst'
 import { ListQrRead } from '../armies/ListQr'
+import { DEPLOYMENTS, DISPOSITIONS, draw, isDisposition, MISSION_PACK, PRIMARIES, primaries, TWISTS, type Disposition } from '../../domain/games/missions'
 import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { editionOfRepo } from '../../data/catalogue/fetch'
@@ -41,6 +42,18 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
   const [faction, setFaction] = useState('')
   const [mission, setMission] = useState('')
   const [deployment, setDeployment] = useState('')
+  const [theirMission, setTheirMission] = useState('')
+  const [twist, setTwist] = useState('')
+  const [disp, setDisp] = useState<{ me?: Disposition; them?: Disposition }>({})
+  const pickDisp = (k: 'me' | 'them', v: string) => {
+    const next = { ...disp, [k]: isDisposition(v) ? v : undefined }
+    setDisp(next)
+    if (next.me && next.them) {
+      const p = primaries(next.me, next.them)
+      setMission(p.me)
+      setTheirMission(p.them)
+    }
+  }
   const [first, setFirst] = useState<SideKey>('me')
   const [theirList, setTheirList] = useState<ArmyList | undefined>()
   const [decide, setDecide] = useState<'roll' | 'coin' | null>(null)
@@ -71,7 +84,7 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
       aria-label="New game"
       onSubmit={(e) => {
         e.preventDefault()
-        void saveGame(newGame({ myListId: mine?.id, myFaction: factionName(catalogue, mine?.factionId), opponent, theirFaction: faction, theirList, mission, deployment, battleSize: mine?.battleSize, first }, ctx())).then(onStarted)
+        void saveGame(newGame({ myListId: mine?.id, myFaction: factionName(catalogue, mine?.factionId), opponent, theirFaction: faction, theirList, mission, theirMission, deployment, twist, battleSize: mine?.battleSize, first }, ctx())).then(onStarted)
       }}
     >
       <div className="grid gap-3 sm:grid-cols-2">
@@ -107,8 +120,39 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
             </span>
           )}
         </div>
-        <label className="grid gap-1 text-sm">Mission<input className="input" value={mission} onChange={(e) => setMission(e.target.value)} /></label>
-        <label className="grid gap-1 text-sm">Deployment<input className="input" value={deployment} onChange={(e) => setDeployment(e.target.value)} /></label>
+        <fieldset className="grid gap-2 rounded border border-line p-2 text-sm sm:col-span-2" aria-label="Mission">
+          <legend className="px-1 text-xs text-muted">Mission · {MISSION_PACK} cards, or type your own</legend>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {(['me', 'them'] as const).map((k) => (
+              <label key={k} className="grid gap-1">{k === 'me' ? 'My force disposition' : 'Their force disposition'}
+                <span className="flex gap-1">
+                  <select className="input flex-1" value={disp[k] ?? ''} onChange={(e) => pickDisp(k, e.target.value)}>
+                    <option value="">—</option>
+                    {DISPOSITIONS.map((d) => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                  <button type="button" className="btn px-2 py-0" aria-label={`Draw ${k === 'me' ? 'my' : 'their'} force disposition`} title="Draw at random" onClick={() => pickDisp(k, draw(DISPOSITIONS))}>🎲</button>
+                </span>
+              </label>
+            ))}
+            <label className="grid gap-1">My primary mission<input className="input" list="game-primaries" value={mission} onChange={(e) => setMission(e.target.value)} /></label>
+            <label className="grid gap-1">Their primary mission<input className="input" list="game-primaries" value={theirMission} onChange={(e) => setTheirMission(e.target.value)} /></label>
+            <datalist id="game-primaries">{PRIMARIES.map((m) => <option key={m} value={m} />)}</datalist>
+            <label className="grid gap-1">Deployment
+              <span className="flex gap-1">
+                <input className="input flex-1" list="game-deployments" value={deployment} onChange={(e) => setDeployment(e.target.value)} />
+                <button type="button" className="btn px-2 py-0" aria-label="Draw deployment" title="Draw at random" onClick={() => setDeployment(draw(DEPLOYMENTS))}>🎲</button>
+              </span>
+              <datalist id="game-deployments">{DEPLOYMENTS.map((m) => <option key={m} value={m} />)}</datalist>
+            </label>
+            <label className="grid gap-1">Twist (optional)
+              <span className="flex gap-1">
+                <input className="input flex-1" list="game-twists" value={twist} onChange={(e) => setTwist(e.target.value)} />
+                <button type="button" className="btn px-2 py-0" aria-label="Draw twist" title="Draw at random" onClick={() => setTwist(draw(TWISTS))}>🎲</button>
+              </span>
+              <datalist id="game-twists">{TWISTS.map((m) => <option key={m} value={m} />)}</datalist>
+            </label>
+          </div>
+        </fieldset>
         <div className="grid gap-1 text-sm">
           <label className="grid gap-1">Who goes first
             <select className="input" value={first} onChange={(e) => setFirst(e.target.value as SideKey)}>
@@ -209,7 +253,7 @@ function LiveGame({ game: g, onCompanion }: { game: Game; onCompanion: () => voi
       <div className="panel flex flex-wrap items-center gap-3 p-3">
         <span className="font-display text-xl">Round {g.round} / {ROUNDS}</span>
         <span className="text-sm" role="status">{g.turn === 'me' ? 'Your turn' : `${g.them.name}'s turn`}</span>
-        {g.mission && <span className="text-sm text-muted">{g.mission}{g.deployment ? ` · ${g.deployment}` : ''}</span>}
+        {(g.mission || g.deployment) && <span className="text-sm text-muted" aria-label="Mission">{[g.mission && (g.theirMission ? `${g.mission} vs ${g.theirMission}` : g.mission), g.deployment, g.twist && `Twist: ${g.twist}`].filter(Boolean).join(' · ')}</span>}
         <button className="btn ml-auto" onClick={() => setDice(true)}>🎲 Dice</button>
         <button className="btn" onClick={onCompanion}>📱 Companion</button>
         <button className="btn btn-primary" disabled={g.round === ROUNDS && g.turn !== g.first} onClick={() => save(advanceTurn(g, c))}>Next turn ▶</button>

@@ -27,8 +27,12 @@ export interface Game {
   id: string
   date: string
   status: 'live' | 'done'
+  /** My Primary Mission (or any mission name). */
   mission: string
   deployment: string
+  /** Mission cards (#194): the opponent's Primary Mission and the Twist, when used. */
+  theirMission?: string
+  twist?: string
   battleSize?: string
   round: number
   turn: SideKey
@@ -53,7 +57,9 @@ export interface NewGame {
   theirFaction?: string
   theirList?: ArmyList
   mission?: string
+  theirMission?: string
   deployment?: string
+  twist?: string
   battleSize?: string
   first?: SideKey
 }
@@ -69,6 +75,8 @@ export function newGame(n: NewGame, ctx: Ctx): Game {
     status: 'live',
     mission: n.mission ?? '',
     deployment: n.deployment ?? '',
+    ...(n.theirMission ? { theirMission: n.theirMission } : {}),
+    ...(n.twist ? { twist: n.twist } : {}),
     ...(n.battleSize ? { battleSize: n.battleSize } : {}),
     round: 1,
     turn: first,
