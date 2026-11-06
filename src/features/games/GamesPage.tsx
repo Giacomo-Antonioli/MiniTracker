@@ -1,3 +1,4 @@
+import { EDITIONS, gameOfRepo } from '../../domain/catalogue/editions'
 import { GamePhotos } from './GamePhotos'
 import { DiceRoller } from '../dice/DiceRoller'
 import { WhoGoesFirst } from '../dice/WhoGoesFirst'
@@ -64,6 +65,9 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
   }
   const [error, setError] = useState('')
   const mine = lists.find((l) => l.id === listId)
+  // Mission cards are 40k's (#194); other games (#99) type their mission.
+  const game = mine ? (EDITIONS.find((e) => e.key === mine.edition)?.game ?? '40k') : catalogue ? gameOfRepo(catalogue.source.repo) : '40k'
+  const is40k = game === '40k'
   const factionName = (c: Catalogue | null, id?: string) => c?.factions.find((f) => f.id === id)?.name
 
   const load = async (f: File) => {
@@ -120,6 +124,12 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
             </span>
           )}
         </div>
+        {!is40k ? (
+          <>
+            <label className="grid gap-1 text-sm">Mission<input className="input" value={mission} onChange={(e) => setMission(e.target.value)} /></label>
+            <label className="grid gap-1 text-sm">Deployment<input className="input" value={deployment} onChange={(e) => setDeployment(e.target.value)} /></label>
+          </>
+        ) : (
         <fieldset className="grid gap-2 rounded border border-line p-2 text-sm sm:col-span-2" aria-label="Mission">
           <legend className="px-1 text-xs text-muted">Mission · {MISSION_PACK} cards, or type your own</legend>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -153,6 +163,7 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
             </label>
           </div>
         </fieldset>
+        )}
         <div className="grid gap-1 text-sm">
           <label className="grid gap-1">Who goes first
             <select className="input" value={first} onChange={(e) => setFirst(e.target.value as SideKey)}>

@@ -12,7 +12,7 @@ const token = process.env.GITHUB_TOKEN
 const f: typeof fetch = (url, init) =>
   fetch(url, token && String(url).startsWith('https://api.github.com') ? { ...init, headers: { ...init?.headers, Authorization: `Bearer ${token}` } } : init)
 
-describe.each(EDITIONS)('BSData live check ($label, $repo)', (edition) => {
+describe.each(EDITIONS.filter((e) => e.game === '40k'))('BSData live check ($label, $repo)', (edition) => {
   let commit = ''
   let files: SourceFile[] = []
 
@@ -50,3 +50,19 @@ describe.each(EDITIONS)('BSData live check ($label, $repo)', (edition) => {
     expect(unpriced, 'share of units without points').toBeLessThan(0.05)
   })
 }, 120_000)
+
+// Other games (#99): the data loads and units come with stats (and points where the game has them).
+const OTHER = { aos: { unit: 'Abhorrant Ghoul King', minUnits: 800, priced: true }, kt: { unit: 'Sharpshooter', minUnits: 400, priced: false } } as const
+describe.each(EDITIONS.filter((e) => e.game !== '40k'))('BSData live check ($label, $repo)', (edition) => {
+  it('downloads and parses', async () => {
+    const commit = await latestCommit(edition.repo, f)
+    const files = await downloadDataFiles(edition.repo, commit, undefined, f)
+    const c = parseBsData(files, { repo: edition.repo, commit, fetchedAt: new Date().toISOString() })
+    const want = OTHER[edition.game as keyof typeof OTHER]
+    expect(c.datasheets.length).toBeGreaterThanOrEqual(want.minUnits)
+    const d = c.datasheets.find((x) => x.name === want.unit)
+    expect(d?.stats?.length, want.unit).toBeGreaterThan(0)
+    expect(c.datasheets.filter((x) => x.stats?.length).length / c.datasheets.length, 'share with stats').toBeGreaterThan(0.9)
+    if (want.priced) expect(c.datasheets.filter((x) => x.points[0].points > 0).length / c.datasheets.length, 'share with points').toBeGreaterThan(0.85)
+  })
+}, 180_000)

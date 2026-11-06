@@ -20,6 +20,8 @@ const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '',
   isArray: (_name, _jpath, _isLeaf, isAttribute) => !isAttribute,
+  // Middle-earth (#99) nests entries deeper than the default limit of 100.
+  maxNestedTags: 2000,
 })
 
 const kids = (n: Node, container: string, tag: string): Node[] => {
@@ -79,7 +81,8 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
   const gstDoc = parsed.find((p) => p.doc.gameSystem)
   if (!gstDoc) throw new Error('No game system file found')
   const gst = gstDoc.doc.gameSystem[0]
-  const ptsId = attr(kids(gst, 'costTypes', 'costType').find((c) => attr(c, 'name') === 'pts') ?? {}, 'id')
+  // "pts" in 40k and Age of Sigmar, " Points" in Middle-earth (#99).
+  const ptsId = attr(kids(gst, 'costTypes', 'costType').find((c) => ['pts', 'points'].includes((attr(c, 'name') ?? '').trim().toLowerCase())) ?? {}, 'id')
 
   const cats: CatInfo[] = []
   const entries = new Map<string, Node>()
@@ -164,8 +167,11 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
       .filter((c): c is Node => !!c)
 
   const datasheets: Datasheet[] = [...factionsByEntry].map(([id, facs]) => {
-    const d = toDatasheet(entries.get(id)!, [...facs].sort(), ptsId, linkable)
     const e = entries.get(id)!
+    let d = toDatasheet(e, [...facs].sort(), ptsId, linkable)
+    // Age of Sigmar (#99) prices units on the faction's link to the shared entry, not on the entry.
+    const linkPts = rootLinks.get(id) ? ptsOf(rootLinks.get(id)!, ptsId) : 0
+    if (linkPts > 0 && d.points.every((p) => p.points === 0)) d = { ...d, points: [{ fromModels: d.minModels, points: linkPts }] }
     const ruleIds = kids(e, 'infoLinks', 'infoLink')
       .filter((l) => attr(l, 'type') === 'rule' && !hidden(l))
       .map((l) => attr(l, 'targetId')!)
@@ -576,12 +582,17 @@ function toDatasheet(e: Node, factionIds: string[], ptsId: string | undefined, l
   const keywords = sortUnique(catNames.filter((n) => !n.startsWith('Faction: ') && n !== name))
   const role = attr(cats.find((c) => attr(c, 'primary') === 'true') ?? {}, 'name')
 
-  const abilityProfiles = kids(e, 'profiles', 'profile').filter((p) => attr(p, 'typeName') === 'Abilities' && !hidden(p))
+  // "Abilities" (40k, Kill Team), "Ability (Passive)", "Ability (Spell)"… (Age of Sigmar), "Unique Actions" (Kill Team).
+  const abilityProfiles = kids(e, 'profiles', 'profile').filter((p) => /^(Abilit|Unique Actions)/.test(attr(p, 'typeName') ?? '') && !hidden(p))
   const abilities = abilityProfiles.map((p) => attr(p, 'name')!)
   const abilityTexts: Record<string, string> = {}
   for (const p of abilityProfiles) {
-    const desc = kids(p, 'characteristics', 'characteristic').find((ch) => attr(ch, 'name') === 'Description')
-    const text = desc ? textOf(desc) : ''
+    const chars = kids(p, 'characteristics', 'characteristic')
+    const field = (n: string) => textOf(chars.find((ch) => attr(ch, 'name') === n) ?? '')
+    // Description (40k), Ability (Kill Team), Effect with its Timing (Age of Sigmar).
+    const timing = field('Timing')
+    const body = field('Description') || field('Ability') || field('Effect')
+    const text = body && timing ? `${timing}: ${body}` : body
     if (text) abilityTexts[attr(p, 'name')!] = text
   }
   const [rawMin, maxModels] = modelCount(e, true, linkable)
@@ -723,6 +734,8 @@ function collectWargear(n: Node): string[] {
  * Profiles under a unit, following links to shared weapons: stat lines ("Unit"), weapon profiles, and the weapon
  * keywords ("Assault", "Sustained Hits 1"…) used to explain weapon abilities.
  */
+const STAT_TYPES = new Set(['Unit', 'Operative', 'Hero', 'Warrior'])
+
 function readProfiles(e: Node, linkable: Map<string, Node>): { keywords: string[]; stats: StatLine[]; weapons: WeaponProfile[] } {
   const out = new Set<string>()
   const stats = new Map<string, StatLine>()
@@ -734,9 +747,11 @@ function readProfiles(e: Node, linkable: Map<string, Node>): { keywords: string[
       if (tag === 'profile' && !hidden(el)) {
         const type = attr(el, 'typeName') ?? ''
         const name = attr(el, 'name')!
-        if (type === 'Unit' && !stats.has(name)) stats.set(name, { name, values: row(el) })
-        if (type.includes('Weapons')) {
-          const kind = type.startsWith('Melee') ? 'melee' : 'ranged'
+        // Stat lines: "Unit" (40k, Age of Sigmar), "Operative" (Kill Team), "Hero"/"Warrior" (Middle-earth).
+        if (STAT_TYPES.has(type) && !stats.has(name)) stats.set(name, { name, values: row(el) })
+        if (/weapon/i.test(type)) {
+          // Kill Team marks melee weapons with ⚔ in the name.
+          const kind = type.startsWith('Melee') || name.startsWith('⚔') ? 'melee' : 'ranged'
           if (!weapons.has(`${kind}:${name}`)) weapons.set(`${kind}:${name}`, { name, kind, values: row(el) })
           const kw = kids(el, 'characteristics', 'characteristic').find((ch) => attr(ch, 'name') === 'Keywords')
           for (const k of (kw ? textOf(kw) : '').split(',')) {

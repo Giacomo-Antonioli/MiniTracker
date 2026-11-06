@@ -1,3 +1,4 @@
+import { DEFAULT_POINTS, gameOfRepo } from '../catalogue/editions'
 import type { BattleSize, Catalogue, Datasheet, Enhancement } from '../catalogue/types'
 import { evalCondition, evalLimit, type Counter } from './conditions'
 import { loadoutProblems } from './loadout'
@@ -16,8 +17,11 @@ import type { ArmyList } from './types'
 /** BSData has no Combat Patrol; it is a fixed-box format, so only points are checked. */
 export const COMBAT_PATROL: BattleSize = { id: 'combat-patrol', name: 'Combat Patrol', pointsLimit: 500 }
 
+/** Battle sizes of a catalogue: 40k adds Combat Patrol; games whose data has none get one open size (#99). */
 export function battleSizes(cat: Catalogue): BattleSize[] {
-  return [COMBAT_PATROL, ...(cat.muster?.battleSizes ?? [])]
+  const game = gameOfRepo(cat.source.repo)
+  if (game === '40k') return [COMBAT_PATROL, ...(cat.muster?.battleSizes ?? [])]
+  return cat.muster?.battleSizes?.length ? cat.muster.battleSizes : [{ id: 'open', name: game === 'kt' ? 'Kill team' : 'Open', pointsLimit: DEFAULT_POINTS[game] }]
 }
 
 export type IssueCode =
