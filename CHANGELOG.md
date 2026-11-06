@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-11-06
+
 ### Added
 - Sync now (#161): while ⇄ Sync is open, devices you synced with before can reach this one without a code; each known device has a ⇄ Sync now button.
 
@@ -292,7 +294,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.19.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.20.0...HEAD
+[0.20.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.16.0...v0.17.0
