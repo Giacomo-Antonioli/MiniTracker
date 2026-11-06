@@ -2,8 +2,8 @@ import QRCode from 'qrcode'
 import { useEffect, useRef, useState } from 'react'
 import { appDb, useStore } from '../../app/store'
 import type { MergeSummary } from '../../domain/sync/merge'
-import { CLOCK_WARN_SECONDS, formatPairCode, newPairCode, pairLink, parsePairCode, type Hello } from '../../domain/sync/protocol'
-import { hostByCode, joinByCode, privateAnswer, privateOffer, type Channel } from '../../data/syncChannel'
+import { CLOCK_WARN_SECONDS, deviceCodeFor, formatPairCode, newPairCode, pairLink, parsePairCode, type Hello } from '../../domain/sync/protocol'
+import { hostByCode, joinByCode, NO_DIRECT, privateAnswer, privateOffer, type Channel } from '../../data/syncChannel'
 import { getDevice, getKnownDevices, getSyncPrefs, isStale, recordSync, saveSyncPrefs, type Device, type KnownDevice } from '../../data/syncDevice'
 import { applySyncFile, makeSyncFile, parseSyncFile, previewSyncFile, syncFileName, type SyncFile } from '../../data/syncFile'
 import { runSync, type Direction, type SyncPlan } from '../../data/syncSession'
@@ -147,14 +147,15 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
       fail(e)
     }
   }
-  const join = async (raw: string) => {
+  const join = async (raw: string, device?: KnownDevice) => {
     const code = parsePairCode(raw)
     if (!code) return setStep({ kind: 'error', text: 'That is not a pairing code; it looks like K7P-42QX.' })
     try {
-      setStep({ kind: 'connecting', text: `Connecting to ${formatPairCode(code)}…` })
+      setStep({ kind: 'connecting', text: device ? `Connecting to ${device.name}…` : `Connecting to ${formatPairCode(code)}…` })
       void talk(await joinByCode(code, turn), true)
     } catch (e) {
-      fail(e)
+      if (device && /No device is waiting/.test((e as Error).message)) setStep({ kind: 'error', text: `${device.name} isn't reachable right now. Open ⇄ Sync on it (both apps open), then try again.` })
+      else fail(e)
     }
   }
   const startPrivate = async () => {
@@ -203,6 +204,41 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
   }, [linkCode, me])
 
   const busy = step.kind !== 'idle' && step.kind !== 'done' && step.kind !== 'error'
+  const busyRef = useRef(busy)
+  busyRef.current = busy
+  const talkRef = useRef(talk)
+  talkRef.current = talk
+
+  // While this page is open, devices that synced before can reach this one under its own code.
+  const [listening, setListening] = useState(false)
+  useEffect(() => {
+    if (!me) return
+    let dead = false
+    let cancel: (() => void) | undefined
+    let retry: ReturnType<typeof setTimeout> | undefined
+    const listen = async () => {
+      try {
+        const h = await hostByCode(deviceCodeFor(me.deviceId), prefs.turn?.urls ? { turn: prefs.turn } : {})
+        if (dead) return h.cancel()
+        cancel = h.cancel
+        setListening(true)
+        const ch = await h.channel
+        setListening(false)
+        if (dead || busyRef.current) ch.close()
+        else await talkRef.current(ch, false)
+      } catch {
+        // no relay, or this device is already listening in another tab: try again later
+      }
+      setListening(false)
+      if (!dead) retry = setTimeout(() => void listen(), 5000)
+    }
+    void listen()
+    return () => {
+      dead = true
+      cancel?.()
+      clearTimeout(retry)
+    }
+  }, [me, prefs.turn])
   const now = new Date().toISOString()
 
   return (
@@ -211,6 +247,7 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
         <h1 className="font-display text-2xl text-accent">Sync</h1>
         {me && <span className="text-sm text-muted">This device: <b className="text-fg">{me.deviceName}</b>{onOpenSettings && <> · <button className="underline" onClick={onOpenSettings}>Sync settings</button></>}</span>}
       </header>
+      {listening && <p className="text-xs text-ok" role="note">📡 Devices you synced with before can sync with this one while this page is open.</p>}
       <p className="text-sm text-muted">Sync with another device running MiniTracker: phone, tablet or PC. The data goes directly between the two devices, encrypted; only the short pairing messages pass through a relay. Both apps must be open.</p>
 
       {!busy && (
@@ -285,7 +322,13 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
       {step.kind === 'error' && (
         <div className="panel grid gap-1 p-3 text-sm" role="alert">
           <p className="text-danger">✕ {step.text}</p>
-          <p className="text-xs text-muted">If the devices can't reach each other (strict networks), add a TURN server in Settings › Sync, or use a sync file below.</p>
+          {step.text === NO_DIRECT ? (
+            <div className="flex flex-wrap gap-2">
+              {onOpenSettings && <button className="btn" onClick={onOpenSettings}>TURN server settings</button>}
+              <button className="btn" onClick={() => { setStep({ kind: 'idle' }); document.querySelector('[aria-label="QR carousel"]')?.scrollIntoView?.({ behavior: 'smooth' }) }}>Use the QR carousel</button>
+              <button className="btn" onClick={() => { setStep({ kind: 'idle' }); document.querySelector('[aria-label="Sync file"]')?.scrollIntoView?.({ behavior: 'smooth' }) }}>Use a sync file</button>
+            </div>
+          ) : <p className="text-xs text-muted">If the devices can't reach each other (different networks), add a TURN server in Settings › Sync, or use the QR carousel or a sync file below.</p>}
         </div>
       )}
 
@@ -350,6 +393,7 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
               <li key={d.id} className="flex flex-wrap items-center gap-2">
                 <span>{d.name}</span>
                 <span className="text-xs text-muted">last sync {d.lastSync.slice(0, 10)}</span>
+                <button className="btn px-2 py-0.5 text-xs" disabled={busy} aria-label={`Sync now with ${d.name}`} onClick={() => void join(deviceCodeFor(d.id), d)}>⇄ Sync now</button>
                 {isStale(d, now) && <span className="text-xs text-danger">⚠ Not synced for over 90 days: deletions made since then may come back from it</span>}
               </li>
             ))}

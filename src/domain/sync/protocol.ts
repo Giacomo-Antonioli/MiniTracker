@@ -11,6 +11,20 @@ export function newPairCode(random: () => number = Math.random): string {
   return Array.from({ length: CODE_LENGTH }, () => ALPHABET[Math.floor(random() * ALPHABET.length)]).join('')
 }
 
+/** A device's own fixed code, so devices that synced before find each other without typing one. */
+export function deviceCodeFor(deviceId: string): string {
+  // FNV-1a over the whole id, then stretched over the code length
+  let h = 0x811c9dc5
+  for (let i = 0; i < deviceId.length; i++) h = Math.imul(h ^ deviceId.charCodeAt(i), 0x01000193) >>> 0
+  let out = ''
+  while (out.length < CODE_LENGTH) {
+    h = Math.imul(h ^ out.length, 0x01000193) >>> 0
+    out += ALPHABET[h % ALPHABET.length]
+  }
+  // never the same as a typed pairing code: those are random, these start with a marker letter
+  return 'D' + out.slice(1)
+}
+
 export const formatPairCode = (code: string) => `${code.slice(0, 3)}-${code.slice(3)}`
 
 /** Read a typed code or a pairing link; undefined if it isn't one. Forgiving about case, spaces and dashes. */

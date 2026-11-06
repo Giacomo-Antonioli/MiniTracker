@@ -4,6 +4,12 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Sync now (#161): while ⇄ Sync is open, devices you synced with before can reach this one without a code; each known device has a ⇄ Sync now button.
+
+### Changed
+- Sync says when two devices can't reach each other directly (failed or no connection within 25 s) instead of waiting, with buttons for the TURN setting, the QR carousel and the sync file.
+
 ## [0.19.0] - 2026-11-05
 
 ### Added
