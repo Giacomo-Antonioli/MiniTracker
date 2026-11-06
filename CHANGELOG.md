@@ -5,6 +5,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Added
+- Mission cards (#194): on New game pick or 🎲 draw each player's Force Disposition and both Primary Missions fill in (Chapter Approved 2026-27 matrix); 🎲 draw a Deployment and an optional Twist. Card names only; you can still type any mission. The live game shows both missions, the deployment and the twist.
 - Opponent's list (#193): on New game pick it from your own lists or 📷 Read QR from the opponent's device, where the list's ⬇ Export › 📱 Show as QR plays it as a QR carousel. Files still work.
 - Who goes first (#192): 🎲 Roll off (one D6 each in your colours, ties roll again) or 🪙 Coin flip on New game; the winner chooses who goes first.
 - Dice roller (#191): 🎲 Dice in the live game and the companion. 3D dice that tumble (dice-box), hits → wounds → saves with the wound table from S and T and the save from Sv, AP and invulnerable save, re-roll 1s or fails, and a summary of the attack. Turn 3D off for quick rolls; it is off when the device asks for reduced motion.
