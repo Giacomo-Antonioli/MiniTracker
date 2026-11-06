@@ -23,3 +23,23 @@ test('dice roller: 3D dice roll hits, then wounds (#191)', async ({ page }) => {
   await expect(roller).toHaveCount(0)
   expect(errors).toEqual([])
 })
+
+test('who goes first: roll-off with 3D dice sets the first player (#192)', async ({ page }) => {
+  const errors: string[] = []
+  page.on('pageerror', (e) => errors.push(e.message))
+  await page.goto('./')
+  await page.getByRole('button', { name: 'Games' }).click()
+  await page.getByRole('button', { name: '▶ New game' }).click()
+  await page.getByRole('button', { name: '🎲 Roll off' }).click()
+  const d = page.getByRole('dialog', { name: 'Roll off' })
+  await d.getByRole('button', { name: 'Roll off' }).click()
+  const winner = d.getByLabel('Winner')
+  await expect(winner).toBeVisible({ timeout: 40_000 })
+  await winner.getByRole('button', { name: 'Opponent goes first' }).click()
+  await expect(d).toHaveCount(0)
+  await expect(page.getByLabel('Who goes first')).toHaveValue('them')
+  await page.getByRole('button', { name: '🪙 Coin flip' }).click()
+  await page.getByRole('dialog', { name: 'Coin flip' }).getByRole('button', { name: 'Flip' }).click()
+  await expect(page.getByRole('dialog', { name: 'Coin flip' }).getByLabel('Winner')).toBeVisible()
+  expect(errors).toEqual([])
+})

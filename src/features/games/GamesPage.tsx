@@ -1,5 +1,6 @@
 import { GamePhotos } from './GamePhotos'
 import { DiceRoller } from '../dice/DiceRoller'
+import { WhoGoesFirst } from '../dice/WhoGoesFirst'
 import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { editionOfRepo } from '../../data/catalogue/fetch'
@@ -41,6 +42,7 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
   const [deployment, setDeployment] = useState('')
   const [first, setFirst] = useState<SideKey>('me')
   const [theirList, setTheirList] = useState<ArmyList | undefined>()
+  const [decide, setDecide] = useState<'roll' | 'coin' | null>(null)
   const [error, setError] = useState('')
   const mine = lists.find((l) => l.id === listId)
   const factionName = (c: Catalogue | null, id?: string) => c?.factions.find((f) => f.id === id)?.name
@@ -85,13 +87,20 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
         </label>
         <label className="grid gap-1 text-sm">Mission<input className="input" value={mission} onChange={(e) => setMission(e.target.value)} /></label>
         <label className="grid gap-1 text-sm">Deployment<input className="input" value={deployment} onChange={(e) => setDeployment(e.target.value)} /></label>
-        <label className="grid gap-1 text-sm">Who goes first
-          <select className="input" value={first} onChange={(e) => setFirst(e.target.value as SideKey)}>
-            <option value="me">Me</option>
-            <option value="them">Opponent</option>
-          </select>
-        </label>
+        <div className="grid gap-1 text-sm">
+          <label className="grid gap-1">Who goes first
+            <select className="input" value={first} onChange={(e) => setFirst(e.target.value as SideKey)}>
+              <option value="me">Me</option>
+              <option value="them">Opponent</option>
+            </select>
+          </label>
+          <span className="flex gap-2">
+            <button type="button" className="btn px-2 py-0.5 text-sm" onClick={() => setDecide('roll')}>🎲 Roll off</button>
+            <button type="button" className="btn px-2 py-0.5 text-sm" onClick={() => setDecide('coin')}>🪙 Coin flip</button>
+          </span>
+        </div>
       </div>
+      {decide && <WhoGoesFirst mode={decide} opponent={opponent} onClose={() => setDecide(null)} onDone={(w) => { setFirst(w); setDecide(null) }} />}
       {error && <p className="text-sm text-danger" role="alert">{error}</p>}
       <div className="flex gap-2">
         <button className="btn btn-primary">▶ Start game</button>
