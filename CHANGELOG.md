@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-11-06
+
 ### Added
 - Mission cards (#194): on New game pick or 🎲 draw each player's Force Disposition and both Primary Missions fill in (Chapter Approved 2026-27 matrix); 🎲 draw a Deployment and an optional Twist. Card names only; you can still type any mission. The live game shows both missions, the deployment and the twist.
 - Opponent's list (#193): on New game pick it from your own lists or 📷 Read QR from the opponent's device, where the list's ⬇ Export › 📱 Show as QR plays it as a QR carousel. Files still work.
@@ -305,7 +307,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.21.0...HEAD
+[0.21.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.17.0...v0.18.0
