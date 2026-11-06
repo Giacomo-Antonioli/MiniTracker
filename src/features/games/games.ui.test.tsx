@@ -175,4 +175,19 @@ describe('Games', () => {
     await user.click(within(comp).getByRole('button', { name: 'Score board' }))
     expect(await screen.findByLabelText('Live game')).toBeInTheDocument()
   })
+
+  it("uses one of my lists as the opponent's list, as a copy (#193)", async () => {
+    await appDb.lists.put({ id: 'L', name: 'Walkers', edition: '11e', factionId: 'cat-testers', battleSize: 'bs-sf', pointsLimit: 2000, status: 'planned', detachmentIds: [], entries: [{ id: 'e1', datasheetId: 'u-walker', models: 1, wargear: [] }], createdAt: 't', updatedAt: 't' } as never)
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(await screen.findByRole('button', { name: 'Games' }))
+    await user.click(screen.getByRole('button', { name: '▶ New game' }))
+    await user.selectOptions(screen.getByLabelText('Their list from my lists'), 'L')
+    expect(screen.getByLabelText('Their list', { exact: true })).toHaveTextContent('Walkers: 1 units')
+    await user.click(screen.getByRole('button', { name: '▶ Start game' }))
+    await waitFor(() => expect(useStore.getState().games).toHaveLength(1))
+    const theirs = useStore.getState().games[0].them.list!
+    expect(theirs.name).toBe('Walkers')
+    expect(theirs.id).not.toBe('L')
+  })
 })

@@ -1,6 +1,7 @@
 import { GamePhotos } from './GamePhotos'
 import { DiceRoller } from '../dice/DiceRoller'
 import { WhoGoesFirst } from '../dice/WhoGoesFirst'
+import { ListQrRead } from '../armies/ListQr'
 import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { editionOfRepo } from '../../data/catalogue/fetch'
@@ -43,6 +44,11 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
   const [first, setFirst] = useState<SideKey>('me')
   const [theirList, setTheirList] = useState<ArmyList | undefined>()
   const [decide, setDecide] = useState<'roll' | 'coin' | null>(null)
+  const [readQr, setReadQr] = useState(false)
+  const pickTheirs = (l: ArmyList) => {
+    setTheirList(l)
+    if (!faction) setFaction(factionName(catalogue, l.factionId) ?? '')
+  }
   const [error, setError] = useState('')
   const mine = lists.find((l) => l.id === listId)
   const factionName = (c: Catalogue | null, id?: string) => c?.factions.find((f) => f.id === id)?.name
@@ -53,8 +59,7 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
       if (!catalogue) throw new Error('Install a catalogue first (Settings → Catalogue)')
       const edition = editionOfRepo(catalogue.source.repo)?.key ?? '11e'
       const r = await importListFile(f, catalogue, edition)
-      setTheirList(r.list)
-      if (!faction) setFaction(factionName(catalogue, r.list.factionId) ?? '')
+      pickTheirs(r.list)
     } catch (e) {
       setError((e as Error).message)
     }
@@ -81,10 +86,27 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
           <input className="input" list="game-factions" value={faction} onChange={(e) => setFaction(e.target.value)} />
           <datalist id="game-factions">{catalogue?.factions.map((f) => <option key={f.id} value={f.name} />)}</datalist>
         </label>
-        <label className="grid gap-1 text-sm">Their list (optional: .rosz, .ros, .json or .txt)
-          <input className="input" type="file" accept=".rosz,.ros,.json,.txt" aria-label="Their list file" onChange={(e) => { const f = e.target.files?.[0]; if (f) void load(f) }} />
-          {theirList && <span className="text-xs text-muted">{theirList.name}: {theirList.entries.length} units</span>}
-        </label>
+        <div className="grid gap-1 text-sm">
+          <span>Their list (optional)</span>
+          <div className="flex flex-wrap gap-2">
+            <label className="btn px-2 py-0.5 text-sm">📄 File
+              <input className="sr-only" type="file" accept=".rosz,.ros,.json,.txt" aria-label="Their list file" onChange={(e) => { const f = e.target.files?.[0]; if (f) void load(f) }} />
+            </label>
+            <button type="button" className="btn px-2 py-0.5 text-sm" onClick={() => setReadQr(true)}>📷 Read QR</button>
+            {lists.length > 0 && (
+              <select className="input py-0.5 text-sm" aria-label="Their list from my lists" value="" onChange={(e) => { const l = lists.find((x) => x.id === e.target.value); if (l) pickTheirs({ ...structuredClone(l), id: ctx().newId() }) }}>
+                <option value="">One of my lists…</option>
+                {lists.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+              </select>
+            )}
+          </div>
+          {theirList && (
+            <span className="flex items-center gap-2 text-xs text-muted" aria-label="Their list">
+              {theirList.name}: {theirList.entries.length} units
+              <button type="button" className="underline" onClick={() => setTheirList(undefined)}>remove</button>
+            </span>
+          )}
+        </div>
         <label className="grid gap-1 text-sm">Mission<input className="input" value={mission} onChange={(e) => setMission(e.target.value)} /></label>
         <label className="grid gap-1 text-sm">Deployment<input className="input" value={deployment} onChange={(e) => setDeployment(e.target.value)} /></label>
         <div className="grid gap-1 text-sm">
@@ -100,6 +122,7 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
           </span>
         </div>
       </div>
+      {readQr && <ListQrRead onClose={() => setReadQr(false)} onList={(l) => { setReadQr(false); pickTheirs(l) }} />}
       {decide && <WhoGoesFirst mode={decide} opponent={opponent} onClose={() => setDecide(null)} onDone={(w) => { setFirst(w); setDecide(null) }} />}
       {error && <p className="text-sm text-danger" role="alert">{error}</p>}
       <div className="flex gap-2">

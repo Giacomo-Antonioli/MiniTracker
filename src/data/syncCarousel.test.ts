@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { pieceFromText, Reassembler } from '../domain/sync/protocol'
-import { carouselFrames, packSyncFile, unpackSyncFile } from './syncCarousel'
+import { carouselFrames, packSyncFile, packText, unpackSyncFile, unpackText } from './syncCarousel'
 import type { SyncFile } from './syncFile'
 
 const file: SyncFile = {
@@ -25,6 +25,12 @@ it('packs, splits into frames, survives any order and repeats, and unpacks witho
 })
 
 it('rejects other QR codes', async () => {
-  await expect(unpackSyncFile('hello')).rejects.toThrow(/not a MiniTracker sync/)
+  await expect(unpackSyncFile('hello')).rejects.toThrow(/not from MiniTracker/)
   await expect(unpackSyncFile('j{"format":"x"}')).rejects.toThrow(/not a MiniTracker sync file/)
+})
+
+it('packs any JSON text, such as an army list (#193)', async () => {
+  const json = JSON.stringify({ format: 'minitracker-list', list: { name: 'Walkers' } })
+  expect(await unpackText(await packText(json))).toBe(json)
+  expect(await unpackText('j{"a":1}')).toBe('{"a":1}')
 })
