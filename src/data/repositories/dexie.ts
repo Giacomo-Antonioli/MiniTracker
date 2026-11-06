@@ -189,6 +189,20 @@ export class DexiePhotoRepository {
     return list.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.fileName.localeCompare(b.fileName))
   }
 
+  async listForGame(gameId: string): Promise<Photo[]> {
+    const list = await this.db.photos.where('gameId').equals(gameId).toArray()
+    return list.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.fileName.localeCompare(b.fileName))
+  }
+
+  /** Deletes all photos of a game. */
+  async deleteForGame(gameId: string): Promise<void> {
+    await this.db.transaction('rw', this.db.photos, this.db.photoFiles, async () => {
+      const ids = (await this.db.photos.where('gameId').equals(gameId).primaryKeys()) as string[]
+      await this.db.photoFiles.bulkDelete(ids)
+      await this.db.photos.bulkDelete(ids)
+    })
+  }
+
   files(id: string): Promise<PhotoFiles | undefined> {
     return this.db.photoFiles.get(id)
   }

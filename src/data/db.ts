@@ -14,7 +14,7 @@ export interface SettingRow {
 }
 
 /** Bump together with a new `version(n)` block and a test in migrations.test.ts. */
-export const DB_VERSION = 8
+export const DB_VERSION = 9
 
 export class MiniTrackerDb extends Dexie {
   units!: Table<OwnedUnit, string>
@@ -58,6 +58,8 @@ export class MiniTrackerDb extends Dexie {
     this.version(7).stores({ lists: 'id, factionId, edition, updatedAt' })
     // v8: shopping lists (#87).
     this.version(8).stores({ shopItems: 'id, kind, bought', shopLists: 'id' })
+    // v9: photos can belong to games (#164).
+    this.version(9).stores({ photos: 'id, unitId, schemeId, gameId, &fileName, createdAt' })
     // Sync (#161): edit times and deletion markers on every synced table.
     trackSyncedTables(this)
   }

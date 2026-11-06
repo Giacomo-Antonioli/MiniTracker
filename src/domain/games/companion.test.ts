@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Stratagem } from '../stratagems/stratagems'
-import { advanceTurn, fullWounds, abilitiesNow, clockTotals, damage, nextPhase, PHASES, pauseClock, startClock, stratagemsNow, woundsLeft } from './companion'
+import { abilityTiming, advanceTurn, fullWounds, abilitiesNow, clockTotals, damage, nextPhase, PHASES, pauseClock, startClock, stratagemsNow, woundsLeft } from './companion'
 import { newGame } from './games'
 
 let n = 0
@@ -75,5 +75,35 @@ describe('turn and wounds helpers', () => {
     expect(advanceTurn(last, ctx())).toBe(last)
     expect(fullWounds(3, [{ values: [['M', '6"'], ['W', '2']] }])).toEqual([2, 2, 2])
     expect(fullWounds(0, undefined)).toEqual([1])
+  })
+  it('gives each model type the W of its own stat line', () => {
+    const stats = [{ name: 'Captain', values: [['W', '5']] as [string, string][] }, { name: 'Intercessor', values: [['W', '2']] as [string, string][] }]
+    expect(fullWounds(3, stats, [{ name: 'Intercessor', count: 2 }, { name: 'Captain', count: 1 }])).toEqual([5, 2, 2])
+    // "Intercessor Sergeant" shares the Intercessor line; unknown names use the first line.
+    expect(fullWounds(2, stats, [{ name: 'Intercessor Sergeant', count: 1 }, { name: 'Gretchin', count: 1 }])).toEqual([5, 2])
+    // Counts that don't match the unit size fall back to the first line.
+    expect(fullWounds(3, stats, [{ name: 'Intercessor', count: 1 }])).toEqual([5, 5, 5])
+  })
+})
+
+describe('abilityTiming', () => {
+  it('reads named phases and whose turn', () => {
+    expect(abilityTiming('In your Shooting phase, re-roll.')).toEqual({ phases: ['Shooting'], turn: 'mine' })
+    expect(abilityTiming("At the end of your opponent's Fight phase, heal.")).toEqual({ phases: ['Fight'], turn: 'theirs' })
+    expect(abilityTiming('At the start of the Command phase, gain 1CP.')).toEqual({ phases: ['Command'], turn: 'either' })
+    expect(abilityTiming('Once per battle, in any phase, do it.')?.phases).toEqual([...PHASES])
+  })
+  it('reads what the ability does when no phase is named', () => {
+    expect(abilityTiming('Each time a model in this unit makes a ranged attack, +1 to hit.')).toEqual({ phases: ['Shooting'], turn: 'mine' })
+    expect(abilityTiming('Each time a model in this unit makes a melee attack, re-roll.')).toEqual({ phases: ['Fight'], turn: 'either' })
+    expect(abilityTiming('Each time an attack targets this unit, subtract 1 from the Hit roll.')).toEqual({ phases: ['Shooting', 'Fight'], turn: 'theirs' })
+    expect(abilityTiming('You can re-roll Charge rolls made for this unit.')?.phases).toEqual(['Charge'])
+    expect(abilityTiming('During the Declare Battle Formations step, set up this unit in Reserves. It can Deep Strike.')?.phases).toEqual(['Movement'])
+    expect(abilityTiming('This model has the Feel No Pain 5+ ability.')).toBeUndefined()
+  })
+  it('filters abilities by phase and turn', () => {
+    const all = [{ text: "In your opponent's Shooting phase, hide." }, { text: 'In your Shooting phase, aim.' }]
+    expect(abilitiesNow(all, 'Shooting', true)).toEqual([all[1]])
+    expect(abilitiesNow(all, 'Shooting', false)).toEqual([all[0]])
   })
 })
