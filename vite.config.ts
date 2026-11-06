@@ -14,7 +14,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       // The scheme library chunk is ~2 MB; keep it in the offline cache (default limit is 2 MiB).
-      workbox: { maximumFileSizeToCacheInBytes: 5 * 1024 * 1024 },
+      // The 3D dice (#191) need their physics (wasm) and theme files offline too.
+      workbox: { maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, globPatterns: ['**/*.{js,css,html,svg,png,jpg,json,wasm,webmanifest}'] },
       manifest: {
         name: 'MiniTracker',
         short_name: 'MiniTracker',
