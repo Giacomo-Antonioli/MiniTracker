@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Middle-earth wargear options can be picked in the army builder (#99): heroes take any of their options, warriors one (shield, spear, bow, banner…), and each option's points are added per model to the unit and the list total. Download the Middle-earth catalogue again to get them.
+
 ## [0.24.0] - 2026-11-07
 
 ### Added

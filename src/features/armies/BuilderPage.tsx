@@ -902,7 +902,7 @@ function LoadoutEditor({ d, entry, linked, onChange }: { d: Datasheet; entry: Li
                   onChange={(ev) => setRow(i, { picks: [...r.picks.filter((p) => !c.options.some((o) => o.id === p)), ...(ev.target.value ? [ev.target.value] : [])] })}
                 >
                   {c.min === 0 && <option value="">{c.name}: none</option>}
-                  {c.options.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+                  {c.options.map((o) => <option key={o.id} value={o.id}>{o.name}{o.points ? ` (+${o.points} pts)` : ''}</option>)}
                 </select>
               ) : (
                 <span key={c.id} className="flex flex-wrap items-center gap-1">

@@ -55,6 +55,8 @@ export interface LoadoutOption {
   name: string
   /** Most of this option per model (usually 1). */
   max: number
+  /** Extra points per model that takes it (Middle-earth options; 40k and Age of Sigmar options cost nothing). */
+  points?: number
 }
 
 /** A choice a model makes, e.g. "Weapon 1": pick between min and max options. */

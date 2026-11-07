@@ -1,6 +1,15 @@
 import { pointsFor } from '../catalogue/points'
 import type { Datasheet, Enhancement } from '../catalogue/types'
-import type { ArmyList } from './types'
+import { defaultLoadout } from './loadout'
+import type { ArmyList, ListEntry } from './types'
+
+/** Points of the options the entry's models picked (Middle-earth; other games' options cost nothing). */
+export function optionPoints(d: Datasheet, e: ListEntry): number {
+  const costs = new Map((d.models ?? []).flatMap((m) => m.choices.flatMap((c) => c.options)).filter((o) => o.points).map((o) => [o.id, o.points!]))
+  if (!costs.size) return 0
+  const rows = e.loadout?.length ? e.loadout : defaultLoadout(d, e.models)
+  return rows.reduce((sum, r) => sum + r.count * r.picks.reduce((n, p) => n + (costs.get(p) ?? 0), 0), 0)
+}
 
 export interface ListPoints {
   total: number
@@ -19,7 +28,7 @@ export function listPoints(l: ArmyList, sheets: Map<string, Datasheet>, enhancem
     const d = sheets.get(e.datasheetId)
     let pts: number | undefined
     try {
-      pts = d && d.points.length ? pointsFor(d, e.models) : undefined
+      pts = d && d.points.length ? pointsFor(d, e.models) + optionPoints(d, e) : undefined
     } catch {
       pts = undefined
     }

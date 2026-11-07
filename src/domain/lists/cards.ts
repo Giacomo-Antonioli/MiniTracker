@@ -1,4 +1,5 @@
 import { pointsFor } from '../catalogue/points'
+import { optionPoints } from './points'
 import { ruleForKeyword } from '../catalogue/rules'
 import type { Catalogue, Datasheet, Rule, WeaponProfile } from '../catalogue/types'
 import type { OwnedUnit } from '../collection/types'
@@ -58,7 +59,7 @@ export function unitCards(list: ArmyList, cat: Catalogue, linkedTo: (e: ListEntr
     }
     let points: number | undefined
     try {
-      points = pointsFor(d, e.models)
+      points = pointsFor(d, e.models) + optionPoints(d, e)
     } catch {
       points = undefined
     }
