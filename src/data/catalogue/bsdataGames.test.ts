@@ -54,4 +54,11 @@ describe('other game systems (#99)', () => {
     expect(d.weapons?.map((w) => [w.name, w.kind])).toEqual([['⚔ Gun butt', 'melee'], ['⌖ Marksman rifle', 'ranged']])
     expect(d.abilityTexts).toEqual({ Spotter: 'Mark a target.', 'Aim (1AP)': 'Take aim.' })
   })
+
+  it('Age of Sigmar: the same army under several leading factions gets told apart', () => {
+    const gst = { gameSystem: { id: 'g', name: 'AoS', costTypes: [{ id: 'points', name: 'pts' }] } }
+    const cat = (id: string, name: string) => json(`${id}.json`, { catalogue: { id, name, library: false, selectionEntries: [{ type: 'unit', id: `u-${id}`, name: `Boss ${id}` }] } })
+    const c = parseBsData([json('g.json', gst), cat('a', 'Ironjawz - Big Waaagh!'), cat('b', 'Kruleboyz - Big Waaagh!'), cat('c', 'Big Waaagh!'), cat('d', 'Orruk Warclans - Ironjawz')], { repo: 'BSData/age-of-sigmar-4th', commit: 'c', fetchedAt: 'f' })
+    expect(c.factions.map((f) => f.name)).toEqual(['Big Waaagh!', 'Big Waaagh! (Ironjawz)', 'Big Waaagh! (Kruleboyz)', 'Ironjawz'])
+  })
 })

@@ -188,8 +188,17 @@ export function parseBsData(files: SourceFile[], source: CatalogueSource): Catal
   })
   datasheets.sort((a, b) => a.name.localeCompare(b.name))
 
+  // Short name = last part of the catalogue name. Age of Sigmar has the same army in several catalogues, one per
+  // leading faction ("Ironjawz - Big Waaagh!", "Kruleboyz - Big Waaagh!"): those keep the leading faction in brackets.
+  const short = (n: string) => n.split(' - ').at(-1)!.trim()
+  const shortCount = new Map<string, number>()
+  for (const c of factionCats) shortCount.set(short(c.name), (shortCount.get(short(c.name)) ?? 0) + 1)
   const factions: Faction[] = factionCats
-    .map((c) => ({ id: c.id, name: c.name.split(' - ').at(-1)!.trim(), fullName: c.name }))
+    .map((c) => {
+      const parts = c.name.split(' - ').map((p) => p.trim())
+      const name = shortCount.get(short(c.name))! > 1 && parts.length > 1 ? `${parts.at(-1)} (${parts.slice(0, -1).join(' - ')})` : short(c.name)
+      return { id: c.id, name, fullName: c.name }
+    })
     .sort((a, b) => a.name.localeCompare(b.name))
 
   const ruleList = [...rules.values()].sort((a, b) => Number(a.kind === 'faction') - Number(b.kind === 'faction') || a.name.localeCompare(b.name))
