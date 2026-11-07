@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, expect, it } from 'vitest'
 import { MiniTrackerDb } from './db'
-import { defaultDeviceName, forgetDevice, getDevice, getKnownDevices, getSyncPrefs, isStale, recordSync, saveSyncPrefs, setDeviceName } from './syncDevice'
+import { defaultDeviceName, forgetDevice, getDevice, getKnownDevices, getSyncPrefs, isStale, markLanPaired, recordSync, saveSyncPrefs, setDeviceName } from './syncDevice'
 
 let db: MiniTrackerDb
 beforeEach(() => {
@@ -36,4 +36,11 @@ it('keeps one id per device, a name, known devices and preferences', async () =>
   expect(await getSyncPrefs(db)).toEqual({})
   await saveSyncPrefs(db, { mode: 'merge' })
   expect(await saveSyncPrefs(db, { photos: true })).toEqual({ mode: 'merge', photos: true })
+})
+
+it('remembers a LAN pairing across later syncs', async () => {
+  const other = { deviceId: 'b', deviceName: 'PC' }
+  await markLanPaired(db, other, '2026-11-07T10:00:00Z')
+  await recordSync(db, other, '2026-11-08T10:00:00Z')
+  expect(await getKnownDevices(db)).toEqual([{ id: 'b', name: 'PC', lastSync: '2026-11-08T10:00:00Z', lanPaired: true }])
 })
