@@ -1,4 +1,4 @@
-import type { Catalogue, CatalogueSource, Datasheet, Faction, PointsStep, Rule, StatLine } from '../../domain/catalogue/types'
+import type { Catalogue, CatalogueSource, Datasheet, Faction, LoadoutChoice, ModelType, PointsStep, Rule, StatLine } from '../../domain/catalogue/types'
 import type { SourceFile } from './bsdata'
 
 /**
@@ -10,6 +10,8 @@ interface Option {
   id: string
   name: string
   points: number
+  /** Comes with the model unless changed (e.g. a hero's mount). */
+  included?: boolean
 }
 interface Unit {
   model_id: string
@@ -23,6 +25,8 @@ interface Unit {
   options: Option[]
   unique?: boolean
   legacy?: boolean
+  /** Warriors must take one of their options. */
+  opt_mandatory?: boolean
 }
 interface Profile {
   [stat: string]: unknown
@@ -85,7 +89,16 @@ export function parseMesbg(files: SourceFile[], source: CatalogueSource): Catalo
     if (mwfw) values.push(['M:W:F:W', mwfw])
     const stats: StatLine[] = values.length ? [{ name: u.name, values }] : []
 
-    const wargear = [...(p?.wargear ?? []), ...u.options.map((o) => `${o.name} (+${o.points} pts)`)]
+    const wargear = p?.wargear ?? []
+    // As in the list builder the data comes from: heroes take any of their options, warriors at most one
+    // (exactly one when the data marks the options mandatory). Options cost points per model.
+    const opt = (o: Option) => ({ id: o.id, name: o.name, max: 1, ...(o.points ? { points: o.points } : {}) })
+    const choices: LoadoutChoice[] = !u.options.length
+      ? []
+      : hero
+        ? u.options.map((o) => ({ id: o.id, name: o.name, min: 0, max: 1, ...(o.included ? { defaultId: o.id } : {}), options: [opt(o)] }))
+        : [{ id: `${u.model_id}/option`, name: 'Option', min: u.opt_mandatory ? 1 : 0, max: 1, options: u.options.map(opt) }]
+    const models: ModelType[] = [{ id: `${u.model_id}/model`, name: u.name, min: 0, max: maxModels, fixed: wargear, choices }]
     return {
       id: u.model_id,
       name: u.name,
@@ -102,6 +115,7 @@ export function parseMesbg(files: SourceFile[], source: CatalogueSource): Catalo
       ...(Object.keys(abilityTexts).length ? { abilityTexts } : {}),
       ...(stats.length ? { stats } : {}),
       ...(u.unique ? { armyLimit: { max: 1 } } : {}),
+      models,
     }
   })
 

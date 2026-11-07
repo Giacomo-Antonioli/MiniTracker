@@ -42,7 +42,16 @@ describe('Middle-earth (MESBG list builder data, #99)', () => {
     expect(captain.stats).toEqual([{ name: 'Captain', values: [['Mv', '6"'], ['Fv', '4'], ['S', '4'], ['M:W:F:W', '2:1:1:2']] }])
     expect(captain.abilityTexts).toEqual({ Lead: 'Passive: Stands firm.' })
     expect(captain.abilities).toEqual(['Lead', 'Bodyguard', 'Heroic action: Heroic March'])
-    expect(captain.wargear).toEqual(['Armour', 'Shield (+5 pts)'])
+    expect(captain.wargear).toEqual(['Armour'])
+  })
+
+  it('options are loadout choices with points: heroes take any, warriors at most one (#99)', () => {
+    const c = parse()
+    const captain = c.datasheets.find((d) => d.name === 'Captain')!
+    expect(captain.models).toEqual([{ id: '[gondor] captain/model', name: 'Captain', min: 0, max: 1, fixed: ['Armour'], choices: [{ id: 'o1', name: 'Shield', min: 0, max: 1, options: [{ id: 'o1', name: 'Shield', max: 1, points: 5 }] }] }])
+    const warrior = c.datasheets.find((d) => d.name === 'Warrior')!
+    expect(warrior.models![0].choices).toEqual([{ id: '[gondor] warrior/option', name: 'Option', min: 0, max: 1, options: [{ id: 'o2', name: 'Spear', max: 1, points: 1 }] }])
+    expect(c.datasheets.find((d) => d.name === 'Boromir')!.models![0].choices).toEqual([])
   })
 
   it('unique heroes are limited to one; legacy profiles are marked like Legends', () => {

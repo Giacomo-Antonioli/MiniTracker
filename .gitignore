@@ -29,3 +29,6 @@ tools/schemes/.cache/
 # Copied by @3d-dice/dice-box's install script; the app uses public/dice-box instead.
 public/assets/
 tools/spearhead/.cache/
+# Local research notes and reports (deep research runs)
+research_notes/
+reports/
