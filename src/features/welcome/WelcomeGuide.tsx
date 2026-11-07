@@ -4,7 +4,37 @@ import { isDesktopApp } from '../../app/platform'
 import { EDITIONS, GAMES, type GameId } from '../../domain/catalogue/editions'
 import { AUTO, UI_SCALES, effectiveScale, scaleLabel } from '../../domain/settings/uiScale'
 import { Dialog, ProgressBar } from '../../ui/Dialog'
+import { endDemo, startDemo } from './demo'
+import { Tour } from './Tour'
+import { TOURS } from './tours'
 import { useWelcome } from './welcome'
+
+type TourName = keyof typeof TOURS
+
+/** Start a guided tour: the guide steps aside and the pages show the demo collection. */
+async function beginTour(name: TourName) {
+  await startDemo()
+  useWelcome.setState({ touring: name, paused: true })
+}
+
+/** The tour running, if any; at its end the user's data comes back and the guide carries on. */
+export function WelcomeTour({ onGo }: { onGo: (to: WelcomeGo) => void }) {
+  const touring = useWelcome((w) => w.touring) as TourName | null
+  if (!touring) return null
+  const t = TOURS[touring]
+  return (
+    <Tour
+      name={t.name}
+      steps={t.steps}
+      onGo={onGo}
+      onEnd={(completed) => {
+        endDemo()
+        const { step } = useWelcome.getState()
+        useWelcome.setState({ touring: null, paused: false, step: completed ? Math.min(step + 1, STEPS.length - 1) : step })
+      }}
+    />
+  )
+}
 
 /** Where a guide button takes you: an app page, Settings › Backup, or the online user guide. */
 export type WelcomeGo = 'backlog' | 'paints' | 'schemes' | 'tools' | 'supplies' | 'storage' | 'armies' | 'games' | 'stats' | 'sync' | 'backup' | 'guide'
@@ -49,7 +79,7 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
           {step === 2 && <Look />}
           {step === 3 && <Data onTry={tryIt} onFresh={() => setStep(4)} />}
           {step === 4 && (
-            <Topic title="Your units" actions={[['Open the Backlog', 'backlog']]} onTry={tryIt}>
+            <Topic title="Your units" tour="units" actions={[['Open the Backlog', 'backlog']]} onTry={tryIt}>
               <p>The <b>Backlog</b> is your collection: every unit you own or want, and how many of its models are at each painting stage.</p>
               <Points items={[
                 ['+ Add unit', 'pick the unit from the catalogue and say how many models are built, painted…'],
@@ -61,7 +91,7 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
             </Topic>
           )}
           {step === 5 && (
-            <Topic title="Paints and schemes" actions={[['Open Paints', 'paints'], ['Open Schemes', 'schemes']]} onTry={tryIt}>
+            <Topic title="Paints and schemes" tour="paints" actions={[['Open Paints', 'paints'], ['Open Schemes', 'schemes']]} onTry={tryIt}>
               <p><b>Paints</b> has thousands of paints from the main brands. Mark the ones you own; MiniTracker then knows what you can paint with.</p>
               <Points items={[
                 ['Owned / running low', 'tick your paints and flag the ones nearly empty'],
@@ -72,7 +102,7 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
             </Topic>
           )}
           {step === 6 && (
-            <Topic title="Workshop" actions={[['Open Tools', 'tools'], ['Open Supplies', 'supplies'], ['Open Storage', 'storage']]} onTry={tryIt}>
+            <Topic title="Workshop" tour="workshop" actions={[['Open Tools', 'tools'], ['Open Supplies', 'supplies'], ['Open Storage', 'storage']]} onTry={tryIt}>
               <p>Everything around the hobby desk.</p>
               <Points items={[
                 ['Tools', 'brushes, clippers, airbrush… with their condition and when to replace them'],
@@ -83,7 +113,7 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
             </Topic>
           )}
           {step === 7 && (
-            <Topic title="Armies and games" actions={[['Open Armies', 'armies'], ['Open Games', 'games'], ['Open Stats', 'stats']]} onTry={tryIt}>
+            <Topic title="Armies and games" tour="armies" actions={[['Open Armies', 'armies'], ['Open Games', 'games'], ['Open Stats', 'stats']]} onTry={tryIt}>
               <Points items={[
                 ['Armies', 'army lists from the catalogue, with points; see which units you own and what to buy'],
                 ['Games', 'play a game: missions, 3D dice, scores, photos; share your list by QR'],
@@ -91,7 +121,7 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
               ]} />
             </Topic>
           )}
-          {step === 8 && <Tour onTry={tryIt} />}
+          {step === 8 && <FindYourWay onTry={tryIt} />}
         </section>
 
         <footer className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
@@ -107,8 +137,8 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
 
 /** While the guide is paused: a button to go back to it, at the same step. */
 export function WelcomeResume() {
-  const { open, paused, step, resume, finish } = useWelcome()
-  if (!open || !paused) return null
+  const { open, paused, step, touring, resume, finish } = useWelcome()
+  if (!open || !paused || touring) return null
   return (
     <div className="panel fixed right-4 bottom-20 z-40 flex items-center gap-2 border-accent p-2 text-sm shadow-lg sm:bottom-4" role="status" aria-label="Welcome guide paused">
       <button className="btn btn-primary" onClick={resume}>↩ Back to the guide ({step + 1}/{STEPS.length})</button>
@@ -117,14 +147,20 @@ export function WelcomeResume() {
   )
 }
 
-function Topic({ title, actions, onTry, children }: { title: string; actions: [string, WelcomeGo][]; onTry: (to: WelcomeGo) => void; children: ReactNode }) {
+function Topic({ title, tour, actions, onTry, children }: { title: string; tour: TourName; actions: [string, WelcomeGo][]; onTry: (to: WelcomeGo) => void; children: ReactNode }) {
   return (
     <>
       <h2 className="font-display text-xl text-accent">{title}</h2>
       {children}
-      <div className="flex flex-wrap items-center gap-2">
-        {actions.map(([label, to]) => <button key={to} className="btn" onClick={() => onTry(to)}>{label}</button>)}
-        <span className="text-sm text-muted">The guide waits: use "Back to the guide" to carry on.</span>
+      <div className="grid gap-2 border-t border-line pt-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <button className="btn btn-primary" onClick={() => void beginTour(tour)}>▶ Show me</button>
+          <span className="text-sm text-muted">A guided tour of the pages with a demo collection; nothing is saved.</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {actions.map(([label, to]) => <button key={to} className="btn text-sm" onClick={() => onTry(to)}>{label}</button>)}
+          <span className="text-sm text-muted">or try it yourself; "Back to the guide" carries on.</span>
+        </div>
       </div>
     </>
   )
@@ -224,7 +260,7 @@ function Data({ onTry, onFresh }: { onTry: (to: WelcomeGo) => void; onFresh: () 
   )
 }
 
-function Tour({ onTry }: { onTry: (to: WelcomeGo) => void }) {
+function FindYourWay({ onTry }: { onTry: (to: WelcomeGo) => void }) {
   return (
     <>
       <h2 className="font-display text-xl text-accent">Find your way</h2>

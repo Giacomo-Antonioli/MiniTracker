@@ -19,6 +19,8 @@ interface WelcomeState {
   paused: boolean
   /** Current step, kept while paused. */
   step: number
+  /** Guided tour running over the demo collection (steps 5–8), or null. */
+  touring: string | null
   /** First start: open the guide when nothing has been set up yet. */
   startIfNew: (hasData: boolean) => void
   setStep: (step: number) => void
@@ -34,6 +36,7 @@ export const useWelcome = create<WelcomeState>((set, get) => ({
   open: false,
   paused: false,
   step: 0,
+  touring: null,
   startIfNew(hasData) {
     if (!get().done && !hasData && !get().open) set({ open: true, paused: false, step: 0 })
   },
@@ -46,7 +49,7 @@ export const useWelcome = create<WelcomeState>((set, get) => ({
     } catch {
       /* not remembered: it shows again next start */
     }
-    set({ done: true, open: false, paused: false, step: 0 })
+    set({ done: true, open: false, paused: false, step: 0, touring: null })
   },
   reopen: () => set({ open: true, paused: false, step: 0 }),
 }))

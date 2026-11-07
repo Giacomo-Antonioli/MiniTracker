@@ -44,3 +44,37 @@ test('welcome guide on first start: walk through, skip, reopen from Settings', a
   await expect(guide).toBeHidden()
   await expect(page.getByRole('status', { name: 'Welcome guide paused' })).toBeHidden()
 })
+
+test('"Show me" runs a guided tour over a demo collection, then puts your data back', async ({ page }) => {
+  await page.goto('./')
+  const guide = page.getByRole('dialog', { name: 'Welcome to MiniTracker' })
+  await guide.getByRole('button', { name: /5\. Units/ }).click()
+  await guide.getByRole('button', { name: '▶ Show me' }).click()
+  await expect(guide).toBeHidden()
+
+  const pop = page.locator('.driver-popover')
+  await expect(pop).toContainText('The Backlog')
+  await expect(pop).toContainText('Your units · 1 / 7')
+  // The demo collection is on the page.
+  await expect(page.getByText('Intercessor Squad').first()).toBeVisible()
+  await pop.getByRole('button', { name: 'Next' }).click()
+  await expect(pop).toContainText('Progress at a glance')
+  await pop.getByRole('button', { name: 'Back' }).click()
+  await expect(pop).toContainText('The Backlog')
+
+  // Closing the tour: the guide comes back on the same step and the demo units are gone.
+  await page.locator('.driver-popover-close-btn').click()
+  await expect(pop).toBeHidden()
+  await expect(guide.getByRole('region', { name: 'Units' })).toBeVisible()
+  await expect(page.getByText('Intercessor Squad')).toHaveCount(0)
+
+  // A tour across pages: Paints → Schemes; finishing moves the guide on to the next step.
+  await guide.getByRole('button', { name: 'Next' }).click()
+  await guide.getByRole('button', { name: '▶ Show me' }).click()
+  await expect(pop).toContainText('Your paints')
+  for (let i = 0; i < 4; i++) await pop.getByRole('button', { name: 'Next' }).click()
+  await expect(pop).toContainText('Your own scheme')
+  await expect(page.getByRole('heading', { name: 'Schemes' })).toBeVisible()
+  await pop.getByRole('button', { name: 'Done' }).click()
+  await expect(guide.getByRole('region', { name: 'Workshop' })).toBeVisible()
+})

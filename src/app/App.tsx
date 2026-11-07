@@ -24,7 +24,7 @@ import { WorkshopPage, workshopAlerts } from '../features/workshop/WorkshopPage'
 import { HomePage } from '../features/home/HomePage'
 import { GamePicker } from '../features/menu/GamePicker'
 import { UpdateBanner } from '../features/menu/UpdateBanner'
-import { WelcomeGuide, WelcomeResume } from '../features/welcome/WelcomeGuide'
+import { WelcomeGuide, WelcomeResume, WelcomeTour } from '../features/welcome/WelcomeGuide'
 import { useWelcome } from '../features/welcome/welcome'
 import { codeFromText, findCode } from '../domain/storage/codes'
 import { parsePairCode } from '../domain/sync/protocol'
@@ -299,6 +299,7 @@ export default function App() {
           />
         )}
         <WelcomeResume />
+        <WelcomeTour onGo={(to) => (to === 'guide' || to === 'backup' || to === 'sync' ? undefined : go(to))} />
         {ready && shared && <SharedSchemeBanner token={shared} onDone={(id) => { setShared(null); if (id) openScheme(id) }} />}
         {missingCode && <p className="panel mb-3 p-3 text-sm" role="alert">No unit or place with code {missingCode} on this device. Restore a backup from the device where you made the labels. <button className="underline" onClick={() => setMissingCode('')}>Dismiss</button></p>}
         {!ready ? (
