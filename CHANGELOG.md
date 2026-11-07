@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.23.1] - 2026-11-07
+
 ### Fixed
 - The game picker and the active catalogue stay in step: making an edition of another game active in Settings moves the picker to that game, and on start the picked game's catalogue is used.
 
@@ -323,7 +325,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.23.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.23.1...HEAD
+[0.23.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.23.0...v0.23.1
 [0.23.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.20.0...v0.21.0
