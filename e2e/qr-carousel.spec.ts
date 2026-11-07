@@ -12,7 +12,7 @@ async function addUnit(page: Page, name: string) {
 test('QR carousel moves data from one device to another with no network', async ({ browser }, info) => {
   test.skip(info.project.name !== 'desktop', 'one run is enough')
   test.setTimeout(90_000)
-  const state = { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: 'startPage', value: 'backlog' }] }] }
+  const state = { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: 'startPage', value: 'backlog' }, { name: 'welcomeDone', value: '1' }] }] }
   const pc = await (await browser.newContext({ storageState: state })).newPage()
   const phone = await (await browser.newContext({ storageState: state })).newPage()
   await pc.goto('./')

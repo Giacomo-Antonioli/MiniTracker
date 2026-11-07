@@ -24,6 +24,8 @@ import { WorkshopPage, workshopAlerts } from '../features/workshop/WorkshopPage'
 import { HomePage } from '../features/home/HomePage'
 import { GamePicker } from '../features/menu/GamePicker'
 import { UpdateBanner } from '../features/menu/UpdateBanner'
+import { WelcomeGuide } from '../features/welcome/WelcomeGuide'
+import { shouldShowWelcome, useWelcome } from '../features/welcome/welcome'
 import { codeFromText, findCode } from '../domain/storage/codes'
 import { parsePairCode } from '../domain/sync/protocol'
 import { SyncPage } from '../features/sync/SyncPage'
@@ -146,6 +148,8 @@ export default function App() {
   // Text and interface size: the root font size; everything sized in rem follows.
   // Auto (the default) follows the window: a bigger or maximised window gets bigger text.
   const uiScale = useStore((s) => s.uiScale)
+  const welcome = useWelcome()
+  const hasUnits = useStore((s) => s.units.length > 0)
   const [winWidth, setWinWidth] = useState(() => window.innerWidth)
   useEffect(() => {
     const onResize = () => setWinWidth(window.innerWidth)
@@ -279,6 +283,15 @@ export default function App() {
       )}
       <main className={phone ? 'min-h-0 min-w-0 flex-1 overflow-auto p-2 pb-4' : 'min-w-0 flex-1 overflow-auto p-4'}>
         <UpdateBanner />
+        {ready && shouldShowWelcome(welcome, hasUnits) && (
+          <WelcomeGuide
+            onGo={(to) => {
+              if (to === 'guide') window.open('https://github.com/Giacomo-Antonioli/MiniTracker/blob/main/docs/USER_GUIDE.md', '_blank', 'noreferrer')
+              else if (to === 'backup') go('settings', 'backup')
+              else go(to)
+            }}
+          />
+        )}
         {ready && shared && <SharedSchemeBanner token={shared} onDone={(id) => { setShared(null); if (id) openScheme(id) }} />}
         {missingCode && <p className="panel mb-3 p-3 text-sm" role="alert">No unit or place with code {missingCode} on this device. Restore a backup from the device where you made the labels. <button className="underline" onClick={() => setMissingCode('')}>Dismiss</button></p>}
         {!ready ? (

@@ -9,8 +9,9 @@ const files = readdirSync(dir).map((f) => join(dir, f))
 test('opponent list by QR: Export › Show as QR, then New game › Read QR', async ({ browser }, info) => {
   test.skip(info.project.name !== 'desktop', 'one run is enough')
   test.setTimeout(90_000)
-  const them = await (await browser.newContext()).newPage()
-  const me = await (await browser.newContext()).newPage()
+  const state = { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: 'welcomeDone', value: '1' }] }] }
+  const them = await (await browser.newContext({ storageState: state })).newPage()
+  const me = await (await browser.newContext({ storageState: state })).newPage()
 
   await them.goto('./')
   await them.getByRole('button', { name: /Settings/ }).click()

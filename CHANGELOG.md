@@ -4,6 +4,14 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Welcome guide on first start: what MiniTracker does, download your games' catalogues, theme and text size, bring your data (sync, restore a backup or start fresh) and where things are. Skip it at any step; Settings › Appearance › Welcome guide › Show it again opens it later. Not shown to anyone who already has units.
+- Desktop app: Settings › Appearance shows the installed version with *Check for updates*; the update banner has the release notes (*What's new*); the window title shows the version.
+- Desktop app: only one copy runs at a time (opening it again brings the open window to the front), and the window remembers its size, position and maximised state.
+
+### Fixed
+- Desktop installers are built and attached to the release again (0.26.0 shipped without them).
+
 ## [0.26.0] - 2026-11-07
 
 ### Added

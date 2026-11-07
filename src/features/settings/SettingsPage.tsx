@@ -9,6 +9,8 @@ import { WorkshopSettings } from './WorkshopSettings'
 import { SyncSettings } from './SyncSettings'
 import { isDesktopApp } from '../../app/platform'
 import { AUTO, UI_SCALES, effectiveScale, scaleLabel } from '../../domain/settings/uiScale'
+import { useUpdates } from '../menu/updates'
+import { useWelcome } from '../welcome/welcome'
 
 export type SettingsSection = 'catalogue' | 'appearance' | 'pipelines' | 'workshop' | 'sync' | 'storage' | 'backup'
 
@@ -28,6 +30,7 @@ let lastTab: SettingsSection = 'catalogue'
 export function SettingsPage({ section }: { section?: SettingsSection }) {
   const [start, setStart] = useState<StartPage>(readStartPage)
   const { currency, setCurrency, theme, setTheme, uiScale, setUiScale, ruleDisplay, setRuleDisplay, pipelines, savePipelineFor, units, paintStock, schemes, storage, supplies } = useStore()
+  const reopenWelcome = useWelcome((w) => w.reopen)
   const shownScale = effectiveScale(uiScale, typeof window === 'undefined' ? 1280 : window.innerWidth)
   const [tab, setTabState] = useState<SettingsSection>(section ?? lastTab)
   const setTab = (t: SettingsSection) => {
@@ -81,6 +84,11 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
             Currency
             <input className="input w-20" aria-label="Currency" defaultValue={currency} key={currency} maxLength={4} onBlur={(e) => e.target.value.trim() && e.target.value.trim() !== currency && void setCurrency(e.target.value.trim())} />
           </label>
+          {isDesktopApp() && <AppVersion />}
+          <div className="flex flex-wrap items-center gap-3">
+            Welcome guide
+            <button type="button" className="btn px-2 py-0.5 text-sm" onClick={reopenWelcome}>Show it again</button>
+          </div>
           <label className="flex items-center gap-3">
             Theme
             <select className="input" value={theme} onChange={(e) => setTheme(e.target.value as Theme)}>
@@ -213,3 +221,17 @@ function StorageInfo() {
     </div>
   )
 }
+
+/** Desktop app: the installed version and a manual update check (#168). */
+function AppVersion() {
+  const { status, update, error, check } = useUpdates()
+  const text = { idle: '', checking: 'Checking…', found: `MiniTracker ${update?.version} is available: see the banner at the top.`, none: 'You have the latest version.', failed: `Could not check: ${error}` }[status]
+  return (
+    <div className="flex flex-wrap items-center gap-3" aria-label="App version">
+      Version {__APP_VERSION__}
+      <button type="button" className="btn px-2 py-0.5 text-sm" disabled={status === 'checking'} onClick={() => void check()}>Check for updates</button>
+      {text && <span className="text-sm text-muted" role="status">{text}</span>}
+    </div>
+  )
+}
+

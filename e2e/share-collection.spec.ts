@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 test('share collection: a read-only link opens on another device without changing it (#97)', async ({ browser }, info) => {
   test.skip(info.project.name !== 'desktop', 'one run is enough')
-  const state = { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: 'startPage', value: 'backlog' }] }] }
+  const state = { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: 'startPage', value: 'backlog' }, { name: 'welcomeDone', value: '1' }] }] }
   const me = await (await browser.newContext({ storageState: state })).newPage()
   await me.goto('./')
   await me.getByRole('button', { name: '+ Add unit' }).click()
