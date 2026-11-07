@@ -28,6 +28,8 @@ import { parsePairCode } from '../domain/sync/protocol'
 import { SyncPage } from '../features/sync/SyncPage'
 import { PlacePage, StoragePage } from '../features/storage/Storage'
 import { CompanionHub, WorkCompanion } from '../features/companion/WorkCompanion'
+import { isDesktopApp } from './platform'
+import { stepScale } from '../domain/settings/uiScale'
 
 type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'workshop' | 'supplies' | 'tools' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'storage' | 'place' | 'sync' | 'settings'
 
@@ -139,6 +141,28 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme
   }, [theme])
+
+  // Text and interface size: the root font size; everything sized in rem follows.
+  const uiScale = useStore((s) => s.uiScale)
+  useEffect(() => {
+    document.documentElement.style.fontSize = uiScale === 1 ? '' : `${uiScale * 100}%`
+  }, [uiScale])
+
+  // Desktop app: Ctrl/Cmd + and − change the size, 0 resets it (in a browser these keys stay the browser's zoom).
+  useEffect(() => {
+    if (!isDesktopApp()) return
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return
+      const { uiScale: s, setUiScale } = useStore.getState()
+      if (e.key === '+' || e.key === '=') setUiScale(stepScale(s, 1))
+      else if (e.key === '-') setUiScale(stepScale(s, -1))
+      else if (e.key === '0') setUiScale(1)
+      else return
+      e.preventDefault()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   const go = (p: Page, s?: SettingsSection) => {
     setMenuOpen(false)

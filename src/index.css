@@ -54,7 +54,7 @@
 
 [data-theme='forum2005'] body {
   background-image: radial-gradient(ellipse at top, #2b1c0f 0%, #0d0906 70%);
-  font-size: 13px;
+  font-size: 0.8125rem; /* 13px at 100%; follows the size setting */
 }
 [data-theme='forum2005'] .panel {
   border: 2px solid var(--line);
@@ -167,7 +167,7 @@ dialog::backdrop {
     min-height: 2.25rem;
   }
   input, select, textarea {
-    font-size: 16px; /* stops iOS zooming into a field when it gets focus */
+    font-size: max(16px, 1rem); /* stops iOS zooming into a field when it gets focus; grows with the size setting */
   }
 }
 

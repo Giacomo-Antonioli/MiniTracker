@@ -873,7 +873,7 @@ function LoadoutEditor({ d, entry, linked, onChange }: { d: Datasheet; entry: Li
     <div className="grid basis-full gap-1 rounded border border-line/60 p-2" aria-label={`${d.name} loadout`}>
       <div className="flex items-center gap-2 text-muted">
         <span>Loadout · {LOADOUT_SOURCE[source]}</span>
-        {source !== 'list' && <span className="text-[10px]">(change anything to keep your own)</span>}
+        {source !== 'list' && <span className="text-[0.625rem]">(change anything to keep your own)</span>}
         {source === 'list' && <button className="ml-auto underline" onClick={() => onChange(undefined)}>Reset</button>}
       </div>
       {rows.map((r, i) => {
