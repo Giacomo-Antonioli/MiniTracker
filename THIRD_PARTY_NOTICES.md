@@ -71,6 +71,34 @@ The fixed contents of each Age of Sigmar Spearhead army (army name, faction, uni
 found through the faction pages of [Wahapedia](https://wahapedia.ru/aos4/). Only these facts and a link to each PDF
 are stored; no rules text or images. Warhammer, Age of Sigmar and Spearhead are trademarks of Games Workshop.
 
+## Guided tour (driver.js)
+
+The welcome guide's tours use [driver.js](https://github.com/nilbuild/driver.js), bundled with the app.
+
+```
+The MIT License
+
+Copyright (c) Kamran Ahmed
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
+
 ## Unit catalogue
 
 Not included. Each user's browser downloads it from [BSData](https://github.com/BSData/wh40k-10e).

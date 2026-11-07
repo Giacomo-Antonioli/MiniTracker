@@ -13,26 +13,43 @@ function readDone(): boolean {
 interface WelcomeState {
   /** The guide has been finished or skipped on this device. */
   done: boolean
-  /** Open again from Settings, even when done. */
-  reopened: boolean
+  /** The guide is running (first start, or opened again from Settings). */
+  open: boolean
+  /** Hidden while the user tries a step on its page; a "Back to the guide" button brings it back. */
+  paused: boolean
+  /** Current step, kept while paused. */
+  step: number
+  /** Guided tour running over the demo collection (steps 5–8), or null. */
+  touring: string | null
+  /** First start: open the guide when nothing has been set up yet. */
+  startIfNew: (hasData: boolean) => void
+  setStep: (step: number) => void
+  pause: () => void
+  resume: () => void
   finish: () => void
   reopen: () => void
 }
 
-/** First-start welcome guide (#168): shown once per device; can be skipped and opened again from Settings. */
-export const useWelcome = create<WelcomeState>((set) => ({
+/** First-start welcome guide (#168): shown once per device; can be skipped, paused to try things, and opened again. */
+export const useWelcome = create<WelcomeState>((set, get) => ({
   done: readDone(),
-  reopened: false,
+  open: false,
+  paused: false,
+  step: 0,
+  touring: null,
+  startIfNew(hasData) {
+    if (!get().done && !hasData && !get().open) set({ open: true, paused: false, step: 0 })
+  },
+  setStep: (step) => set({ step }),
+  pause: () => set({ paused: true }),
+  resume: () => set({ paused: false }),
   finish() {
     try {
       localStorage.setItem(KEY, '1')
     } catch {
       /* not remembered: it shows again next start */
     }
-    set({ done: true, reopened: false })
+    set({ done: true, open: false, paused: false, step: 0, touring: null })
   },
-  reopen: () => set({ reopened: true }),
+  reopen: () => set({ open: true, paused: false, step: 0 }),
 }))
-
-/** Show it on a first start (nothing in the collection yet) or when reopened. */
-export const shouldShowWelcome = (s: { done: boolean; reopened: boolean }, hasData: boolean) => s.reopened || (!s.done && !hasData)

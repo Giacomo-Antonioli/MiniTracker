@@ -4,6 +4,10 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Changed
+- Welcome guide: steps 5–9 are guided tours of the whole app, drawn with driver.js and started by themselves: each page's controls are highlighted and explained in turn, across pages (Backlog, Paints, Schemes, Tools, Supplies, Storage, Armies, Games, Stats, Home, Catalogue, Rules, Shopping, Goals, Companion, Sync, Settings).
+- The tours act things out for you: they add a unit (open the dialog, type the name, pick 5 models built, save, open it), search and open a paint, add a tool and a storage place, and run a game (set it up, start, score, next turn, end). All of it happens in a separate demo database: your own data is never touched and is back when the tour ends. Finishing a tour goes on to the next; *▶ Show me again* replays one; *Open…* buttons let you try a page yourself while the guide waits. The *Your data* choices are laid out more clearly. Enter or Space go to the next step, one at a time, in the guide and in the tours.
+
 ## [0.26.1] - 2026-11-07
 
 ### Added
