@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-11-06
+
 ### Added
 - User guide (docs/USER_GUIDE.md): every page of the app explained, linked from the README and from Settings.
 - Other game systems (#99): Age of Sigmar 4th edition and Kill Team (2024) can be downloaded in Settings › Catalogue data next to 40k. Units come with points (Age of Sigmar), stat lines, weapons and abilities; lists, the backlog and the catalogue work with them. 40k-only parts (detachments, Combat Patrol, mission cards) are hidden for these games, and the dice roller's wound roll can be fixed (Wound on 4+) instead of S vs T.
@@ -313,7 +315,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.18.0...v0.19.0
