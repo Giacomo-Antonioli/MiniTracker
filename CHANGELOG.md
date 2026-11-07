@@ -4,8 +4,6 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
-## [0.26.0] - 2026-11-07
-
 ### Added
 - Welcome guide on first start: what MiniTracker does, download your games' catalogues, theme and text size, bring your data (sync, restore a backup or start fresh) and where things are. Skip it at any step; Settings › Appearance › Welcome guide › Show it again opens it later. Not shown to anyone who already has units.
 - Desktop app: Settings › Appearance shows the installed version with *Check for updates*; the update banner has the release notes (*What's new*); the window title shows the version.
@@ -13,6 +11,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ### Fixed
 - Desktop installers are built and attached to the release again (0.26.0 shipped without them).
+
+## [0.26.0] - 2026-11-07
 
 ### Added
 - Desktop app (#168, part 1): MiniTracker as an installable app for Windows (.msi/.exe), macOS (.dmg) and Linux (.deb/.AppImage), built with Tauri and attached to each GitHub release. It keeps its own data: on first start Home offers to sync from another device or restore a backup. Web links open in your browser, and share, pairing and QR links point to the web app so other devices can open them. The installers are not code-signed yet (see the release notes for how to open them). Automatic discovery of your other devices comes next.
