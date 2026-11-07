@@ -1,3 +1,4 @@
+mod android;
 mod lan;
 
 #[cfg(desktop)]
@@ -6,7 +7,13 @@ use tauri::Manager;
 /// Opens the system print dialog for the window (window.print() does nothing in the Windows webview).
 #[tauri::command]
 fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
-    window.print().map_err(|e| e.to_string())
+    #[cfg(desktop)]
+    return window.print().map_err(|e| e.to_string());
+    #[cfg(mobile)]
+    {
+        let _ = window;
+        Err("Printing isn't available in the Android app yet".into())
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

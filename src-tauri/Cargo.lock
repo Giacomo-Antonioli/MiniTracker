@@ -2245,8 +2245,10 @@ name = "minitracker"
 version = "0.0.0"
 dependencies = [
  "futures-util",
+ "jni 0.21.1",
  "log",
  "mdns-sd",
+ "ndk-context",
  "serde",
  "serde_json",
  "tauri",
