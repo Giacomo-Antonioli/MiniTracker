@@ -28,7 +28,10 @@ export class LiveSession {
   private offset = 0
   private readonly now: () => number
 
-  constructor(private readonly o: LiveOptions) {
+  private readonly o: LiveOptions
+
+  constructor(o: LiveOptions) {
+    this.o = o
     this.game = o.game
     this.now = o.now ?? Date.now
   }

@@ -30,11 +30,12 @@ export async function shareLive(game: Game, o: Options): Promise<LiveSession> {
   })
   void (async () => {
     let h = first
-    while (session.state !== 'ended') {
+    const ended = () => session.state === 'ended'
+    while (!ended()) {
       try {
         session.attach(await h.channel)
         await new Promise<void>((r) => (again = r))
-        if (session.state === 'ended') break
+        if (ended()) break
         h = await hostByCode(o.code, o.turn)
         cancel = h.cancel
       } catch {
