@@ -7,6 +7,8 @@ import { CataloguePage } from './CataloguePage'
 import { PipelineEditor } from './PipelineEditor'
 import { WorkshopSettings } from './WorkshopSettings'
 import { SyncSettings } from './SyncSettings'
+import { isDesktopApp } from '../../app/platform'
+import { AUTO, UI_SCALES, effectiveScale, scaleLabel } from '../../domain/settings/uiScale'
 
 export type SettingsSection = 'catalogue' | 'appearance' | 'pipelines' | 'workshop' | 'sync' | 'storage' | 'backup'
 
@@ -25,7 +27,8 @@ let lastTab: SettingsSection = 'catalogue'
 
 export function SettingsPage({ section }: { section?: SettingsSection }) {
   const [start, setStart] = useState<StartPage>(readStartPage)
-  const { currency, setCurrency, theme, setTheme, ruleDisplay, setRuleDisplay, pipelines, savePipelineFor, units, paintStock, schemes, storage, supplies } = useStore()
+  const { currency, setCurrency, theme, setTheme, uiScale, setUiScale, ruleDisplay, setRuleDisplay, pipelines, savePipelineFor, units, paintStock, schemes, storage, supplies } = useStore()
+  const shownScale = effectiveScale(uiScale, typeof window === 'undefined' ? 1280 : window.innerWidth)
   const [tab, setTabState] = useState<SettingsSection>(section ?? lastTab)
   const setTab = (t: SettingsSection) => {
     lastTab = t
@@ -84,6 +87,13 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
               {Object.entries(THEMES).map(([id, name]) => <option key={id} value={id}>{name}</option>)}
             </select>
           </label>
+          <label className="flex items-center gap-3">
+            Text and interface size
+            <input className="w-40 accent-[var(--accent)]" type="range" min={0} max={UI_SCALES.length - 1} step={1} aria-label="Text and interface size" value={UI_SCALES.indexOf(shownScale as (typeof UI_SCALES)[number])} onChange={(e) => setUiScale(UI_SCALES[Number(e.target.value)])} />
+            <span className="w-24 tabular-nums">{scaleLabel(shownScale)}{uiScale === AUTO && ' (auto)'}</span>
+            {uiScale !== AUTO && <button type="button" className="btn px-2 py-0.5 text-sm" onClick={() => setUiScale(AUTO)}>Auto</button>}
+          </label>
+          <p className="text-sm text-muted">Auto follows the window: a bigger or maximised window gets bigger text. Move the slider to fix a size.{isDesktopApp() && ' Shortcut: Ctrl + / Ctrl − to change, Ctrl 0 for Auto.'}</p>
         </div>
       </section>}
 

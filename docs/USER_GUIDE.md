@@ -36,7 +36,7 @@ A good first half hour looks like this:
 2. **Add a few units.** On the **Backlog**, press **+ Add unit**, pick the faction and the unit, and say how many models are at which stage. You can add a unit by hand too, without the catalogue.
 3. **Make a backup.** **Settings › Backup** saves everything in one file. Your data lives in this browser only; clearing the browser's site data deletes it, so keep a backup somewhere else.
 
-The theme (*Grimdark* or *Forum 2005*) is in **Settings › Appearance**.
+The theme (*Grimdark* or *Forum 2005*) and the **Text and interface size** (Auto follows the window, so a bigger or maximised window gets bigger text; or pick 80–150%) are in **Settings › Appearance**. In the desktop app, Ctrl + / Ctrl − change the size and Ctrl 0 goes back to Auto.
 
 ## Home
 
@@ -206,7 +206,7 @@ If two devices can't reach each other directly (some phone networks and office W
 Settings has tabs:
 
 - **Catalogue data**: download, update or remove game catalogues; import catalogue files by hand; import Wahapedia stratagem files.
-- **Appearance**: theme, rule explanations.
+- **Appearance**: theme, text and interface size, rule explanations.
 - **Pipelines**: the painting stages, plus the paint, scheme, storage and liquid-level pipelines.
 - **Workshop**: tool and supply categories.
 - **Sync**: see above.

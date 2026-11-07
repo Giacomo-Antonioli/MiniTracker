@@ -1,6 +1,7 @@
 name: Release
 # Push a tag like v0.2.0 to publish a GitHub release.
 # Notes come from that version's section in CHANGELOG.md; a zip of the built app is attached.
+# The desktop job (#168) then builds the Linux, Windows and macOS installers and adds them to the release.
 on:
   push:
     tags: ['v*.*.*']
@@ -32,6 +33,7 @@ jobs:
           ' CHANGELOG.md > notes.md
           if [ ! -s notes.md ]; then echo "No CHANGELOG section for $V"; exit 1; fi
           printf '\n**Live app:** https://giacomo-antonioli.github.io/MiniTracker/\n' >> notes.md
+          printf '\n**Desktop app:** installers below (Windows .msi/.exe, macOS .dmg, Linux .deb/.AppImage). Installed apps update themselves (on Linux the AppImage does; the .deb updates through apt). They are not code-signed yet: on Windows choose *More info › Run anyway*; on macOS right-click the app › *Open*.\n' >> notes.md
       - name: Package built app
         run: cd dist && zip -qr "../minitracker-${GITHUB_REF_NAME}-web.zip" .
       - name: Create GitHub release
@@ -42,3 +44,40 @@ jobs:
           case "$GITHUB_REF_NAME" in *-*) PRE="--prerelease";; esac
           gh release create "$GITHUB_REF_NAME" "minitracker-${GITHUB_REF_NAME}-web.zip" \
             --title "MiniTracker $GITHUB_REF_NAME" --notes-file notes.md $PRE
+
+  desktop:
+    needs: release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            args: --bundles deb,appimage
+          - os: windows-latest
+            args: --bundles msi,nsis
+          - os: macos-latest
+            args: --target universal-apple-darwin --bundles app,dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 24, cache: npm }
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+      - uses: swatinem/rust-cache@v2
+        with: { workspaces: src-tauri }
+      - name: Linux build dependencies
+        if: matrix.os == 'ubuntu-22.04'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev
+      - run: npm ci
+      # Builds, signs the update files with the updater key (repo secret) and uploads the installers plus
+      # latest.json, which installed apps check for updates (#168). Without the secret it fails loudly.
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          args: ${{ matrix.args }} --config '{"bundle":{"createUpdaterArtifacts":true}}'

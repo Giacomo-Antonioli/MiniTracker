@@ -3,6 +3,7 @@ import { useStore } from '../../app/store'
 import { buildShowcase, factionOf, SHOWCASE_HASH } from '../../domain/share/showcase'
 import { encodeShare } from '../../domain/schemes/share'
 import { Dialog } from '../../ui/Dialog'
+import { appUrl } from '../../app/platform'
 
 const OWNER = 'mt.shareOwner'
 const readOwner = () => {
@@ -26,7 +27,7 @@ export function ShareCollection({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     let live = true
     const s = buildShowcase(units, pipeline, { owner, factions, wishlist }, new Date().toISOString())
-    void encodeShare(JSON.stringify(s)).then((t) => live && setUrl(`${location.origin}${location.pathname}${SHOWCASE_HASH}${t}`))
+    void encodeShare(JSON.stringify(s)).then((t) => live && setUrl(`${appUrl()}${SHOWCASE_HASH}${t}`))
     try {
       localStorage.setItem(OWNER, owner)
     } catch {

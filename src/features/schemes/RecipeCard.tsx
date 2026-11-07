@@ -79,7 +79,7 @@ export function RecipeCard({ scheme, onDone }: { scheme: PaintScheme; onDone: ()
           <p className="whitespace-pre-wrap text-sm">{scheme.tips}</p>
         </section>
       )}
-      <footer className="mt-4 text-[10px]">MiniTracker · ✓ = in your paint inventory</footer>
+      <footer className="mt-4 text-[0.625rem]">MiniTracker · ✓ = in your paint inventory</footer>
     </div>,
     document.body,
   )

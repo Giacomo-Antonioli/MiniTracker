@@ -21,6 +21,7 @@ import { ColourStrip } from './ColourStrip'
 import { RecipeCard } from './RecipeCard'
 import { SchemePhotos } from './SchemePhotos'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
+import { appUrl } from '../../app/platform'
 
 export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: PaintScheme; onOpen: (id: string) => void; onClose: () => void; onOpenUnit?: (id: string) => void }) {
   const { paints, paintStock, schemes, units, pipelines, schemeDefaults, saveScheme, deleteScheme, setDefaultScheme } = useStore()
@@ -61,7 +62,7 @@ export function SchemeEditor({ scheme, onOpen, onClose, onOpenUnit }: { scheme: 
   }
 
   async function shareLink() {
-    const url = await shareUrl(location.href, schemeFile([scheme], paints, new Date().toISOString()))
+    const url = await shareUrl(appUrl(), schemeFile([scheme], paints, new Date().toISOString()))
     try {
       await navigator.clipboard.writeText(url)
       setLinkNote('Link copied. Anyone opening it can import this scheme (photos are not included).')

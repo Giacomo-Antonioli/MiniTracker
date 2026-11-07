@@ -11,6 +11,7 @@ import type { SyncPrefs } from '../../data/syncStamps'
 import { Dialog } from '../../ui/Dialog'
 import { ScanDialog } from '../storage/Labels'
 import { QrReceiver, QrSender } from './QrCarousel'
+import { appUrl } from '../../app/platform'
 
 const TABLE_NAMES: Record<string, string> = {
   units: 'Units', statusEvents: 'Painting history', paintStock: 'Paint stock', customPaints: 'Custom paints', photos: 'Photos',
@@ -32,7 +33,7 @@ type Ask =
   | { kind: 'changes'; summary: Record<string, MergeSummary>; resolve: (ok: boolean) => void }
 
 const qrOf = (t: string) => QRCode.toString(t, { type: 'svg', margin: 1, errorCorrectionLevel: 'L' }).catch(() => undefined)
-const appBase = () => location.origin + location.pathname
+const appBase = appUrl
 
 /** The changes a sync will make here, per kind of data. */
 export function ChangesTable({ summary }: { summary: Record<string, MergeSummary> }) {

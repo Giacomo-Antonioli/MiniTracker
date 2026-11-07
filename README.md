@@ -98,6 +98,11 @@ npm run dev            # http://localhost:5173/MiniTracker/
 | `npm run check:bsdata` | Live check: download real BSData and parse it (needs internet) |
 | `npm run lint` / `npm run typecheck` | Static checks |
 | `npm run build` | Production build into `dist/` |
+| `npm run desktop:dev` / `npm run desktop:build` | Desktop app (Tauri) in a dev window / installers into `src-tauri/target/release/bundle/` |
+
+### Desktop app
+
+The desktop app (#168) wraps the same web app with [Tauri 2](https://tauri.app). It needs Rust (`rustup`) and, on Linux, `libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev`. Built for Tauri, the app is served from `/` and has no service worker; `src/app/platform.ts` tells the two apart. Shared links always point to the web app. Installed desktop apps update themselves from GitHub releases: the release workflow signs the update files with the updater key in the `TAURI_SIGNING_PRIVATE_KEY` repo secret and publishes `latest.json`; the public key is in `src-tauri/tauri.conf.json`.
 
 ### Workflow
 
@@ -108,7 +113,7 @@ Work is planned in two-week sprints on [GitHub issues](https://github.com/Giacom
 1. Move the `[Unreleased]` entries in [CHANGELOG.md](CHANGELOG.md) under a new `## [x.y.z] - YYYY-MM-DD` heading.
 2. Set the same version: `npm version x.y.z --no-git-tag-version`.
 3. Merge that to `main`, then tag it: `git tag vx.y.z && git push origin vx.y.z`.
-4. The [Release workflow](.github/workflows/release.yml) checks the version, runs the tests, builds, and publishes a GitHub release with the changelog section and a zip of the web app. Tags with a suffix (e.g. `v0.2.0-beta.1`) become pre-releases.
+4. The [Release workflow](.github/workflows/release.yml) checks the version, runs the tests, builds, and publishes a GitHub release with the changelog section and a zip of the web app, then builds the desktop installers for Linux, Windows and macOS and adds them to the release. Tags with a suffix (e.g. `v0.2.0-beta.1`) become pre-releases.
 
 ## Contributing
 

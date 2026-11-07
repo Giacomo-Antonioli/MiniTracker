@@ -3,6 +3,7 @@ import { ScanBoxButton } from '../barcodes/BoxScan'
 import { GoalBar } from '../goals/GoalBar'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useShownUnits, useStore } from '../../app/store'
+import { isDesktopApp } from '../../app/platform'
 import { GAMES } from '../../domain/catalogue/editions'
 import { modelsByStatus } from '../../domain/collection/ownedUnit'
 import { WISHLISTED } from '../../domain/collection/pipeline'
@@ -19,7 +20,7 @@ import { StageBar, stageColour } from '../backlog/BacklogTable'
 import { ActivityCalendar, HBars, MonthArea, MonthBars } from '../stats/charts'
 import { forecast, Tile, useAllEvents, usePointsOf } from '../stats/StatsPage'
 
-type Go = 'backlog' | 'stats' | 'shopping' | 'paints' | 'supplies' | 'games' | 'goals'
+type Go = 'backlog' | 'stats' | 'shopping' | 'paints' | 'supplies' | 'games' | 'goals' | 'sync' | 'settings'
 
 const AGO = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
 /** "today", "yesterday", "3 days ago", "2 months ago". */
@@ -75,6 +76,15 @@ export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: st
           <h1 className="font-display text-2xl text-accent">Welcome to MiniTracker</h1>
           <p className="text-muted">Add your first unit to start tracking your pile, painting progress and stats.</p>
           {onAddUnit && <button className="btn btn-primary justify-self-center" onClick={onAddUnit}>+ Add your first unit</button>}
+          {isDesktopApp() && onGo && (
+            <div className="grid gap-2 border-t border-line pt-3" aria-label="Bring your data">
+              <p className="text-sm text-muted">This app keeps its own data, separate from MiniTracker in your browser. Bring it over:</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                <button className="btn" onClick={() => onGo('sync')}>⇄ Sync from another device</button>
+                <button className="btn" onClick={() => onGo('settings')}>Restore a backup</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )

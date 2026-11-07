@@ -23,11 +23,14 @@ import { useIsPhone } from '../ui/useIsPhone'
 import { WorkshopPage, workshopAlerts } from '../features/workshop/WorkshopPage'
 import { HomePage } from '../features/home/HomePage'
 import { GamePicker } from '../features/menu/GamePicker'
+import { UpdateBanner } from '../features/menu/UpdateBanner'
 import { codeFromText, findCode } from '../domain/storage/codes'
 import { parsePairCode } from '../domain/sync/protocol'
 import { SyncPage } from '../features/sync/SyncPage'
 import { PlacePage, StoragePage } from '../features/storage/Storage'
 import { CompanionHub, WorkCompanion } from '../features/companion/WorkCompanion'
+import { isDesktopApp } from './platform'
+import { AUTO, effectiveScale, stepScale } from '../domain/settings/uiScale'
 
 type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'workshop' | 'supplies' | 'tools' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'storage' | 'place' | 'sync' | 'settings'
 
@@ -140,6 +143,37 @@ export default function App() {
     document.documentElement.dataset.theme = theme
   }, [theme])
 
+  // Text and interface size: the root font size; everything sized in rem follows.
+  // Auto (the default) follows the window: a bigger or maximised window gets bigger text.
+  const uiScale = useStore((s) => s.uiScale)
+  const [winWidth, setWinWidth] = useState(() => window.innerWidth)
+  useEffect(() => {
+    const onResize = () => setWinWidth(window.innerWidth)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  const scale = effectiveScale(uiScale, winWidth)
+  useEffect(() => {
+    document.documentElement.style.fontSize = scale === 1 ? '' : `${scale * 100}%`
+  }, [scale])
+
+  // Desktop app: Ctrl/Cmd + and − change the size, 0 resets it (in a browser these keys stay the browser's zoom).
+  useEffect(() => {
+    if (!isDesktopApp()) return
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return
+      const { uiScale, setUiScale } = useStore.getState()
+      const s = effectiveScale(uiScale, window.innerWidth)
+      if (e.key === '+' || e.key === '=') setUiScale(stepScale(s, 1))
+      else if (e.key === '-') setUiScale(stepScale(s, -1))
+      else if (e.key === '0') setUiScale(AUTO)
+      else return
+      e.preventDefault()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   const go = (p: Page, s?: SettingsSection) => {
     setMenuOpen(false)
     if (p !== 'companion') useStore.getState().closeCompanion()
@@ -244,6 +278,7 @@ export default function App() {
         </div>
       )}
       <main className={phone ? 'min-h-0 min-w-0 flex-1 overflow-auto p-2 pb-4' : 'min-w-0 flex-1 overflow-auto p-4'}>
+        <UpdateBanner />
         {ready && shared && <SharedSchemeBanner token={shared} onDone={(id) => { setShared(null); if (id) openScheme(id) }} />}
         {missingCode && <p className="panel mb-3 p-3 text-sm" role="alert">No unit or place with code {missingCode} on this device. Restore a backup from the device where you made the labels. <button className="underline" onClick={() => setMissingCode('')}>Dismiss</button></p>}
         {!ready ? (

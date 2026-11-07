@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { useMemo } from 'react'
 import { GAMES, gameOfRepo } from '../domain/catalogue/editions'
+import { AUTO, readSetting, snapScale, type UiScaleSetting } from '../domain/settings/uiScale'
 import { unitsOfGame, type GameFilter } from '../domain/catalogue/unitGame'
 import { exportBackupZip, importBackupFile } from '../data/backup'
 import { MiniTrackerDb } from '../data/db'
@@ -80,6 +81,14 @@ export interface CatalogueJob {
 export const THEMES = { grimdark: 'Grimdark', forum2005: 'Forum 2005' } as const
 export type Theme = keyof typeof THEMES
 
+function readUiScale(): UiScaleSetting {
+  try {
+    return readSetting(localStorage.getItem('uiScale'))
+  } catch {
+    return AUTO
+  }
+}
+
 function readTheme(): Theme {
   try {
     const t = localStorage.getItem('theme')
@@ -152,6 +161,9 @@ interface State {
   pipelines: Record<PipelineKey, Pipeline>
   savePipelineFor(key: PipelineKey, p: Pipeline): Promise<void>
   theme: Theme
+  /** Text and interface size, saved on this device: a size (1 = 100%) or Auto (follows the window, the default). */
+  uiScale: UiScaleSetting
+  setUiScale(s: UiScaleSetting): void
   setTheme(theme: Theme): void
   ruleDisplay: RuleDisplay
   setRuleDisplay(v: RuleDisplay): void
@@ -333,6 +345,7 @@ export const useStore = create<State>((set, get) => ({
   },
   pipelines: DEFAULT_PIPELINES,
   theme: readTheme(),
+  uiScale: readUiScale(),
   ruleDisplay: readRuleDisplay(),
   gameFilter: readGameFilter(),
   async setGameFilter(g) {
@@ -403,6 +416,16 @@ export const useStore = create<State>((set, get) => ({
     const m = new Map(get().paintStock)
     m.delete(id)
     set({ paints: get().paints.filter((p) => p.id !== id), paintStock: m })
+  },
+
+  setUiScale(s) {
+    const uiScale = s === AUTO ? AUTO : snapScale(s)
+    try {
+      localStorage.setItem('uiScale', String(uiScale))
+    } catch {
+      /* storage unavailable: the size just isn't remembered */
+    }
+    set({ uiScale })
   },
 
   setTheme(theme) {

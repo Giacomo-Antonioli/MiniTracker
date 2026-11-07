@@ -4,14 +4,19 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vite'
 import pkg from './package.json' with { type: 'json' }
 
+// Tauri (#168) sets TAURI_ENV_PLATFORM while building the desktop/Android app: served from its own root, no service worker.
+const tauri = !!process.env.TAURI_ENV_PLATFORM
+
 // base matches the GitHub Pages path: https://<user>.github.io/MiniTracker/
 export default defineConfig({
-  base: '/MiniTracker/',
+  base: tauri ? '/' : '/MiniTracker/',
+  // Tauri's dev window expects a fixed port.
+  server: tauri ? { port: 5173, strictPort: true } : undefined,
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   plugins: [
     react(),
     tailwindcss(),
-    VitePWA({
+    !tauri && VitePWA({
       registerType: 'autoUpdate',
       // The scheme library chunk is ~2 MB; keep it in the offline cache (default limit is 2 MiB).
       // The 3D dice (#191) need their physics (wasm) and theme files offline too.

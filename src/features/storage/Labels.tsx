@@ -8,6 +8,7 @@ import { isBarcode } from '../../domain/barcodes/barcodes'
 import { decodeFrame } from './decode'
 import { WISHLISTED } from '../../domain/collection/pipeline'
 import type { OwnedUnit } from '../../domain/collection/types'
+import { appUrl } from '../../app/platform'
 
 /** Owned models of a unit (wishlisted ones have no base to label yet). */
 export const ownedModels = (u: OwnedUnit | undefined) => (u ? u.groups.reduce((n, g) => n + (g.status === WISHLISTED ? 0 : g.count), 0) : 0)
@@ -16,7 +17,7 @@ export type LabelLayout = 'stickers' | 'boxes' | 'stencil'
 export interface LabelItem { code: string; name: string; sub: string; contents: string[]; qr: string }
 
 const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
-const appBase = () => location.origin + location.pathname
+const appBase = appUrl
 
 /** The printable page for a label sheet (A4, sizes in mm). */
 export function labelsHtml(items: LabelItem[], layout: LabelLayout, size: number): string {

@@ -4,6 +4,11 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Desktop app (#168, part 1): MiniTracker as an installable app for Windows (.msi/.exe), macOS (.dmg) and Linux (.deb/.AppImage), built with Tauri and attached to each GitHub release. It keeps its own data: on first start Home offers to sync from another device or restore a backup. Web links open in your browser, and share, pairing and QR links point to the web app so other devices can open them. The installers are not code-signed yet (see the release notes for how to open them). Automatic discovery of your other devices comes next.
+- Desktop app updates itself: on start it checks GitHub releases for a newer version and offers *Install and restart*. Updates are signed with the project's update key and checked before installing. On Linux the AppImage updates itself; the .deb updates through apt.
+- Text and interface size (Settings › Appearance): Auto by default, following the window (100% up to 1280 px wide, growing to 150% on big or maximised windows), or a fixed 80–150%, saved on the device; text and the layout grow together. In the desktop app Ctrl + / Ctrl − change it and Ctrl 0 goes back to Auto.
+
 ## [0.25.0] - 2026-11-07
 
 ### Added

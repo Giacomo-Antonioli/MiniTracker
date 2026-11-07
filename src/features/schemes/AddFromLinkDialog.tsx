@@ -4,8 +4,9 @@ import { blocksFromText, draftFromPage, type SourceBlock } from '../../domain/sc
 import { createScheme } from '../../domain/schemes/scheme'
 import { Dialog } from '../../ui/Dialog'
 import { bookmarkletCode, type RecipePayload } from './recipeImport'
+import { appUrl } from '../../app/platform'
 
-const APP_URL = `${location.origin}${import.meta.env.BASE_URL}`
+const APP_URL = appUrl()
 
 /** Paste a link (always remembered) and optionally its text, or receive a page from the bookmarklet. */
 export function AddFromLinkDialog({ payload, onClose, onCreated }: { payload?: RecipePayload; onClose: () => void; onCreated: (id: string) => void }) {
