@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-11-07
+
 ### Added
 - Spearhead boxes (#99): ⚔ Spearhead box on the Backlog adds a whole Age of Sigmar Spearhead army (47 armies across 24 factions) to the backlog, wishlisted or at a painting stage. Units link to the Age of Sigmar catalogue where the names match; where a unit has several builds you pick yours. Shows how many of each you already own and links the army's rules PDF. The contents are read from Games Workshop's free Spearhead PDFs by `npm run spearhead:build`.
 
@@ -328,7 +330,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.23.1...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.24.0...HEAD
+[0.24.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.23.1...v0.24.0
 [0.23.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.23.0...v0.23.1
 [0.23.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.21.0...v0.22.0
