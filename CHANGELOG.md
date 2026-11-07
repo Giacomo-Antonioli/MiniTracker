@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.26.1] - 2026-11-07
+
 ### Added
 - Welcome guide on first start: what MiniTracker does, download your games' catalogues, theme and text size, bring your data (sync, restore a backup or start fresh) and where things are. Skip it at any step; Settings › Appearance › Welcome guide › Show it again opens it later. Not shown to anyone who already has units.
 - Desktop app: Settings › Appearance shows the installed version with *Check for updates*; the update banner has the release notes (*What's new*); the window title shows the version.
@@ -350,7 +352,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.26.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.26.1...HEAD
+[0.26.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.26.0...v0.26.1
 [0.26.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.23.1...v0.24.0
