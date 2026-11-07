@@ -30,7 +30,7 @@ export const NO_DIRECT = "These devices can't reach each other directly (usually
 export const CONNECT_TIMEOUT_MS = 25_000
 
 /** Rejects with NO_DIRECT when the connection fails or does not open in time. */
-function guard<T>(p: Promise<T>, pc: () => RTCPeerConnection | undefined, ms = CONNECT_TIMEOUT_MS): Promise<T> {
+export function guard<T>(p: Promise<T>, pc: () => RTCPeerConnection | undefined, ms = CONNECT_TIMEOUT_MS): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const fail = () => reject(new Error(NO_DIRECT))
     const timer = setTimeout(fail, ms)
@@ -134,7 +134,7 @@ export async function joinByCode(code: string, o: ConnectOptions = {}): Promise<
 
 // ---------- private (no relay) ----------
 
-function fromDataChannel(dc: RTCDataChannel, pc: RTCPeerConnection): Channel {
+export function fromDataChannel(dc: RTCDataChannel, pc: RTCPeerConnection): Channel {
   return {
     send: (t) => dc.send(t),
     ...buffered((fn) => dc.addEventListener('message', (e) => fn(String(e.data))), (fn) => dc.addEventListener('close', fn)),
@@ -146,7 +146,7 @@ function fromDataChannel(dc: RTCDataChannel, pc: RTCPeerConnection): Channel {
 }
 
 /** Wait until the connection text lists every address, so it can travel in one piece. */
-async function gathered(pc: RTCPeerConnection, ms = 5000): Promise<string> {
+export async function gathered(pc: RTCPeerConnection, ms = 5000): Promise<string> {
   if (pc.iceGatheringState !== 'complete') {
     await new Promise<void>((resolve) => {
       const done = () => pc.iceGatheringState === 'complete' && resolve()
@@ -157,7 +157,7 @@ async function gathered(pc: RTCPeerConnection, ms = 5000): Promise<string> {
   return JSON.stringify(pc.localDescription)
 }
 
-const channelOpen = (dc: RTCDataChannel) =>
+export const channelOpen = (dc: RTCDataChannel) =>
   new Promise<void>((resolve, reject) => {
     if (dc.readyState === 'open') return resolve()
     dc.addEventListener('open', () => resolve())

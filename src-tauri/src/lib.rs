@@ -1,3 +1,5 @@
+mod lan;
+
 #[cfg(desktop)]
 use tauri::Manager;
 
@@ -28,7 +30,15 @@ pub fn run() {
     builder
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![print_page])
+        .manage(lan::Lan::default())
+        .invoke_handler(tauri::generate_handler![
+            print_page,
+            lan::lan_start,
+            lan::lan_stop,
+            lan::lan_connect,
+            lan::lan_send,
+            lan::lan_close
+        ])
         .setup(|app| {
             #[cfg(desktop)]
             {
