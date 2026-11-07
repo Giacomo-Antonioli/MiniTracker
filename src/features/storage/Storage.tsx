@@ -10,6 +10,7 @@ import {
 import { Dialog } from '../../ui/Dialog'
 import { CodeBadge, FindCode, LabelsDialog } from './Labels'
 import { itemsIn, MassMoveDialog, MovePlaceDialog, ScanMoveDialog } from './MassMove'
+import { useT } from '../../i18n'
 
 const icon = (k: string) => kindOf(useStore.getState().storage, k).icon
 
@@ -335,6 +336,7 @@ export function PlacePage({ placeId, onBack, onOpenUnit, onOpenPlace }: { placeI
 
 /** Settings: the list of place kinds (Shelf, Box, Drawer…). */
 export function KindsEditor() {
+  const t = useT()
   const { storage: s } = useStore()
   const { run, err } = useSave()
   const [rows, setRows] = useState<KindDef[]>(s.kinds)
@@ -345,29 +347,29 @@ export function KindsEditor() {
     setRows(r)
   }
   return (
-    <details className="panel group" aria-label="Place kinds">
+    <details className="panel group" aria-label={t('settingsPanels.kinds.label')}>
       <summary className="flex cursor-pointer list-none items-center gap-2 p-4">
         <span className="text-muted group-open:rotate-90">▸</span>
-        <h3 className="font-display text-lg">Storage place kinds</h3>
+        <h3 className="font-display text-lg">{t('settingsPanels.kinds.title')}</h3>
         <span className="ml-auto truncate text-xs text-muted">{s.kinds.map((k) => `${k.icon} ${k.name}`).join(', ')}</span>
       </summary>
       <div className="grid gap-2 px-4 pb-4">
-      <p className="text-sm text-muted">Kinds of places in Storage. Kinds used by places can't be deleted.</p>
+      <p className="text-sm text-muted">{t('settingsPanels.kinds.help')}</p>
       <ul className="grid gap-1">
         {rows.map((k, i) => (
           <li key={k.id} className="flex items-center gap-2">
-            <input className="input w-14 text-center" aria-label={`Icon of ${k.name}`} value={k.icon} onChange={(e) => setRows(rows.map((x) => (x.id === k.id ? { ...x, icon: e.target.value } : x)))} />
-            <input className="input flex-1" aria-label={`Name of ${k.name}`} value={k.name} onChange={(e) => setRows(rows.map((x) => (x.id === k.id ? { ...x, name: e.target.value } : x)))} />
-            <span className="w-16 text-xs text-muted">{used(k.id)} used</span>
-            <button className="btn px-2 py-0.5" aria-label={`Move ${k.name} up`} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
-            <button className="btn px-2 py-0.5" aria-label={`Move ${k.name} down`} disabled={i === rows.length - 1} onClick={() => move(i, 1)}>↓</button>
-            <button className="btn px-2 py-0.5" aria-label={`Delete ${k.name}`} disabled={used(k.id) > 0} onClick={() => setRows(rows.filter((x) => x.id !== k.id))}>✕</button>
+            <input className="input w-14 text-center" aria-label={t('settingsPanels.kinds.icon', { name: k.name })} value={k.icon} onChange={(e) => setRows(rows.map((x) => (x.id === k.id ? { ...x, icon: e.target.value } : x)))} />
+            <input className="input flex-1" aria-label={t('settingsPanels.kinds.name', { name: k.name })} value={k.name} onChange={(e) => setRows(rows.map((x) => (x.id === k.id ? { ...x, name: e.target.value } : x)))} />
+            <span className="w-16 text-xs text-muted">{t('settingsPanels.kinds.used', { count: used(k.id) })}</span>
+            <button className="btn px-2 py-0.5" aria-label={t('settingsPanels.kinds.up', { name: k.name })} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
+            <button className="btn px-2 py-0.5" aria-label={t('settingsPanels.kinds.down', { name: k.name })} disabled={i === rows.length - 1} onClick={() => move(i, 1)}>↓</button>
+            <button className="btn px-2 py-0.5" aria-label={t('settingsPanels.kinds.delete', { name: k.name })} disabled={used(k.id) > 0} onClick={() => setRows(rows.filter((x) => x.id !== k.id))}>✕</button>
           </li>
         ))}
       </ul>
       <div className="flex flex-wrap gap-2">
-        <button className="btn" onClick={() => setRows([...rows, { id: crypto.randomUUID().slice(0, 8), name: 'New kind', icon: '📦' }])}>+ Add kind</button>
-        <button className="btn btn-primary" onClick={() => run((x) => saveKinds(x, rows))}>Save kinds</button>
+        <button className="btn" onClick={() => setRows([...rows, { id: crypto.randomUUID().slice(0, 8), name: t('settingsPanels.kinds.newKind'), icon: '📦' }])}>{t('settingsPanels.kinds.add')}</button>
+        <button className="btn btn-primary" onClick={() => run((x) => saveKinds(x, rows))}>{t('settingsPanels.kinds.save')}</button>
       </div>
       {err && <p className="text-sm text-danger" role="alert">{err}</p>}
       </div>

@@ -6,6 +6,7 @@ import { es } from './locales/es'
 import { de } from './locales/de'
 import { fr } from './locales/fr'
 import { zh } from './locales/zh'
+import { AREAS } from './areas'
 
 /** The app's languages, each named in its own language. BSData game data (unit names, rules) stays English. */
 export const LANGUAGES = { en: 'English', it: 'Italiano', es: 'Español', de: 'Deutsch', fr: 'Français', zh: '中文' } as const
@@ -37,7 +38,12 @@ export function readLanguageChoice(): LanguageChoice {
 const resolve = (c: LanguageChoice): Language => (c === 'auto' ? deviceLanguage() : c)
 
 void i18n.use(initReactI18next).init({
-  resources: { en: { translation: en }, it: { translation: it }, es: { translation: es }, de: { translation: de }, fr: { translation: fr }, zh: { translation: zh } },
+  resources: Object.fromEntries(
+    Object.entries({ en, it, es, de, fr, zh }).map(([lang, core]) => [
+      lang,
+      { translation: { ...core, ...Object.fromEntries(Object.entries(AREAS).map(([name, a]) => [name, a[lang as Language]])) } },
+    ]),
+  ),
   lng: resolve(readLanguageChoice()),
   fallbackLng: 'en',
   interpolation: { escapeValue: false },

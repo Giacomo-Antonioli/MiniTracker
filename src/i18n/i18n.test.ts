@@ -8,6 +8,7 @@ import { es } from './locales/es'
 import { de } from './locales/de'
 import { fr } from './locales/fr'
 import { zh } from './locales/zh'
+import { AREAS } from './areas'
 
 /** Every key path with the length of each array, so missing tour steps or list items show up. */
 function shape(o: unknown, path = ''): string[] {
@@ -30,6 +31,12 @@ describe('translations', () => {
   it.each(Object.entries(all))('%s has every English key, list item and placeholder', (_, strings) => {
     expect(shape(strings)).toEqual(shape(en))
     expect(vars(strings).sort()).toEqual(vars(en).sort())
+  })
+  describe.each(Object.entries(AREAS))('area %s', (_, area) => {
+    it.each(['it', 'es', 'de', 'fr', 'zh'] as const)('%s has every English key, list item and placeholder', (lang) => {
+      expect(shape(area[lang])).toEqual(shape(area.en))
+      expect(vars(area[lang]).sort()).toEqual(vars(area.en).sort())
+    })
   })
   it('covers every language in the picker', () => {
     expect(Object.keys(LANGUAGES).sort()).toEqual(['de', 'en', 'es', 'fr', 'it', 'zh'])

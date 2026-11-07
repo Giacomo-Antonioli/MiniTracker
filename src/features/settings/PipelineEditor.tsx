@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { addStage, removeUnusedStage, renameStage, reorderStages } from '../../domain/collection/pipeline'
 import type { Pipeline } from '../../domain/collection/types'
+import { useT } from '../../i18n'
 
 interface Props {
   title: string
@@ -15,6 +16,7 @@ interface Props {
 
 /** Rename, reorder, add, delete and reset the stages of any pipeline. */
 export function PipelineEditor({ title, description, pipeline, defaults, usedBy, usedLabel, onSave }: Props) {
+  const t = useT()
   const [newName, setNewName] = useState('')
   const [error, setError] = useState('')
   const ids = pipeline.stages.map((s) => s.id)
@@ -49,13 +51,13 @@ export function PipelineEditor({ title, description, pipeline, defaults, usedBy,
             <input
               className="input flex-1"
               defaultValue={s.name}
-              aria-label={`Name of stage ${i + 1}`}
+              aria-label={t('settingsPanels.pipeline.stageName', { n: i + 1 })}
               onBlur={(e) => e.target.value !== s.name && apply(() => renameStage(pipeline, s.id, e.target.value))}
             />
             <span className="w-24 text-xs text-muted">{usedBy(s.id)} {usedLabel}</span>
-            <button className="btn" aria-label="Move up" disabled={i === 0} onClick={() => apply(() => swap(i, i - 1))}>↑</button>
-            <button className="btn" aria-label="Move down" disabled={i === ids.length - 1} onClick={() => apply(() => swap(i, i + 1))}>↓</button>
-            <button className="btn btn-danger" aria-label="Delete stage" onClick={() => apply(() => removeUnusedStage(pipeline, s.id, usedBy(s.id)))}>✕</button>
+            <button className="btn" aria-label={t('settingsPanels.pipeline.up')} disabled={i === 0} onClick={() => apply(() => swap(i, i - 1))}>↑</button>
+            <button className="btn" aria-label={t('settingsPanels.pipeline.down')} disabled={i === ids.length - 1} onClick={() => apply(() => swap(i, i + 1))}>↓</button>
+            <button className="btn btn-danger" aria-label={t('settingsPanels.pipeline.delete')} onClick={() => apply(() => removeUnusedStage(pipeline, s.id, usedBy(s.id)))}>✕</button>
           </li>
         ))}
       </ol>
@@ -70,21 +72,21 @@ export function PipelineEditor({ title, description, pipeline, defaults, usedBy,
           void apply(() => addStage(pipeline, { id, name })).then(() => setNewName(''))
         }}
       >
-        <input className="input flex-1" placeholder="New stage name" aria-label={`New stage for ${title}`} value={newName} onChange={(e) => setNewName(e.target.value)} />
-        <button className="btn btn-primary" type="submit">Add stage</button>
+        <input className="input flex-1" placeholder={t('settingsPanels.pipeline.newPlaceholder')} aria-label={t('settingsPanels.pipeline.newFor', { title })} value={newName} onChange={(e) => setNewName(e.target.value)} />
+        <button className="btn btn-primary" type="submit">{t('settingsPanels.pipeline.add')}</button>
         <button
           type="button"
           className="btn"
           onClick={() =>
-            confirm(`Reset "${title}" to the default stages?`) &&
+            confirm(t('settingsPanels.pipeline.confirmReset', { title })) &&
             apply(() => {
               const missing = pipeline.stages.filter((s) => usedBy(s.id) > 0 && !defaults.stages.some((d) => d.id === s.id))
-              if (missing.length) throw new Error(`Some items are in stages the default doesn't have: ${missing.map((s) => s.name).join(', ')}`)
+              if (missing.length) throw new Error(t('settingsPanels.pipeline.missing', { names: missing.map((s) => s.name).join(', ') }))
               return defaults
             })
           }
         >
-          Reset
+          {t('settingsPanels.pipeline.reset')}
         </button>
       </form>
       {error && <p className="text-danger" role="alert">{error}</p>}

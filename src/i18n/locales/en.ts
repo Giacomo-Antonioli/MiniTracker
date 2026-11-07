@@ -1,3 +1,4 @@
+import type { Shape } from '../area'
 import { TOURS, type TourName } from '../../features/welcome/tours'
 
 /** English: the source text. Every other language has the same keys (checked by i18n.test.ts). */
@@ -220,6 +221,4 @@ export const en = {
   tours,
 }
 
-/** The shape every language follows: same keys, strings (and arrays) in place of the English text. */
-type Shape<T> = T extends string ? string : T extends readonly (infer U)[] ? Shape<U>[] : { [K in keyof T]: Shape<T[K]> }
 export type Strings = Shape<typeof en>
