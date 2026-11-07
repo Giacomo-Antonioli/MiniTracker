@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Changed
+- Welcome guide: new steps for your units, paints and schemes, the workshop (tools, supplies, storage), and armies and games. Their *Open…* buttons take you to the page while the guide waits; *Back to the guide* carries on at the same step. The *Your data* choices are laid out more clearly.
+
 ## [0.26.1] - 2026-11-07
 
 ### Added

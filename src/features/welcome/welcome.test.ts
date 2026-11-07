@@ -1,26 +1,40 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest'
-import { shouldShowWelcome, useWelcome } from './welcome'
+import { useWelcome } from './welcome'
+
+const s = () => useWelcome.getState()
 
 describe('welcome guide (#168)', () => {
   beforeEach(() => {
     localStorage.removeItem('welcomeDone')
-    useWelcome.setState({ done: false, reopened: false })
+    useWelcome.setState({ done: false, open: false, paused: false, step: 0 })
   })
 
-  it('shows on a first start with no data, not when there are units or once done', () => {
-    expect(shouldShowWelcome(useWelcome.getState(), false)).toBe(true)
-    expect(shouldShowWelcome(useWelcome.getState(), true)).toBe(false)
-    useWelcome.getState().finish()
+  it('opens on a first start with no data, not when there are units or once done', () => {
+    s().startIfNew(true)
+    expect(s().open).toBe(false)
+    s().startIfNew(false)
+    expect(s().open).toBe(true)
+    s().finish()
     expect(localStorage.getItem('welcomeDone')).toBe('1')
-    expect(shouldShowWelcome(useWelcome.getState(), false)).toBe(false)
+    expect(s().open).toBe(false)
+    s().startIfNew(false)
+    expect(s().open).toBe(false)
   })
 
-  it('can be opened again from Settings even when done', () => {
-    useWelcome.getState().finish()
-    useWelcome.getState().reopen()
-    expect(shouldShowWelcome(useWelcome.getState(), true)).toBe(true)
-    useWelcome.getState().finish()
-    expect(shouldShowWelcome(useWelcome.getState(), true)).toBe(false)
+  it('pauses on a step while you try it and resumes there; adding units meanwhile does not close it', () => {
+    s().startIfNew(false)
+    s().setStep(4)
+    s().pause()
+    expect(s()).toMatchObject({ open: true, paused: true, step: 4 })
+    s().startIfNew(true)
+    s().resume()
+    expect(s()).toMatchObject({ open: true, paused: false, step: 4 })
+  })
+
+  it('can be opened again from Settings even when done, from the first step', () => {
+    s().finish()
+    s().reopen()
+    expect(s()).toMatchObject({ open: true, paused: false, step: 0 })
   })
 })
