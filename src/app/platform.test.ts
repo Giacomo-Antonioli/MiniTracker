@@ -1,6 +1,24 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { PUBLIC_URL, appUrl, isDesktopApp, openLinksInBrowser } from './platform'
+import { PUBLIC_URL, appUrl, canAutoUpdate, isAndroidApp, isDesktopApp, openLinksInBrowser } from './platform'
+
+describe('Android app', () => {
+  it('is the Tauri app on Android and does not auto-update', () => {
+    ;(window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {}
+    const ua = vi.spyOn(navigator, 'userAgent', 'get')
+    try {
+      ua.mockReturnValue('Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36')
+      expect(isAndroidApp()).toBe(true)
+      expect(canAutoUpdate()).toBe(false)
+      ua.mockReturnValue('Mozilla/5.0 (Windows NT 10.0; Win64; x64)')
+      expect(isAndroidApp()).toBe(false)
+      expect(canAutoUpdate()).toBe(true)
+    } finally {
+      ua.mockRestore()
+      delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__
+    }
+  })
+})
 
 afterEach(() => {
   delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__

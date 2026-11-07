@@ -7,7 +7,7 @@ import { CataloguePage } from './CataloguePage'
 import { PipelineEditor } from './PipelineEditor'
 import { WorkshopSettings } from './WorkshopSettings'
 import { SyncSettings } from './SyncSettings'
-import { isDesktopApp } from '../../app/platform'
+import { canAutoUpdate, isAndroidApp, isDesktopApp } from '../../app/platform'
 import { AUTO, UI_SCALES, effectiveScale, scaleLabel } from '../../domain/settings/uiScale'
 import { useUpdates } from '../menu/updates'
 import { useWelcome } from '../welcome/welcome'
@@ -84,7 +84,7 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
             Currency
             <input className="input w-20" aria-label="Currency" defaultValue={currency} key={currency} maxLength={4} onBlur={(e) => e.target.value.trim() && e.target.value.trim() !== currency && void setCurrency(e.target.value.trim())} />
           </label>
-          {isDesktopApp() && <AppVersion />}
+          {canAutoUpdate() && <AppVersion />}
           <div className="flex flex-wrap items-center gap-3">
             Welcome guide
             <button type="button" className="btn px-2 py-0.5 text-sm" onClick={reopenWelcome}>Show it again</button>
@@ -101,7 +101,7 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
             <span className="w-24 tabular-nums">{scaleLabel(shownScale)}{uiScale === AUTO && ' (auto)'}</span>
             {uiScale !== AUTO && <button type="button" className="btn px-2 py-0.5 text-sm" onClick={() => setUiScale(AUTO)}>Auto</button>}
           </label>
-          <p className="text-sm text-muted">Auto follows the window: a bigger or maximised window gets bigger text. Move the slider to fix a size.{isDesktopApp() && ' Shortcut: Ctrl + / Ctrl − to change, Ctrl 0 for Auto.'}</p>
+          <p className="text-sm text-muted">Auto follows the window: a bigger or maximised window gets bigger text. Move the slider to fix a size.{isDesktopApp() && !isAndroidApp() && ' Shortcut: Ctrl + / Ctrl − to change, Ctrl 0 for Auto.'}</p>
         </div>
       </section>}
 
