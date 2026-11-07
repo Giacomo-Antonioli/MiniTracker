@@ -6,7 +6,7 @@ test.use({ storageState: { cookies: [], origins: [] } })
 
 test('walk every guided tour, mocks included', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop', 'one run is enough')
-  test.setTimeout(120_000)
+  test.setTimeout(process.env.CI ? 240_000 : 120_000)
   const problems: string[] = []
   page.on('console', (m) => m.text().startsWith('Tour step without') && problems.push(m.text()))
   page.on('pageerror', (e) => problems.push(e.message))
