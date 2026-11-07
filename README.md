@@ -102,7 +102,7 @@ npm run dev            # http://localhost:5173/MiniTracker/
 
 ### Desktop app
 
-The desktop app (#168) wraps the same web app with [Tauri 2](https://tauri.app). It needs Rust (`rustup`) and, on Linux, `libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev`. Built for Tauri, the app is served from `/` and has no service worker; `src/app/platform.ts` tells the two apart. Shared links always point to the web app.
+The desktop app (#168) wraps the same web app with [Tauri 2](https://tauri.app). It needs Rust (`rustup`) and, on Linux, `libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev`. Built for Tauri, the app is served from `/` and has no service worker; `src/app/platform.ts` tells the two apart. Shared links always point to the web app. Installed desktop apps update themselves from GitHub releases: the release workflow signs the update files with the updater key in the `TAURI_SIGNING_PRIVATE_KEY` repo secret and publishes `latest.json`; the public key is in `src-tauri/tauri.conf.json`.
 
 ### Workflow
 

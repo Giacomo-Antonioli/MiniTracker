@@ -23,6 +23,7 @@ import { useIsPhone } from '../ui/useIsPhone'
 import { WorkshopPage, workshopAlerts } from '../features/workshop/WorkshopPage'
 import { HomePage } from '../features/home/HomePage'
 import { GamePicker } from '../features/menu/GamePicker'
+import { UpdateBanner } from '../features/menu/UpdateBanner'
 import { codeFromText, findCode } from '../domain/storage/codes'
 import { parsePairCode } from '../domain/sync/protocol'
 import { SyncPage } from '../features/sync/SyncPage'
@@ -277,6 +278,7 @@ export default function App() {
         </div>
       )}
       <main className={phone ? 'min-h-0 min-w-0 flex-1 overflow-auto p-2 pb-4' : 'min-w-0 flex-1 overflow-auto p-4'}>
+        <UpdateBanner />
         {ready && shared && <SharedSchemeBanner token={shared} onDone={(id) => { setShared(null); if (id) openScheme(id) }} />}
         {missingCode && <p className="panel mb-3 p-3 text-sm" role="alert">No unit or place with code {missingCode} on this device. Restore a backup from the device where you made the labels. <button className="underline" onClick={() => setMissingCode('')}>Dismiss</button></p>}
         {!ready ? (

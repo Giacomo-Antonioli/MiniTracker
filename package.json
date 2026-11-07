@@ -23,6 +23,8 @@
     "@3d-dice/dice-box": "^1.1.4",
     "@tauri-apps/api": "^2.12.4",
     "@tauri-apps/plugin-opener": "^2.7.2",
+    "@tauri-apps/plugin-process": "^2.4.0",
+    "@tauri-apps/plugin-updater": "^2.14.1",
     "@zxing/library": "^0.23.0",
     "dexie": "^4.4.7",
     "fast-xml-parser": "^5.11.2",
