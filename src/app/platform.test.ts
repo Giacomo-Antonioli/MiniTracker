@@ -28,3 +28,24 @@ describe('platform (#168)', () => {
     stop()
   })
 })
+
+describe('printHtml in the desktop app', () => {
+  it('shows the document inside the page and opens the native print dialog', async () => {
+    const invoke = vi.fn().mockResolvedValue(undefined)
+    vi.doMock('@tauri-apps/api/core', () => ({ invoke }))
+    ;(window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {}
+    try {
+      const { printHtml } = await import('./platform')
+      await printHtml('<html><head><style>.x{color:red}</style></head><body><p class="x">Labels</p><script>print()</script></body></html>')
+      const root = document.getElementById('print-doc')!
+      expect(root.textContent).toContain('Labels')
+      expect(root.querySelector('script')).toBeNull()
+      expect(invoke).toHaveBeenCalledWith('print_page')
+      window.dispatchEvent(new Event('afterprint'))
+      expect(document.getElementById('print-doc')).toBeNull()
+    } finally {
+      delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__
+      vi.doUnmock('@tauri-apps/api/core')
+    }
+  })
+})

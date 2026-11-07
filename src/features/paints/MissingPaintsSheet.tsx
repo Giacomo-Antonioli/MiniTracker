@@ -1,3 +1,4 @@
+import { printPage } from '../../app/platform'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { MissingPaint } from '../../domain/paints/missing'
@@ -29,7 +30,7 @@ export function MissingPaintsSheet({ rows, schemes, onDone }: { rows: MissingPai
   useEffect(() => {
     const done = () => onDone()
     window.addEventListener('afterprint', done)
-    const t = setTimeout(() => window.print(), 50)
+    const t = setTimeout(() => void printPage(), 50)
     return () => {
       clearTimeout(t)
       window.removeEventListener('afterprint', done)

@@ -67,7 +67,7 @@ it('shows "Before you start" with painting order, techniques and a printable she
   expect(screen.getByRole('dialog', { name: 'Technique Basecoat' })).toBeTruthy()
   await user.click(screen.getByRole('button', { name: 'Close technique' }))
   await user.click(within(box).getByRole('button', { name: '🖨 Print / PDF' }))
-  expect(fake.print).toHaveBeenCalled()
+  expect(written[0]).toContain('onload=()=>print()')
   expect(written[0]).toContain('Recipe, in painting order')
   expect(written[0]).toContain('Black Templars')
   expect(written[0]).toContain('How to: techniques used')

@@ -21,3 +21,40 @@ export function openLinksInBrowser(open: (url: string) => Promise<void>): () => 
   document.addEventListener('click', onClick)
   return () => document.removeEventListener('click', onClick)
 }
+
+/**
+ * Print the current page. The desktop app's webview ignores window.print() on Windows, so there the
+ * native print dialog is opened from the Rust side.
+ */
+export async function printPage(): Promise<void> {
+  if (!isDesktopApp()) return window.print()
+  const { invoke } = await import('@tauri-apps/api/core')
+  await invoke('print_page')
+}
+
+/**
+ * Print a standalone HTML document. On the web it opens in a new tab and prints there; the desktop app
+ * has no pop-ups, so the document is shown inside the page (everything else hidden while printing).
+ * Returns false when the browser blocked the pop-up.
+ */
+export async function printHtml(html: string): Promise<boolean> {
+  if (!isDesktopApp()) {
+    const w = window.open('', '_blank')
+    if (!w) return false
+    w.document.write(html)
+    w.document.close()
+    return true
+  }
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  doc.querySelectorAll('script').forEach((s) => s.remove())
+  document.getElementById('print-doc')?.remove()
+  const root = document.createElement('div')
+  root.id = 'print-doc'
+  const css = [...doc.querySelectorAll('style')].map((s) => s.textContent).join('\n')
+  root.innerHTML = `<style>#print-doc{display:none}@media print{body>:not(#print-doc){display:none!important}#print-doc{display:block}}${css}</style>${doc.body.innerHTML}`
+  document.body.appendChild(root)
+  window.addEventListener('afterprint', () => root.remove(), { once: true })
+  await new Promise((r) => setTimeout(r, 100))
+  await printPage()
+  return true
+}

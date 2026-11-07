@@ -8,7 +8,7 @@ import { isBarcode } from '../../domain/barcodes/barcodes'
 import { decodeFrame } from './decode'
 import { WISHLISTED } from '../../domain/collection/pipeline'
 import type { OwnedUnit } from '../../domain/collection/types'
-import { appUrl } from '../../app/platform'
+import { appUrl, printHtml } from '../../app/platform'
 
 /** Owned models of a unit (wishlisted ones have no base to label yet). */
 export const ownedModels = (u: OwnedUnit | undefined) => (u ? u.groups.reduce((n, g) => n + (g.status === WISHLISTED ? 0 : g.count), 0) : 0)
@@ -84,10 +84,7 @@ export function LabelsDialog({ onClose, unitIds: preset, placeIds: presetPlaces 
   const print = async () => {
     const { html, next } = await build()
     await saveStorage(next)
-    const w = window.open('', '_blank')
-    if (!w) return setMsg('Allow pop-ups for this site to print the labels.')
-    w.document.write(html)
-    w.document.close()
+    if (!(await printHtml(html))) setMsg('Allow pop-ups for this site to print the labels.')
   }
   const download = async () => {
     const next = assignCodes(s, units_, places)
