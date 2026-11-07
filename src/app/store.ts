@@ -126,6 +126,14 @@ function readGameFilter(): GameFilter {
   }
 }
 
+function saveGameFilter(g: GameFilter) {
+  try {
+    localStorage.setItem('gameFilter', g)
+  } catch {
+    // Not saved: this session only.
+  }
+}
+
 export const ctx = (): Ctx => ({ now: new Date().toISOString(), newId: () => crypto.randomUUID() })
 
 interface State {
@@ -316,18 +324,19 @@ export const useStore = create<State>((set, get) => ({
 
   async setActiveCatalogue(gameId) {
     await settingsRepo.setValue('activeCatalogue', gameId)
-    set({ catalogue: get().catalogues.find((c) => c.gameId === gameId) ?? null })
+    const catalogue = get().catalogues.find((c) => c.gameId === gameId) ?? null
+    // Keep the menu's game picker on the active catalogue's game (unless "All games" is picked).
+    const filter = get().gameFilter
+    const game = catalogue && gameOfRepo(catalogue.source.repo)
+    if (game && filter !== 'all' && filter !== game) saveGameFilter(game)
+    set({ catalogue, ...(game && filter !== 'all' ? { gameFilter: game } : {}) })
   },
   pipelines: DEFAULT_PIPELINES,
   theme: readTheme(),
   ruleDisplay: readRuleDisplay(),
   gameFilter: readGameFilter(),
   async setGameFilter(g) {
-    try {
-      localStorage.setItem('gameFilter', g)
-    } catch {
-      // Not saved: this session only.
-    }
+    saveGameFilter(g)
     set({ gameFilter: g })
     const { catalogue, catalogues } = get()
     if (g === 'all' || (catalogue && gameOfRepo(catalogue.source.repo) === g)) return
@@ -436,7 +445,10 @@ export const useStore = create<State>((set, get) => ({
       settingsRepo.getValue<unknown>('barcodes', []),
       settingsRepo.getValue<unknown>('tools', []),
     ])
-    const catalogue = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
+    // The game picked in the menu wins over a saved catalogue of another game.
+    const filter = get().gameFilter
+    const saved = catalogues.find((c) => c.gameId === activeCatalogue) ?? catalogues[0]
+    const catalogue = filter !== 'all' && saved && gameOfRepo(saved.source.repo) !== filter ? (catalogues.find((c) => gameOfRepo(c.source.repo) === filter) ?? saved) : saved
     set({
       units,
       pipeline: painting,

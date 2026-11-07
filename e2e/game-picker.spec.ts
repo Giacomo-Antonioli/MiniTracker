@@ -33,4 +33,12 @@ test('game picker in the menu switches the active catalogue', async ({ page }) =
   await expect(me).toContainText('active')
   await page.reload()
   await expect(picker).toHaveValue('mesbg')
+
+  // The other way round: making a 40k edition active in Settings moves the picker to 40k.
+  await page.getByRole('button', { name: /Settings/ }).click()
+  await page.getByRole('region', { name: 'Catalogue Test Game' }).getByRole('button', { name: 'Use this edition' }).click()
+  await expect(picker).toHaveValue('40k')
+  await picker.selectOption('all')
+  await me.getByRole('button', { name: 'Use this edition' }).click()
+  await expect(picker).toHaveValue('all')
 })
