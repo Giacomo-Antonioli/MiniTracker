@@ -1,3 +1,4 @@
+import { printPage } from '../../app/platform'
 import { useEffect, useState } from 'react'
 import { ScanBoxButton } from '../barcodes/BoxScan'
 import { createPortal } from 'react-dom'
@@ -112,7 +113,7 @@ function ShoppingSheet({ title, items, onDone }: { title: string; items: ShopIte
   useEffect(() => {
     const done = () => onDone()
     window.addEventListener('afterprint', done)
-    const t = setTimeout(() => window.print(), 50)
+    const t = setTimeout(() => void printPage(), 50)
     return () => {
       clearTimeout(t)
       window.removeEventListener('afterprint', done)

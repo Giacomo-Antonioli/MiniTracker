@@ -1,3 +1,4 @@
+import { printPage } from '../../app/platform'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useStore } from '../../app/store'
@@ -25,7 +26,7 @@ export function ArmySheet({ list, cat, options, onDone }: { list: ArmyList; cat:
   useEffect(() => {
     const done = () => onDone()
     window.addEventListener('afterprint', done)
-    const t = setTimeout(() => window.print(), 50)
+    const t = setTimeout(() => void printPage(), 50)
     return () => {
       clearTimeout(t)
       window.removeEventListener('afterprint', done)

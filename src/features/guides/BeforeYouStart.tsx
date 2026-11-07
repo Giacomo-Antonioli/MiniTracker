@@ -1,3 +1,4 @@
+import { printHtml } from '../../app/platform'
 import { DIFFICULTY_LABEL, difficulty, paintCount, paintingOrder, techniquesUsed } from '../../domain/guides/prepare'
 import type { Technique } from '../../domain/guides/techniques'
 import type { PaintScheme } from '../../domain/schemes/types'
@@ -77,10 +78,5 @@ function techniqueTips(scheme: PaintScheme): string {
 }
 
 function printScheme(scheme: PaintScheme, paintName: (id: string) => string) {
-  const w = window.open('', '_blank')
-  if (!w) return
-  w.document.write(schemeSheet(scheme, paintName))
-  w.document.close()
-  w.focus()
-  w.print()
+  void printHtml(schemeSheet(scheme, paintName) + '<script>onload=()=>print()</script>')
 }

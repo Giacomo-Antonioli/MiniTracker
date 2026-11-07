@@ -1,3 +1,4 @@
+import { printPage } from '../../app/platform'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useStore } from '../../app/store'
@@ -16,7 +17,7 @@ export function RecipeCard({ scheme, onDone }: { scheme: PaintScheme; onDone: ()
     const done = () => onDone()
     window.addEventListener('afterprint', done)
     // Give the cover image a moment to load before opening the print dialog.
-    const t = setTimeout(() => window.print(), scheme.coverPhotoId ? 400 : 50)
+    const t = setTimeout(() => void printPage(), scheme.coverPhotoId ? 400 : 50)
     return () => {
       clearTimeout(t)
       window.removeEventListener('afterprint', done)

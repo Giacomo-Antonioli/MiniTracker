@@ -1,6 +1,12 @@
 #[cfg(desktop)]
 use tauri::Manager;
 
+/// Opens the system print dialog for the window (window.print() does nothing in the Windows webview).
+#[tauri::command]
+fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
+    window.print().map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default();
@@ -22,6 +28,7 @@ pub fn run() {
     builder
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_opener::init())
+        .invoke_handler(tauri::generate_handler![print_page])
         .setup(|app| {
             #[cfg(desktop)]
             {

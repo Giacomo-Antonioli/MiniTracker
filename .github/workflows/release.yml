@@ -49,6 +49,8 @@ jobs:
     needs: release
     strategy:
       fail-fast: false
+      # One at a time: each job rewrites latest.json, and parallel jobs overwrote each other's entries.
+      max-parallel: 1
       matrix:
         include:
           - os: ubuntu-22.04

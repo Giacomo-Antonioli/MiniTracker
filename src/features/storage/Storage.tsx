@@ -1,3 +1,4 @@
+import { printPage } from '../../app/platform'
 import { useState } from 'react'
 import { BoxDialog } from '../barcodes/BoxScan'
 import { ctx, useStore } from '../../app/store'
@@ -452,7 +453,7 @@ export function PickListDialog({ unitIds, unlinked, title, onClose }: { unitIds:
         <div className="flex flex-wrap gap-2">
           {target && toPack.length > 0 && <button className="btn btn-primary" onClick={() => run((x) => checkOut(x, toPack, target, ctx()))}>🧳 Pack {toPack.length} into {placeById(s, target)?.name}</button>}
           {target && pick.ready.length > 0 && <button className="btn" onClick={() => run((x) => putBack(x, pick.ready, ctx()))}>↩ Put back {pick.ready.length}</button>}
-          <button className="btn" onClick={() => window.print()}>🖨 Print</button>
+          <button className="btn" onClick={() => void printPage()}>🖨 Print</button>
         </div>
       </div>
     </Dialog>
