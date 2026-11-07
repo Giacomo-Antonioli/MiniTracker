@@ -29,6 +29,9 @@ test('welcome guide on first start: walk through, skip, reopen from Settings', a
   await expect(guide).toBeVisible()
   await guide.getByRole('button', { name: /4\. Your data/ }).click()
   await guide.getByRole('button', { name: /Start fresh/ }).click()
+  // Step 5 is a guided tour: it starts by itself; closing it shows the step in the guide.
+  await expect(page.locator('.driver-popover')).toContainText('The Backlog')
+  await page.locator('.driver-popover-close-btn').click()
   await expect(guide.getByRole('region', { name: 'Units' })).toContainText('Spearhead box')
 
   // "Open the Backlog" pauses the guide on the page; "Back to the guide" resumes at the same step.
@@ -38,6 +41,8 @@ test('welcome guide on first start: walk through, skip, reopen from Settings', a
   await page.getByRole('button', { name: /Back to the guide \(5\/9\)/ }).click()
   await expect(guide.getByRole('region', { name: 'Units' })).toBeVisible()
   await guide.getByRole('button', { name: 'Next' }).click()
+  await expect(page.locator('.driver-popover')).toContainText('Your paints')
+  await page.keyboard.press('Escape')
   await expect(guide.getByRole('region', { name: 'Paints' })).toContainText('Colour match')
   await guide.getByRole('button', { name: /9\. Find your way/ }).click()
   await guide.getByRole('button', { name: 'Start using MiniTracker' }).click()
@@ -45,11 +50,10 @@ test('welcome guide on first start: walk through, skip, reopen from Settings', a
   await expect(page.getByRole('status', { name: 'Welcome guide paused' })).toBeHidden()
 })
 
-test('"Show me" runs a guided tour over a demo collection, then puts your data back', async ({ page }) => {
+test('tour steps run a guided tour over a demo collection, chain on, and put your data back', async ({ page }) => {
   await page.goto('./')
   const guide = page.getByRole('dialog', { name: 'Welcome to MiniTracker' })
   await guide.getByRole('button', { name: /5\. Units/ }).click()
-  await guide.getByRole('button', { name: '▶ Show me' }).click()
   await expect(guide).toBeHidden()
 
   const pop = page.locator('.driver-popover')
@@ -68,13 +72,18 @@ test('"Show me" runs a guided tour over a demo collection, then puts your data b
   await expect(guide.getByRole('region', { name: 'Units' })).toBeVisible()
   await expect(page.getByText('Intercessor Squad')).toHaveCount(0)
 
-  // A tour across pages: Paints → Schemes; finishing moves the guide on to the next step.
+  // Show me again replays it; Next starts the next tour (Paints → Schemes, across pages).
+  await guide.getByRole('button', { name: '▶ Show me again' }).click()
+  await expect(pop).toContainText('The Backlog')
+  await page.keyboard.press('Escape')
   await guide.getByRole('button', { name: 'Next' }).click()
-  await guide.getByRole('button', { name: '▶ Show me' }).click()
   await expect(pop).toContainText('Your paints')
   for (let i = 0; i < 4; i++) await pop.getByRole('button', { name: 'Next' }).click()
   await expect(pop).toContainText('Your own scheme')
   await expect(page.getByRole('heading', { name: 'Schemes' })).toBeVisible()
+  // Done goes straight into the next tour (Workshop).
   await pop.getByRole('button', { name: 'Done' }).click()
+  await expect(pop).toContainText('Tools')
+  await page.locator('.driver-popover-close-btn').click()
   await expect(guide.getByRole('region', { name: 'Workshop' })).toBeVisible()
 })

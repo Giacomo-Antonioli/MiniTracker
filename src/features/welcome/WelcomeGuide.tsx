@@ -11,6 +11,16 @@ import { useWelcome } from './welcome'
 
 type TourName = keyof typeof TOURS
 
+/** Guide steps that are guided tours (5–8): reaching them starts the tour straight away. */
+const STEP_TOURS: Record<number, TourName> = { 4: 'units', 5: 'paints', 6: 'workshop', 7: 'armies' }
+
+/** Go to a guide step; a tour step starts its tour. */
+export function goToStep(step: number) {
+  useWelcome.setState({ step })
+  const tour = STEP_TOURS[step]
+  if (tour) void beginTour(tour)
+}
+
 /** Start a guided tour: the guide steps aside and the pages show the demo collection. */
 async function beginTour(name: TourName) {
   await startDemo()
@@ -30,7 +40,9 @@ export function WelcomeTour({ onGo }: { onGo: (to: WelcomeGo) => void }) {
       onEnd={(completed) => {
         endDemo()
         const { step } = useWelcome.getState()
-        useWelcome.setState({ touring: null, paused: false, step: completed ? Math.min(step + 1, STEPS.length - 1) : step })
+        useWelcome.setState({ touring: null, paused: false })
+        // Finished: on to the next step (the next tour, if it is one). Ended early: back to this step's page.
+        if (completed) goToStep(Math.min(step + 1, STEPS.length - 1))
       }}
     />
   )
@@ -66,7 +78,7 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
         <ol className="flex flex-wrap gap-1 text-xs" aria-label="Steps">
           {STEPS.map((s, i) => (
             <li key={s}>
-              <button className={`rounded px-2 py-0.5 ${i === step ? 'bg-accent text-accent-fg' : 'text-muted hover:text-fg'}`} aria-current={i === step ? 'step' : undefined} onClick={() => setStep(i)}>
+              <button className={`rounded px-2 py-0.5 ${i === step ? 'bg-accent text-accent-fg' : 'text-muted hover:text-fg'}`} aria-current={i === step ? 'step' : undefined} onClick={() => goToStep(i)}>
                 {i + 1}. {s}
               </button>
             </li>
@@ -77,7 +89,7 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
           {step === 0 && <Intro />}
           {step === 1 && <Games />}
           {step === 2 && <Look />}
-          {step === 3 && <Data onTry={tryIt} onFresh={() => setStep(4)} />}
+          {step === 3 && <Data onTry={tryIt} onFresh={() => goToStep(4)} />}
           {step === 4 && (
             <Topic title="Your units" tour="units" actions={[['Open the Backlog', 'backlog']]} onTry={tryIt}>
               <p>The <b>Backlog</b> is your collection: every unit you own or want, and how many of its models are at each painting stage.</p>
@@ -128,7 +140,7 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
           <button className="btn" onClick={() => leave()}>Skip guide</button>
           <span className="flex-1 text-center text-xs text-muted">{step + 1} / {STEPS.length}</span>
           {step > 0 && <button className="btn" onClick={() => setStep(step - 1)}>Back</button>}
-          {last ? <button className="btn btn-primary" onClick={() => leave()}>Start using MiniTracker</button> : <button className="btn btn-primary" onClick={() => setStep(step + 1)}>Next</button>}
+          {last ? <button className="btn btn-primary" onClick={() => leave()}>Start using MiniTracker</button> : <button className="btn btn-primary" onClick={() => goToStep(step + 1)}>Next</button>}
         </footer>
       </div>
     </Dialog>
@@ -154,8 +166,8 @@ function Topic({ title, tour, actions, onTry, children }: { title: string; tour:
       {children}
       <div className="grid gap-2 border-t border-line pt-3">
         <div className="flex flex-wrap items-center gap-2">
-          <button className="btn btn-primary" onClick={() => void beginTour(tour)}>▶ Show me</button>
-          <span className="text-sm text-muted">A guided tour of the pages with a demo collection; nothing is saved.</span>
+          <button className="btn btn-primary" onClick={() => void beginTour(tour)}>▶ Show me again</button>
+          <span className="text-sm text-muted">The guided tour of these pages, with a demo collection; nothing is saved.</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {actions.map(([label, to]) => <button key={to} className="btn text-sm" onClick={() => onTry(to)}>{label}</button>)}
