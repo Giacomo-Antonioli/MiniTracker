@@ -7,6 +7,12 @@ export const PUBLIC_URL = 'https://giacomo-antonioli.github.io/MiniTracker/'
 
 export const isDesktopApp = (): boolean => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 
+/** The Android app (Tauri mobile, #168 Phase 3). */
+export const isAndroidApp = (): boolean => isDesktopApp() && /Android/i.test(navigator.userAgent)
+
+/** Installs that update themselves from GitHub releases: the desktop app, not Android (the .apk is installed by hand). */
+export const canAutoUpdate = (): boolean => isDesktopApp() && !isAndroidApp()
+
 /** Base address for links to this app: the page's own address on the web, the public web app in the desktop app. */
 export const appUrl = (): string => (isDesktopApp() ? PUBLIC_URL : location.origin + location.pathname)
 

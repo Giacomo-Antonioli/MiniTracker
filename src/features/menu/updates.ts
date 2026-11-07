@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { isDesktopApp } from '../../app/platform'
+import { canAutoUpdate } from '../../app/platform'
 
 /** A newer signed release found by the desktop app's updater (#168). */
 export interface AppUpdate {
@@ -26,7 +26,7 @@ export const useUpdates = create<UpdateState>((set) => ({
   status: 'idle',
   dismissed: false,
   async check() {
-    if (!isDesktopApp()) return
+    if (!canAutoUpdate()) return
     set({ status: 'checking', error: undefined, dismissed: false })
     try {
       const { check } = await import('@tauri-apps/plugin-updater')

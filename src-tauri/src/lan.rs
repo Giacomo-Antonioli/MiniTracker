@@ -102,6 +102,7 @@ pub async fn lan_start(app: AppHandle, lan: State<'_, Lan>, id: String, name: St
         emit_peers(&app, &lan.peers);
         return Ok(r.port);
     }
+    crate::android::multicast_lock(true);
     let listener = TcpListener::bind("0.0.0.0:0").await.map_err(|e| e.to_string())?;
     let port = listener.local_addr().map_err(|e| e.to_string())?.port();
 
@@ -177,6 +178,7 @@ pub fn lan_stop(app: AppHandle, lan: State<'_, Lan>) {
         let _ = r.daemon.shutdown();
         r.server.abort();
     }
+    crate::android::multicast_lock(false);
     lan.peers.lock().unwrap().clear();
     emit_peers(&app, &lan.peers);
 }

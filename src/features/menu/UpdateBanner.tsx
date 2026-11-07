@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { isDesktopApp } from '../../app/platform'
+import { canAutoUpdate } from '../../app/platform'
 import { useT } from '../../i18n'
 import { installUpdate, releaseUrl, useUpdates } from './updates'
 
@@ -11,7 +11,7 @@ export function UpdateBanner() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (isDesktopApp() && useUpdates.getState().status === 'idle') void check()
+    if (canAutoUpdate() && useUpdates.getState().status === 'idle') void check()
   }, [check])
 
   if (!update || status !== 'found' || dismissed) return null

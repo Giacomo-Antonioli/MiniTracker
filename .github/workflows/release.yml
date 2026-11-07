@@ -34,6 +34,7 @@ jobs:
           if [ ! -s notes.md ]; then echo "No CHANGELOG section for $V"; exit 1; fi
           printf '\n**Live app:** https://giacomo-antonioli.github.io/MiniTracker/\n' >> notes.md
           printf '\n**Desktop app:** installers below (Windows .msi/.exe, macOS .dmg, Linux .deb/.AppImage). Installed apps update themselves (on Linux the AppImage does; the .deb updates through apt). They are not code-signed yet: on Windows choose *More info › Run anyway*; on macOS right-click the app › *Open*.\n' >> notes.md
+          printf '\n**Android:** the .apk below; allow *Install unknown apps* for your browser or file manager when asked. Test build: it does not update itself, and a newer .apk may need the old one uninstalled first (sync or back up your data before).\n' >> notes.md
       - name: Package built app
         run: cd dist && zip -qr "../minitracker-${GITHUB_REF_NAME}-web.zip" .
       - name: Create GitHub release
@@ -83,3 +84,34 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           args: ${{ matrix.args }} --config '{"bundle":{"createUpdaterArtifacts":true}}'
+
+  # Android app (#168 Phase 3): one .apk for all phones, attached to the release. Debug-signed for now so it
+  # installs by hand ("install unknown apps"); a release signing key is a follow-up. It doesn't touch
+  # latest.json (Android doesn't auto-update), so it runs alongside the desktop jobs.
+  android:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 24, cache: npm }
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: 21 }
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+      - uses: swatinem/rust-cache@v2
+        with: { workspaces: src-tauri }
+      - name: Android NDK
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.2.12479018" > /dev/null
+          echo "NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
+      - run: npm ci
+      - run: npx tauri android build --apk --debug --ci
+      - name: Upload the .apk
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APK="MiniTracker_${GITHUB_REF_NAME#v}_android.apk"
+          cp src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk "$APK"
+          gh release upload "$GITHUB_REF_NAME" "$APK" --clobber

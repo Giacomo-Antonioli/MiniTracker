@@ -7,7 +7,7 @@ import { CataloguePage } from './CataloguePage'
 import { PipelineEditor } from './PipelineEditor'
 import { WorkshopSettings } from './WorkshopSettings'
 import { SyncSettings } from './SyncSettings'
-import { isDesktopApp } from '../../app/platform'
+import { canAutoUpdate, isAndroidApp, isDesktopApp } from '../../app/platform'
 import { AUTO, UI_SCALES, effectiveScale, scaleLabel } from '../../domain/settings/uiScale'
 import { useUpdates } from '../menu/updates'
 import { useWelcome } from '../welcome/welcome'
@@ -80,7 +80,7 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
             {t('settings.currency')}
             <input className="input w-20" aria-label={t('settings.currency')} defaultValue={currency} key={currency} maxLength={4} onBlur={(e) => e.target.value.trim() && e.target.value.trim() !== currency && void setCurrency(e.target.value.trim())} />
           </label>
-          {isDesktopApp() && <AppVersion />}
+          {canAutoUpdate() && <AppVersion />}
           <div className="flex flex-wrap items-center gap-3">
             {t('settings.welcome')}
             <button type="button" className="btn px-2 py-0.5 text-sm" onClick={reopenWelcome}>{t('settings.showAgain')}</button>
@@ -97,7 +97,7 @@ export function SettingsPage({ section }: { section?: SettingsSection }) {
             <span className="w-24 tabular-nums">{scaleLabel(shownScale)}{uiScale === AUTO && t('settings.autoSuffix')}</span>
             {uiScale !== AUTO && <button type="button" className="btn px-2 py-0.5 text-sm" onClick={() => setUiScale(AUTO)}>{t('settings.auto')}</button>}
           </label>
-          <p className="text-sm text-muted">{t('settings.sizeHelp')}{isDesktopApp() && t('settings.sizeShortcut')}</p>
+          <p className="text-sm text-muted">{t('settings.sizeHelp')}{isDesktopApp() && !isAndroidApp() && t('settings.sizeShortcut')}</p>
         </div>
       </section>}
 
