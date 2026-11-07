@@ -1,3 +1,4 @@
+import { formatMoney } from '../../i18n/format'
 import { isGone } from '../collection/pipeline'
 import type { OwnedUnit, Pipeline, StageId } from '../collection/types'
 import type { PaintStock } from '../paints/types'
@@ -79,6 +80,5 @@ export function costSummary(units: OwnedUnit[], purchases: Purchase[], stock: It
 
 /** "€12.50" style; whole amounts without decimals. */
 export function money(n: number, currency: string): string {
-  const v = Math.round(n * 100) / 100
-  return `${currency}${Number.isInteger(v) ? v : v.toFixed(2)}`
+  return formatMoney(n, currency)
 }

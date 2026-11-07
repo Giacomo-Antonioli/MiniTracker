@@ -1,5 +1,6 @@
 import { isGone, WISHLISTED } from '../collection/pipeline'
 import type { OwnedUnit, Pipeline, StageId, StatusEvent } from '../collection/types'
+import { tr } from '../../i18n'
 
 /** 'YYYY-MM' of an ISO date. */
 const monthOf = (date: string) => date.slice(0, 7)
@@ -78,11 +79,11 @@ export function pileNow(units: OwnedUnit[], p: Pipeline, target: StageId = 'pain
 }
 
 export function pileLevel(pile: number): string {
-  if (pile === 0) return 'Clear'
-  if (pile < 20) return 'Molehill'
-  if (pile < 100) return 'Hill'
-  if (pile < 300) return 'Mountain'
-  return 'Everest'
+  if (pile === 0) return tr('home.level.clear')
+  if (pile < 20) return tr('home.level.molehill')
+  if (pile < 100) return tr('home.level.hill')
+  if (pile < 300) return tr('home.level.mountain')
+  return tr('home.level.everest')
 }
 
 export function addedIn(units: OwnedUnit[], p: Pipeline, keep: (date: string) => boolean) {

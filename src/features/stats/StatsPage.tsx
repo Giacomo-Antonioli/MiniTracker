@@ -12,12 +12,13 @@ import { gameStats, resultsOver, streaks } from '../../domain/games/games'
 import { activityByDay, byRole, paintUsage, pileAge, pointsOverTime, records, spending, stageFlow, stageTimes } from '../../domain/stats/more'
 import { ActivityCalendar, HBars, MonthArea, MonthBars, monthLabel } from './charts'
 import { byMonth, byWeek, lastWeeks, monthsSince, byFaction, finishMonths, lastMonths, netThisYear, pace, paintedPerMonth, pileFlow, pileLevel, pileNow, streakWeeks } from '../../domain/stats/stats'
+import { tr } from '../../i18n'
 
 /** "about 14 months", "about 2 years", or a dash when there is no pace yet. */
 export function forecast(months: number | undefined): string {
   if (months === undefined) return '—'
-  if (months === 0) return 'Done'
-  return months < 24 ? `about ${months} month${months === 1 ? '' : 's'}` : `about ${Math.round(months / 12)} years`
+  if (months === 0) return tr('home.forecast.done')
+  return months < 24 ? tr('home.forecast.months', { count: months }) : tr('home.forecast.years', { count: Math.round(months / 12) })
 }
 
 export function Tile({ label, value, hint, tone }: { label: string; value: string | number; hint?: string; tone?: 'good' | 'bad' }) {

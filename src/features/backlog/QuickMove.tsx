@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useStore } from '../../app/store'
 import type { ModelGroup, OwnedUnit } from '../../domain/collection/types'
+import { useTx } from '../../i18n'
 
 /** Move some or all models of a group, to the next stage by default (any stage can be chosen). */
 export function QuickMove({ unit, group }: { unit: OwnedUnit; group: ModelGroup }) {
+  const tx = useTx()
   const { pipeline, move } = useStore()
   const stages = pipeline.stages.filter((s) => s.id !== group.status)
   const at = pipeline.stages.findIndex((s) => s.id === group.status)
@@ -17,13 +19,13 @@ export function QuickMove({ unit, group }: { unit: OwnedUnit; group: ModelGroup 
 
   return (
     <div className="flex items-center gap-1 text-sm">
-      <input className="input w-14" type="number" min={1} max={group.count} value={n} aria-label={`How many ${name} to move`} onChange={(e) => setN(e.target.value)} />
+      <input className="input w-14" type="number" min={1} max={group.count} value={n} aria-label={tx('How many {{stage}} to move', { stage: name })} onChange={(e) => setN(e.target.value)} />
       <span>→</span>
-      <select className="input" value={to} aria-label={`Move ${name} to`} onChange={(e) => setTo(e.target.value)}>
+      <select className="input" value={to} aria-label={tx('Move {{stage}} to', { stage: name })} onChange={(e) => setTo(e.target.value)}>
         {stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
       </select>
-      <button className="btn" onClick={() => go(count)}>Move</button>
-      <button className="btn" onClick={() => go(group.count)} title={`Move all ${group.count}`}>All</button>
+      <button className="btn" onClick={() => go(count)}>{tx('Move')}</button>
+      <button className="btn" onClick={() => go(group.count)} title={tx('Move all {{n}}', { n: group.count })}>{tx('All')}</button>
     </div>
   )
 }

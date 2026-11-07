@@ -20,8 +20,11 @@ import { unitTag } from '../../domain/photos/naming'
 import { MoveDialog } from './MoveDialog'
 import { UnitStorage } from '../storage/Storage'
 import { QuickMove } from './QuickMove'
+import { lifecycleName } from './lifecycle'
+import { formatDate } from '../../i18n/format'
+import { useTx } from '../../i18n'
 
-const fmt = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+const fmt = (iso: string) => formatDate(iso, { day: '2-digit', month: 'short', year: 'numeric' })
 
 interface Props {
   unit: OwnedUnit
@@ -36,6 +39,7 @@ interface Props {
 }
 
 export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage, onOpenDatasheet, onOpenScheme }: Props) {
+  const tx = useTx()
   const page = variant === 'page'
   const [tab, setTab] = useState<'details' | 'storage'>('details')
   const { pipeline, events, loadEvents, saveUnit, deleteUnit, catalogue, photos: allPhotos, loadPhotos, schemes, library, loadLibrary, paints, loadPaints, paintStock, purchases, currency, openCompanion } = useStore()
@@ -73,35 +77,36 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
   return (
     <Container
       className={page ? 'panel mx-auto flex w-full max-w-4xl flex-col' : 'panel fixed inset-0 z-40 flex flex-col overflow-y-auto rounded-none md:static md:z-auto md:h-full md:w-[420px] md:shrink-0 md:rounded-[inherit]'}
-      aria-label={page ? 'Unit page' : 'Unit details'}
+      aria-label={page ? tx('Unit page') : tx('Unit details')}
       data-tour="unit-details"
+      page={page}
     >
       <header className="border-b border-line p-4">
         {page && (
           <button className="mb-3 text-sm text-muted hover:text-accent" onClick={onClose}>
-            ← Back to backlog
+            {tx('← Back to backlog')}
           </button>
         )}
         <div className="flex flex-wrap items-start justify-between gap-2">
           <h2 className={`min-w-0 break-words font-display text-accent ${page ? 'text-3xl' : 'text-xl'}`}>{unit.customName}</h2>
           <div className="flex flex-wrap gap-1">
-            <button className="btn" aria-pressed={unit.favourite} title="Favourite" onClick={() => toggle('favourite')}>{unit.favourite ? '★' : '☆'}</button>
-            <button className="btn" title="Painter companion" onClick={() => openCompanion('paint', unit.id)}>🎨 Paint</button>
-            <button className="btn" title="Builder companion" onClick={() => openCompanion('build', unit.id)}>🔨 Build</button>
-            <button className="btn" aria-pressed={unit.nextUp} title="Next up" onClick={() => toggle('nextUp')}>{unit.nextUp ? '⏭' : '⏵'}</button>
+            <button className="btn" aria-pressed={unit.favourite} title={tx('Favourite')} onClick={() => toggle('favourite')}>{unit.favourite ? '★' : '☆'}</button>
+            <button className="btn" title={tx('Painter companion')} onClick={() => openCompanion('paint', unit.id)}>{tx('🎨 Paint')}</button>
+            <button className="btn" title={tx('Builder companion')} onClick={() => openCompanion('build', unit.id)}>{tx('🔨 Build')}</button>
+            <button className="btn" aria-pressed={unit.nextUp} title={tx('Next up')} onClick={() => toggle('nextUp')}>{unit.nextUp ? '⏭' : '⏵'}</button>
             {!page && onOpenPage && (
-              <button className="btn" title="Open the full unit page" onClick={onOpenPage}>⤢ Open page</button>
+              <button className="btn" title={tx('Open the full unit page')} onClick={onOpenPage}>{tx('⤢ Open page')}</button>
             )}
-            {!page && <button className="btn" aria-label="Close details" onClick={onClose}>✕</button>}
+            {!page && <button className="btn" aria-label={tx('Close details')} onClick={onClose}>✕</button>}
           </div>
         </div>
         <p className="mt-1 text-sm text-muted">
-          {unit.factionName ?? 'No faction'} · {unit.lifecycle} ·{' '}
-          <span title="Permanent unit tag, used in photo names and future QR/NFC tags" aria-label="Unit tag">🏷 {unitTag(unit.id)}</span>
+          {unit.factionName ?? tx('No faction')} · {lifecycleName(unit.lifecycle)} ·{' '}
+          <span title={tx('Permanent unit tag, used in photo names and future QR/NFC tags')} aria-label={tx('Unit tag')}>🏷 {unitTag(unit.id)}</span>
         </p>
         <GamesPlayed unitId={unit.id} />
         {datasheet && (
-          <p className="mt-1 text-sm" aria-label="Datasheet">
+          <p className="mt-1 text-sm" aria-label={tx('Datasheet')}>
             📜{' '}
             {onOpenDatasheet ? (
               <button className="text-accent underline" onClick={() => onOpenDatasheet(datasheet.id)}>{datasheet.name}</button>
@@ -109,32 +114,32 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
               datasheet.name
             )}
             {datasheet.role && <span className="text-muted"> · {datasheet.role}</span>}
-            <span className="text-muted"> · {models} models</span>
+            <span className="text-muted"> · {tx('{{n}} models', { n: models })}</span>
             {points !== undefined ? (
-              <b className="text-accent"> · {points || '?'} pts</b>
+              <b className="text-accent"> · {tx('{{pts}} pts', { pts: points || '?' })}</b>
             ) : (
-              <span className="text-danger"> · size {datasheet.minModels}–{datasheet.maxModels} allowed</span>
+              <span className="text-danger"> · {tx('size {{min}}–{{max}} allowed', { min: datasheet.minModels, max: datasheet.maxModels })}</span>
             )}
           </p>
         )}
         <div className="mt-3 flex gap-2">
-          <button className="btn" onClick={onEdit}>Edit</button>
+          <button className="btn" onClick={onEdit}>{tx('Edit')}</button>
           <button
             className="btn btn-danger"
             onClick={() => {
-              if (confirm(`Delete "${unit.customName}" and its history?`)) void deleteUnit(unit.id).then(onClose)
+              if (confirm(tx('Delete "{{name}}" and its history?', { name: unit.customName }))) void deleteUnit(unit.id).then(onClose)
             }}
           >
-            Delete
+            {tx('Delete')}
           </button>
         </div>
       </header>
 
       {page && (
-        <div className="flex gap-1 border-b border-line px-4 pt-2" role="tablist" aria-label="Unit sections">
+        <div className="flex gap-1 border-b border-line px-4 pt-2" role="tablist" aria-label={tx('Unit sections')}>
           {(['details', 'storage'] as const).map((t) => (
             <button key={t} role="tab" aria-selected={tab === t} className={`rounded-t px-3 py-1.5 ${tab === t ? 'bg-panel-2 text-accent' : 'text-muted hover:text-fg'}`} onClick={() => setTab(t)}>
-              {t === 'details' ? 'Details' : '📦 Storage'}
+              {t === 'details' ? tx('Details') : tx('📦 Storage')}
             </button>
           ))}
         </div>
@@ -142,7 +147,7 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
       {page && tab === 'storage' && <UnitStorage unit={unit} />}
       {(!page || tab === 'details') && <>
       <section className="border-b border-line p-4">
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Models</h3>
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{tx('Models')}</h3>
         <ul className="grid gap-2">
           {unit.groups.map((g) => (
             <li key={g.id} className="flex items-center justify-between gap-2">
@@ -155,7 +160,7 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
               </div>
               <div className="flex flex-col items-end gap-1">
                 <QuickMove key={`${g.id}-${g.count}-${g.status}`} unit={unit} group={g} />
-                <button className="text-xs text-muted underline" data-tour="move-with-date" onClick={() => setMoving(g)}>Move with date, note or photo…</button>
+                <button className="text-xs text-muted underline" data-tour="move-with-date" onClick={() => setMoving(g)}>{tx('Move with date, note or photo…')}</button>
               </div>
             </li>
           ))}
@@ -164,12 +169,12 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
 
       {!page && <UnitStorage unit={unit} />}
 
-      <section className="grid gap-2 border-b border-line p-4" aria-label="Scheme">
+      <section className="grid gap-2 border-b border-line p-4" aria-label={tx('Scheme')}>
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">Paint scheme</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">{tx('Paint scheme')}</h3>
           <div className="w-56">
             <SchemePicker
-              label="Choose scheme"
+              label={tx('Choose scheme')}
               chosenColours={false}
               value={unit.schemeId}
               paints={paints}
@@ -184,25 +189,25 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
             <ol className="text-xs text-muted">
               {scheme.sections.map((sec) => (
                 <li key={sec.id}>
-                  <b>{sec.area}:</b> {sec.steps.map((st) => `${st.technique || 'step'} (${st.paints.map((p) => paints.find((x) => x.id === p.paintId)?.name ?? '?').join(' + ')})`).join(' → ')}
+                  <b>{sec.area}:</b> {sec.steps.map((st) => `${st.technique || tx('step')} (${st.paints.map((p) => paints.find((x) => x.id === p.paintId)?.name ?? '?').join(' + ')})`).join(' → ')}
                 </li>
               ))}
             </ol>
             <AddToShoppingButton
-              label="Add missing paints to shopping list…"
-              items={missingForSchemes([scheme], paints, paintStock).map((m) => ({ kind: 'paint' as const, name: m.paint ? `${m.paint.brand} ${m.paint.name}` : m.paintId, refId: m.paintId, qty: 1, sources: [`Scheme: ${scheme.name}`] }))}
+              label={tx('Add missing paints to shopping list…')}
+              items={missingForSchemes([scheme], paints, paintStock).map((m) => ({ kind: 'paint' as const, name: m.paint ? `${m.paint.brand} ${m.paint.name}` : m.paintId, refId: m.paintId, qty: 1, sources: [tx('Scheme: {{name}}', { name: scheme.name })] }))}
             />
           </>
         ) : (
           <p className="text-sm text-muted">
-            {unit.schemeId ? 'The linked scheme is no longer available.' : schemesForUnit(allSchemes, unit, datasheet).length ? 'No scheme yet: pick one above.' : 'No schemes for this unit yet.'}
+            {unit.schemeId ? tx('The linked scheme is no longer available.') : schemesForUnit(allSchemes, unit, datasheet).length ? tx('No scheme yet: pick one above.') : tx('No schemes for this unit yet.')}
           </p>
         )}
       </section>
 
       {datasheet && catalogue && (
-        <details className="border-b border-line" open={page} aria-label="Datasheet details">
-          <summary className="cursor-pointer p-4 text-xs font-semibold uppercase tracking-wider text-muted">Datasheet: stats, weapons, abilities, rules, wargear</summary>
+        <details className="border-b border-line" open={page} aria-label={tx('Datasheet details')}>
+          <summary className="cursor-pointer p-4 text-xs font-semibold uppercase tracking-wider text-muted">{tx('Datasheet: stats, weapons, abilities, rules, wargear')}</summary>
           <DatasheetInfo catalogue={catalogue} d={datasheet} />
         </details>
       )}
@@ -212,14 +217,14 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
       <UnitCost unit={unit} purchases={purchases} currency={currency} onSave={(price) => void saveUnit({ ...unit, price, updatedAt: new Date().toISOString() })} />
 
       <section className="border-b border-line p-4">
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">History</h3>
-        {history.length === 0 && <p className="text-sm text-muted">No changes yet.</p>}
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{tx('History')}</h3>
+        {history.length === 0 && <p className="text-sm text-muted">{tx('No changes yet.')}</p>}
         <ol className="grid gap-3">
           {history.map((e) => (
             <li key={e.id} className="grid grid-cols-[90px_1fr] gap-2 text-sm">
               <span className="text-muted">{fmt(e.date)}</span>
               <div>
-                {e.count} models {stageName(e.from)} {e.direction === 'forward' ? '→' : '↩'} {stageName(e.to)}
+                {tx('{{n}} models', { n: e.count })} {stageName(e.from)} {e.direction === 'forward' ? '→' : '↩'} {stageName(e.to)}
                 {e.note && <p className="text-muted italic">“{e.note}”</p>}
                 {(() => {
                   const ph = e.photoId && photos.find((p) => p.id === e.photoId)
@@ -233,12 +238,12 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
 
       {unit.tutorials.length > 0 && (
         <section className="border-b border-line p-4">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Tutorials</h3>
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{tx('Tutorials')}</h3>
           <ul className="grid gap-1">
             {unit.tutorials.map((t, i) => (
               <li key={i}>
                 <a className="text-accent underline" href={t.url} target="_blank" rel="noreferrer">{t.title || t.url}</a>
-                <span className="text-xs text-muted"> · {t.kind}</span>
+                <span className="text-xs text-muted"> · {tx(t.kind)}</span>
               </li>
             ))}
           </ul>
@@ -262,8 +267,8 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
   )
 }
 
-function Container({ className, children, ...rest }: { className: string; children: ReactNode; 'aria-label': string }) {
-  return rest['aria-label'] === 'Unit page' ? (
+function Container({ className, children, page, ...rest }: { className: string; children: ReactNode; 'aria-label': string; 'data-tour': string; page: boolean }) {
+  return page ? (
     <article className={className} {...rest}>{children}</article>
   ) : (
     <aside className={className} {...rest}>{children}</aside>
@@ -272,24 +277,26 @@ function Container({ className, children, ...rest }: { className: string; childr
 
 /** "⚔ Played in 3 games · destroyed in 1", from finished games whose list this unit fills (#71). */
 function GamesPlayed({ unitId }: { unitId: string }) {
+  const tx = useTx()
   const { games, lists, units, pipeline } = useStore()
   if (!games.length) return null
   const r = unitRecord(unitId, games, lists, (id, l) => [...listOwnership(l, units, pipeline).byEntry].filter(([, o]) => o.from.some((f) => f.unitId === id)).map(([entryId]) => entryId))
   if (!r.played) return null
-  return <p className="mt-1 text-sm text-muted" aria-label="Games played">⚔ Played in {r.played} game{r.played === 1 ? '' : 's'}{r.destroyed ? ` · destroyed in ${r.destroyed}` : ''}</p>
+  return <p className="mt-1 text-sm text-muted" aria-label={tx('Games played')}>{r.played === 1 ? tx('⚔ Played in 1 game') : tx('⚔ Played in {{n}} games', { n: r.played })}{r.destroyed ? tx(' · destroyed in {{n}}', { n: r.destroyed }) : ''}</p>
 }
 
 /** Price paid for the unit on its own, plus what it got from shared purchases. */
 function UnitCost({ unit, purchases, currency, onSave }: { unit: OwnedUnit; purchases: Purchase[]; currency: string; onSave: (price: number | undefined) => void }) {
+  const tx = useTx()
   const mine = purchases.filter((p) => p.unitIds.includes(unit.id))
   const share = purchaseShares(mine, useStore.getState().units).get(unit.id)
   const value = unit.price?.toString() ?? ''
   return (
-    <section className="flex flex-wrap items-center gap-2 border-b border-line p-4 text-sm" aria-label="Cost">
-      <span className="text-xs font-semibold uppercase tracking-wider text-muted">Price paid</span>
-      <input key={value} className="input w-24" type="number" min={0} step="0.01" aria-label="Price paid" defaultValue={value} onBlur={(e) => e.target.value !== value && onSave(e.target.value === '' ? undefined : Number(e.target.value))} />
+    <section className="flex flex-wrap items-center gap-2 border-b border-line p-4 text-sm" aria-label={tx('Cost')}>
+      <span className="text-xs font-semibold uppercase tracking-wider text-muted">{tx('Price paid')}</span>
+      <input key={value} className="input w-24" type="number" min={0} step="0.01" aria-label={tx('Price paid')} defaultValue={value} onBlur={(e) => e.target.value !== value && onSave(e.target.value === '' ? undefined : Number(e.target.value))} />
       <span className="text-muted">{currency}</span>
-      {mine.length > 0 && <span className="text-muted">+ {mine.map((p) => p.name).join(', ')}{share !== undefined ? ` (share ${money(share, currency)})` : ''}</span>}
+      {mine.length > 0 && <span className="text-muted">+ {mine.map((p) => p.name).join(', ')}{share !== undefined ? tx(' (share {{amount}})', { amount: money(share, currency) }) : ''}</span>}
     </section>
   )
 }

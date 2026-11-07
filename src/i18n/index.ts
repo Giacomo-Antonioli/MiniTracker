@@ -7,6 +7,7 @@ import { de } from './locales/de'
 import { fr } from './locales/fr'
 import { zh } from './locales/zh'
 import { AREAS } from './areas'
+import { TEXT } from './text'
 
 /** The app's languages, each named in its own language. BSData game data (unit names, rules) stays English. */
 export const LANGUAGES = { en: 'English', it: 'Italiano', es: 'Español', de: 'Deutsch', fr: 'Français', zh: '中文' } as const
@@ -35,13 +36,20 @@ export function readLanguageChoice(): LanguageChoice {
   return 'auto'
 }
 
+/** Page text keyed by its English wording (see tx): this language's dictionary. */
+function uiStrings(lang: Language): Record<string, string> {
+  if (lang === 'en') return {}
+  const i = (['it', 'es', 'de', 'fr', 'zh'] as const).indexOf(lang)
+  return Object.fromEntries(Object.values(TEXT).flatMap((area) => Object.entries(area).map(([k, v]) => [k, v[i]])))
+}
+
 const resolve = (c: LanguageChoice): Language => (c === 'auto' ? deviceLanguage() : c)
 
 void i18n.use(initReactI18next).init({
   resources: Object.fromEntries(
     Object.entries({ en, it, es, de, fr, zh }).map(([lang, core]) => [
       lang,
-      { translation: { ...core, ...Object.fromEntries(Object.entries(AREAS).map(([name, a]) => [name, a[lang as Language]])) } },
+      { translation: { ...core, ...Object.fromEntries(Object.entries(AREAS).map(([name, a]) => [name, a[lang as Language]])) }, ui: uiStrings(lang as Language) },
     ]),
   ),
   lng: resolve(readLanguageChoice()),
@@ -65,3 +73,20 @@ export function setLanguageChoice(c: LanguageChoice) {
 
 export const useT = () => useTranslation().t
 export { i18n }
+
+/** For text built outside components (domain helpers): the current language at the time of the call. */
+export const tr = (key: string, options: Record<string, unknown> = {}): string => i18n.t(key, options) as string
+
+const UI = { ns: 'ui', keySeparator: false, nsSeparator: false } as const
+
+/**
+ * Page text by its English wording: tx('Add unit'), tx('{{n}} models', { n }). English needs no entry; the other
+ * languages look it up in src/i18n/text (a test checks every tx('…') in the code has all five translations).
+ */
+export const txr = (english: string, options: Record<string, unknown> = {}): string => i18n.t(english, { ...UI, ...options }) as string
+
+/** tx for components: re-renders when the language changes. */
+export function useTx() {
+  useTranslation()
+  return txr
+}
