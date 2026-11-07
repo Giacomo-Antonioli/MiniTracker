@@ -12,6 +12,8 @@ import { SchemePicker } from '../schemes/SchemePicker'
 import { Combobox, type ComboOption } from '../../ui/Combobox'
 import { Dialog } from '../../ui/Dialog'
 import { InfoTip } from '../../ui/InfoTip'
+import { lifecycleName } from './lifecycle'
+import { txr, useTx } from '../../i18n'
 
 interface GroupDraft {
   id?: string
@@ -22,10 +24,8 @@ interface GroupDraft {
   showMagnets?: boolean
 }
 
-const LEGENDS_INFO =
-  'Legends are older units that Games Workshop no longer updates for current matched play. ' +
-  'You can still use them in casual and narrative games, but they are usually not allowed in tournaments. ' +
-  'They are hidden from the list unless you tick this box.'
+const LEGENDS_INFO = () =>
+  txr('Legends are older units that Games Workshop no longer updates for current matched play. You can still use them in casual and narrative games, but they are usually not allowed in tournaments. They are hidden from the list unless you tick this box.')
 
 const LIFECYCLES: Lifecycle[] = ['active', 'on-hold', 'sold', 'traded', 'gifted', 'lost']
 
@@ -42,6 +42,7 @@ export function UnitFormDialog({
   /** Start a new unit from a catalogue datasheet (e.g. "Add to collection"). */
   preset?: { datasheet: Datasheet; factionId?: string }
 }) {
+  const tx = useTx()
   const { pipeline, saveUnit, catalogue, schemes: mySchemes, library, schemeDefaults, paints, loadPaints } = useStore()
   const schemes = [...mySchemes, ...library]
   const presetFaction = preset && catalogue ? (preset.factionId && preset.datasheet.factionIds.includes(preset.factionId) ? preset.factionId : preset.datasheet.factionIds[0]) : undefined
@@ -77,9 +78,9 @@ export function UnitFormDialog({
 
   const factionOptions = useMemo((): ComboOption[] => {
     const q = faction.trim().toLowerCase()
-    const fromCatalogue = (catalogue?.factions ?? []).map((f) => ({ value: f.id, label: f.name, group: 'Catalogue' }))
+    const fromCatalogue = (catalogue?.factions ?? []).map((f) => ({ value: f.id, label: f.name, group: tx('Catalogue') }))
     const known = new Set(fromCatalogue.map((f) => f.label))
-    const used = factions.filter((f) => !known.has(f)).map((f) => ({ value: `custom:${f}`, label: f, group: 'Your factions' }))
+    const used = factions.filter((f) => !known.has(f)).map((f) => ({ value: `custom:${f}`, label: f, group: tx('Your factions') }))
     return [...fromCatalogue, ...used].filter((o) => o.label.toLowerCase().includes(q))
   }, [catalogue, factions, faction])
 
@@ -147,7 +148,7 @@ export function UnitFormDialog({
   }
 
   return (
-    <Dialog title={unit ? 'Edit unit' : 'Add unit'} onClose={onClose} wide>
+    <Dialog title={unit ? tx('Edit unit') : tx('Add unit')} onClose={onClose} wide>
       <form
         className="grid gap-3"
         onSubmit={(e) => {
@@ -157,7 +158,8 @@ export function UnitFormDialog({
         }}
       >
         <Combobox
-          label="Faction"
+          label={tx('Faction')}
+          tour="unit-faction"
           text={faction}
           onTextChange={(t) => {
             setFaction(t)
@@ -168,21 +170,22 @@ export function UnitFormDialog({
             setFaction(o.label)
             setFactionId(o.value.startsWith('custom:') ? undefined : o.value)
           }}
-          placeholder={catalogue ? 'Type to search, e.g. Ultramarines' : 'e.g. Ultramarines'}
+          placeholder={catalogue ? tx('Type to search, e.g. Ultramarines') : tx('e.g. Ultramarines')}
         />
         <Combobox
-          label="Name *"
+          label={tx('Name *')}
+          tour="unit-name"
           text={name}
           onTextChange={setName}
           options={unitOptions}
           onSelect={(o) => pickDatasheet(catalogue!.datasheets.find((d) => d.id === o.value)!)}
-          placeholder={catalogue ? 'Type to search the catalogue, or enter any name' : 'e.g. Intercessor Squad'}
+          placeholder={catalogue ? tx('Type to search the catalogue, or enter any name') : tx('e.g. Intercessor Squad')}
           autoFocus
           footer={
             !catalogue
-              ? 'Tip: download the catalogue in Settings → Catalogue to pick units from a list.'
+              ? tx('Tip: download the catalogue in Settings → Catalogue to pick units from a list.')
               : unitOptions.length === 0 && name.trim()
-                ? 'No catalogue match. You can keep a custom name (conversions, other games).'
+                ? tx('No catalogue match. You can keep a custom name (conversions, other games).')
                 : undefined
           }
         />
@@ -190,36 +193,36 @@ export function UnitFormDialog({
           {catalogue && (
             <span className="flex items-center gap-1.5">
               <label className="flex items-center gap-1 text-muted">
-                <input type="checkbox" checked={showLegends} onChange={(e) => setShowLegends(e.target.checked)} /> Show Legends
+                <input type="checkbox" checked={showLegends} onChange={(e) => setShowLegends(e.target.checked)} /> {tx('Show Legends')}
               </label>
-              <InfoTip label="What are Legends?" text={LEGENDS_INFO} />
+              <InfoTip label={tx('What are Legends?')} text={LEGENDS_INFO()} />
             </span>
           )}
           {datasheet ? (
             <span className="flex items-center gap-2" data-testid="datasheet-link">
-              <span className="text-ok">✓ Linked to datasheet “{datasheet.name}”</span>
-              <span className="text-muted">{points === undefined ? `${datasheet.minModels}–${datasheet.maxModels} models` : `${totalModels} models = ${points || '?'} pts`}</span>
-              <button type="button" className="text-muted underline" onClick={() => setDatasheetId(undefined)}>unlink</button>
+              <span className="text-ok">{tx('✓ Linked to datasheet “{{name}}”', { name: datasheet.name })}</span>
+              <span className="text-muted">{points === undefined ? tx('{{min}}–{{max}} models', { min: datasheet.minModels, max: datasheet.maxModels }) : tx('{{n}} models = {{pts}} pts', { n: totalModels, pts: points || '?' })}</span>
+              <button type="button" className="text-muted underline" onClick={() => setDatasheetId(undefined)}>{tx('unlink')}</button>
             </span>
           ) : (
-            unit?.datasheetId && <span className="text-muted">Datasheet not found in the installed catalogue.</span>
+            unit?.datasheetId && <span className="text-muted">{tx('Datasheet not found in the installed catalogue.')}</span>
           )}
         </div>
 
         <fieldset className="grid gap-2">
-          <legend className="mb-1 text-sm text-muted">Model groups</legend>
+          <legend className="mb-1 text-sm text-muted">{tx('Model groups')}</legend>
           {groups.map((g, i) => (
             <div key={i} className="flex flex-wrap items-center gap-2">
-              <input className="input w-20" type="number" min={1} value={g.count} aria-label="Models" onChange={(e) => patchGroup(i, { count: Number(e.target.value) })} />
-              <span className="text-muted">models in</span>
-              <select className="input" value={g.status} aria-label="Stage" onChange={(e) => patchGroup(i, { status: e.target.value })}>
+              <input className="input w-20" type="number" min={1} value={g.count} aria-label={tx('Models')} data-tour="unit-models" onChange={(e) => patchGroup(i, { count: Number(e.target.value) })} />
+              <span className="text-muted">{tx('models in')}</span>
+              <select className="input" value={g.status} aria-label={tx('Stage')} data-tour="unit-stage" onChange={(e) => patchGroup(i, { status: e.target.value })}>
                 {pipeline.stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
-              <input className="input flex-1" list={datasheet ? 'wargear-options' : undefined} placeholder="loadout, comma separated" value={g.loadout} aria-label="Loadout" onChange={(e) => patchGroup(i, { loadout: e.target.value })} />
-              <button type="button" className="btn" aria-expanded={!!g.showMagnets} aria-label="Magnets" title="Magnet slots" onClick={() => patchGroup(i, { showMagnets: !g.showMagnets })}>
+              <input className="input flex-1" list={datasheet ? 'wargear-options' : undefined} placeholder={tx('loadout, comma separated')} value={g.loadout} aria-label={tx('Loadout')} onChange={(e) => patchGroup(i, { loadout: e.target.value })} />
+              <button type="button" className="btn" aria-expanded={!!g.showMagnets} aria-label={tx('Magnets')} title={tx('Magnet slots')} onClick={() => patchGroup(i, { showMagnets: !g.showMagnets })}>
                 🧲{g.magnets.length > 0 && ` ${g.magnets.length}`}
               </button>
-              <button type="button" className="btn btn-danger" aria-label="Remove group" disabled={groups.length === 1} onClick={() => setGroups(groups.filter((_, j) => j !== i))}>✕</button>
+              <button type="button" className="btn btn-danger" aria-label={tx('Remove group')} disabled={groups.length === 1} onClick={() => setGroups(groups.filter((_, j) => j !== i))}>✕</button>
               {g.showMagnets && (
                 <div className="basis-full">
                   <MagnetEditor slots={g.magnets} wargear={datasheet?.wargear ?? []} onChange={(m) => patchGroup(i, { magnets: m })} />
@@ -229,14 +232,14 @@ export function UnitFormDialog({
           ))}
           {datasheet && <datalist id="wargear-options">{datasheet.wargear.map((w) => <option key={w} value={w} />)}</datalist>}
           <button type="button" className="btn w-fit" onClick={() => setGroups([...groups, { count: 1, status: firstOwnedStage(pipeline), loadout: '', magnets: [] }])}>
-            + Add group
+            {tx('+ Add group')}
           </button>
         </fieldset>
 
         <div className="grid gap-1">
-          <span className="text-sm text-muted">Paint scheme</span>
+          <span className="text-sm text-muted">{tx('Paint scheme')}</span>
           <SchemePicker
-            label="Paint scheme"
+            label={tx('Paint scheme')}
             value={effectiveScheme}
             paints={paints}
             isDefault={(x) => schemeDefaults[x.factionName ?? ''] === x.id}
@@ -253,45 +256,45 @@ export function UnitFormDialog({
         </div>
 
         <fieldset className="grid gap-2">
-          <legend className="mb-1 text-sm text-muted">Tutorials and guides</legend>
+          <legend className="mb-1 text-sm text-muted">{tx('Tutorials and guides')}</legend>
           {tutorials.map((t, i) => (
             <div key={i} className="flex flex-wrap gap-2">
-              <input className="input w-40" placeholder="title" value={t.title} onChange={(e) => setTutorials(tutorials.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} />
+              <input className="input w-40" placeholder={tx('title')} value={t.title} onChange={(e) => setTutorials(tutorials.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} />
               <input className="input flex-1" placeholder="https://…" value={t.url} onChange={(e) => setTutorials(tutorials.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} />
               <select className="input" value={t.kind} onChange={(e) => setTutorials(tutorials.map((x, j) => (j === i ? { ...x, kind: e.target.value as Link['kind'] } : x)))}>
-                <option value="build">build</option>
-                <option value="paint">paint</option>
-                <option value="lore">lore</option>
-                <option value="other">other</option>
+                <option value="build">{tx('build')}</option>
+                <option value="paint">{tx('paint')}</option>
+                <option value="lore">{tx('lore')}</option>
+                <option value="other">{tx('other')}</option>
               </select>
-              <button type="button" className="btn btn-danger" aria-label="Remove link" onClick={() => setTutorials(tutorials.filter((_, j) => j !== i))}>✕</button>
+              <button type="button" className="btn btn-danger" aria-label={tx('Remove link')} onClick={() => setTutorials(tutorials.filter((_, j) => j !== i))}>✕</button>
             </div>
           ))}
-          <button type="button" className="btn w-fit" onClick={() => setTutorials([...tutorials, { title: '', url: '', kind: 'paint' }])}>+ Add link</button>
+          <button type="button" className="btn w-fit" onClick={() => setTutorials([...tutorials, { title: '', url: '', kind: 'paint' }])}>{tx('+ Add link')}</button>
         </fieldset>
 
         <label className="grid gap-1">
-          <span className="text-sm text-muted">Notes</span>
+          <span className="text-sm text-muted">{tx('Notes')}</span>
           <textarea className="input min-h-16" value={notes} onChange={(e) => setNotes(e.target.value)} />
         </label>
         <label className="grid gap-1">
-          <span className="text-sm text-muted">Tags (comma separated)</span>
-          <input className="input" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="crusade, display" />
+          <span className="text-sm text-muted">{tx('Tags (comma separated)')}</span>
+          <input className="input" value={tags} onChange={(e) => setTags(e.target.value)} placeholder={tx('crusade, display')} />
         </label>
         <div className="flex flex-wrap items-center gap-4">
-          <label className="flex items-center gap-2"><input type="checkbox" checked={favourite} onChange={(e) => setFavourite(e.target.checked)} /> Favourite</label>
-          <label className="flex items-center gap-2"><input type="checkbox" checked={nextUp} onChange={(e) => setNextUp(e.target.checked)} /> Next up</label>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={favourite} onChange={(e) => setFavourite(e.target.checked)} /> {tx('Favourite')}</label>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={nextUp} onChange={(e) => setNextUp(e.target.checked)} /> {tx('Next up')}</label>
           <label className="flex items-center gap-2">
-            State
+            {tx('State')}
             <select className="input" value={lifecycle} onChange={(e) => setLifecycle(e.target.value as Lifecycle)}>
-              {LIFECYCLES.map((l) => <option key={l} value={l}>{l}</option>)}
+              {LIFECYCLES.map((l) => <option key={l} value={l}>{lifecycleName(l)}</option>)}
             </select>
           </label>
         </div>
         {error && <p className="text-danger" role="alert">{error}</p>}
         <div className="flex justify-end gap-2">
-          <button type="button" className="btn" onClick={(e) => (e.target as HTMLElement).closest('dialog')?.close()}>Cancel</button>
-          <button type="submit" className="btn btn-primary">Save</button>
+          <button type="button" className="btn" onClick={(e) => (e.target as HTMLElement).closest('dialog')?.close()}>{tx('Cancel')}</button>
+          <button type="submit" className="btn btn-primary" data-tour="unit-save">{tx('Save')}</button>
         </div>
       </form>
     </Dialog>

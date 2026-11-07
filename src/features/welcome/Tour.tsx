@@ -2,6 +2,7 @@ import { driver, type Driver } from 'driver.js'
 import 'driver.js/dist/driver.css'
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../../app/store'
+import { i18n } from '../../i18n'
 import type { WelcomeGo } from './WelcomeGuide'
 import { findTarget, runActions, waitForTarget, type TourStep } from './tourTarget'
 
@@ -68,9 +69,9 @@ export function Tour({ name, steps: allSteps, onGo, onEnd }: { name: string; ste
       popoverClass: 'mt-tour',
       showProgress: true,
       progressText: `${name} · {{current}} / {{total}}`,
-      nextBtnText: 'Next',
-      prevBtnText: 'Back',
-      doneBtnText: 'Done',
+      nextBtnText: i18n.t('tour.next'),
+      prevBtnText: i18n.t('tour.back'),
+      doneBtnText: i18n.t('tour.done'),
       allowClose: true,
       overlayClickBehavior: 'none',
       disableActiveInteraction: true,
@@ -82,7 +83,7 @@ export function Tour({ name, steps: allSteps, onGo, onEnd }: { name: string; ste
         // Not found: a centred invisible anchor (never the body: driver.js would make the whole page, popover
         // included, unclickable).
         element: s.target ? () => findTarget(s.target) ?? anchor() : undefined,
-        popover: { title: s.title, description: `${s.text}<p class="mt-tour-note">Demo data · nothing is saved</p>` },
+        popover: { title: s.title, description: `${s.text}<p class="mt-tour-note">${i18n.t('tour.demo')}</p>` },
       })),
       onNextClick: () => next(),
       onPrevClick: () => {

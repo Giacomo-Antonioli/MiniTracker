@@ -3,9 +3,11 @@ import { useStore } from '../../app/store'
 import type { Game } from '../../domain/games/games'
 import { PhotoThumb } from '../photos/PhotoThumb'
 import { PhotoViewer } from '../photos/PhotoViewer'
+import { useTx } from '../../i18n'
 
 /** Photos of a game (#164): the table, the armies, the final position. */
 export function GamePhotos({ game }: { game: Game }) {
+  const tx = useTx()
   const { photos: all, loadGamePhotos, addGamePhotos } = useStore()
   const photos = all[game.id] ?? []
   const [open, setOpen] = useState<string | null>(null)
@@ -16,17 +18,17 @@ export function GamePhotos({ game }: { game: Game }) {
   }, [game.id, loadGamePhotos])
 
   return (
-    <section className="grid gap-2" aria-label="Game photos">
+    <section className="grid gap-2" aria-label={tx('Game photos')}>
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">Photos ({photos.length})</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">{tx('Photos ({{n}})', { n: photos.length })}</h3>
         <label className="btn px-2 py-0.5 text-sm">
-          📷 Add
+          {tx('📷 Add')}
           <input
             type="file"
             accept="image/*"
             multiple
             className="sr-only"
-            aria-label="Add game photos"
+            aria-label={tx('Add game photos')}
             onChange={async (e) => {
               const files = [...(e.target.files ?? [])]
               e.target.value = ''

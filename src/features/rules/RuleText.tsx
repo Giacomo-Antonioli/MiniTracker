@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useStore } from '../../app/store'
+import { useTx } from '../../i18n'
 import { formatRuleText } from '../../domain/catalogue/rules'
 
 /** Rule or ability name with its explanation; how it opens follows Settings → Appearance. */
 export function RuleText({ name, text, extra }: { name: string; text?: string; extra?: string }) {
+  const tx = useTx()
   const mode = useStore((s) => s.ruleDisplay)
   const [open, setOpen] = useState(false)
   const [hover, setHover] = useState(false)
@@ -29,7 +31,7 @@ export function RuleText({ name, text, extra }: { name: string; text?: string; e
         {extra && <span className="font-normal text-muted">{extra}</span>}
       </button>
       {shown && (
-        <p className="rounded border border-line bg-bg p-2 text-sm leading-relaxed" role="note" aria-label={`${name} explanation`}>
+        <p className="rounded border border-line bg-bg p-2 text-sm leading-relaxed" role="note" aria-label={tx('{{name}} explanation', { name })}>
           {formatRuleText(text).map((p, i) => (p.bold ? <b key={i}>{p.text}</b> : <span key={i}>{p.text}</span>))}
         </p>
       )}
