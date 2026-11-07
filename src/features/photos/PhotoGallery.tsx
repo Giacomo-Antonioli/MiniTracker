@@ -4,11 +4,13 @@ import type { OwnedUnit, StatusEvent } from '../../domain/collection/types'
 import { photoTimeline } from '../../domain/photos/timeline'
 import { stageColour } from '../backlog/BacklogTable'
 import type { Photo } from '../../domain/photos/types'
+import { useTx } from '../../i18n'
 import { PhotoThumb } from './PhotoThumb'
 import { PhotoViewer } from './PhotoViewer'
 
 /** Unit gallery: all photos of the unit (own and from history steps). */
 export function PhotoGallery({ unit, photos, thumbSize, events = [] }: { unit: OwnedUnit; photos: Photo[]; thumbSize?: string; events?: StatusEvent[] }) {
+  const tx = useTx()
   const addPhotos = useStore((s) => s.addPhotos)
   const pipeline = useStore((s) => s.pipeline)
   const [view, setView] = useState<'grid' | 'timeline'>(() => {
@@ -45,33 +47,33 @@ export function PhotoGallery({ unit, photos, thumbSize, events = [] }: { unit: O
   }
 
   return (
-    <section className="border-b border-line p-4" aria-label="Photos">
+    <section className="border-b border-line p-4" aria-label={tx('Photos')}>
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">Photos ({photos.length})</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">{tx('Photos ({{n}})', { n: photos.length })}</h3>
         <div className="flex gap-1">
           {photos.length > 1 && (
-            <div className="flex overflow-hidden rounded border border-line text-sm" role="group" aria-label="Photo view">
+            <div className="flex overflow-hidden rounded border border-line text-sm" role="group" aria-label={tx('Photo view')}>
               {(['grid', 'timeline'] as const).map((v) => (
-                <button key={v} aria-pressed={view === v} className={`px-2 ${view === v ? 'bg-accent text-accent-fg' : 'hover:bg-panel-2'}`} onClick={() => pick(v)}>{v === 'grid' ? 'Grid' : 'Timeline'}</button>
+                <button key={v} aria-pressed={view === v} className={`px-2 ${view === v ? 'bg-accent text-accent-fg' : 'hover:bg-panel-2'}`} onClick={() => pick(v)}>{v === 'grid' ? tx('Grid') : tx('Timeline')}</button>
               ))}
             </div>
           )}
           <label className={`btn text-sm ${busy ? 'pointer-events-none opacity-50' : ''}`}>
-            + Add
-            <input type="file" accept="image/*" multiple className="sr-only" aria-label="Add photos" onChange={(e) => { void add(e.target.files); e.target.value = '' }} />
+            {tx('+ Add')}
+            <input type="file" accept="image/*" multiple className="sr-only" aria-label={tx('Add photos')} onChange={(e) => { void add(e.target.files); e.target.value = '' }} />
           </label>
-          <label className={`btn text-sm ${busy ? 'pointer-events-none opacity-50' : ''}`} title="Take a photo (phone/tablet)">
+          <label className={`btn text-sm ${busy ? 'pointer-events-none opacity-50' : ''}`} title={tx('Take a photo (phone/tablet)')}>
             📷
-            <input type="file" accept="image/*" capture="environment" className="sr-only" aria-label="Take photo" onChange={(e) => { void add(e.target.files); e.target.value = '' }} />
+            <input type="file" accept="image/*" capture="environment" className="sr-only" aria-label={tx('Take photo')} onChange={(e) => { void add(e.target.files); e.target.value = '' }} />
           </label>
         </div>
       </div>
-      {busy && <p className="text-sm text-muted" role="status">Saving photos…</p>}
+      {busy && <p className="text-sm text-muted" role="status">{tx('Saving photos…')}</p>}
       {error && <p className="text-sm text-danger" role="alert">{error}</p>}
       {photos.length === 0 ? (
-        <p className="text-sm text-muted">No photos yet.</p>
+        <p className="text-sm text-muted">{tx('No photos yet.')}</p>
       ) : view === 'timeline' && photos.length > 1 ? (
-        <ol className="flex gap-4 overflow-x-auto pb-2" aria-label="Photo timeline">
+        <ol className="flex gap-4 overflow-x-auto pb-2" aria-label={tx('Photo timeline')}>
           {photoTimeline(photos, events).map(({ photo, stageId }, i) => {
             const stage = pipeline.stages.find((x) => x.id === stageId)
             return (
@@ -81,7 +83,7 @@ export function PhotoGallery({ unit, photos, thumbSize, events = [] }: { unit: O
                 <PhotoThumb photo={photo} size={thumbSize} onClick={() => setOpen(photo.id)} />
                 <span className="flex items-center gap-1">
                   <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: stageId ? stageColour(pipeline, stageId) : 'var(--muted)' }} />
-                  {stage?.name ?? 'Before tracking'}
+                  {stage?.name ?? tx('Before tracking')}
                 </span>
               </li>
             )

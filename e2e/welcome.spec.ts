@@ -3,6 +3,23 @@ import { expect, test } from '@playwright/test'
 // Every other spec starts with the guide done; this one starts like a brand-new user.
 test.use({ storageState: { cookies: [], origins: [] } })
 
+test('language: pick it in the guide, kept after a reload, changed back in Settings', async ({ page }) => {
+  await page.goto('./')
+  const guide = page.getByRole('dialog', { name: 'Welcome to MiniTracker' })
+  await guide.getByLabel('Language').selectOption('it')
+  const it = page.getByRole('dialog', { name: 'Benvenuto in MiniTracker' })
+  await expect(it.getByRole('button', { name: 'Avanti' })).toBeVisible()
+  await it.getByRole('button', { name: 'Salta la guida' }).click()
+  await expect(page.getByRole('navigation', { name: 'Principale' }).getByRole('button', { name: 'Colori' })).toBeVisible()
+
+  await page.reload()
+  await page.getByRole('button', { name: /Impostazioni/ }).click()
+  await page.getByRole('tab', { name: 'Aspetto' }).click()
+  await page.getByLabel('Lingua').selectOption('en')
+  await expect(page.getByRole('tab', { name: 'Appearance' })).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Paints' })).toBeVisible()
+})
+
 test('welcome guide on first start: walk through, skip, reopen from Settings', async ({ page }) => {
   await page.goto('./')
   const guide = page.getByRole('dialog', { name: 'Welcome to MiniTracker' })

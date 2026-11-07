@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTx } from '../../i18n'
 import { decodeShare } from '../../domain/schemes/share'
 import { parseShowcase, percent, showcaseSummary, type Progress, type Showcase } from '../../domain/share/showcase'
 
 function Bar({ p, stages, label }: { p: Progress; stages: string[]; label: string }) {
+  const tx = useTx()
   return (
-    <div className="flex h-3 w-full overflow-hidden rounded bg-panel-2" role="img" aria-label={`${label}: ${percent(p)}% painted`}>
+    <div className="flex h-3 w-full overflow-hidden rounded bg-panel-2" role="img" aria-label={tx('{{label}}: {{pct}}% painted', { label, pct: percent(p) })}>
       {p.byStage.map((n, i) =>
         n ? <span key={i} title={`${stages[i]}: ${n}`} style={{ width: `${(n / p.models) * 100}%`, opacity: 0.25 + (0.75 * (i + 1)) / stages.length }} className="bg-accent" /> : null,
       )}
@@ -14,6 +16,7 @@ function Bar({ p, stages, label }: { p: Progress; stages: string[]; label: strin
 
 /** Someone's collection from a share link (#97): read-only, nothing is saved here. */
 export function ShowcaseView({ token, onClose }: { token: string; onClose: () => void }) {
+  const tx = useTx()
   const [s, setS] = useState<Showcase>()
   const [err, setErr] = useState('')
   const [q, setQ] = useState('')
@@ -22,7 +25,7 @@ export function ShowcaseView({ token, onClose }: { token: string; onClose: () =>
   }, [token])
   const sum = useMemo(() => (s ? showcaseSummary(s) : undefined), [s])
 
-  const title = s?.owner ? `${s.owner}'s collection` : 'A MiniTracker collection'
+  const title = s?.owner ? tx("{{name}}'s collection", { name: s.owner }) : tx('A MiniTracker collection')
   useEffect(() => {
     document.title = `${title} · MiniTracker`
   }, [title])
@@ -31,25 +34,25 @@ export function ShowcaseView({ token, onClose }: { token: string; onClose: () =>
     return (
       <main className="mx-auto grid max-w-xl gap-3 p-4">
         <p className="text-danger" role="alert">{err}</p>
-        <button className="btn w-fit" onClick={onClose}>Open MiniTracker</button>
+        <button className="btn w-fit" onClick={onClose}>{tx('Open MiniTracker')}</button>
       </main>
     )
-  if (!s || !sum) return <p className="p-4 text-muted">Opening…</p>
+  if (!s || !sum) return <p className="p-4 text-muted">{tx('Opening…')}</p>
   const match = (u: Showcase['units'][number]) => !q || `${u[0]} ${u[1]}`.toLowerCase().includes(q.toLowerCase())
 
   return (
-    <main className="mx-auto grid max-w-3xl gap-4 p-4" aria-label="Shared collection">
+    <main className="mx-auto grid max-w-3xl gap-4 p-4" aria-label={tx('Shared collection')}>
       <header className="flex flex-wrap items-center gap-2">
         <div className="flex-1">
           <h1 className="font-display text-2xl text-accent">{title}</h1>
-          <p className="text-xs text-muted">Read-only snapshot{s.at ? ` from ${new Date(s.at).toLocaleDateString()}` : ''}. Nothing from this page is saved on your device.</p>
+          <p className="text-xs text-muted">{s.at ? tx('Read-only snapshot from {{date}}.', { date: new Date(s.at).toLocaleDateString() }) : tx('Read-only snapshot.')} {tx('Nothing from this page is saved on your device.')}</p>
         </div>
-        <button className="btn" onClick={onClose}>Open my MiniTracker</button>
+        <button className="btn" onClick={onClose}>{tx('Open my MiniTracker')}</button>
       </header>
 
-      <section className="panel grid gap-2 p-4" aria-label="Progress">
-        <p className="font-display text-3xl tabular-nums">{percent(sum.total)}% <span className="text-base text-muted">painted · {sum.total.painted} of {sum.total.models} models</span></p>
-        <Bar p={sum.total} stages={s.stages} label="All" />
+      <section className="panel grid gap-2 p-4" aria-label={tx('Progress')}>
+        <p className="font-display text-3xl tabular-nums">{percent(sum.total)}% <span className="text-base text-muted">{tx('painted · {{done}} of {{total}} models', { done: sum.total.painted, total: sum.total.models })}</span></p>
+        <Bar p={sum.total} stages={s.stages} label={tx('All')} />
         <ul className="flex flex-wrap gap-x-3 text-xs text-muted">{s.stages.map((st, i) => sum.total.byStage[i] ? <li key={st}>{st} {sum.total.byStage[i]}</li> : null)}</ul>
         <div className="mt-2 grid gap-2">
           {sum.factions.map((f) => (
@@ -61,13 +64,13 @@ export function ShowcaseView({ token, onClose }: { token: string; onClose: () =>
         </div>
       </section>
 
-      <section className="panel grid gap-2 p-4" aria-label="Units">
+      <section className="panel grid gap-2 p-4" aria-label={tx('Units')}>
         <div className="flex items-center gap-2">
-          <h2 className="font-display text-lg">Units ({s.units.length})</h2>
-          <input className="input ml-auto w-48" placeholder="Search" aria-label="Search units" value={q} onChange={(e) => setQ(e.target.value)} />
+          <h2 className="font-display text-lg">{tx('Units ({{n}})', { n: s.units.length })}</h2>
+          <input className="input ml-auto w-48" placeholder={tx('Search')} aria-label={tx('Search units')} value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
         <table className="w-full text-sm">
-          <thead className="text-left text-xs uppercase tracking-wider text-muted"><tr><th>Unit</th><th>Faction</th><th className="text-right">Painted</th><th>Stages</th></tr></thead>
+          <thead className="text-left text-xs uppercase tracking-wider text-muted"><tr><th>{tx('Unit')}</th><th>{tx('Faction')}</th><th className="text-right">{tx('Painted')}</th><th>{tx('Stages')}</th></tr></thead>
           <tbody>
             {s.units.filter(match).map((u, i) => {
               const models = u[2].reduce((a, b) => a + b, 0)

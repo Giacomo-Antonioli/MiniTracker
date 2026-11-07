@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { adjustQuantity, newStock, updateStock } from '../../domain/paints/inventory'
 import type { PaintDef, PaintStock } from '../../domain/paints/types'
+import { useTx } from '../../i18n'
 import { ColourMatches } from './ColourMatches'
 
 export function PaintPanel({ paint, onClose, onSelect }: { paint: PaintDef; onClose: () => void; onSelect?: (id: string) => void }) {
+  const tx = useTx()
   const { paintStock, pipelines, saveStock, removeStock, deleteCustomPaint } = useStore()
   const stock = paintStock.get(paint.id)
   const [error, setError] = useState('')
@@ -24,7 +26,7 @@ export function PaintPanel({ paint, onClose, onSelect }: { paint: PaintDef; onCl
   const text = (v: string) => (v.trim() === '' ? undefined : v)
 
   return (
-    <aside className="panel flex h-full w-[400px] shrink-0 flex-col overflow-y-auto" aria-label="Paint details">
+    <aside className="panel flex h-full w-[400px] shrink-0 flex-col overflow-y-auto" aria-label={tx('Paint details')} data-tour="paint-details">
       <div className="h-24 border-b border-line" style={{ background: paint.hex }} />
       <header className="border-b border-line p-4">
         <div className="flex items-start justify-between gap-2">
@@ -34,77 +36,77 @@ export function PaintPanel({ paint, onClose, onSelect }: { paint: PaintDef; onCl
               {paint.brand}
               {paint.type && ` · ${paint.type}`}
               {paint.range && ` · ${paint.range}`}{paint.family && ` · ${paint.family}`} · <code>{paint.hex}</code>
-              {paint.custom && ' · custom'}
+              {paint.custom && ` · ${tx('custom')}`}
             </p>
           </div>
-          <button className="btn" aria-label="Close paint" onClick={onClose}>✕</button>
+          <button className="btn" aria-label={tx('Close paint')} onClick={onClose}>✕</button>
         </div>
       </header>
 
       {!stock ? (
         <section className="grid gap-2 p-4">
-          <p className="text-sm text-muted">Not in your inventory.</p>
+          <p className="text-sm text-muted">{tx('Not in your inventory.')}</p>
           <div className="flex flex-wrap gap-2">
             <button className="btn btn-primary" onClick={() => void saveStock(newStock(paint.id, has('sealed') ? 'sealed' : stages[0].id, ctx()))}>
-              I own it
+              {tx('I own it')}
             </button>
             {has('wishlist') && (
-              <button className="btn" onClick={() => void saveStock(newStock(paint.id, 'wishlist', ctx()))}>Add to wishlist</button>
+              <button className="btn" onClick={() => void saveStock(newStock(paint.id, 'wishlist', ctx()))}>{tx('Add to wishlist')}</button>
             )}
           </div>
         </section>
       ) : (
-        <section className="grid gap-3 p-4" aria-label="Inventory">
+        <section className="grid gap-3 p-4" aria-label={tx('Inventory')}>
           <div className="flex items-center gap-2">
-            <span className="w-24 text-sm text-muted">Pots</span>
-            <button className="btn" aria-label="One pot less" onClick={() => void saveStock(adjustQuantity(stock, -1, ctx()))}>−</button>
-            <b className="w-8 text-center text-lg" aria-label="Pots owned">{stock.quantity}</b>
-            <button className="btn" aria-label="One pot more" onClick={() => void saveStock(adjustQuantity(stock, 1, ctx()))}>+</button>
+            <span className="w-24 text-sm text-muted">{tx('Pots')}</span>
+            <button className="btn" aria-label={tx('One pot less')} onClick={() => void saveStock(adjustQuantity(stock, -1, ctx()))}>−</button>
+            <b className="w-8 text-center text-lg" aria-label={tx('Pots owned')}>{stock.quantity}</b>
+            <button className="btn" aria-label={tx('One pot more')} onClick={() => void saveStock(adjustQuantity(stock, 1, ctx()))}>+</button>
             <button className="btn ml-auto" aria-pressed={stock.favourite} onClick={() => void patch({ favourite: !stock.favourite })}>
               {stock.favourite ? '★' : '☆'}
             </button>
           </div>
           <label className="flex items-center gap-2">
-            <span className="w-24 text-sm text-muted">Stage</span>
+            <span className="w-24 text-sm text-muted">{tx('Stage')}</span>
             <select className="input flex-1" value={stock.stage} onChange={(e) => void patch({ stage: e.target.value })}>
               {stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </label>
           <div className="flex flex-wrap gap-2">
-            {has('low') && stock.stage !== 'low' && <button className="btn" onClick={() => void patch({ stage: 'low' })}>Mark running low</button>}
-            {has('empty') && stock.stage !== 'empty' && <button className="btn" onClick={() => void patch({ stage: 'empty', quantity: 0 })}>Mark empty</button>}
+            {has('low') && stock.stage !== 'low' && <button className="btn" onClick={() => void patch({ stage: 'low' })}>{tx('Mark running low')}</button>}
+            {has('empty') && stock.stage !== 'empty' && <button className="btn" onClick={() => void patch({ stage: 'empty', quantity: 0 })}>{tx('Mark empty')}</button>}
           </div>
-          <Field label="Purchased" type="date" value={stock.purchaseDate ?? ''} onSave={(v) => patch({ purchaseDate: text(v) })} />
-          <Field label="Price / pot" type="number" value={stock.price?.toString() ?? ''} onSave={(v) => patch({ price: num(v) })} />
-          <Field label="Shop" value={stock.shop ?? ''} onSave={(v) => patch({ shop: text(v) })} />
-          <Field label="Location" placeholder="case, drawer, rack slot" value={stock.location ?? ''} onSave={(v) => patch({ location: text(v) })} />
-          <Field label="Barcode" value={stock.barcode ?? ''} onSave={(v) => patch({ barcode: text(v) })} />
+          <Field label={tx('Purchased')} type="date" value={stock.purchaseDate ?? ''} onSave={(v) => patch({ purchaseDate: text(v) })} />
+          <Field label={tx('Price / pot')} type="number" value={stock.price?.toString() ?? ''} onSave={(v) => patch({ price: num(v) })} />
+          <Field label={tx('Shop')} value={stock.shop ?? ''} onSave={(v) => patch({ shop: text(v) })} />
+          <Field label={tx('Location')} placeholder={tx('case, drawer, rack slot')} value={stock.location ?? ''} onSave={(v) => patch({ location: text(v) })} />
+          <Field label={tx('Barcode')} value={stock.barcode ?? ''} onSave={(v) => patch({ barcode: text(v) })} />
           <label className="flex items-center gap-2">
-            <span className="w-24 text-sm text-muted">Rating</span>
+            <span className="w-24 text-sm text-muted">{tx('Rating')}</span>
             <select className="input" value={stock.rating ?? ''} onChange={(e) => void patch({ rating: num(e.target.value) })}>
               <option value="">—</option>
               {[1, 2, 3, 4, 5].map((r) => <option key={r} value={r}>{'★'.repeat(r)}</option>)}
             </select>
           </label>
           <label className="grid gap-1">
-            <span className="text-sm text-muted">Notes</span>
+            <span className="text-sm text-muted">{tx('Notes')}</span>
             <textarea className="input min-h-16" defaultValue={stock.notes} key={`${paint.id}-notes`} onBlur={(e) => e.target.value !== stock.notes && void patch({ notes: e.target.value })} />
           </label>
           {error && <p className="text-danger" role="alert">{error}</p>}
-          <button className="btn btn-danger w-fit" onClick={() => confirm(`Remove ${paint.name} from your inventory?`) && void removeStock(paint.id)}>
-            Remove from inventory
+          <button className="btn btn-danger w-fit" onClick={() => confirm(tx('Remove {{name}} from your inventory?', { name: paint.name })) && void removeStock(paint.id)}>
+            {tx('Remove from inventory')}
           </button>
         </section>
       )}
 
-      <section className="border-t border-line p-4" aria-label="Colour match">
+      <section className="border-t border-line p-4" aria-label={tx('Colour match')}>
         <ColourMatches key={paint.id} hex={paint.hex} exclude={paint.id} onPick={(p) => onSelect?.(p.id)} />
       </section>
 
       {paint.custom && !paint.id.startsWith('lib/') && (
         <section className="mt-auto border-t border-line p-4">
-          <button className="btn btn-danger" onClick={() => confirm(`Delete custom paint ${paint.name}?`) && void deleteCustomPaint(paint.id).then(onClose)}>
-            Delete custom paint
+          <button className="btn btn-danger" onClick={() => confirm(tx('Delete custom paint {{name}}?', { name: paint.name })) && void deleteCustomPaint(paint.id).then(onClose)}>
+            {tx('Delete custom paint')}
           </button>
         </section>
       )}

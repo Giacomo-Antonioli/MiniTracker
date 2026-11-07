@@ -8,10 +8,12 @@ import { battleSizes } from '../../domain/lists/rules'
 import type { EditionKey } from '../../domain/lists/types'
 import { ImportForm } from './ImportForm'
 import { summarise } from './summary'
+import { useTx } from '../../i18n'
 
 type Filter = 'all' | 'complete' | 'incomplete' | 'issues'
 
 export function ArmiesPage({ onOpenList, onOpenSettings }: { onOpenList: (id: string) => void; onOpenSettings: () => void }) {
+  const tx = useTx()
   const { lists: allLists, catalogues, units, gameFilter } = useStore()
   const lists = useMemo(() => (gameFilter === 'all' ? allLists : allLists.filter((l) => gameOfEdition(l.edition) === gameFilter)), [allLists, gameFilter])
   const [filter, setFilter] = useState<Filter>('all')
@@ -29,9 +31,9 @@ export function ArmiesPage({ onOpenList, onOpenSettings }: { onOpenList: (id: st
   if (!catalogues.length) {
     return (
       <div className="grid max-w-xl gap-3">
-        <h1 className="font-display text-2xl text-accent">Armies</h1>
-        <p className="text-muted">Install a unit catalogue first: lists are built from it.</p>
-        <button className="btn btn-primary w-fit" onClick={onOpenSettings}>Go to Settings → Catalogue data</button>
+        <h1 className="font-display text-2xl text-accent" data-tour="armies-title">{tx('Armies')}</h1>
+        <p className="text-muted">{tx('Install a unit catalogue first: lists are built from it.')}</p>
+        <button className="btn btn-primary w-fit" onClick={onOpenSettings}>{tx('Go to Settings → Catalogue data')}</button>
       </div>
     )
   }
@@ -39,10 +41,10 @@ export function ArmiesPage({ onOpenList, onOpenSettings }: { onOpenList: (id: st
   return (
     <div className="grid max-w-4xl gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-display text-2xl text-accent">Armies</h1>
+        <h1 className="font-display text-2xl text-accent" data-tour="armies-title">{tx('Armies')}</h1>
         <div className="flex gap-2">
-          <button className="btn" onClick={() => setImporting(true)}>⬆ Import</button>
-          <button className="btn btn-primary" onClick={() => setCreating(true)}>+ New list</button>
+          <button className="btn" onClick={() => setImporting(true)}>{tx('⬆ Import')}</button>
+          <button className="btn btn-primary" data-tour="new-list" onClick={() => setCreating(true)}>{tx('+ New list')}</button>
         </div>
       </header>
 
@@ -50,13 +52,13 @@ export function ArmiesPage({ onOpenList, onOpenSettings }: { onOpenList: (id: st
       {importing && <ImportForm onCancel={() => setImporting(false)} onOpen={onOpenList} />}
 
       {lists.length > 0 && (
-        <div className="flex flex-wrap gap-1" role="group" aria-label="Filter lists">
+        <div className="flex flex-wrap gap-1" role="group" aria-label={tx('Filter lists')}>
           {(
             [
-              ['all', 'All'],
-              ['complete', 'Complete'],
-              ['incomplete', 'Incomplete'],
-              ['issues', 'Rule issues'],
+              ['all', tx('All')],
+              ['complete', tx('Complete')],
+              ['incomplete', tx('Incomplete')],
+              ['issues', tx('Rule issues')],
             ] as const
           ).map(([id, label]) => (
             <button key={id} className={`btn ${filter === id ? 'btn-primary' : ''}`} aria-pressed={filter === id} onClick={() => setFilter(id)}>
@@ -66,34 +68,35 @@ export function ArmiesPage({ onOpenList, onOpenSettings }: { onOpenList: (id: st
         </div>
       )}
 
-      {lists.length === 0 && !creating && !importing && <p className="text-muted">No army lists yet. Start one with “+ New list”.</p>}
+      {lists.length === 0 && !creating && !importing && <p className="text-muted">{tx('No army lists yet. Start one with “+ New list”.')}</p>}
 
-      <ul className="grid gap-2" aria-label="Army lists">
+      <ul className="grid gap-2" aria-label={tx('Army lists')}>
         {shown.map(({ l, s }) => (
           <li key={l.id}>
             <button className="panel grid w-full gap-1 p-3 text-left hover:border-accent/60" onClick={() => onOpenList(l.id)}>
               <span className="flex flex-wrap items-baseline justify-between gap-2">
                 <span className="font-semibold">{l.name}</span>
-                <span className={`text-sm ${s.points > l.pointsLimit ? 'text-danger' : 'text-muted'}`}>{s.points} / {l.pointsLimit} pts</span>
+                <span className={`text-sm ${s.points > l.pointsLimit ? 'text-danger' : 'text-muted'}`}>{tx('{{pts}} / {{limit}} pts', { pts: s.points, limit: l.pointsLimit })}</span>
               </span>
               <span className="text-sm text-muted">
-                {[s.factionName ?? 'No faction yet', EDITIONS.find((e) => e.key === l.edition)?.label, s.battleSizeName].filter(Boolean).join(' · ')}
+                {[s.factionName ?? tx('No faction yet'), EDITIONS.find((e) => e.key === l.edition)?.label, s.battleSizeName].filter(Boolean).join(' · ')}
               </span>
               <span className="flex flex-wrap gap-3 text-sm">
-                <span>{l.entries.length === 0 ? '— Empty' : s.complete ? '✅ Complete' : `🟡 Missing ${s.missingModels} model${s.missingModels === 1 ? '' : 's'}`}</span>
-                <span>{s.issues === undefined ? '· Rules not checked' : s.issues.length ? `⚠ ${s.issues.length} rule issue${s.issues.length === 1 ? '' : 's'}` : '✔ Rules OK'}</span>
+                <span>{l.entries.length === 0 ? tx('— Empty') : s.complete ? tx('✅ Complete') : s.missingModels === 1 ? tx('🟡 Missing 1 model') : tx('🟡 Missing {{n}} models', { n: s.missingModels })}</span>
+                <span>{s.issues === undefined ? tx('· Rules not checked') : s.issues.length === 1 ? tx('⚠ 1 rule issue') : s.issues.length ? tx('⚠ {{n}} rule issues', { n: s.issues.length }) : tx('✔ Rules OK')}</span>
                 <span className="text-muted">{l.status}</span>
               </span>
             </button>
           </li>
         ))}
       </ul>
-      {lists.length > 0 && shown.length === 0 && <p className="text-muted">No lists match this filter.</p>}
+      {lists.length > 0 && shown.length === 0 && <p className="text-muted">{tx('No lists match this filter.')}</p>}
     </div>
   )
 }
 
 function NewListForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: (id: string) => void }) {
+  const tx = useTx()
   const { catalogues, catalogue: active, saveList, units } = useStore()
   const [fromCollection, setFromCollection] = useState(false)
   const installed = EDITIONS.filter((e) => catalogueFor(catalogues, e.key))
@@ -105,7 +108,7 @@ function NewListForm({ onCancel, onCreated }: { onCancel: () => void; onCreated:
   const [size, setSize] = useState(sizes.find((b) => b.name === 'Strike Force')?.id ?? sizes[0]?.id ?? '')
   const [factionId, setFactionId] = useState('')
 
-  if (!installed.length) return <p className="text-muted">Catalogues installed from local files can't be used for lists yet: download an edition in Settings.</p>
+  if (!installed.length) return <p className="text-muted">{tx("Catalogues installed from local files can't be used for lists yet: download an edition in Settings.")}</p>
 
   const create = async () => {
     const b = sizes.find((x) => x.id === size)!
@@ -118,18 +121,19 @@ function NewListForm({ onCancel, onCreated }: { onCancel: () => void; onCreated:
   return (
     <form
       className="panel grid gap-3 p-3 sm:grid-cols-2"
-      aria-label="New list"
+      aria-label={tx('New list')}
+      data-tour="new-list-form"
       onSubmit={(e) => {
         e.preventDefault()
         void create()
       }}
     >
       <label className="grid gap-1 text-sm">
-        Name
-        <input className="input" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Tau 1000" autoFocus />
+        {tx('Name')}
+        <input className="input" required value={name} onChange={(e) => setName(e.target.value)} placeholder={tx('e.g. Tau 1000')} data-tour="list-name" autoFocus />
       </label>
       <label className="grid gap-1 text-sm">
-        Edition
+        {tx('Edition')}
         <select
           className="input"
           value={edition}
@@ -147,17 +151,17 @@ function NewListForm({ onCancel, onCreated }: { onCancel: () => void; onCreated:
         </select>
       </label>
       <label className="grid gap-1 text-sm">
-        Battle size
+        {tx('Battle size')}
         <select className="input" value={size} onChange={(e) => setSize(e.target.value)}>
           {sizes.map((b) => (
-            <option key={b.id} value={b.id}>{b.name} ({b.pointsLimit} pts)</option>
+            <option key={b.id} value={b.id}>{b.name} ({tx('{{n}} pts', { n: b.pointsLimit })})</option>
           ))}
         </select>
       </label>
       <label className="grid gap-1 text-sm">
-        Faction
+        {tx('Faction')}
         <select className="input" value={factionId} onChange={(e) => setFactionId(e.target.value)}>
-          <option value="">Set by the first unit</option>
+          <option value="">{tx('Set by the first unit')}</option>
           {cat?.factions.map((f) => (
             <option key={f.id} value={f.id}>{f.name}</option>
           ))}
@@ -165,14 +169,14 @@ function NewListForm({ onCancel, onCreated }: { onCancel: () => void; onCreated:
       </label>
       <label className="flex items-center gap-2 text-sm sm:col-span-2">
         <input type="checkbox" checked={fromCollection} disabled={!factionId} onChange={(e) => setFromCollection(e.target.checked)} />
-        Start with all the units I own
+        {tx('Start with all the units I own')}
       </label>
       <p className="-mt-2 text-xs text-muted sm:col-span-2">
-        {factionId ? 'Every unit of this army you own is added, linked to your collection.' : 'Pick the army above to use this.'}
+        {factionId ? tx('Every unit of this army you own is added, linked to your collection.') : tx('Pick the army above to use this.')}
       </p>
       <div className="flex gap-2 sm:col-span-2">
-        <button className="btn btn-primary" type="submit" disabled={!name.trim()}>Create</button>
-        <button className="btn" type="button" onClick={onCancel}>Cancel</button>
+        <button className="btn btn-primary" type="submit" disabled={!name.trim()}>{tx('Create')}</button>
+        <button className="btn" type="button" onClick={onCancel}>{tx('Cancel')}</button>
       </div>
     </form>
   )

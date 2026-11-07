@@ -2,9 +2,11 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../../app/store'
 import { closestPaints, matchLabel, owns, type PaintMatch } from '../../domain/paints/colour'
 import type { PaintDef } from '../../domain/paints/types'
+import { useTx } from '../../i18n'
 
 /** Closest owned paints and closest paints of a chosen brand to a hex colour. */
 export function ColourMatches({ hex, exclude, onPick }: { hex: string; exclude?: string; onPick?: (p: PaintDef) => void }) {
+  const tx = useTx()
   const { paints, paintStock } = useStore()
   const brands = useMemo(() => [...new Set(paints.map((p) => p.brand))].sort(), [paints])
   const [brand, setBrand] = useState('')
@@ -13,15 +15,15 @@ export function ColourMatches({ hex, exclude, onPick }: { hex: string; exclude?:
 
   return (
     <div className="grid gap-3">
-      <MatchList title="Closest you own" matches={owned} empty={exclude && owns(paintStock, exclude) ? 'You own no other paints.' : 'You own no paints yet.'} onPick={onPick} />
+      <MatchList title={tx('Closest you own')} matches={owned} empty={exclude && owns(paintStock, exclude) ? tx('You own no other paints.') : tx('You own no paints yet.')} onPick={onPick} />
       <label className="flex items-center gap-2">
-        <span className="text-sm text-muted">Closest in</span>
-        <select className="input flex-1" aria-label="Match brand" value={brand} onChange={(e) => setBrand(e.target.value)}>
-          <option value="">choose a brand…</option>
+        <span className="text-sm text-muted">{tx('Closest in')}</span>
+        <select className="input flex-1" aria-label={tx('Match brand')} value={brand} onChange={(e) => setBrand(e.target.value)}>
+          <option value="">{tx('choose a brand…')}</option>
           {brands.map((b) => <option key={b}>{b}</option>)}
         </select>
       </label>
-      {brand && <MatchList title={`Closest in ${brand}`} matches={inBrand} empty="No paints." onPick={onPick} />}
+      {brand && <MatchList title={tx('Closest in {{brand}}', { brand })} matches={inBrand} empty={tx('No paints.')} onPick={onPick} />}
     </div>
   )
 }
@@ -44,17 +46,18 @@ function MatchList({ title, matches, empty, onPick }: { title: string; matches: 
 
 /** Pick or type a hex colour and see the closest paints. */
 export function HexMatchDialog({ onPick, onClose }: { onPick: (p: PaintDef) => void; onClose: () => void }) {
+  const tx = useTx()
   const [hex, setHex] = useState('#8a2be2')
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50" role="dialog" aria-label="Match a colour">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50" role="dialog" aria-label={tx('Match a colour')}>
       <div className="panel grid w-[420px] max-w-[calc(100vw-32px)] gap-3 p-4">
         <header className="flex items-center justify-between">
-          <h2 className="font-display text-xl text-accent">Match a colour</h2>
-          <button className="btn" aria-label="Close colour match" onClick={onClose}>✕</button>
+          <h2 className="font-display text-xl text-accent">{tx('Match a colour')}</h2>
+          <button className="btn" aria-label={tx('Close colour match')} onClick={onClose}>✕</button>
         </header>
         <div className="flex items-center gap-2">
-          <input type="color" aria-label="Colour" value={/^#[0-9a-f]{6}$/i.test(hex) ? hex : '#000000'} onChange={(e) => setHex(e.target.value)} />
-          <input className="input flex-1" aria-label="Hex" value={hex} onChange={(e) => setHex(e.target.value)} />
+          <input type="color" aria-label={tx('Colour')} value={/^#[0-9a-f]{6}$/i.test(hex) ? hex : '#000000'} onChange={(e) => setHex(e.target.value)} />
+          <input className="input flex-1" aria-label={tx('Hex')} value={hex} onChange={(e) => setHex(e.target.value)} />
         </div>
         <ColourMatches hex={hex} onPick={onPick} />
       </div>

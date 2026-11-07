@@ -5,6 +5,7 @@ import { readRoster } from '../../data/lists/rosz'
 import { listFromJson, listFromRoster, listFromText, type ImportResult } from '../../domain/lists/io'
 import type { EditionKey } from '../../domain/lists/types'
 import type { Catalogue } from '../../domain/catalogue/types'
+import { useTx } from '../../i18n'
 
 /** A list from a file: BattleScribe / NewRecruit .rosz/.ros, MiniTracker .json or text. */
 export async function importListFile(f: File, cat: Catalogue, edition: EditionKey): Promise<ImportResult> {
@@ -16,6 +17,7 @@ export async function importListFile(f: File, cat: Catalogue, edition: EditionKe
 
 /** Import a list: BattleScribe / NewRecruit .rosz/.ros, MiniTracker .json, or text (file or pasted). */
 export function ImportForm({ onCancel, onOpen }: { onCancel: () => void; onOpen: (id: string) => void }) {
+  const tx = useTx()
   const { catalogues, catalogue: active, saveList } = useStore()
   const installed = EDITIONS.filter((e) => catalogueFor(catalogues, e.key))
   const [edition, setEdition] = useState<EditionKey | undefined>(installed.find((e) => catalogueFor(catalogues, e.key) === active)?.key ?? installed[0]?.key)
@@ -38,32 +40,32 @@ export function ImportForm({ onCancel, onOpen }: { onCancel: () => void; onOpen:
 
   const fromFile = (f: File) =>
     run(async () => {
-      if (!cat || !edition) throw new Error('Install a catalogue first')
+      if (!cat || !edition) throw new Error(tx('Install a catalogue first'))
       return importListFile(f, cat, edition)
     })
 
   if (done) {
     return (
-      <section className="panel grid gap-2 p-3" aria-label="Import result">
-        <p className="font-semibold">Imported “{done.list.name}” with {done.list.entries.length} units. Check these:</p>
+      <section className="panel grid gap-2 p-3" aria-label={tx('Import result')}>
+        <p className="font-semibold">{tx('Imported “{{name}}” with {{n}} units. Check these:', { name: done.list.name, n: done.list.entries.length })}</p>
         <ul className="list-disc pl-5 text-sm">
           {done.warnings.map((w, i) => (
             <li key={i}>{w}</li>
           ))}
         </ul>
         <div className="flex gap-2">
-          <button className="btn btn-primary" onClick={() => onOpen(done.list.id)}>Open list</button>
-          <button className="btn" onClick={onCancel}>Close</button>
+          <button className="btn btn-primary" onClick={() => onOpen(done.list.id)}>{tx('Open list')}</button>
+          <button className="btn" onClick={onCancel}>{tx('Close')}</button>
         </div>
       </section>
     )
   }
 
   return (
-    <section className="panel grid gap-3 p-3" aria-label="Import list">
+    <section className="panel grid gap-3 p-3" aria-label={tx('Import list')}>
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm">
-          Match with
+          {tx('Match with')}
           <select className="input" value={edition} onChange={(e) => setEdition(e.target.value as EditionKey)}>
             {installed.map((e) => (
               <option key={e.key} value={e.key}>{e.label}</option>
@@ -71,11 +73,11 @@ export function ImportForm({ onCancel, onOpen }: { onCancel: () => void; onOpen:
           </select>
         </label>
         <label className="btn">
-          📂 Choose file (.rosz, .ros, .json, .txt)
+          {tx('📂 Choose file (.rosz, .ros, .json, .txt)')}
           <input
             type="file"
             className="sr-only"
-            aria-label="List file"
+            aria-label={tx('List file')}
             accept=".rosz,.ros,.json,.txt"
             onChange={(e) => {
               const f = e.target.files?.[0]
@@ -86,7 +88,7 @@ export function ImportForm({ onCancel, onOpen }: { onCancel: () => void; onOpen:
         </label>
       </div>
       <label className="grid gap-1 text-sm">
-        …or paste a list (GW app, NewRecruit, MiniTracker text)
+        {tx('…or paste a list (GW app, NewRecruit, MiniTracker text)')}
         <textarea className="input min-h-32 font-mono text-xs" value={text} onChange={(e) => setText(e.target.value)} />
       </label>
       {error && <p className="text-sm text-danger" role="alert">{error}</p>}
@@ -96,9 +98,9 @@ export function ImportForm({ onCancel, onOpen }: { onCancel: () => void; onOpen:
           disabled={!text.trim() || !cat}
           onClick={() => void run(() => listFromText(text, cat!, edition!, ctx()))}
         >
-          Import text
+          {tx('Import text')}
         </button>
-        <button className="btn" onClick={onCancel}>Cancel</button>
+        <button className="btn" onClick={onCancel}>{tx('Cancel')}</button>
       </div>
     </section>
   )

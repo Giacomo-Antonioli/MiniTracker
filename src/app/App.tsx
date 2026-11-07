@@ -32,6 +32,7 @@ import { SyncPage } from '../features/sync/SyncPage'
 import { PlacePage, StoragePage } from '../features/storage/Storage'
 import { CompanionHub, WorkCompanion } from '../features/companion/WorkCompanion'
 import { isDesktopApp } from './platform'
+import { useT } from '../i18n'
 import { AUTO, effectiveScale, stepScale } from '../domain/settings/uiScale'
 
 type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'workshop' | 'supplies' | 'tools' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'storage' | 'place' | 'sync' | 'settings'
@@ -40,6 +41,7 @@ const SOON: string[] = []
 
 export default function App() {
   const { ready, load, theme } = useStore()
+  const t = useT()
   const companion = useStore((s) => s.companion)
   const timing = useStore((s) => s.paintTimers.some((t) => t.runningSince))
   const alerts = useStore((s) => [workshopAlerts(s), workshopAlerts(s, 'tool'), workshopAlerts(s, 'supply')].join())
@@ -98,7 +100,7 @@ export default function App() {
       return 'companion'
     })
   }, [companion])
-  const PAGE_NAME: Partial<Record<Page, string>> = { home: 'Home', backlog: 'Backlog', unit: 'unit page' }
+  const PAGE_NAME: Partial<Record<Page, string>> = { home: t('menu.home'), backlog: t('menu.backlog'), unit: t('menu.unitPage') }
 
   // A pairing link (#sync=K7P42QX) opens Sync and connects.
   const [syncCode, setSyncCode] = useState<string>()
@@ -207,38 +209,38 @@ export default function App() {
     <>
         <div className="mb-2 font-display text-lg tracking-wide text-accent">MiniTracker</div>
         {!phone && <GamePicker className="mb-2" />}
-        {nav('home', 'Home')}
-        {nav('backlog', 'Backlog')}
-        {nav('armies', 'Armies')}
-        {nav('browse', 'Catalogue')}
-        {nav('rules', 'Rules')}
-        {nav('paints', 'Paints')}
-        {nav('storage', 'Storage')}
+        {nav('home', t('menu.home'))}
+        {nav('backlog', t('menu.backlog'))}
+        {nav('armies', t('menu.armies'))}
+        {nav('browse', t('menu.catalogue'))}
+        {nav('rules', t('menu.rules'))}
+        {nav('paints', t('menu.paints'))}
+        {nav('storage', t('menu.storage'))}
         <div className="flex items-center gap-1">
-          {nav('workshop', allAlerts ? `Workshop ⚠${allAlerts}` : 'Workshop')}
-          <button className="rounded px-1.5 py-1.5 text-muted hover:bg-panel-2" aria-expanded={workshopOpen || page === 'tools' || page === 'supplies'} aria-label="Workshop pages" onClick={() => setWorkshopOpen(!workshopOpen)}>
+          {nav('workshop', allAlerts ? `${t('menu.workshop')} ⚠${allAlerts}` : t('menu.workshop'))}
+          <button className="rounded px-1.5 py-1.5 text-muted hover:bg-panel-2" aria-expanded={workshopOpen || page === 'tools' || page === 'supplies'} aria-label={t('menu.workshopPages')} onClick={() => setWorkshopOpen(!workshopOpen)}>
             {workshopOpen || page === 'tools' || page === 'supplies' ? '▾' : '▸'}
           </button>
         </div>
         {(workshopOpen || page === 'tools' || page === 'supplies') && (
           <div className="ml-3 grid gap-1 border-l border-line pl-1 text-sm">
-            {nav('tools', toolAlerts ? `Tools ⚠${toolAlerts}` : 'Tools')}
-            {nav('supplies', supplyAlerts ? `Supplies ⚠${supplyAlerts}` : 'Supplies')}
+            {nav('tools', toolAlerts ? `${t('menu.tools')} ⚠${toolAlerts}` : t('menu.tools'))}
+            {nav('supplies', supplyAlerts ? `${t('menu.supplies')} ⚠${supplyAlerts}` : t('menu.supplies'))}
           </div>
         )}
-        {nav('schemes', 'Schemes')}
-        {nav('guides', 'Guides')}
-        {nav('shopping', 'Shopping')}
-        {nav('companion', timing ? 'Companion ●' : 'Companion')}
-        {nav('stats', 'Stats')}
-        {nav('goals', 'Goals')}
-        {nav('games', liveGame ? 'Games ●' : 'Games')}
+        {nav('schemes', t('menu.schemes'))}
+        {nav('guides', t('menu.guides'))}
+        {nav('shopping', t('menu.shopping'))}
+        {nav('companion', timing ? `${t('menu.companion')} ●` : t('menu.companion'))}
+        {nav('stats', t('menu.stats'))}
+        {nav('goals', t('menu.goals'))}
+        {nav('games', liveGame ? `${t('menu.games')} ●` : t('menu.games'))}
         {SOON.map((s) => (
           <span key={s} className="px-3 py-1.5 text-muted/60" title="Coming in a later sprint">{s} ⌛</span>
         ))}
         <div className="mt-auto grid gap-1">
-          {nav('sync', '⇄ Sync')}
-          {nav('settings', '⚙ Settings')}
+          {nav('sync', t('menu.sync'))}
+          {nav('settings', t('menu.settings'))}
           <a
             className="px-3 pt-2 text-xs text-muted hover:text-accent"
             href={`https://github.com/Giacomo-Antonioli/MiniTracker/releases/tag/v${__APP_VERSION__}`}
@@ -271,18 +273,18 @@ export default function App() {
     <div className={phone ? 'flex h-dvh flex-col' : 'flex h-screen'}>
       {phone ? (
         <header className="panel m-2 mb-0 flex items-center gap-2 px-2 py-1.5">
-          <button className="btn px-2 py-1" aria-label="Menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>☰</button>
+          <button className="btn px-2 py-1" aria-label={t('menu.menu')} aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>☰</button>
           <span className="flex-1 font-display text-lg tracking-wide text-accent">MiniTracker</span>
           <GamePicker className="max-w-[40vw]" />
-          <button className="btn px-2 py-1" aria-label="Sync" onClick={() => go('sync')}>⇄</button>
+          <button className="btn px-2 py-1" aria-label={t('menu.syncShort')} onClick={() => go('sync')}>⇄</button>
         </header>
       ) : (
-        <nav className="panel m-2 mr-0 flex w-52 shrink-0 flex-col gap-1 overflow-y-auto p-3" aria-label="Main">{navItems}</nav>
+        <nav className="panel m-2 mr-0 flex w-52 shrink-0 flex-col gap-1 overflow-y-auto p-3" aria-label={t('menu.main')}>{navItems}</nav>
       )}
       {phone && menuOpen && (
         <div className="fixed inset-0 z-50 flex bg-black/50" onClick={() => setMenuOpen(false)}>
-          <nav className="panel m-0 flex h-full w-64 max-w-[85vw] flex-col gap-1 overflow-y-auto rounded-none p-3" aria-label="Main" onClick={(e) => e.stopPropagation()}>
-            <button className="btn mb-2 w-fit px-2 py-1" aria-label="Close menu" onClick={() => setMenuOpen(false)}>✕</button>
+          <nav className="panel m-0 flex h-full w-64 max-w-[85vw] flex-col gap-1 overflow-y-auto rounded-none p-3" aria-label={t('menu.main')} onClick={(e) => e.stopPropagation()}>
+            <button className="btn mb-2 w-fit px-2 py-1" aria-label={t('menu.closeMenu')} onClick={() => setMenuOpen(false)}>✕</button>
             {navItems}
           </nav>
         </div>
@@ -301,9 +303,9 @@ export default function App() {
         <WelcomeResume />
         <WelcomeTour onGo={(to) => (to === 'guide' ? undefined : to === 'backup' ? go('settings', 'backup') : go(to))} />
         {ready && shared && <SharedSchemeBanner token={shared} onDone={(id) => { setShared(null); if (id) openScheme(id) }} />}
-        {missingCode && <p className="panel mb-3 p-3 text-sm" role="alert">No unit or place with code {missingCode} on this device. Restore a backup from the device where you made the labels. <button className="underline" onClick={() => setMissingCode('')}>Dismiss</button></p>}
+        {missingCode && <p className="panel mb-3 p-3 text-sm" role="alert">{t('menu.missingCode', { code: missingCode })} <button className="underline" onClick={() => setMissingCode('')}>{t('menu.dismiss')}</button></p>}
         {!ready ? (
-          <p className="text-muted">Loading…</p>
+          <p className="text-muted">{t('menu.loading')}</p>
         ) : page === 'companion' ? (
           companion ? <WorkCompanion key={`${companion.mode}/${companion.unitId}`} backTo={from && PAGE_NAME[from] ? { label: PAGE_NAME[from]!, go: () => { useStore.getState().closeCompanion(); setPage(from); setFrom(null) } } : undefined} /> : <CompanionHub />
         ) : page === 'storage' ? (
@@ -351,12 +353,12 @@ export default function App() {
         )}
       </main>
       {phone && (
-        <nav className="panel m-2 mt-0 flex shrink-0 items-stretch pb-[env(safe-area-inset-bottom)]" aria-label="Quick">
-          {tab('home', '🏠', 'Home')}
-          {tab('backlog', '📋', 'Backlog')}
-          {tab('paints', '🎨', 'Paints')}
-          {tab('workshop', '🧰', allAlerts ? `Workshop ⚠${allAlerts}` : 'Workshop')}
-          <button className="flex flex-1 flex-col items-center gap-0.5 py-1.5 text-xs text-muted" onClick={() => setMenuOpen(true)}><span className="text-lg leading-none" aria-hidden>☰</span>More</button>
+        <nav className="panel m-2 mt-0 flex shrink-0 items-stretch pb-[env(safe-area-inset-bottom)]" aria-label={t('menu.quick')}>
+          {tab('home', '🏠', t('menu.home'))}
+          {tab('backlog', '📋', t('menu.backlog'))}
+          {tab('paints', '🎨', t('menu.paints'))}
+          {tab('workshop', '🧰', allAlerts ? `${t('menu.workshop')} ⚠${allAlerts}` : t('menu.workshop'))}
+          <button className="flex flex-1 flex-col items-center gap-0.5 py-1.5 text-xs text-muted" onClick={() => setMenuOpen(true)}><span className="text-lg leading-none" aria-hidden>☰</span>{t('menu.more')}</button>
         </nav>
       )}
     </div>

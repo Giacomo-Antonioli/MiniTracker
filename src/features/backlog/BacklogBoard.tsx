@@ -3,11 +3,13 @@ import { useStore } from '../../app/store'
 import { boardColumns, type BoardCard } from '../../domain/collection/board'
 import type { OwnedUnit } from '../../domain/collection/types'
 import { MoveDialog } from './MoveDialog'
+import { useTx } from '../../i18n'
 
 const DRAG_TYPE = 'application/x-minitracker-group'
 
 /** Kanban view of the backlog: drag a card to another stage, or use its "Move to" menu (works on touch). */
 export function BacklogBoard({ units, selectedId, onCardClick }: { units: OwnedUnit[]; selectedId: string | null; onCardClick: (id: string, clicks: number) => void }) {
+  const tx = useTx()
   const { pipeline } = useStore()
   const columns = useMemo(() => boardColumns(units, pipeline), [units, pipeline])
   const [moving, setMoving] = useState<(BoardCard & { to: string }) | null>(null)
@@ -15,11 +17,11 @@ export function BacklogBoard({ units, selectedId, onCardClick }: { units: OwnedU
   const find = (key: string) => columns.flatMap((c) => c.cards).find((c) => `${c.unit.id}/${c.group.id}` === key)
 
   return (
-    <div className="flex min-h-[60vh] gap-3 overflow-x-auto pb-2" aria-label="Board">
+    <div className="flex min-h-[60vh] gap-3 overflow-x-auto pb-2" aria-label={tx('Board')}>
       {columns.map(({ stage, cards }) => (
         <section
           key={stage.id}
-          aria-label={`Stage ${stage.name}`}
+          aria-label={tx('Stage {{name}}', { name: stage.name })}
           className={`panel flex w-60 shrink-0 flex-col gap-2 p-2 ${over === stage.id ? 'ring-2 ring-accent' : ''}`}
           onDragOver={(e) => {
             if (!e.dataTransfer.types.includes(DRAG_TYPE)) return
@@ -41,7 +43,7 @@ export function BacklogBoard({ units, selectedId, onCardClick }: { units: OwnedU
           {cards.map((card) => (
             <article
               key={card.group.id}
-              aria-label={`${card.unit.customName}, ${card.group.count} in ${stage.name}`}
+              aria-label={tx('{{name}}, {{n}} in {{stage}}', { name: card.unit.customName, n: card.group.count, stage: stage.name })}
               draggable
               onDragStart={(e) => e.dataTransfer.setData(DRAG_TYPE, `${card.unit.id}/${card.group.id}`)}
               onClick={(e) => onCardClick(card.unit.id, e.detail)}
@@ -49,25 +51,25 @@ export function BacklogBoard({ units, selectedId, onCardClick }: { units: OwnedU
             >
               <div className="font-medium">{card.unit.customName}</div>
               <div className="flex items-center justify-between gap-2 text-xs text-muted">
-                <span className="truncate">{card.group.count} model{card.group.count === 1 ? '' : 's'}{card.unit.factionName ? ` · ${card.unit.factionName}` : ''}</span>
+                <span className="truncate">{tx('{{n}} models', { n: card.group.count })}{card.unit.factionName ? ` · ${card.unit.factionName}` : ''}</span>
                 <span className="flex gap-1">
-                  <button className="hover:text-accent" title="Painter companion" aria-label={`Paint ${card.unit.customName}`} onClick={(e) => { e.stopPropagation(); useStore.getState().openCompanion('paint', card.unit.id) }}>🎨</button>
-                  <button className="hover:text-accent" title="Builder companion" aria-label={`Build ${card.unit.customName}`} onClick={(e) => { e.stopPropagation(); useStore.getState().openCompanion('build', card.unit.id) }}>🔨</button>
+                  <button className="hover:text-accent" title={tx('Painter companion')} aria-label={tx('Paint {{name}}', { name: card.unit.customName })} onClick={(e) => { e.stopPropagation(); useStore.getState().openCompanion('paint', card.unit.id) }}>🎨</button>
+                  <button className="hover:text-accent" title={tx('Builder companion')} aria-label={tx('Build {{name}}', { name: card.unit.customName })} onClick={(e) => { e.stopPropagation(); useStore.getState().openCompanion('build', card.unit.id) }}>🔨</button>
                 </span>
                 <select
                   className="max-w-24 rounded border border-line bg-transparent text-xs"
-                  aria-label={`Move ${card.unit.customName} to`}
+                  aria-label={tx('Move {{name}} to', { name: card.unit.customName })}
                   value=""
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) => e.target.value && setMoving({ ...card, to: e.target.value })}
                 >
-                  <option value="">Move…</option>
+                  <option value="">{tx('Move…')}</option>
                   {pipeline.stages.filter((s) => s.id !== stage.id).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
             </article>
           ))}
-          {cards.length === 0 && <p className="px-1 text-xs text-muted">Drop models here</p>}
+          {cards.length === 0 && <p className="px-1 text-xs text-muted">{tx('Drop models here')}</p>}
         </section>
       ))}
       {moving && <MoveDialog unit={moving.unit} group={moving.group} initialTo={moving.to} onClose={() => setMoving(null)} />}
