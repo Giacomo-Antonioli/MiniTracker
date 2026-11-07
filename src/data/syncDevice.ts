@@ -11,6 +11,10 @@ export interface KnownDevice {
   id: string
   name: string
   lastSync: string
+  /** Paired over the local network (#168): later syncs on the same network skip the pairing code. */
+  lanPaired?: boolean
+  /** Its certificate fingerprint at pairing; a different one later means its identity changed. */
+  lanPrint?: string
 }
 
 /** Deletion markers expire after this many days, so a device away longer can bring deleted items back. */
@@ -45,8 +49,18 @@ export const getKnownDevices = async (db: MiniTrackerDb) => (await get<KnownDevi
 
 /** Remember the other device and when we last synced with it. */
 export async function recordSync(db: MiniTrackerDb, other: Device, now: string): Promise<void> {
-  const list = (await getKnownDevices(db)).filter((d) => d.id !== other.deviceId)
-  await db.settings.put({ key: 'syncDevices', value: [{ id: other.deviceId, name: other.deviceName, lastSync: now }, ...list] })
+  const all = await getKnownDevices(db)
+  const before = all.find((d) => d.id === other.deviceId)
+  const list = all.filter((d) => d.id !== other.deviceId)
+  await db.settings.put({ key: 'syncDevices', value: [{ ...before, id: other.deviceId, name: other.deviceName, lastSync: now }, ...list] })
+}
+
+/** Remember that the pairing code was confirmed with this device over the local network. */
+export async function markLanPaired(db: MiniTrackerDb, other: Device, now: string, print?: string): Promise<void> {
+  const all = await getKnownDevices(db)
+  const before = all.find((d) => d.id === other.deviceId)
+  const list = all.filter((d) => d.id !== other.deviceId)
+  await db.settings.put({ key: 'syncDevices', value: [{ lastSync: now, ...before, id: other.deviceId, name: other.deviceName, lanPaired: true, lanPrint: print ?? before?.lanPrint }, ...list] })
 }
 
 export async function forgetDevice(db: MiniTrackerDb, id: string): Promise<void> {
@@ -63,3 +77,7 @@ export async function saveSyncPrefs(db: MiniTrackerDb, patch: Partial<SyncPrefs>
   await db.settings.put({ key: 'syncPrefs', value: next })
   return next
 }
+
+/** This device's own certificate for LAN pairing (#168), kept so paired devices recognise it. */
+export const getLanCert = (db: MiniTrackerDb) => get<RTCCertificate>(db, 'lanCertificate')
+export const saveLanCert = async (db: MiniTrackerDb, c: RTCCertificate) => void (await db.settings.put({ key: 'lanCertificate', value: c }))
