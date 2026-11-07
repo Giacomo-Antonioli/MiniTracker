@@ -68,6 +68,13 @@
   text-shadow: 1px 1px 0 #000;
 }
 
+/* Desktop app (#168): only the app's own panes scroll, never the window. */
+html.desktop-app,
+html.desktop-app body {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   background: var(--bg);
   color: var(--fg);
