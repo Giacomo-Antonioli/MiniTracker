@@ -13,11 +13,14 @@ import { BacklogCards, BacklogTable, StageBar } from './BacklogTable'
 import { useIsPhone } from '../../ui/useIsPhone'
 import { BacklogBoard } from './BacklogBoard'
 import { MassMoveDialog } from '../storage/MassMove'
+import { lifecycleName } from './lifecycle'
+import { useTx } from '../../i18n'
 
 /** How long a single click waits for a possible second click. */
 const DOUBLE_CLICK_MS = 250
 
 export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onOpenUnit?: (id: string) => void; onOpenDatasheet?: (id: string) => void; onOpenScheme?: (id: string) => void }) {
+  const tx = useTx()
   const units = useShownUnits()
   const { pipeline, backlogFilter: filter, setBacklogFilter: setFilter } = useStore()
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -70,59 +73,59 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <header className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-3">
-            <h1 className="font-display text-2xl text-accent">Backlog</h1>
-            {!phone && <div role="tablist" aria-label="Backlog view" className="flex gap-1">
+            <h1 className="font-display text-2xl text-accent" data-tour="backlog-title">{tx('Backlog')}</h1>
+            {!phone && <div role="tablist" aria-label={tx('Backlog view')} className="flex gap-1">
               {(['table', 'board'] as const).map((v) => (
-                <button key={v} role="tab" aria-selected={view === v} className={`btn text-sm ${view === v ? 'btn-primary' : ''}`} onClick={() => chooseView(v)}>
-                  {v === 'table' ? '☰ Table' : '▦ Board'}
+                <button key={v} role="tab" data-tour={`view-${v}`} aria-selected={view === v} className={`btn text-sm ${view === v ? 'btn-primary' : ''}`} onClick={() => chooseView(v)}>
+                  {v === 'table' ? tx('☰ Table') : tx('▦ Board')}
                 </button>
               ))}
             </div>}
           </div>
           <ScanBoxButton onOpenUnit={onOpenUnit} />
-          {showSpearhead && <button className="btn" onClick={() => setSpearhead(true)}>⚔ Spearhead box</button>}
-          <button className="btn btn-primary" onClick={() => setEditing('new')}>+ Add unit</button>
+          {showSpearhead && <button className="btn" onClick={() => setSpearhead(true)}>{tx('⚔ Spearhead box')}</button>}
+          <button className="btn btn-primary" data-tour="add-unit" onClick={() => setEditing('new')}>{tx('+ Add unit')}</button>
         </header>
 
         <CatalogueBanner />
 
-        <section className="panel grid gap-3 p-4" aria-label="Summary">
+        <section className="panel grid gap-3 p-4" aria-label={tx('Summary')} data-tour="backlog-summary">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
-              ['Units', live.length],
-              ['Models owned', owned],
-              ['Wishlisted', wished],
-              ['Painted', `${Math.round(total.ratio * 100)}%`],
+              [tx('Units'), live.length],
+              [tx('Models owned'), owned],
+              [tx('Wishlisted'), wished],
+              [tx('Painted'), `${Math.round(total.ratio * 100)}%`],
             ].map(([k, v]) => (
               <div key={k} className="rounded border border-line p-2"><div className="text-xs uppercase tracking-wider text-muted">{k}</div><div className="font-display text-xl text-accent">{v}</div></div>
             ))}
           </div>
-          {stats.length ? <StageBar stages={stats} pipeline={pipeline} legend wide /> : <p className="text-sm text-muted">No models yet</p>}
+          {stats.length ? <StageBar stages={stats} pipeline={pipeline} legend wide /> : <p className="text-sm text-muted">{tx('No models yet')}</p>}
         </section>
 
-        <section className="flex flex-wrap items-center gap-2" aria-label="Filters">
-          <input className="input w-full sm:w-56" placeholder="🔍 Search name, faction, tag" value={filter.text ?? ''} onChange={(e) => set({ text: e.target.value })} />
-          <select className="input" aria-label="Faction" value={filter.faction ?? ''} onChange={(e) => set({ faction: e.target.value || undefined })}>
-            <option value="">All factions</option>
+        <section className="flex flex-wrap items-center gap-2" aria-label={tx('Filters')} data-tour="backlog-filters">
+          <input className="input w-full sm:w-56" placeholder={tx('🔍 Search name, faction, tag')} value={filter.text ?? ''} onChange={(e) => set({ text: e.target.value })} />
+          <select className="input" aria-label={tx('Faction')} value={filter.faction ?? ''} onChange={(e) => set({ faction: e.target.value || undefined })}>
+            <option value="">{tx('All factions')}</option>
             {factions.map((f) => <option key={f}>{f}</option>)}
           </select>
-          <select className="input" aria-label="Stage" value={filter.stage ?? ''} onChange={(e) => set({ stage: e.target.value || undefined })}>
-            <option value="">All stages</option>
+          <select className="input" aria-label={tx('Stage')} value={filter.stage ?? ''} onChange={(e) => set({ stage: e.target.value || undefined })}>
+            <option value="">{tx('All stages')}</option>
             {pipeline.stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
-          <select className="input" aria-label="State" value={filter.lifecycle ?? 'current'} onChange={(e) => set({ lifecycle: e.target.value as BacklogFilter['lifecycle'] })}>
-            <option value="current">Active + on hold</option>
-            <option value="all">All states</option>
-            {['active', 'on-hold', 'sold', 'traded', 'gifted', 'lost'].map((l) => <option key={l} value={l}>{l}</option>)}
+          <select className="input" aria-label={tx('State')} value={filter.lifecycle ?? 'current'} onChange={(e) => set({ lifecycle: e.target.value as BacklogFilter['lifecycle'] })}>
+            <option value="current">{tx('Active + on hold')}</option>
+            <option value="all">{tx('All states')}</option>
+            {['active', 'on-hold', 'sold', 'traded', 'gifted', 'lost'].map((l) => <option key={l} value={l}>{lifecycleName(l)}</option>)}
           </select>
-          <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={!!filter.nextUpOnly} onChange={(e) => set({ nextUpOnly: e.target.checked })} /> Next up</label>
-          <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={!!filter.favouritesOnly} onChange={(e) => set({ favouritesOnly: e.target.checked })} /> Favourites</label>
-          {hasPlaces && shown.length > 0 && <button className="btn ml-auto text-sm" onClick={() => setStoring(true)}>📦 Store shown units… ({shown.length})</button>}
+          <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={!!filter.nextUpOnly} onChange={(e) => set({ nextUpOnly: e.target.checked })} /> {tx('Next up')}</label>
+          <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={!!filter.favouritesOnly} onChange={(e) => set({ favouritesOnly: e.target.checked })} /> {tx('Favourites')}</label>
+          {hasPlaces && shown.length > 0 && <button className="btn ml-auto text-sm" onClick={() => setStoring(true)}>{tx('📦 Store shown units… ({{n}})', { n: shown.length })}</button>}
         </section>
-        {storing && <MassMoveDialog title="Store the shown units" unitIds={shown.filter((u) => u.lifecycle === 'active' || u.lifecycle === 'on-hold').map((u) => u.id)} onClose={() => setStoring(false)} />}
+        {storing && <MassMoveDialog title={tx('Store the shown units')} unitIds={shown.filter((u) => u.lifecycle === 'active' || u.lifecycle === 'on-hold').map((u) => u.id)} onClose={() => setStoring(false)} />}
 
         {phone ? (
-          shown.length ? <BacklogCards units={shown} selectedId={selectedId} onRowClick={onRowClick} /> : <p className="p-6 text-center text-muted">{units.length === 0 ? 'Your backlog is empty. Add your first unit!' : 'No units match these filters.'}</p>
+          shown.length ? <BacklogCards units={shown} selectedId={selectedId} onRowClick={onRowClick} /> : <p className="p-6 text-center text-muted">{units.length === 0 ? tx('Your backlog is empty. Add your first unit!') : tx('No units match these filters.')}</p>
         ) : view === 'board' ? (
           <BacklogBoard units={shown} selectedId={selectedId} onCardClick={onRowClick} />
         ) : (
@@ -130,7 +133,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
           <BacklogTable units={shown} selectedId={selectedId} onRowClick={onRowClick} />
           {shown.length === 0 && (
             <p className="p-6 text-center text-muted">
-              {units.length === 0 ? 'Your backlog is empty. Add your first unit!' : 'No units match these filters.'}
+              {units.length === 0 ? tx('Your backlog is empty. Add your first unit!') : tx('No units match these filters.')}
             </p>
           )}
         </div>

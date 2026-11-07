@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { useStore } from '../../app/store'
 import type { ModelGroup, OwnedUnit } from '../../domain/collection/types'
 import { Dialog } from '../../ui/Dialog'
+import { useTx } from '../../i18n'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
 export function MoveDialog({ unit, group, initialTo, onClose, onMoved }: { unit: OwnedUnit; group: ModelGroup; initialTo?: string; onClose: () => void; onMoved?: () => void }) {
+  const tx = useTx()
   const { pipeline, move } = useStore()
   const currentIdx = pipeline.stages.findIndex((s) => s.id === group.status)
   const next = pipeline.stages[currentIdx + 1] ?? pipeline.stages.find((s) => s.id !== group.status)!
@@ -18,7 +20,7 @@ export function MoveDialog({ unit, group, initialTo, onClose, onMoved }: { unit:
   const from = pipeline.stages[currentIdx]?.name ?? group.status
 
   return (
-    <Dialog title="Move models" onClose={onClose}>
+    <Dialog title={tx('Move models')} onClose={onClose}>
       <form
         className="grid gap-3"
         onSubmit={async (e) => {
@@ -34,16 +36,16 @@ export function MoveDialog({ unit, group, initialTo, onClose, onMoved }: { unit:
           }
         }}
       >
-        <p className="text-muted">From <b className="text-fg">{from}</b> ({group.count} models)</p>
+        <p className="text-muted">{tx('From')} <b className="text-fg">{from}</b> {tx('({{n}} models)', { n: group.count })}</p>
         <label className="grid gap-1">
-          <span className="text-sm text-muted">How many</span>
+          <span className="text-sm text-muted">{tx('How many')}</span>
           <div className="flex items-center gap-2">
             <input className="input w-20" type="number" min={1} max={group.count} value={count} onChange={(e) => setCount(Number(e.target.value))} />
-            <input className="flex-1 accent-[var(--accent)]" type="range" min={1} max={group.count} value={count} onChange={(e) => setCount(Number(e.target.value))} aria-label="How many (slider)" />
+            <input className="flex-1 accent-[var(--accent)]" type="range" min={1} max={group.count} value={count} onChange={(e) => setCount(Number(e.target.value))} aria-label={tx('How many (slider)')} />
           </div>
         </label>
         <label className="grid gap-1">
-          <span className="text-sm text-muted">To stage</span>
+          <span className="text-sm text-muted">{tx('To stage')}</span>
           <select className="input" value={to} onChange={(e) => setTo(e.target.value)}>
             {pipeline.stages.filter((s) => s.id !== group.status).map((s) => (
               <option key={s.id} value={s.id}>{pipeline.stages.indexOf(s) < currentIdx ? '↩ ' : ''}{s.name}</option>
@@ -51,32 +53,32 @@ export function MoveDialog({ unit, group, initialTo, onClose, onMoved }: { unit:
           </select>
         </label>
         <label className="grid gap-1">
-          <span className="text-sm text-muted">Date</span>
+          <span className="text-sm text-muted">{tx('Date')}</span>
           <input className="input" type="date" value={date} max={today()} onChange={(e) => setDate(e.target.value)} required />
         </label>
         <div className="grid gap-1">
-          <span className="text-sm text-muted">Photo (optional)</span>
+          <span className="text-sm text-muted">{tx('Photo (optional)')}</span>
           <span className="flex flex-wrap items-center gap-2">
             <label className="btn w-fit">
-              📷 {photo ? 'Change photo' : 'Add photo'}
-              <input type="file" accept="image/*" className="sr-only" aria-label="Photo for this step" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+              📷 {photo ? tx('Change photo') : tx('Add photo')}
+              <input type="file" accept="image/*" className="sr-only" aria-label={tx('Photo for this step')} onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
             </label>
             {photo && (
               <>
                 <span className="max-w-48 truncate text-sm text-muted">{photo.name}</span>
-                <button type="button" className="text-sm text-muted underline" onClick={() => setPhoto(null)}>remove</button>
+                <button type="button" className="text-sm text-muted underline" onClick={() => setPhoto(null)}>{tx('remove')}</button>
               </>
             )}
           </span>
         </div>
         <label className="grid gap-1">
-          <span className="text-sm text-muted">Note</span>
+          <span className="text-sm text-muted">{tx('Note')}</span>
           <input className="input" value={note} onChange={(e) => setNote(e.target.value)} />
         </label>
         {error && <p className="text-danger" role="alert">{error}</p>}
         <div className="flex justify-end gap-2">
-          <button type="button" className="btn" onClick={(e) => (e.target as HTMLElement).closest('dialog')?.close()}>Cancel</button>
-          <button type="submit" className="btn btn-primary">Move</button>
+          <button type="button" className="btn" onClick={(e) => (e.target as HTMLElement).closest('dialog')?.close()}>{tx('Cancel')}</button>
+          <button type="submit" className="btn btn-primary">{tx('Move')}</button>
         </div>
       </form>
     </Dialog>

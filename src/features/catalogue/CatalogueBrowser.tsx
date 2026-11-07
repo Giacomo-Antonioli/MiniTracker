@@ -6,8 +6,10 @@ import type { Catalogue, Datasheet } from '../../domain/catalogue/types'
 import { factionsOf } from '../../domain/collection/backlog'
 import { UnitFormDialog } from '../backlog/UnitFormDialog'
 import { DatasheetInfo } from './DatasheetInfo'
+import { useTx } from '../../i18n'
 
 export function CatalogueBrowser({ onOpenSettings, openId }: { onOpenSettings: () => void; openId?: string }) {
+  const tx = useTx()
   const { catalogue, units } = useStore()
   const [text, setText] = useState('')
   const [factionId, setFactionId] = useState('')
@@ -29,9 +31,9 @@ export function CatalogueBrowser({ onOpenSettings, openId }: { onOpenSettings: (
   if (!catalogue) {
     return (
       <div className="grid max-w-xl gap-3">
-        <h1 className="font-display text-2xl text-accent">Catalogue</h1>
-        <p className="text-muted">No unit catalogue installed yet.</p>
-        <button className="btn btn-primary w-fit" onClick={onOpenSettings}>Go to Settings → Catalogue</button>
+        <h1 className="font-display text-2xl text-accent" data-tour="catalogue-title">{tx('Catalogue')}</h1>
+        <p className="text-muted">{tx('No unit catalogue installed yet.')}</p>
+        <button className="btn btn-primary w-fit" onClick={onOpenSettings}>{tx('Go to Settings → Catalogue')}</button>
       </div>
     )
   }
@@ -42,35 +44,35 @@ export function CatalogueBrowser({ onOpenSettings, openId }: { onOpenSettings: (
     <div className="flex h-full gap-4">
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <header className="flex items-baseline justify-between">
-          <h1 className="font-display text-2xl text-accent">Catalogue</h1>
+          <h1 className="font-display text-2xl text-accent" data-tour="catalogue-title">{tx('Catalogue')}</h1>
           <span className="text-sm text-muted">
-            {shown.length} of {catalogue.datasheets.length} units · {catalogue.gameName}
+            {tx('{{shown}} of {{total}} units', { shown: shown.length, total: catalogue.datasheets.length })} · {catalogue.gameName}
           </span>
         </header>
 
-        <section className="flex flex-wrap items-center gap-2" aria-label="Catalogue filters">
-          <input className="input w-60" placeholder="🔍 Search name or keyword" value={text} onChange={(e) => setText(e.target.value)} />
-          <select className="input" aria-label="Faction" value={factionId} onChange={(e) => setFactionId(e.target.value)}>
-            <option value="">All factions</option>
+        <section className="flex flex-wrap items-center gap-2" aria-label={tx('Catalogue filters')}>
+          <input className="input w-60" placeholder={tx('🔍 Search name or keyword')} value={text} onChange={(e) => setText(e.target.value)} />
+          <select className="input" aria-label={tx('Faction')} value={factionId} onChange={(e) => setFactionId(e.target.value)}>
+            <option value="">{tx('All factions')}</option>
             {catalogue.factions.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
           </select>
-          <select className="input" aria-label="Role" value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="">All roles</option>
+          <select className="input" aria-label={tx('Role')} value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="">{tx('All roles')}</option>
             {roles.map((r) => <option key={r}>{r}</option>)}
           </select>
-          <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={ownedOnly} onChange={(e) => setOwnedOnly(e.target.checked)} /> Owned only</label>
-          <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={legends} onChange={(e) => setLegends(e.target.checked)} /> Legends</label>
+          <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={ownedOnly} onChange={(e) => setOwnedOnly(e.target.checked)} /> {tx('Owned only')}</label>
+          <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={legends} onChange={(e) => setLegends(e.target.checked)} /> {tx('Legends')}</label>
         </section>
 
         <div className="panel overflow-auto">
           <table className="w-full text-left text-sm">
             <thead className="sticky top-0 border-b border-line bg-panel text-xs uppercase tracking-wider text-muted">
               <tr>
-                <th className="p-2">Unit</th>
-                <th className="p-2">Role</th>
-                <th className="p-2">Models</th>
-                <th className="p-2 text-right">Points</th>
-                <th className="p-2 text-right">Owned</th>
+                <th className="p-2">{tx('Unit')}</th>
+                <th className="p-2">{tx('Role')}</th>
+                <th className="p-2">{tx('Models')}</th>
+                <th className="p-2 text-right">{tx('Points')}</th>
+                <th className="p-2 text-right">{tx('Owned')}</th>
               </tr>
             </thead>
             <tbody>
@@ -84,7 +86,7 @@ export function CatalogueBrowser({ onOpenSettings, openId }: { onOpenSettings: (
                   >
                     <td className="p-2">
                       {d.name}
-                      {d.legends && <span className="text-muted"> (Legends)</span>}
+                      {d.legends && <span className="text-muted"> ({tx('Legends')})</span>}
                     </td>
                     <td className="p-2 text-muted">{d.role ?? '—'}</td>
                     <td className="p-2 text-muted">{d.minModels === d.maxModels ? d.minModels : `${d.minModels}–${d.maxModels}`}</td>
@@ -95,7 +97,7 @@ export function CatalogueBrowser({ onOpenSettings, openId }: { onOpenSettings: (
               })}
             </tbody>
           </table>
-          {shown.length === 0 && <p className="p-6 text-center text-muted">No units match these filters.</p>}
+          {shown.length === 0 && <p className="p-6 text-center text-muted">{tx('No units match these filters.')}</p>}
         </div>
       </div>
 
@@ -135,6 +137,7 @@ function DatasheetPanel({
   onAdd: () => void
   onClose: () => void
 }) {
+  const tx = useTx()
   const factionNames = d.factionIds.map((id) => catalogue.factions.find((f) => f.id === id)?.name).filter(Boolean)
   const section = (title: string, items: string[]) =>
     items.length > 0 && (
@@ -147,30 +150,30 @@ function DatasheetPanel({
     )
 
   return (
-    <aside className="panel fixed inset-0 z-40 flex flex-col overflow-y-auto rounded-none md:static md:z-auto md:h-full md:w-[420px] md:shrink-0 md:rounded-[inherit]" aria-label="Datasheet details">
+    <aside className="panel fixed inset-0 z-40 flex flex-col overflow-y-auto rounded-none md:static md:z-auto md:h-full md:w-[420px] md:shrink-0 md:rounded-[inherit]" aria-label={tx('Datasheet details')}>
       <header className="border-b border-line p-4">
         <div className="flex items-start justify-between gap-2">
           <h2 className="font-display text-xl text-accent">{d.name}</h2>
-          <button className="btn" aria-label="Close datasheet" onClick={onClose}>✕</button>
+          <button className="btn" aria-label={tx('Close datasheet')} onClick={onClose}>✕</button>
         </div>
         <p className="mt-1 text-sm text-muted">
-          {d.role ?? 'No role'}
-          {d.legends && ' · Legends'}
+          {d.role ?? tx('No role')}
+          {d.legends && ` · ${tx('Legends')}`}
         </p>
         <p className="mt-2 text-sm">
-          {owned ? <span className="text-ok">You own {owned.models} models in {owned.units} unit{owned.units > 1 ? 's' : ''}</span> : <span className="text-muted">Not in your collection</span>}
+          {owned ? <span className="text-ok">{owned.units > 1 ? tx('You own {{models}} models in {{units}} units', { models: owned.models, units: owned.units }) : tx('You own {{models}} models in 1 unit', { models: owned.models })}</span> : <span className="text-muted">{tx('Not in your collection')}</span>}
         </p>
-        <button className="btn btn-primary mt-3" onClick={onAdd}>+ Add to collection</button>
+        <button className="btn btn-primary mt-3" onClick={onAdd}>{tx('+ Add to collection')}</button>
       </header>
 
       <section className="border-b border-line p-4">
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Points</h3>
-        <table className="text-sm" aria-label="Points by unit size">
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{tx('Points')}</h3>
+        <table className="text-sm" aria-label={tx('Points by unit size')}>
           <tbody>
             {pointsTable(d).map((r) => (
               <tr key={r.models}>
-                <td className="pr-6">{r.models} model{r.models === '1' ? '' : 's'}</td>
-                <td className="font-semibold text-accent">{r.points || '?'} pts</td>
+                <td className="pr-6">{r.models === '1' ? tx('1 model') : tx('{{n}} models', { n: r.models })}</td>
+                <td className="font-semibold text-accent">{tx('{{n}} pts', { n: r.points || '?' })}</td>
               </tr>
             ))}
           </tbody>
@@ -178,15 +181,15 @@ function DatasheetPanel({
       </section>
 
       <DatasheetInfo catalogue={catalogue} d={d} />
-      {section(`Available to (${factionNames.length})`, factionNames as string[])}
+      {section(tx('Available to ({{n}})', { n: factionNames.length }), factionNames as string[])}
 
       {ownedUnits.length > 0 && (
         <section className="p-4">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Your units</h3>
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{tx('Your units')}</h3>
           <ul className="text-sm">{ownedUnits.map((u) => <li key={u.id}>• {u.customName}</li>)}</ul>
         </section>
       )}
-      <p className="mt-auto p-4 text-xs text-muted">Data: BSData ({catalogue.source.repo}). Full rules text is not included.</p>
+      <p className="mt-auto p-4 text-xs text-muted">{tx('Data: BSData ({{repo}}). Full rules text is not included.', { repo: catalogue.source.repo })}</p>
     </aside>
   )
 }

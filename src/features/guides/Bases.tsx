@@ -6,6 +6,7 @@ import { techniqueFor, type Technique } from '../../domain/guides/techniques'
 import { HowTo, TechniquePanel } from './GuidesPage'
 import { materialsFor, type Material } from '../../domain/guides/materials'
 import { MaterialPanel, MaterialsList } from './Materials'
+import { useTx } from '../../i18n'
 
 type RecipeSet = 'bases' | 'terrain'
 const cache: Partial<Record<RecipeSet, BaseRecipe[]>> = {}
@@ -27,6 +28,7 @@ const KINDS: Record<RecipeSet, string[]> = { bases: BASE_KINDS.map(([k]) => k), 
 
 /** Browse basing recipes; with onPick, each card gets a "Use this base" button. */
 export function BasesBrowser({ onPick, set = 'bases' }: { onPick?: (b: BaseRecipe) => void; set?: RecipeSet }) {
+  const tx = useTx()
   const bases = useBases(set)
   const { paints, loadPaints } = useStore()
   useEffect(() => {
@@ -41,23 +43,23 @@ export function BasesBrowser({ onPick, set = 'bases' }: { onPick?: (b: BaseRecip
     () => (bases ? filterBases(bases, kind, text).sort((a, b) => Number(a.origin !== 'minitracker') - Number(b.origin !== 'minitracker') || Number(!!a.schemeId) - Number(!!b.schemeId) || a.name.localeCompare(b.name)) : []),
     [bases, kind, text],
   )
-  if (!bases) return <p className="text-sm text-muted">Loading bases…</p>
+  if (!bases) return <p className="text-sm text-muted">{tx('Loading bases…')}</p>
 
   return (
     <div className="grid gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <input className="input w-56" aria-label={set === 'bases' ? 'Search bases' : 'Search terrain'} placeholder={set === 'bases' ? 'Search bases or factions…' : 'Search terrain…'} value={text} onChange={(e) => setText(e.target.value)} />
-        <div role="group" aria-label={set === 'bases' ? 'Base type' : 'Surface'} className="flex flex-wrap gap-1">
+        <input className="input w-56" aria-label={set === 'bases' ? tx('Search bases') : tx('Search terrain')} placeholder={set === 'bases' ? tx('Search bases or factions…') : tx('Search terrain…')} value={text} onChange={(e) => setText(e.target.value)} />
+        <div role="group" aria-label={set === 'bases' ? tx('Base type') : tx('Surface')} className="flex flex-wrap gap-1">
           {['', ...KINDS[set]].map((k) => (
             <button key={k || 'all'} aria-pressed={kind === k} className={`btn text-sm ${kind === k ? 'btn-primary' : ''}`} onClick={() => setKind(k)}>
-              {k || 'All'}
+              {k || tx('All')}
             </button>
           ))}
         </div>
       </div>
       <p className="text-sm text-muted">
-        {shown.length} recipes.{' '}
-        {set === 'bases' ? 'Texture paints go on first; finish with drybrushing and a neat rim.' : 'Spray or drybrush big areas, sponge on damage, and keep terrain colours different from your army so models stand out.'}
+        {tx('{{n}} recipes.', { n: shown.length })}{' '}
+        {set === 'bases' ? tx('Texture paints go on first; finish with drybrushing and a neat rim.') : tx('Spray or drybrush big areas, sponge on damage, and keep terrain colours different from your army so models stand out.')}
       </p>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {shown.map((b) => <BaseCard key={b.id} base={b} label={set === 'bases' ? 'Base' : 'Terrain'} onTechnique={setTechnique} onMaterial={setMaterial} onPick={onPick} />)}
@@ -69,16 +71,17 @@ export function BasesBrowser({ onPick, set = 'bases' }: { onPick?: (b: BaseRecip
 }
 
 function BaseCard({ base: b, label, onTechnique, onMaterial, onPick }: { base: BaseRecipe; label: string; onTechnique: (t: Technique) => void; onMaterial: (m: Material) => void; onPick?: (b: BaseRecipe) => void }) {
+  const tx = useTx()
   const { paints } = useStore()
   const byId = useMemo(() => new Map(paints.map((p) => [p.id, p])), [paints])
   return (
-    <article className="panel grid content-start gap-2 p-3 text-sm" aria-label={`${label} ${b.name}`}>
+    <article className="panel grid content-start gap-2 p-3 text-sm" aria-label={`${label === 'Base' ? tx('Base') : tx('Terrain')} ${b.name}`}>
       <header>
         <h3 className="font-semibold text-accent">{b.name}</h3>
         <p className="text-xs text-muted">
-          {b.kinds.join(' · ') || 'other'}
+          {b.kinds.join(' · ') || tx('other')}
           {b.factionName && ` · ${b.factionName}`}
-          {b.origin === 'minitracker' ? ' · MiniTracker' : b.source ? <> · <a className="hover:text-accent hover:underline" href={b.source.url} target="_blank" rel="noreferrer">{b.schemeId ? 'from a scheme' : 'source'} ↗</a></> : null}
+          {b.origin === 'minitracker' ? ' · MiniTracker' : b.source ? <> · <a className="hover:text-accent hover:underline" href={b.source.url} target="_blank" rel="noreferrer">{b.schemeId ? tx('from a scheme') : tx('source')} ↗</a></> : null}
         </p>
       </header>
       <ol className="grid gap-1">
@@ -109,25 +112,26 @@ function BaseCard({ base: b, label, onTechnique, onMaterial, onPick }: { base: B
       </ol>
       {materialsFor(b).length > 0 && (
         <p className="flex flex-wrap items-center gap-1 text-xs text-muted">
-          Materials:
+          {tx('Materials:')}
           {materialsFor(b).map((m) => (
             <button key={m.id} className="rounded border border-line px-1.5 hover:border-accent hover:text-accent" onClick={() => onMaterial(m)}>{m.name}</button>
           ))}
         </p>
       )}
-      {onPick && <button className="btn btn-primary justify-self-start text-sm" onClick={() => onPick(b)}>Use this base</button>}
+      {onPick && <button className="btn btn-primary justify-self-start text-sm" onClick={() => onPick(b)}>{tx('Use this base')}</button>}
     </article>
   )
 }
 
 /** Pick a base recipe for a scheme. */
 export function BasePickerDialog({ onPick, onClose }: { onPick: (b: BaseRecipe) => void; onClose: () => void }) {
+  const tx = useTx()
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" role="dialog" aria-label="Pick a base recipe">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" role="dialog" aria-label={tx('Pick a base recipe')}>
       <div className="panel grid max-h-full w-[1000px] max-w-full gap-3 overflow-y-auto p-4">
         <header className="flex items-center justify-between">
-          <h2 className="font-display text-xl text-accent">Pick a base recipe</h2>
-          <button className="btn" aria-label="Close base picker" onClick={onClose}>✕</button>
+          <h2 className="font-display text-xl text-accent">{tx('Pick a base recipe')}</h2>
+          <button className="btn" aria-label={tx('Close base picker')} onClick={onClose}>✕</button>
         </header>
         <BasesBrowser onPick={onPick} />
       </div>
@@ -137,16 +141,17 @@ export function BasePickerDialog({ onPick, onClose }: { onPick: (b: BaseRecipe) 
 
 /** Guides › Bases: recipes or materials. */
 export function BasesTab() {
+  const tx = useTx()
   const [view, setView] = useState<'recipes' | 'materials'>('recipes')
   return (
     <div className="grid gap-3">
-      <div role="tablist" aria-label="Bases view" className="flex gap-1">
-        <button role="tab" aria-selected={view === 'recipes'} className={`btn text-sm ${view === 'recipes' ? 'btn-primary' : ''}`} onClick={() => setView('recipes')}>Recipes</button>
-        <button role="tab" aria-selected={view === 'materials'} className={`btn text-sm ${view === 'materials' ? 'btn-primary' : ''}`} onClick={() => setView('materials')}>Materials</button>
+      <div role="tablist" aria-label={tx('Bases view')} className="flex gap-1">
+        <button role="tab" aria-selected={view === 'recipes'} className={`btn text-sm ${view === 'recipes' ? 'btn-primary' : ''}`} onClick={() => setView('recipes')}>{tx('Recipes')}</button>
+        <button role="tab" aria-selected={view === 'materials'} className={`btn text-sm ${view === 'materials' ? 'btn-primary' : ''}`} onClick={() => setView('materials')}>{tx('Materials')}</button>
       </div>
       {view === 'recipes' ? (
         <>
-          <HowTo title="How to base miniatures" sections={BASES_GUIDE} sources={BASES_SOURCES} diagrams={['order', 'drybrush', 'tufts']} />
+          <HowTo title={tx('How to base miniatures')} sections={BASES_GUIDE} sources={BASES_SOURCES} diagrams={['order', 'drybrush', 'tufts']} />
           <BasesBrowser />
         </>
       ) : (

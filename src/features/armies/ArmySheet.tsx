@@ -12,6 +12,7 @@ import type { ArmyList } from '../../domain/lists/types'
 import { DatasheetCards, KeywordLegend } from './DatasheetCards'
 import { StratagemCards } from './StratagemCards'
 import { detachmentNames, stratagemsFor } from '../../domain/stratagems/stratagems'
+import { useTx } from '../../i18n'
 
 export interface ArmyPrintOptions {
   cards: boolean
@@ -21,6 +22,7 @@ export interface ArmyPrintOptions {
 
 /** The whole army as a printable roster, optionally with datasheet cards and owned/painted counts. */
 export function ArmySheet({ list, cat, options, onDone }: { list: ArmyList; cat: Catalogue; options: ArmyPrintOptions; onDone: () => void }) {
+  const tx = useTx()
   const { units, pipeline, stratagemData } = useStore()
   const [date] = useState(() => new Date().toLocaleDateString())
   useEffect(() => {
@@ -42,21 +44,21 @@ export function ArmySheet({ list, cat, options, onDone }: { list: ArmyList; cat:
   const subtitle = [cat.factions.find((f) => f.id === list.factionId)?.name, EDITIONS.find((x) => x.key === list.edition)?.label, battleSizes(cat).find((b) => b.id === list.battleSize)?.name, detachments.join(', ')].filter(Boolean).join(' · ')
 
   return createPortal(
-    <div className="print-only" aria-label="Army sheet">
+    <div className="print-only" aria-label={tx('Army sheet')}>
       <header className="flex items-baseline justify-between border-b-2 border-black pb-1">
         <h1 className="text-2xl font-bold">{list.name}</h1>
-        <span className="text-lg font-bold">{points.total} / {list.pointsLimit} pts</span>
+        <span className="text-lg font-bold">{tx('{{pts}} / {{limit}} pts', { pts: points.total, limit: list.pointsLimit })}</span>
       </header>
       <p className="text-sm">{subtitle}</p>
       <table className="mt-3 w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-black text-left">
-            <th className="py-1">Unit</th>
-            <th className="py-1 text-right">Models</th>
-            <th className="py-1 pl-3">Notes</th>
-            {options.ownership && <th className="py-1 text-right">Owned</th>}
-            {options.ownership && <th className="py-1 text-right">Painted</th>}
-            <th className="py-1 text-right">Points</th>
+            <th className="py-1">{tx('Unit')}</th>
+            <th className="py-1 text-right">{tx('Models')}</th>
+            <th className="py-1 pl-3">{tx('Notes')}</th>
+            {options.ownership && <th className="py-1 text-right">{tx('Owned')}</th>}
+            {options.ownership && <th className="py-1 text-right">{tx('Painted')}</th>}
+            <th className="py-1 text-right">{tx('Points')}</th>
           </tr>
         </thead>
         <tbody>
@@ -67,10 +69,10 @@ export function ArmySheet({ list, cat, options, onDone }: { list: ArmyList; cat:
             const leads = e.attachedTo ? list.entries.find((t) => t.id === e.attachedTo) : undefined
             return (
               <tr key={e.id} className="border-b border-black/30 align-top">
-                <td className="py-1">{d?.name ?? 'Unknown unit'}</td>
+                <td className="py-1">{d?.name ?? tx('Unknown unit')}</td>
                 <td className="py-1 text-right">{e.models}</td>
                 <td className="py-1 pl-3 text-xs">
-                  {[e.warlord && 'Warlord', x && `${x.name} (+${x.points})`, leads && `Leads ${sheets.get(leads.datasheetId)?.name ?? 'a unit'}`].filter(Boolean).join(' · ')}
+                  {[e.warlord && tx('Warlord'), x && `${x.name} (+${x.points})`, leads && tx('Leads {{name}}', { name: sheets.get(leads.datasheetId)?.name ?? tx('a unit') })].filter(Boolean).join(' · ')}
                 </td>
                 {options.ownership && <td className="py-1 text-right">{o ? `${o.have}/${o.need}` : '–'}</td>}
                 {options.ownership && <td className="py-1 text-right">{o ? o.painted : '–'}</td>}
@@ -80,7 +82,7 @@ export function ArmySheet({ list, cat, options, onDone }: { list: ArmyList; cat:
           })}
         </tbody>
       </table>
-      {options.ownership && <p className="mt-2 text-sm">{own.missingModels ? `${own.missingModels} models missing` : 'Every model owned'} · {own.unpaintedModels} to paint</p>}
+      {options.ownership && <p className="mt-2 text-sm">{own.missingModels ? tx('{{n}} models missing', { n: own.missingModels }) : tx('Every model owned')} · {tx('{{n}} to paint', { n: own.unpaintedModels })}</p>}
       {options.cards && (
         <section style={{ breakBefore: 'page' }}>
           {(() => {
@@ -106,25 +108,26 @@ export function ArmySheet({ list, cat, options, onDone }: { list: ArmyList; cat:
 
 /** Asked before printing the army: what to include. Owned/painted counts are off unless asked for. */
 export function ArmyPrintDialog({ list, cat, onSave, onCancel, onPrint }: { list: ArmyList; cat: Catalogue; onSave: (l: ArmyList) => void; onCancel: () => void; onPrint: (o: ArmyPrintOptions) => void }) {
+  const tx = useTx()
   const { stratagemData } = useStore()
   const [o, setO] = useState<ArmyPrintOptions>({ cards: true, ownership: false, stratagems: !!stratagemData })
   const names = (cat.detachments ?? []).filter((d) => list.detachmentIds?.includes(d.id)).map((d) => d.name)
   const r = stratagemData ? stratagemsFor(names, stratagemData, list.stratagemDetachments) : undefined
   const choices = stratagemData ? detachmentNames(stratagemData) : []
   return (
-    <div role="dialog" aria-label="Print army" className="panel absolute right-0 z-20 mt-1 grid w-64 gap-2 border-accent/60 p-3">
-      <h3 className="font-semibold">Print army</h3>
-      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={o.cards} onChange={(e) => setO({ ...o, cards: e.target.checked })} /> Datasheet cards</label>
-      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={o.ownership} onChange={(e) => setO({ ...o, ownership: e.target.checked })} /> Owned and painted models</label>
+    <div role="dialog" aria-label={tx('Print army')} className="panel absolute right-0 z-20 mt-1 grid w-64 gap-2 border-accent/60 p-3">
+      <h3 className="font-semibold">{tx('Print army')}</h3>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={o.cards} onChange={(e) => setO({ ...o, cards: e.target.checked })} /> {tx('Datasheet cards')}</label>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={o.ownership} onChange={(e) => setO({ ...o, ownership: e.target.checked })} /> {tx('Owned and painted models')}</label>
       {stratagemData ? (
         <>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={o.stratagems} onChange={(e) => setO({ ...o, stratagems: e.target.checked })} /> Stratagem cards</label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={o.stratagems} onChange={(e) => setO({ ...o, stratagems: e.target.checked })} /> {tx('Stratagem cards')}</label>
           {o.stratagems && r?.detachments.map((d) => (
             <label key={d.name} className="grid gap-0.5 text-xs">
-              <span className={d.matched ? 'text-muted' : 'text-danger'}>{d.matched ? `${d.name}: ${d.stratagems.length} stratagems` : `${d.name}: not found, pick it`}</span>
+              <span className={d.matched ? 'text-muted' : 'text-danger'}>{d.matched ? tx('{{name}}: {{n}} stratagems', { name: d.name, n: d.stratagems.length }) : tx('{{name}}: not found, pick it', { name: d.name })}</span>
               <select
                 className="input py-0.5"
-                aria-label={`Stratagems for ${d.name}`}
+                aria-label={tx('Stratagems for {{name}}', { name: d.name })}
                 value={d.matched ?? ''}
                 onChange={(e) => onSave({ ...list, stratagemDetachments: { ...list.stratagemDetachments, [d.name]: e.target.value }, updatedAt: new Date().toISOString() })}
               >
@@ -135,11 +138,11 @@ export function ArmyPrintDialog({ list, cat, onSave, onCancel, onPrint }: { list
           ))}
         </>
       ) : (
-        <p className="text-xs text-muted">Stratagem cards: import them in Settings → Catalogue.</p>
+        <p className="text-xs text-muted">{tx('Stratagem cards: import them in Settings → Catalogue.')}</p>
       )}
       <div className="flex gap-2">
-        <button className="btn btn-primary" onClick={() => onPrint(o)}>🖨 Print</button>
-        <button className="btn" onClick={onCancel}>Cancel</button>
+        <button className="btn btn-primary" onClick={() => onPrint(o)}>{tx('🖨 Print')}</button>
+        <button className="btn" onClick={onCancel}>{tx('Cancel')}</button>
       </div>
     </div>
   )

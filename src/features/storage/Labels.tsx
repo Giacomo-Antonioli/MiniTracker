@@ -9,6 +9,7 @@ import { decodeFrame } from './decode'
 import { WISHLISTED } from '../../domain/collection/pipeline'
 import type { OwnedUnit } from '../../domain/collection/types'
 import { appUrl, printHtml } from '../../app/platform'
+import { txr, useTx } from '../../i18n'
 
 /** Owned models of a unit (wishlisted ones have no base to label yet). */
 export const ownedModels = (u: OwnedUnit | undefined) => (u ? u.groups.reduce((n, g) => n + (g.status === WISHLISTED ? 0 : g.count), 0) : 0)
@@ -31,11 +32,11 @@ export function labelsHtml(items: LabelItem[], layout: LabelLayout, size: number
   if (layout === 'stickers') {
     body = `<div class="grid">${items.map((i) => `<div class="st">${i.qr}<b>${esc(i.code)}</b></div>`).join('')}</div>`
   } else if (layout === 'boxes') {
-    body = `<div class="grid">${items.map((i) => `<div class="bx">${i.qr}<div><div class="code">${esc(i.code)}</div><h2>${esc(i.name)}</h2><p>${esc(i.sub)}</p>${i.contents.length ? `<ul>${i.contents.slice(0, 12).map((c) => `<li>${esc(c)}</li>`).join('')}${i.contents.length > 12 ? `<li>+${i.contents.length - 12} more</li>` : ''}</ul>` : ''}</div></div>`).join('')}</div>`
+    body = `<div class="grid">${items.map((i) => `<div class="bx">${i.qr}<div><div class="code">${esc(i.code)}</div><h2>${esc(i.name)}</h2><p>${esc(i.sub)}</p>${i.contents.length ? `<ul>${i.contents.slice(0, 12).map((c) => `<li>${esc(c)}</li>`).join('')}${i.contents.length > 12 ? `<li>+${i.contents.length - 12} ${txr('more')}</li>` : ''}</ul>` : ''}</div></div>`).join('')}</div>`
   } else {
-    body = `<p class="tip">Stencil: cut the black shapes out of stencil film or thin card (or load the SVG in a cutting machine), then dab paint or use a paint pen through it.</p>` + stencilSvg(items.map((i) => i.code), size)
+    body = `<p class="tip">${txr('Stencil: cut the black shapes out of stencil film or thin card (or load the SVG in a cutting machine), then dab paint or use a paint pen through it.')}</p>` + stencilSvg(items.map((i) => i.code), size)
   }
-  return `<!doctype html><html><head><meta charset="utf-8"><title>MiniTracker labels</title><style>${css}</style></head><body>${body}<script>onload=()=>print()</script></body></html>`
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${txr('MiniTracker labels')}</title><style>${css}</style></head><body>${body}<script>onload=()=>print()</script></body></html>`
 }
 
 /** All codes as stencils in one SVG, `h` mm high each, with a cut frame around each. */
@@ -53,6 +54,7 @@ const qrSvg = (text: string) => QRCode.toString(text, { type: 'svg', margin: 0, 
 
 /** Pick units and places, then print stickers, box labels or a stencil sheet. */
 export function LabelsDialog({ onClose, unitIds: preset, placeIds: presetPlaces }: { onClose: () => void; unitIds?: string[]; placeIds?: string[] }) {
+  const tx = useTx()
   const { storage: s, units, saveStorage } = useStore()
   const stored = units.filter((u) => u.lifecycle === 'active')
   const [units_, setUnits] = useState<string[]>(preset ?? stored.filter((u) => s.homes[u.id]).map((u) => u.id))
@@ -84,7 +86,7 @@ export function LabelsDialog({ onClose, unitIds: preset, placeIds: presetPlaces 
   const print = async () => {
     const { html, next } = await build()
     await saveStorage(next)
-    if (!(await printHtml(html))) setMsg('Allow pop-ups for this site to print the labels.')
+    if (!(await printHtml(html))) setMsg(tx('Allow pop-ups for this site to print the labels.'))
   }
   const download = async () => {
     const next = assignCodes(s, units_, places)
@@ -94,42 +96,42 @@ export function LabelsDialog({ onClose, unitIds: preset, placeIds: presetPlaces 
     a.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
     a.download = 'minitracker-stencils.svg'
     a.click()
-    setMsg('Stencil SVG downloaded.')
+    setMsg(tx('Stencil SVG downloaded.'))
   }
 
   return (
-    <Dialog title="Labels and stencils" onClose={onClose} wide>
+    <Dialog title={tx('Labels and stencils')} onClose={onClose} wide>
       <div className="grid gap-3">
-        <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="Layout">
-          {([['stickers', '🏷 QR stickers'], ['boxes', '📦 Box labels'], ['stencil', '✂ Stencil sheet']] as const).map(([id, l]) => (
+        <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label={tx('Layout')}>
+          {([['stickers', tx('🏷 QR stickers')], ['boxes', tx('📦 Box labels')], ['stencil', tx('✂ Stencil sheet')]] as const).map(([id, l]) => (
             <button key={id} aria-pressed={layout === id} className={`btn ${layout === id ? 'btn-primary' : ''}`} onClick={() => setLayout(id)}>{l}</button>
           ))}
           {layout !== 'boxes' && (
-            <select className="input" aria-label="Size" value={size} onChange={(e) => setSize(Number(e.target.value))}>
-              {[12, 15, 20, 25].map((n) => <option key={n} value={n}>{layout === 'stencil' ? `${n / 2} mm letters` : `${n} mm`}</option>)}
+            <select className="input" aria-label={tx('Size')} value={size} onChange={(e) => setSize(Number(e.target.value))}>
+              {[12, 15, 20, 25].map((n) => <option key={n} value={n}>{layout === 'stencil' ? tx('{{n}} mm letters', { n: n / 2 }) : tx('{{n}} mm', { n })}</option>)}
             </select>
           )}
         </div>
         <p className="text-xs text-muted">
-          {layout === 'stickers' ? 'Small QR stickers for under bases or on bags. Tip: print on vinyl label paper and add a coat of varnish so they stay on.'
-            : layout === 'boxes' ? 'One label per place with its QR, code, where it is and what is inside.'
-            : 'Codes in a stencil font (no loose islands): print and cut by hand, or download the SVG for a cutting machine.'}
+          {layout === 'stickers' ? tx('Small QR stickers for under bases or on bags. Tip: print on vinyl label paper and add a coat of varnish so they stay on.')
+            : layout === 'boxes' ? tx('One label per place with its QR, code, where it is and what is inside.')
+            : tx('Codes in a stencil font (no loose islands): print and cut by hand, or download the SVG for a cutting machine.')}
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           {layout !== 'boxes' && (
             <fieldset className="grid max-h-56 content-start gap-1 overflow-auto text-sm">
-              <legend className="text-xs text-muted">Units ({units_.length}, one label per model)</legend>
-              {stored.map((u) => <label key={u.id} className="flex items-center gap-2"><input type="checkbox" checked={units_.includes(u.id)} onChange={() => toggle(units_, setUnits, u.id)} />{u.customName}<span className="text-muted"> · {ownedModels(u) || 1} {ownedModels(u) > 1 ? 'labels' : 'label'}{s.codes[u.id] ? ` · ${s.codes[u.id]}` : ''}</span></label>)}
+              <legend className="text-xs text-muted">{tx('Units ({{n}}, one label per model)', { n: units_.length })}</legend>
+              {stored.map((u) => <label key={u.id} className="flex items-center gap-2"><input type="checkbox" checked={units_.includes(u.id)} onChange={() => toggle(units_, setUnits, u.id)} />{u.customName}<span className="text-muted"> · {ownedModels(u) > 1 ? tx('{{n}} labels', { n: ownedModels(u) }) : tx('1 label')}{s.codes[u.id] ? ` · ${s.codes[u.id]}` : ''}</span></label>)}
             </fieldset>
           )}
           <fieldset className="grid max-h-56 content-start gap-1 overflow-auto text-sm">
-            <legend className="text-xs text-muted">Places ({places.length})</legend>
+            <legend className="text-xs text-muted">{tx('Places ({{n}})', { n: places.length })}</legend>
             {s.places.map((p) => <label key={p.id} className="flex items-center gap-2"><input type="checkbox" checked={places.includes(p.id)} onChange={() => toggle(places, setPlaces, p.id)} />{kindOf(s, p.kind).icon} {pathLabel(s, p.id)}{s.codes[p.id] ? <span className="text-muted"> · {s.codes[p.id]}</span> : null}</label>)}
           </fieldset>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button className="btn btn-primary" disabled={!units_.length && !places.length} onClick={() => void print()}>🖨 Print</button>
-          {layout === 'stencil' && <button className="btn" onClick={() => void download()}>⬇ Download SVG</button>}
+          <button className="btn btn-primary" disabled={!units_.length && !places.length} onClick={() => void print()}>{tx('🖨 Print')}</button>
+          {layout === 'stencil' && <button className="btn" onClick={() => void download()}>{tx('⬇ Download SVG')}</button>}
         </div>
         {msg && <p className="text-sm text-muted" role="status">{msg}</p>}
       </div>
@@ -139,23 +141,25 @@ export function LabelsDialog({ onClose, unitIds: preset, placeIds: presetPlaces 
 
 /** The code shown big, to copy under a base with a paint pen; gives one if missing. */
 export function CodeBadge({ id, kind }: { id: string; kind: 'unit' | 'place' }) {
+  const tx = useTx()
   const { storage: s, saveStorage, units } = useStore()
   const code = s.codes[id]
   const models = kind === 'unit' ? modelCodes(code ?? '', ownedModels(units.find((u) => u.id === id))) : []
-  if (!code) return <button className="btn w-fit" onClick={() => void saveStorage(assignCodes(s, kind === 'unit' ? [id] : [], kind === 'place' ? [id] : []))}>🏷 Give it a code</button>
+  if (!code) return <button className="btn w-fit" onClick={() => void saveStorage(assignCodes(s, kind === 'unit' ? [id] : [], kind === 'place' ? [id] : []))}>{tx('🏷 Give it a code')}</button>
   return (
-    <div className="flex flex-wrap items-center gap-3" aria-label="Code">
+    <div className="flex flex-wrap items-center gap-3" aria-label={tx('Code')}>
       <span className="rounded border-2 border-dashed border-line px-3 py-1 font-mono text-3xl font-bold tracking-wider">{code}</span>
       <span className="text-xs text-muted">
-        {models.length > 1 ? 'Write one code under each base with a paint pen, or print a sticker per model or a stencil from Storage ▸ Labels.' : 'Write this under the base with a paint pen, or print a sticker or stencil from Storage ▸ Labels.'}
+        {models.length > 1 ? tx('Write one code under each base with a paint pen, or print a sticker per model or a stencil from Storage ▸ Labels.') : tx('Write this under the base with a paint pen, or print a sticker or stencil from Storage ▸ Labels.')}
       </span>
-      {models.length > 1 && <ul className="flex w-full flex-wrap gap-1 font-mono text-sm" aria-label="Model codes">{models.map((c) => <li key={c} className="rounded border border-line px-1.5">{c}</li>)}</ul>}
+      {models.length > 1 && <ul className="flex w-full flex-wrap gap-1 font-mono text-sm" aria-label={tx('Model codes')}>{models.map((c) => <li key={c} className="rounded border border-line px-1.5">{c}</li>)}</ul>}
     </div>
   )
 }
 
 /** Type a code or scan a QR with the camera; calls onFound with the unit or place. */
 export function FindCode({ onFound, onBarcode }: { onFound: (t: CodeTarget) => void; onBarcode?: (code: string) => void }) {
+  const tx = useTx()
   const { storage: s } = useStore()
   const [text, setText] = useState('')
   const [err, setErr] = useState('')
@@ -172,14 +176,14 @@ export function FindCode({ onFound, onBarcode }: { onFound: (t: CodeTarget) => v
       setErr('')
       setScanning(false)
       onFound(t)
-    } else setErr(`No unit or place has the code "${code.trim()}".`)
+    } else setErr(tx('No unit or place has the code "{{code}}".', { code: code.trim() }))
   }
   return (
     <div className="grid gap-1">
       <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); go(text) }}>
-        <input className="input w-32" aria-label="Find code" placeholder="Code, e.g. U-007" value={text} onChange={(e) => setText(e.target.value)} />
-        <button className="btn">Find</button>
-        <button type="button" className="btn" onClick={() => setScanning(true)}>📷 Scan</button>
+        <input className="input w-32" aria-label={tx('Find code')} placeholder={tx('Code, e.g. U-007')} value={text} onChange={(e) => setText(e.target.value)} />
+        <button className="btn">{tx('Find')}</button>
+        <button type="button" className="btn" onClick={() => setScanning(true)}>{tx('📷 Scan')}</button>
       </form>
       {err && <p className="text-sm text-danger" role="alert">{err}</p>}
       {scanning && <ScanDialog onText={go} onClose={() => setScanning(false)} />}
@@ -188,7 +192,8 @@ export function FindCode({ onFound, onBarcode }: { onFound: (t: CodeTarget) => v
 }
 
 /** Camera scanner for QR labels and box barcodes, with a typed fallback. */
-export function ScanDialog({ onText, onClose, title = 'Scan a QR or barcode' }: { onText: (t: string) => void; onClose: () => void; title?: string }) {
+export function ScanDialog({ onText, onClose, title }: { onText: (t: string) => void; onClose: () => void; title?: string }) {
+  const tx = useTx()
   const [typed, setTyped] = useState('')
   const video = useRef<HTMLVideoElement>(null)
   const [err, setErr] = useState('')
@@ -212,7 +217,7 @@ export function ScanDialog({ onText, onClose, title = 'Scan a QR or barcode' }: 
       }
       requestAnimationFrame(tick)
     }
-    if (!navigator.mediaDevices?.getUserMedia) setErr('This browser cannot use the camera here. Type the code instead, or scan with the phone camera app.')
+    if (!navigator.mediaDevices?.getUserMedia) setErr(tx('This browser cannot use the camera here. Type the code instead, or scan with the phone camera app.'))
     else
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((st) => {
         stream = st
@@ -221,18 +226,18 @@ export function ScanDialog({ onText, onClose, title = 'Scan a QR or barcode' }: 
           void video.current.play()
         }
         requestAnimationFrame(tick)
-      }, () => setErr('No camera access. Allow the camera, or type the code instead.'))
+      }, () => setErr(tx('No camera access. Allow the camera, or type the code instead.')))
     return () => {
       stop = true
       stream?.getTracks().forEach((t) => t.stop())
     }
-  }, [onText])
+  }, [onText, tx])
   return (
-    <Dialog title={title} onClose={onClose}>
-      {err ? <p className="text-sm text-danger" role="alert">{err}</p> : <video ref={video} className="w-full rounded" muted playsInline aria-label="Camera" />}
-      <p className="mt-2 text-xs text-muted">Point the camera at a MiniTracker label or the barcode on a box.</p>
+    <Dialog title={title ?? tx('Scan a QR or barcode')} onClose={onClose}>
+      {err ? <p className="text-sm text-danger" role="alert">{err}</p> : <video ref={video} className="w-full rounded" muted playsInline aria-label={tx('Camera')} />}
+      <p className="mt-2 text-xs text-muted">{tx('Point the camera at a MiniTracker label or the barcode on a box.')}</p>
       <form className="mt-2 flex gap-2" onSubmit={(e) => { e.preventDefault(); if (typed.trim()) onText(typed.trim()) }}>
-        <input className="input flex-1" aria-label="Type a code or barcode" placeholder="…or type it" value={typed} onChange={(e) => setTyped(e.target.value)} />
+        <input className="input flex-1" aria-label={tx('Type a code or barcode')} placeholder={tx('…or type it')} value={typed} onChange={(e) => setTyped(e.target.value)} />
         <button className="btn">OK</button>
       </form>
     </Dialog>

@@ -1,12 +1,22 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { txr, useTx } from '../../i18n'
+import { locale } from '../../i18n/format'
 
-const MONTH = new Intl.DateTimeFormat(undefined, { month: 'short', timeZone: 'UTC' })
-const LONG = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' })
-const DAYM = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', timeZone: 'UTC' })
+/** Date formats in the chosen language (cached per language). */
+const cache = new Map<string, Intl.DateTimeFormat>()
+function fmt(o: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const key = `${locale()}|${JSON.stringify(o)}`
+  let f = cache.get(key)
+  if (!f) cache.set(key, (f = new Intl.DateTimeFormat(locale(), { ...o, timeZone: 'UTC' })))
+  return f
+}
+const MONTH = { format: (d: Date) => fmt({ month: 'short' }).format(d) }
+const LONG = { format: (d: Date) => fmt({ month: 'long', year: 'numeric' }).format(d) }
+const DAYM = { format: (d: Date) => fmt({ day: 'numeric', month: 'short' }).format(d) }
 const isWeek = (k: string) => k.length === 10
 /** Axis label of a bucket: 'Mar' for a month, '9 Mar' for a week (its Monday). */
 export const monthLabel = (k: string) => (isWeek(k) ? DAYM.format(new Date(`${k}T00:00:00Z`)) : MONTH.format(new Date(`${k}-01T00:00:00Z`)))
-const longLabel = (k: string) => (isWeek(k) ? `Week of ${DAYM.format(new Date(`${k}T00:00:00Z`))}` : LONG.format(new Date(`${k}-01T00:00:00Z`)))
+const longLabel = (k: string) => (isWeek(k) ? txr('Week of {{date}}', { date: DAYM.format(new Date(`${k}T00:00:00Z`)) }) : LONG.format(new Date(`${k}-01T00:00:00Z`)))
 
 const H = 180
 const PAD = { top: 16, right: 12, bottom: 24, left: 32 }
@@ -184,6 +194,7 @@ export function MonthArea({ months, values, name, label }: { months: string[]; v
 
 /** A year of days as a GitHub-style grid: one column per week (Monday on top), shaded by models moved. */
 export function ActivityCalendar({ counts, now, weeks = 53 }: { counts: Record<string, number>; now: string; weeks?: number }) {
+  const tx = useTx()
   const today = new Date(`${now.slice(0, 10)}T00:00:00Z`)
   const monday = today.getTime() - ((today.getUTCDay() + 6) % 7) * 86_400_000
   const start = monday - (weeks - 1) * 7 * 86_400_000
@@ -198,8 +209,8 @@ export function ActivityCalendar({ counts, now, weeks = 53 }: { counts: Record<s
   return (
     <figure className="mx-auto grid w-fit max-w-full gap-2">
       <div className="overflow-x-auto">
-        <svg role="img" aria-label="Models moved per day over the last year" className="mx-auto block" width={weeks * step + 24} height={7 * step + 16}>
-          {['Mon', 'Wed', 'Fri'].map((d, i) => <text key={d} x={0} y={16 + i * 2 * step + cell - 2} className="fill-current text-[9px] text-muted">{d}</text>)}
+        <svg role="img" aria-label={tx('Models moved per day over the last year')} className="mx-auto block" width={weeks * step + 24} height={7 * step + 16}>
+          {['2024-01-01', '2024-01-03', '2024-01-05'].map((d, i) => <text key={d} x={0} y={16 + i * 2 * step + cell - 2} className="fill-current text-[9px] text-muted">{fmt({ weekday: 'short' }).format(new Date(`${d}T00:00:00Z`))}</text>)}
           {days.map((d, i) => {
             const col = Math.floor(i / 7)
             const n = counts[d] ?? 0
@@ -208,7 +219,7 @@ export function ActivityCalendar({ counts, now, weeks = 53 }: { counts: Record<s
               <g key={d}>
                 {first && <text x={24 + col * step} y={9} className="fill-current text-[9px] text-muted">{monthLabel(d.slice(0, 7))}</text>}
                 <rect data-day={d} x={24 + col * step} y={14 + (i % 7) * step} width={cell} height={cell} rx={2} className={n ? 'fill-accent' : 'fill-panel-2'} fillOpacity={n ? OPACITY[level(n)] : 1}>
-                  <title>{`${d}: ${n} model${n === 1 ? '' : 's'} moved`}</title>
+                  <title>{`${d}: ${n === 1 ? tx('1 model moved') : tx('{{n}} models moved', { n })}`}</title>
                 </rect>
               </g>
             )
@@ -216,8 +227,8 @@ export function ActivityCalendar({ counts, now, weeks = 53 }: { counts: Record<s
         </svg>
       </div>
       <figcaption className="flex items-center justify-between text-xs text-muted">
-        <span>{total} models moved on {active} days</span>
-        <span className="flex items-center gap-1">Less{OPACITY.map((o, i) => <span key={i} className={`inline-block h-2.5 w-2.5 rounded-sm ${i ? 'bg-accent' : 'bg-panel-2'}`} style={{ opacity: i ? o : 1 }} />)}More</span>
+        <span>{tx('{{total}} models moved on {{active}} days', { total, active })}</span>
+        <span className="flex items-center gap-1">{tx('Less')}{OPACITY.map((o, i) => <span key={i} className={`inline-block h-2.5 w-2.5 rounded-sm ${i ? 'bg-accent' : 'bg-panel-2'}`} style={{ opacity: i ? o : 1 }} />)}{tx('More')}</span>
       </figcaption>
     </figure>
   )
