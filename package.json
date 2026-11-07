@@ -32,11 +32,13 @@
     "driver.js": "^1.10.2",
     "fast-xml-parser": "^5.11.2",
     "fflate": "^0.8.3",
+    "i18next": "^27.0.1",
     "jsqr": "^1.4.0",
     "peerjs": "1.5.5",
     "qrcode": "^1.5.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "react-i18next": "^18.0.0",
     "zustand": "^5.0.16"
   },
   "devDependencies": {

@@ -8,6 +8,8 @@ import { endDemo, startDemo } from './demo'
 import { Tour } from './Tour'
 import { TOURS, type TourName } from './tours'
 import { useWelcome } from './welcome'
+import { i18n, useT } from '../../i18n'
+import { LanguagePicker } from '../../i18n/LanguagePicker'
 
 
 /** Guide steps that are guided tours (5–9): reaching them starts the tour straight away. */
@@ -31,10 +33,11 @@ export function WelcomeTour({ onGo }: { onGo: (to: WelcomeGo) => void }) {
   const touring = useWelcome((w) => w.touring) as TourName | null
   if (!touring) return null
   const t = TOURS[touring]
+  const tr = i18n.t(`tours.${touring}`, { returnObjects: true }) as { name: string; steps: { title: string; text: string }[] }
   return (
     <Tour
-      name={t.name}
-      steps={t.steps}
+      name={tr.name}
+      steps={t.steps.map((s, i) => ({ ...s, ...tr.steps[i] }))}
       onGo={onGo}
       onEnd={(completed) => {
         endDemo()
@@ -50,13 +53,17 @@ export function WelcomeTour({ onGo }: { onGo: (to: WelcomeGo) => void }) {
 /** Where a guide button takes you: an app page, Settings › Backup, or the online user guide. */
 export type WelcomeGo = 'home' | 'backlog' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'tools' | 'supplies' | 'storage' | 'companion' | 'armies' | 'games' | 'stats' | 'goals' | 'sync' | 'settings' | 'backup' | 'guide'
 
-const STEPS = ['Welcome', 'Your games', 'Look', 'Your data', 'Units', 'Paints', 'Workshop', 'Armies and games', 'Find your way'] as const
+/** Step names are in the translations (welcome.stepNames); there are nine. */
+const STEPS = { length: 9 }
+const useStepNames = () => useT()('welcome.stepNames', { returnObjects: true }) as unknown as string[]
 
 /**
  * First-start guide (#168): sets the app up and shows each part. "Try it" buttons open the page and pause the guide;
  * a "Back to the guide" button (WelcomeResume) brings it back at the same step. Skippable at any step.
  */
 export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
+  const t = useT()
+  const names = useStepNames()
   const { step, setStep, pause, finish } = useWelcome()
   const last = step === STEPS.length - 1
   /** Leave for good (Skip / Start fresh / Finish), optionally going somewhere. */
@@ -72,11 +79,11 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
   }
 
   return (
-    <Dialog title="Welcome to MiniTracker" onClose={() => leave()} wide>
-      <div className="grid gap-4 p-4" aria-label="Welcome guide">
-        <ol className="flex flex-wrap gap-1 text-xs" aria-label="Steps">
-          {STEPS.map((s, i) => (
-            <li key={s}>
+    <Dialog title={t('welcome.title')} onClose={() => leave()} wide>
+      <div className="grid gap-4 p-4" aria-label={t('welcome.label')}>
+        <ol className="flex flex-wrap gap-1 text-xs" aria-label={t('welcome.steps')}>
+          {names.map((s, i) => (
+            <li key={i}>
               <button className={`rounded px-2 py-0.5 ${i === step ? 'bg-accent text-accent-fg' : 'text-muted hover:text-fg'}`} aria-current={i === step ? 'step' : undefined} onClick={() => goToStep(i)}>
                 {i + 1}. {s}
               </button>
@@ -84,63 +91,43 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
           ))}
         </ol>
 
-        <section className="grid min-h-56 content-start gap-3" aria-label={STEPS[step]}>
+        <section className="grid min-h-56 content-start gap-3" aria-label={names[step]}>
           {step === 0 && <Intro />}
           {step === 1 && <Games />}
           {step === 2 && <Look />}
           {step === 3 && <Data onTry={tryIt} onFresh={() => goToStep(4)} />}
           {step === 4 && (
-            <Topic title="Your units" tour="units" actions={[['Open the Backlog', 'backlog']]} onTry={tryIt}>
-              <p>The <b>Backlog</b> is your collection: every unit you own or want, and how many of its models are at each painting stage.</p>
-              <Points items={[
-                ['+ Add unit', 'pick the unit from the catalogue and say how many models are built, painted…'],
-                ['📷 Scan box', 'point the camera at a box barcode; teach it once what is inside'],
-                ['⚔ Spearhead box', 'adds a whole Age of Sigmar Spearhead army in one go'],
-                ['Wishlisted', 'the first stage: units you want to buy; tick them bought on the Shopping list'],
-                ['Board view', 'drag units between stages as you paint'],
-              ]} />
+            <Topic title={t('welcome.units.title')} tour="units" actions={[[t('welcome.units.open'), 'backlog']]} onTry={tryIt}>
+              <p dangerouslySetInnerHTML={{ __html: t('welcome.units.intro') }} />
+              <Points items={t('welcome.units.points', { returnObjects: true }) as unknown as [string, string][]} />
             </Topic>
           )}
           {step === 5 && (
-            <Topic title="Paints and schemes" tour="paints" actions={[['Open Paints', 'paints'], ['Open Schemes', 'schemes']]} onTry={tryIt}>
-              <p><b>Paints</b> has thousands of paints from the main brands. Mark the ones you own; MiniTracker then knows what you can paint with.</p>
-              <Points items={[
-                ['Owned / running low', 'tick your paints and flag the ones nearly empty'],
-                ['Colour match', 'find your closest paint to any colour or to another brand\'s paint'],
-                ['Schemes', 'painting recipes step by step; a library to start from, or write your own'],
-                ['Missing paints', 'a scheme shows what you lack and adds it to the Shopping list'],
-              ]} />
+            <Topic title={t('welcome.paints.title')} tour="paints" actions={[[t('welcome.paints.openPaints'), 'paints'], [t('welcome.paints.openSchemes'), 'schemes']]} onTry={tryIt}>
+              <p dangerouslySetInnerHTML={{ __html: t('welcome.paints.intro') }} />
+              <Points items={t('welcome.paints.points', { returnObjects: true }) as unknown as [string, string][]} />
             </Topic>
           )}
           {step === 6 && (
-            <Topic title="Workshop" tour="workshop" actions={[['Open Tools', 'tools'], ['Open Supplies', 'supplies'], ['Open Storage', 'storage']]} onTry={tryIt}>
-              <p>Everything around the hobby desk.</p>
-              <Points items={[
-                ['Tools', 'brushes, clippers, airbrush… with their condition and when to replace them'],
-                ['Supplies', 'glue, primer, varnish, basing: how much is left, with a warning when low'],
-                ['Storage', 'boxes and shelves; where each unit is, with QR labels to print'],
-                ['Companion', 'times your painting sessions and tracks hours per unit'],
-              ]} />
+            <Topic title={t('welcome.workshop.title')} tour="workshop" actions={[[t('welcome.workshop.openTools'), 'tools'], [t('welcome.workshop.openSupplies'), 'supplies'], [t('welcome.workshop.openStorage'), 'storage']]} onTry={tryIt}>
+              <p>{t('welcome.workshop.intro')}</p>
+              <Points items={t('welcome.workshop.points', { returnObjects: true }) as unknown as [string, string][]} />
             </Topic>
           )}
           {step === 7 && (
-            <Topic title="Armies and games" tour="armies" actions={[['Open Armies', 'armies'], ['Open Games', 'games'], ['Open Stats', 'stats']]} onTry={tryIt}>
-              <Points items={[
-                ['Armies', 'army lists from the catalogue, with points; see which units you own and what to buy'],
-                ['Games', 'play a game: missions, 3D dice, scores, photos; share your list by QR'],
-                ['Stats and Goals', 'your painting progress over time and goals to keep it going'],
-              ]} />
+            <Topic title={t('welcome.armies.title')} tour="armies" actions={[[t('welcome.armies.openArmies'), 'armies'], [t('welcome.armies.openGames'), 'games'], [t('welcome.armies.openStats'), 'stats']]} onTry={tryIt}>
+              <Points items={t('welcome.armies.points', { returnObjects: true }) as unknown as [string, string][]} />
             </Topic>
           )}
           {step === 8 && <FindYourWay onTry={tryIt} onTour={() => void beginTour('more')} />}
         </section>
 
         <footer className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
-          <button className="btn" onClick={() => leave()}>Skip guide</button>
+          <button className="btn" onClick={() => leave()}>{t('welcome.skip')}</button>
           <span className="flex-1 text-center text-xs text-muted">{step + 1} / {STEPS.length}</span>
-          {step > 0 && <button className="btn" onClick={() => setStep(step - 1)}>Back</button>}
+          {step > 0 && <button className="btn" onClick={() => setStep(step - 1)}>{t('welcome.back')}</button>}
           {/* Focused, so Enter or Space goes to the next step (not the ✕ close button). */}
-          {last ? <button key="start" className="btn btn-primary" autoFocus data-autofocus onClick={() => leave()}>Start using MiniTracker</button> : <button key={`next-${step}`} className="btn btn-primary" autoFocus data-autofocus onClick={() => goToStep(step + 1)}>Next</button>}
+          {last ? <button key="start" className="btn btn-primary" autoFocus data-autofocus onClick={() => leave()}>{t('welcome.start')}</button> : <button key={`next-${step}`} className="btn btn-primary" autoFocus data-autofocus onClick={() => goToStep(step + 1)}>{t('welcome.next')}</button>}
         </footer>
       </div>
     </Dialog>
@@ -149,29 +136,31 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
 
 /** While the guide is paused: a button to go back to it, at the same step. */
 export function WelcomeResume() {
+  const t = useT()
   const { open, paused, step, touring, resume, finish } = useWelcome()
   if (!open || !paused || touring) return null
   return (
-    <div className="panel fixed right-4 bottom-20 z-40 flex items-center gap-2 border-accent p-2 text-sm shadow-lg sm:bottom-4" role="status" aria-label="Welcome guide paused">
-      <button className="btn btn-primary" onClick={resume}>↩ Back to the guide ({step + 1}/{STEPS.length})</button>
-      <button className="text-muted hover:text-fg" aria-label="End the guide" onClick={finish}>✕</button>
+    <div className="panel fixed right-4 bottom-20 z-40 flex items-center gap-2 border-accent p-2 text-sm shadow-lg sm:bottom-4" role="status" aria-label={t('welcome.paused')}>
+      <button className="btn btn-primary" onClick={resume}>{t('welcome.resume', { step: step + 1, total: STEPS.length })}</button>
+      <button className="text-muted hover:text-fg" aria-label={t('welcome.end')} onClick={finish}>✕</button>
     </div>
   )
 }
 
 function Topic({ title, tour, actions, onTry, children }: { title: string; tour: TourName; actions: [string, WelcomeGo][]; onTry: (to: WelcomeGo) => void; children: ReactNode }) {
+  const t = useT()
   return (
     <>
       <h2 className="font-display text-xl text-accent">{title}</h2>
       {children}
       <div className="grid gap-2 border-t border-line pt-3">
         <div className="flex flex-wrap items-center gap-2">
-          <button className="btn btn-primary" onClick={() => void beginTour(tour)}>▶ Show me again</button>
-          <span className="text-sm text-muted">The guided tour of these pages, with a demo collection; nothing is saved.</span>
+          <button className="btn btn-primary" onClick={() => void beginTour(tour)}>{t('welcome.showAgain')}</button>
+          <span className="text-sm text-muted">{t('welcome.tourHelp')}</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {actions.map(([label, to]) => <button key={to} className="btn text-sm" onClick={() => onTry(to)}>{label}</button>)}
-          <span className="text-sm text-muted">or try it yourself; "Back to the guide" carries on.</span>
+          <span className="text-sm text-muted">{t('welcome.tryHelp')}</span>
         </div>
       </div>
     </>
@@ -189,23 +178,26 @@ function Points({ items }: { items: [string, string][] }) {
 }
 
 function Intro() {
+  const t = useT()
   return (
     <>
-      <h2 className="font-display text-xl text-accent">Your pile of shame, under control</h2>
-      <p>MiniTracker keeps track of your miniatures from box to finished model: what you own, what stage it's at, which paints you need, and army lists built from what you have.</p>
-      <p className="text-muted">Everything stays on this device. Nothing is uploaded; you choose when to sync with your other devices.</p>
-      <p className="text-sm text-muted">The guide sets up the app and shows each part; "Open…" buttons take you there and the guide waits. Skip it at any time and open it again from Settings › Appearance.</p>
+      <h2 className="font-display text-xl text-accent">{t('welcome.intro.title')}</h2>
+      <LanguagePicker />
+      <p>{t('welcome.intro.what')}</p>
+      <p className="text-muted">{t('welcome.intro.local')}</p>
+      <p className="text-sm text-muted">{t('welcome.intro.how')}</p>
     </>
   )
 }
 
 function Games() {
+  const t = useT()
   const { catalogues, catalogueJob: job, downloadCatalogue } = useStore()
   const busy = job.phase !== 'idle'
   return (
     <>
-      <h2 className="font-display text-xl text-accent">Which games do you play?</h2>
-      <p className="text-sm text-muted">Download a catalogue for the units, points and rules of a game. It comes from the community BSData project (Middle-earth from the MESBG list builder) and is converted on this device. You can add more later in Settings › Catalogue data.</p>
+      <h2 className="font-display text-xl text-accent">{t('welcome.games.title')}</h2>
+      <p className="text-sm text-muted">{t('welcome.games.help')}</p>
       <ul className="grid gap-2">
         {(Object.keys(GAMES) as GameId[]).map((g) => {
           const e = EDITIONS.find((x) => x.game === g)!
@@ -214,7 +206,7 @@ function Games() {
           return (
             <li key={g} className="flex flex-wrap items-center gap-2">
               <span className="flex-1">{GAMES[g]} <span className="text-sm text-muted">· {e.label}</span></span>
-              {have ? <span className="text-ok">✓ Installed</span> : <button className="btn text-sm" disabled={busy} onClick={() => void downloadCatalogue(e.repo)}>⬇ Download</button>}
+              {have ? <span className="text-ok">{t('welcome.games.installed')}</span> : <button className="btn text-sm" disabled={busy} onClick={() => void downloadCatalogue(e.repo)}>{t('welcome.games.download')}</button>}
               {mine && busy && <span className="w-full"><ProgressBar ratio={job.phase === 'downloading' && job.total ? job.done / job.total : job.phase === 'converting' ? 1 : 0} /></span>}
               {mine && job.error && <span className="w-full text-sm text-danger" role="alert">{job.error}</span>}
             </li>
@@ -226,38 +218,40 @@ function Games() {
 }
 
 function Look() {
+  const t = useT()
   const { theme, setTheme, uiScale, setUiScale } = useStore()
   const shown = effectiveScale(uiScale, window.innerWidth)
   return (
     <>
-      <h2 className="font-display text-xl text-accent">Make it yours</h2>
+      <h2 className="font-display text-xl text-accent">{t('welcome.look.title')}</h2>
       <label className="flex items-center gap-3">
-        Theme
+        {t('settings.theme')}
         <select className="input" value={theme} onChange={(e) => setTheme(e.target.value as Theme)}>
           {Object.entries(THEMES).map(([id, name]) => <option key={id} value={id}>{name}</option>)}
         </select>
       </label>
       <label className="flex flex-wrap items-center gap-3">
-        Text and interface size
-        <input className="w-40 accent-[var(--accent)]" type="range" min={0} max={UI_SCALES.length - 1} step={1} aria-label="Text and interface size" value={UI_SCALES.indexOf(shown as (typeof UI_SCALES)[number])} onChange={(e) => setUiScale(UI_SCALES[Number(e.target.value)])} />
-        <span className="tabular-nums">{scaleLabel(shown)}{uiScale === AUTO && ' (auto)'}</span>
-        {uiScale !== AUTO && <button type="button" className="btn px-2 py-0.5 text-sm" onClick={() => setUiScale(AUTO)}>Auto</button>}
+        {t('settings.size')}
+        <input className="w-40 accent-[var(--accent)]" type="range" min={0} max={UI_SCALES.length - 1} step={1} aria-label={t('settings.size')} value={UI_SCALES.indexOf(shown as (typeof UI_SCALES)[number])} onChange={(e) => setUiScale(UI_SCALES[Number(e.target.value)])} />
+        <span className="tabular-nums">{scaleLabel(shown)}{uiScale === AUTO && t('settings.autoSuffix')}</span>
+        {uiScale !== AUTO && <button type="button" className="btn px-2 py-0.5 text-sm" onClick={() => setUiScale(AUTO)}>{t('settings.auto')}</button>}
       </label>
-      <p className="text-sm text-muted">Auto follows the window: a bigger or maximised window gets bigger text.</p>
+      <p className="text-sm text-muted">{t('welcome.look.help')}</p>
     </>
   )
 }
 
 function Data({ onTry, onFresh }: { onTry: (to: WelcomeGo) => void; onFresh: () => void }) {
+  const t = useT()
   const choices: [string, string, () => void][] = [
-    ['⇄ Sync from another device', 'From your phone, a browser or another computer: by pairing code, QR or a sync file.', () => onTry('sync')],
-    ['Restore a backup', 'Open a backup file you exported before.', () => onTry('backup')],
-    ['+ Start fresh', 'Nothing to bring over: carry on with the guide and add your first units.', onFresh],
+    [t('welcome.data.sync'), t('welcome.data.syncHelp'), () => onTry('sync')],
+    [t('welcome.data.restore'), t('welcome.data.restoreHelp'), () => onTry('backup')],
+    [t('welcome.data.fresh'), t('welcome.data.freshHelp'), onFresh],
   ]
   return (
     <>
-      <h2 className="font-display text-xl text-accent">Already use MiniTracker somewhere else?</h2>
-      <p className="text-muted">{isDesktopApp() ? 'This app keeps its own data, separate from MiniTracker in your browser.' : 'Each browser and device keeps its own data.'} Bring yours over, or start fresh.</p>
+      <h2 className="font-display text-xl text-accent">{t('welcome.data.title')}</h2>
+      <p className="text-muted">{isDesktopApp() ? t('welcome.data.desktop') : t('welcome.data.browser')}{t('welcome.data.bring')}</p>
       <ul className="grid gap-2">
         {choices.map(([title, what, act]) => (
           <li key={title}>
@@ -273,19 +267,14 @@ function Data({ onTry, onFresh }: { onTry: (to: WelcomeGo) => void; onFresh: () 
 }
 
 function FindYourWay({ onTry, onTour }: { onTry: (to: WelcomeGo) => void; onTour: () => void }) {
+  const t = useT()
   return (
     <>
-      <h2 className="font-display text-xl text-accent">Find your way</h2>
-      <Points items={[
-        ['Menu', 'every page is in the menu on the left (☰ on a phone)'],
-        ['Game picker', 'at the top of the menu: one game, or All games, for Home, Backlog, Stats and Armies'],
-        ['Home', 'your pile, recent progress and what to paint next; rearrange its cards'],
-        ['Sync', 'keep your phone, browser and computer in step'],
-        ['Settings', 'catalogues, appearance, pipelines, backups'],
-      ]} />
+      <h2 className="font-display text-xl text-accent">{t('welcome.way.title')}</h2>
+      <Points items={t('welcome.way.points', { returnObjects: true }) as unknown as [string, string][]} />
       <div className="flex flex-wrap gap-2">
-        <button className="btn btn-primary" onClick={onTour}>▶ Show me again</button>
-        <button className="btn" onClick={() => onTry('guide')}>📖 Open the full user guide</button>
+        <button className="btn btn-primary" onClick={onTour}>{t('welcome.showAgain')}</button>
+        <button className="btn" onClick={() => onTry('guide')}>{t('welcome.way.fullGuide')}</button>
       </div>
     </>
   )

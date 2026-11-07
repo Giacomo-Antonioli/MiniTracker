@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Languages: English, Italiano, Español, Deutsch, Français and 中文. Pick one in Settings › Appearance › Language or on the first step of the welcome guide; by default the app follows the device language, and anything not translated yet shows in English. This first pass covers the menu, Settings, the welcome guide and its tours; the other pages follow. Unit names and rules from the game catalogues stay in English.
+
 ## [0.26.3] - 2026-11-07
 
 ### Fixed
