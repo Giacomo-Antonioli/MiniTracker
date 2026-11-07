@@ -4,6 +4,13 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.27.0-beta.1] - 2026-11-07
+
+Beta for testing nearby-device sync. Not offered as an auto-update; install it by hand. Windows: .exe installer only.
+
+### Added
+- Desktop app: Sync › Nearby devices finds other MiniTracker desktop apps on the same Wi-Fi. First pairing shows the same 6-digit code on both screens to confirm; after that a paired device syncs with one click. Paired devices are recognised by their security fingerprint, and a changed one asks again.
+
 ### Added
 - Desktop app: *Nearby devices* on the Sync page lists other MiniTracker apps on the same network, found automatically (no code to type). The first time, both screens show the same 6-digit number to confirm the pairing; after that a paired device syncs with one click (*⇄ Sync now*). The data still goes directly between the devices over the encrypted connection; the browser version keeps pairing codes and QR.
 

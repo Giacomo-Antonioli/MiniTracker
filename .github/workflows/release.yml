@@ -82,4 +82,5 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
-          args: ${{ matrix.args }} --config '{"bundle":{"createUpdaterArtifacts":true}}'
+          # Betas (tags with a dash): the Windows .msi format can't hold a version like 0.27.0-beta.1, so only the .exe.
+          args: ${{ (matrix.os == 'windows-latest' && contains(github.ref_name, '-')) && '--bundles nsis' || matrix.args }} --config '{"bundle":{"createUpdaterArtifacts":true}}'
