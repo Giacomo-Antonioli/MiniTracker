@@ -32,7 +32,7 @@ Open the app at **https://giacomo-antonioli.github.io/MiniTracker/**. In Chrome,
 
 A good first half hour looks like this:
 
-1. **Download a catalogue.** Go to **⚙ Settings › Catalogue data** and download the game you play: Warhammer 40,000 (11th or 10th edition), Age of Sigmar 4th edition or Kill Team (2024). Your browser fetches the data from the community [BSData](https://github.com/BSData) project and converts it on your device, which takes a minute. You can install several and switch with **Use this edition**; the active one is used by the Catalogue, the Backlog and new army lists.
+1. **Download a catalogue.** Go to **⚙ Settings › Catalogue data** and download the game you play: Warhammer 40,000 (11th or 10th edition), Age of Sigmar 4th edition, Kill Team (2024) or Middle-earth Strategy Battle Game (2024). Your browser fetches the data from the community [BSData](https://github.com/BSData) project (Middle-earth from the [MESBG list builder](https://github.com/mhollink/mesbg-list-builder-v2024)) and converts it on your device, which takes a minute. You can install several and switch with **Use this edition**; the active one is used by the Catalogue, the Backlog and new army lists.
 2. **Add a few units.** On the **Backlog**, press **+ Add unit**, pick the faction and the unit, and say how many models are at which stage. You can add a unit by hand too, without the catalogue.
 3. **Make a backup.** **Settings › Backup** saves everything in one file. Your data lives in this browser only; clearing the browser's site data deletes it, so keep a backup somewhere else.
 
@@ -84,7 +84,7 @@ Useful buttons in the list header:
 
 **⬆ Import** on the Armies page reads BattleScribe / New Recruit rosters (`.rosz`, `.ros`), text lists from the GW app or New Recruit, and MiniTracker files.
 
-Age of Sigmar and Kill Team lists work the same way with points and units, but without the 40k-only parts (detachments, Combat Patrol).
+Age of Sigmar, Kill Team and Middle-earth lists work the same way with points and units, but without the 40k-only parts (detachments, Combat Patrol).
 
 ## Catalogue and Rules
 

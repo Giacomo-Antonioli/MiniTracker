@@ -5,6 +5,7 @@
  */
 import { describe, expect, it } from 'vitest'
 import { parseBsData, type SourceFile } from '../src/data/catalogue/bsdata'
+import { parseCatalogue } from '../src/data/catalogue/parse'
 import { EDITIONS, downloadDataFiles, latestCommit } from '../src/data/catalogue/fetch'
 
 // In CI, authenticate GitHub API calls to avoid shared-runner rate limits.
@@ -52,12 +53,12 @@ describe.each(EDITIONS.filter((e) => e.game === '40k'))('BSData live check ($lab
 }, 120_000)
 
 // Other games (#99): the data loads and units come with stats (and points where the game has them).
-const OTHER = { aos: { unit: 'Abhorrant Ghoul King', minUnits: 800, priced: true }, kt: { unit: 'Sharpshooter', minUnits: 400, priced: false } } as const
+const OTHER = { aos: { unit: 'Abhorrant Ghoul King', minUnits: 800, priced: true }, kt: { unit: 'Sharpshooter', minUnits: 400, priced: false }, mesbg: { unit: 'Captain of Minas Tirith', minUnits: 1000, priced: true } } as const
 describe.each(EDITIONS.filter((e) => e.game !== '40k'))('BSData live check ($label, $repo)', (edition) => {
   it('downloads and parses', async () => {
     const commit = await latestCommit(edition.repo, f)
     const files = await downloadDataFiles(edition.repo, commit, undefined, f)
-    const c = parseBsData(files, { repo: edition.repo, commit, fetchedAt: new Date().toISOString() })
+    const c = parseCatalogue(files, { repo: edition.repo, commit, fetchedAt: new Date().toISOString() })
     const want = OTHER[edition.game as keyof typeof OTHER]
     expect(c.datasheets.length).toBeGreaterThanOrEqual(want.minUnits)
     const d = c.datasheets.find((x) => x.name === want.unit)

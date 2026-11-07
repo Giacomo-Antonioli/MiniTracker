@@ -15,8 +15,9 @@ export function CataloguePage() {
       <h2 className="font-display text-xl text-accent">Unit catalogue</h2>
       <p className="text-muted">
         Unit, points, rules and wargear data comes from the community{' '}
-        <a className="text-accent underline" href="https://github.com/BSData" target="_blank" rel="noreferrer">BSData</a> project. Your browser downloads it
-        directly from BSData and converts it here; MiniTracker never hosts this data. You can install several games and editions and switch between them; the active one is used by the catalogue, the backlog and new lists.
+        <a className="text-accent underline" href="https://github.com/BSData" target="_blank" rel="noreferrer">BSData</a> project (Middle-earth from the community{' '}
+        <a className="text-accent underline" href="https://github.com/mhollink/mesbg-list-builder-v2024" target="_blank" rel="noreferrer">MESBG list builder</a>). Your browser downloads it
+        directly from GitHub and converts it here; MiniTracker never hosts this data. You can install several games and editions and switch between them; the active one is used by the catalogue, the backlog and new lists.
       </p>
 
       {(Object.keys(GAMES) as GameId[]).map((g) => (
