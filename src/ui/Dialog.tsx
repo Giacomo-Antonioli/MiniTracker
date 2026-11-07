@@ -5,6 +5,8 @@ export function Dialog({ title, onClose, children, wide }: { title: string; onCl
   const ref = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     ref.current?.showModal()
+    // showModal() focuses the first control (the ✕); a control marked data-autofocus gets the focus instead.
+    ref.current?.querySelector<HTMLElement>('[data-autofocus]')?.focus()
   }, [])
   return (
     <dialog

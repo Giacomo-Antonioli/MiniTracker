@@ -139,7 +139,8 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
           <button className="btn" onClick={() => leave()}>Skip guide</button>
           <span className="flex-1 text-center text-xs text-muted">{step + 1} / {STEPS.length}</span>
           {step > 0 && <button className="btn" onClick={() => setStep(step - 1)}>Back</button>}
-          {last ? <button className="btn btn-primary" onClick={() => leave()}>Start using MiniTracker</button> : <button className="btn btn-primary" onClick={() => goToStep(step + 1)}>Next</button>}
+          {/* Focused, so Enter or Space goes to the next step (not the ✕ close button). */}
+          {last ? <button key="start" className="btn btn-primary" autoFocus data-autofocus onClick={() => leave()}>Start using MiniTracker</button> : <button key={`next-${step}`} className="btn btn-primary" autoFocus data-autofocus onClick={() => goToStep(step + 1)}>Next</button>}
         </footer>
       </div>
     </Dialog>

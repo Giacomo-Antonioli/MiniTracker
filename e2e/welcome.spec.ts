@@ -89,3 +89,23 @@ test('tour steps run a guided tour over a demo collection, chain on, and put you
   await page.locator('.driver-popover-close-btn').click()
   await expect(guide.getByRole('region', { name: 'Workshop' })).toBeVisible()
 })
+
+test('Enter and Space go one step at a time, in the guide and in a tour', async ({ page }) => {
+  await page.goto('./')
+  const guide = page.getByRole('dialog', { name: 'Welcome to MiniTracker' })
+  await expect(guide.getByRole('region', { name: 'Welcome' })).toBeVisible()
+  await page.keyboard.press('Enter')
+  await expect(guide.getByRole('region', { name: 'Your games' })).toBeVisible()
+  await page.keyboard.press(' ')
+  await expect(guide.getByRole('region', { name: 'Look' })).toBeVisible()
+  await page.keyboard.press('Enter')
+  await expect(guide.getByRole('region', { name: 'Your data' })).toBeVisible()
+  await page.keyboard.press('Enter')
+  // Step 5 is the Units tour: Enter and Space move one tour step each, not to the next guide step.
+  const pop = page.locator('.driver-popover')
+  await expect(pop).toContainText('Your units · 1 / 14')
+  await page.keyboard.press('Enter')
+  await expect(pop).toContainText('Your units · 2 / 14')
+  await page.keyboard.press(' ')
+  await expect(pop).toContainText('Your units · 3 / 14')
+})

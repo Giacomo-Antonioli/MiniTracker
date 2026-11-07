@@ -84,11 +84,7 @@ export function Tour({ name, steps: allSteps, onGo, onEnd }: { name: string; ste
         element: s.target ? () => findTarget(s.target) ?? anchor() : undefined,
         popover: { title: s.title, description: `${s.text}<p class="mt-tour-note">Demo data · nothing is saved</p>` },
       })),
-      onNextClick: () => {
-        const i = d!.getActiveIndex() ?? 0
-        if (i >= steps.length - 1) finish(true)
-        else void show(i + 1)
-      },
+      onNextClick: () => next(),
       onPrevClick: () => {
         const i = d!.getActiveIndex() ?? 0
         if (i > 0) void show(i - 1)
@@ -96,8 +92,24 @@ export function Tour({ name, steps: allSteps, onGo, onEnd }: { name: string; ste
       // × and Escape ask to close here; Done ends through finish(true) above.
       onDestroyStarted: () => finish(false),
     })
+    /** One step on (Done on the last one). */
+    function next() {
+      const i = d!.getActiveIndex() ?? 0
+      if (i >= steps.length - 1) finish(true)
+      else void show(i + 1)
+    }
+    // Enter or Space: the next step, one at a time (never the popover's × button, which would end the tour).
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return
+      if ((e.target as HTMLElement | null)?.closest?.('input, textarea, select, [contenteditable="true"]')) return
+      e.preventDefault()
+      e.stopPropagation()
+      if (!busy) next()
+    }
+    window.addEventListener('keydown', onKey, true)
     void show(0)
     return () => {
+      window.removeEventListener('keydown', onKey, true)
       live = false
       over = true
       d?.destroy()
