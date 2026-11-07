@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-11-07
+
 ### Added
 - Middle-earth wargear options can be picked in the army builder (#99): heroes take any of their options, warriors one (shield, spear, bow, banner…), and each option's points are added per model to the unit and the list total. Download the Middle-earth catalogue again to get them.
 
@@ -333,7 +335,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.24.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.25.0...HEAD
+[0.25.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.23.1...v0.24.0
 [0.23.1]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.23.0...v0.23.1
 [0.23.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.22.0...v0.23.0
