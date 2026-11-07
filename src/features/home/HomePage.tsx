@@ -2,7 +2,8 @@ import { goalProgress, goalTitle } from '../../domain/goals/goals'
 import { ScanBoxButton } from '../barcodes/BoxScan'
 import { GoalBar } from '../goals/GoalBar'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { useStore } from '../../app/store'
+import { useShownUnits, useStore } from '../../app/store'
+import { GAMES } from '../../domain/catalogue/editions'
 import { modelsByStatus } from '../../domain/collection/ownedUnit'
 import { WISHLISTED } from '../../domain/collection/pipeline'
 import { TimerPanel } from '../paintTime/PaintTime'
@@ -35,7 +36,10 @@ const Link = ({ onClick, children }: { onClick?: () => void; children: ReactNode
   onClick ? <button className="text-sm text-muted hover:text-accent" onClick={onClick}>{children}</button> : null
 
 export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: string) => void; onGo?: (p: Go) => void; onAddUnit?: () => void }) {
-  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints, homeLayout, saveHomeLayout, supplies, games, goals, pipelines } = useStore()
+  const units = useShownUnits()
+  const anyUnits = useStore((s) => s.units.length > 0)
+  const game = useStore((s) => s.gameFilter)
+  const { pipeline, shopItems, schemes, paints, paintStock, loadPaints, homeLayout, saveHomeLayout, supplies, games, goals, pipelines } = useStore()
   const events = useAllEvents()
   const { pointsOf, roleOf, factionName } = usePointsOf()
   const [editing, setEditing] = useState(false)
@@ -51,6 +55,18 @@ export function HomePage({ onOpenUnit, onGo, onAddUnit }: { onOpenUnit?: (id: st
   const names = new Map(units.map((u) => [u.id, u.customName]))
   const stageName = (id: string) => pipeline.stages.find((s) => s.id === id)?.name ?? id
   const stats = () => onGo && (() => onGo('stats'))
+
+  if (units.length === 0 && anyUnits) {
+    return (
+      <div className="grid h-full place-items-center">
+        <div className="panel grid max-w-md gap-3 p-6 text-center">
+          <h1 className="font-display text-2xl text-accent">No {game === 'all' ? '' : GAMES[game]} units yet</h1>
+          <p className="text-muted">Pick another game in the menu, or add a unit from this game's catalogue.</p>
+          {onAddUnit && <button className="btn btn-primary justify-self-center" onClick={onAddUnit}>+ Add a unit</button>}
+        </div>
+      </div>
+    )
+  }
 
   if (units.length === 0) {
     return (

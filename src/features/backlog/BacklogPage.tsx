@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ScanBoxButton } from '../barcodes/BoxScan'
-import { useStore } from '../../app/store'
+import { useShownUnits, useStore } from '../../app/store'
 import { factionsOf, filterUnits, stageTotals, type BacklogFilter } from '../../domain/collection/backlog'
 import { isGone, progress, WISHLISTED } from '../../domain/collection/pipeline'
 import type { OwnedUnit } from '../../domain/collection/types'
@@ -16,7 +16,8 @@ import { MassMoveDialog } from '../storage/MassMove'
 const DOUBLE_CLICK_MS = 250
 
 export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onOpenUnit?: (id: string) => void; onOpenDatasheet?: (id: string) => void; onOpenScheme?: (id: string) => void }) {
-  const { units, pipeline, backlogFilter: filter, setBacklogFilter: setFilter } = useStore()
+  const units = useShownUnits()
+  const { pipeline, backlogFilter: filter, setBacklogFilter: setFilter } = useStore()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<OwnedUnit | 'new' | null>(null)
   const [storing, setStoring] = useState(false)

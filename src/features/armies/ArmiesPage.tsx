@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { catalogueFor, ctx, useStore } from '../../app/store'
 import { EDITIONS } from '../../data/catalogue/fetch'
+import { gameOfEdition } from '../../domain/catalogue/unitGame'
 import { addFromCollection } from '../../domain/lists/collection'
 import { createList } from '../../domain/lists/list'
 import { battleSizes } from '../../domain/lists/rules'
@@ -11,7 +12,8 @@ import { summarise } from './summary'
 type Filter = 'all' | 'complete' | 'incomplete' | 'issues'
 
 export function ArmiesPage({ onOpenList, onOpenSettings }: { onOpenList: (id: string) => void; onOpenSettings: () => void }) {
-  const { lists, catalogues, units } = useStore()
+  const { lists: allLists, catalogues, units, gameFilter } = useStore()
+  const lists = useMemo(() => (gameFilter === 'all' ? allLists : allLists.filter((l) => gameOfEdition(l.edition) === gameFilter)), [allLists, gameFilter])
   const [filter, setFilter] = useState<Filter>('all')
   const [creating, setCreating] = useState(false)
   const [importing, setImporting] = useState(false)

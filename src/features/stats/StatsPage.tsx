@@ -2,7 +2,7 @@ import { ShareCollection } from '../share/ShareCollection'
 import { CostsSection } from '../costs/CostsSection'
 import { PaintTimeSection } from '../paintTime/PaintTime'
 import { useEffect, useMemo, useState } from 'react'
-import { useStore } from '../../app/store'
+import { useShownUnits, useStore } from '../../app/store'
 import { pointsFor } from '../../domain/catalogue/points'
 import { factionsOf } from '../../domain/collection/backlog'
 import { ownedModels } from '../../domain/collection/ownedUnit'
@@ -33,7 +33,7 @@ export function Tile({ label, value, hint, tone }: { label: string; value: strin
 /** All moves of every unit, loaded once per visit. */
 export function useAllEvents() {
   const allEvents = useStore((s) => s.allEvents)
-  const units = useStore((s) => s.units)
+  const units = useShownUnits()
   const [events, setEvents] = useState<StatusEvent[]>([])
   useEffect(() => {
     void allEvents().then(setEvents)
@@ -61,7 +61,8 @@ export function usePointsOf() {
 
 export function StatsPage() {
   const [sharing, setSharing] = useState(false)
-  const { units, pipeline, shopItems, schemes, paints, paintStock, loadPaints, games: allGames, lists } = useStore()
+  const units = useShownUnits()
+  const { pipeline, shopItems, schemes, paints, paintStock, loadPaints, games: allGames, lists } = useStore()
   useEffect(() => {
     void loadPaints()
   }, [loadPaints])
