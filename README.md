@@ -26,7 +26,7 @@ No account, no server: your collection stays in your browser. Install it from th
 
 **Catalogue and rules**
 
-- **Unit catalogue.** Every Warhammer 40,000 datasheet (10th and/or 11th edition), Age of Sigmar 4th edition and Kill Team (2024) from BSData, Middle-earth (2024) from the MESBG list builder, downloaded and converted on your device: sizes, points, stats, weapons, abilities, wargear.
+- **Unit catalogue.** Every Warhammer 40,000 datasheet (10th and/or 11th edition), Age of Sigmar 4th edition and Kill Team (2024) from BSData, Middle-earth (2024) from the MESBG list builder, and every Age of Sigmar Spearhead box to add in one go, downloaded and converted on your device: sizes, points, stats, weapons, abilities, wargear.
 - **Rules.** Every core and faction rule explained, in the catalogue and on a searchable Rules page.
 - **Stratagems.** Import Wahapedia's stratagem and detachment-rule files once; they show on the army PDF and in the match companion.
 

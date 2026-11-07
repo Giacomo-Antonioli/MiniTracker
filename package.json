@@ -14,6 +14,7 @@
     "e2e": "playwright test",
     "check:bsdata": "vitest run --config vitest.live.config.ts",
     "schemes:scrape": "node --experimental-strip-types --no-warnings tools/schemes/scrape.mts",
+    "spearhead:build": "node --experimental-strip-types --no-warnings tools/spearhead/build.mts",
     "paints:seed": "node --experimental-strip-types --no-warnings tools/paints/build-seed.mjs"
   },
   "dependencies": {

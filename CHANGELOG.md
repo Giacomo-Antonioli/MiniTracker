@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Spearhead boxes (#99): ⚔ Spearhead box on the Backlog adds a whole Age of Sigmar Spearhead army (47 armies across 24 factions) to the backlog, wishlisted or at a painting stage. Units link to the Age of Sigmar catalogue where the names match; where a unit has several builds you pick yours. Shows how many of each you already own and links the army's rules PDF. The contents are read from Games Workshop's free Spearhead PDFs by `npm run spearhead:build`.
+
 ## [0.23.1] - 2026-11-07
 
 ### Fixed

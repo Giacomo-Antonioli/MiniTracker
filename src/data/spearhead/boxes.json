@@ -1,0 +1,1321 @@
+{
+ "source": "Warhammer Community Spearhead rules PDFs",
+ "boxes": [
+  {
+   "id": "bloodbound-gore-pilgrims",
+   "faction": "Blades of Khorne",
+   "name": "Bloodbound Gore Pilgrims",
+   "general": {
+    "models": 1,
+    "name": "Slaughterpriest"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Blood Warriors"
+    },
+    {
+     "models": 5,
+     "name": "Blood Warriors"
+    },
+    {
+     "models": 10,
+     "name": "Bloodreavers"
+    },
+    {
+     "models": 3,
+     "name": "Mighty Skullcrushers"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_blades_of_khorne_bloodbound_gore_pilgrims-r1xwzo5jaf-hkweqb74wl.pdf"
+  },
+  {
+   "id": "fangs-of-the-blood-god",
+   "faction": "Blades of Khorne",
+   "name": "Fangs of the Blood God",
+   "general": {
+    "models": 1,
+    "name": "Karanak"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Flesh Hounds"
+    },
+    {
+     "models": 5,
+     "name": "Flesh Hounds"
+    },
+    {
+     "models": 8,
+     "name": "Claws of Karanak"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_blades_of_khorne_fangs_of_the_blood_god-ka6n0z20jt-aeqz1vbnku.pdf"
+  },
+  {
+   "id": "castelite-company",
+   "faction": "Cities of Sigmar",
+   "name": "Castelite Company",
+   "general": {
+    "models": 1,
+    "name": "Freeguild Cavalier-Marshal"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Freeguild Steelhelms"
+    },
+    {
+     "models": 5,
+     "name": "Freeguild Steelhelms"
+    },
+    {
+     "models": 5,
+     "name": "Freeguild Cavaliers"
+    },
+    {
+     "models": 1,
+     "name": "Ironweld Great Cannon"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_cities_of_sigmar_castelite_company-nthmiu00z3-olrqpo2lat.pdf"
+  },
+  {
+   "id": "fusil-platoon",
+   "faction": "Cities of Sigmar",
+   "name": "Fusil-Platoon",
+   "general": {
+    "models": 1,
+    "name": "Fusil-Major on Ogor Warhulk"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Alchemite Warforger"
+    },
+    {
+     "models": 5,
+     "name": "Freeguild Fusiliers"
+    },
+    {
+     "models": 5,
+     "name": "Freeguild Fusiliers"
+    },
+    {
+     "models": 11,
+     "name": "Wildercorps Hunters"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_cities_of_sigmar_fusil_platoon-ps3dhpiflc-3fboq1inns.pdf"
+  },
+  {
+   "id": "sentinels-of-embergard",
+   "faction": "Cities of Sigmar",
+   "name": "Sentinels of Embergard",
+   "general": {
+    "models": 1,
+    "name": "Jorvan Kreel, Heir of the Kraken"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Mallus Forgepriest"
+    },
+    {
+     "models": 5,
+     "name": "Freeguild Gallants"
+    },
+    {
+     "models": 5,
+     "name": "Freeguild Grenadiers"
+    },
+    {
+     "models": 5,
+     "name": "Freeguild Grenadiers"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_15-04_aos_spearhead_city_of_ash_gaming_pack-0mp6ikgdep-heefiiargp.pdf"
+  },
+  {
+   "id": "zenestra-s-zealots",
+   "faction": "Cities of Sigmar",
+   "name": "Zenestra’s Zealots",
+   "general": {
+    "models": 1,
+    "name": "Freeguild Marshal and Relic Envoy"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Pontifex Zenestra, Matriarch of the Great Wheel"
+    },
+    {
+     "models": 1,
+     "name": "Freeguild Command Corps Whisperblade"
+    },
+    {
+     "models": 1,
+     "name": "Freeguild Command Corps Arch-Knight and Retinue"
+    },
+    {
+     "models": 5,
+     "name": "Freeguild Steelhelms"
+    },
+    {
+     "models": 5,
+     "name": "Freeguild Steelhelms"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_13-05_aos_spearhead_cities_of_sigmar_zenestra-s_zealots-jiv98kvc9n-nhjktzu4pc.pdf"
+  },
+  {
+   "id": "heartflayer-troupe",
+   "faction": "Daughters of Khaine",
+   "name": "Heartflayer Troupe",
+   "general": {
+    "models": 1,
+    "name": "Melusai Ironscale"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Witch Aelves"
+    },
+    {
+     "models": 5,
+     "name": "Witch Aelves"
+    },
+    {
+     "models": 5,
+     "name": "Doomfire Warlocks"
+    },
+    {
+     "models": 5,
+     "name": "Blood Stalkers"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_28-10_aos_spearhead_daughetrs_of_khaine_heartflayer_troupe-quzpujyq4t-4ufmxrkoky.pdf"
+  },
+  {
+   "id": "khainite-shadow-coven",
+   "faction": "Daughters of Khaine",
+   "name": "Khainite Shadow Coven",
+   "general": {
+    "models": 1,
+    "name": "Slaughter Queen on Cauldron of Blood"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Hag Queen"
+    },
+    {
+     "models": 1,
+     "name": "Bloodwrack Medusa"
+    },
+    {
+     "models": 9,
+     "name": "Khainite Shadowstalkers"
+    },
+    {
+     "models": 5,
+     "name": "Sisters of Slaughter"
+    },
+    {
+     "models": 5,
+     "name": "Sisters of Slaughter"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_25-03_aos_spearhead_daughters_of_khaine_khainite_shadow_coven-kcxewlylck-jc3xxv1v2v.pdf"
+  },
+  {
+   "id": "fluxblade-coven",
+   "faction": "Disciples of Tzeentch",
+   "name": "Fluxblade Coven",
+   "general": {
+    "models": 1,
+    "name": "Magister on Disc of Tzeentch"
+   },
+   "units": [
+    {
+     "models": 3,
+     "name": "Flamers of Tzeentch"
+    },
+    {
+     "models": 3,
+     "name": "Screamers of Tzeentch"
+    },
+    {
+     "models": 5,
+     "name": "Tzaangors"
+    },
+    {
+     "models": 5,
+     "name": "Tzaangors"
+    },
+    {
+     "models": 10,
+     "name": "Kairic Acolytes"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_disciples_of_tzeentch_fluxblade_coven-maph6dtofo-iasdohuesc.pdf"
+  },
+  {
+   "id": "tzaangor-warflock",
+   "faction": "Disciples of Tzeentch",
+   "name": "Tzaangor Warflock",
+   "general": {
+    "models": 1,
+    "name": "Tzaangor Shaman"
+   },
+   "units": [
+    {
+     "models": 10,
+     "name": "Tzaangors"
+    },
+    {
+     "models": 3,
+     "name": "Tzaangor Enlightened"
+    },
+    {
+     "models": 3,
+     "name": "Tzaangor Skyfires"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_04-02_aos_spearhead_disciples_of_tzeentch-4mldohmkit-qcunidsq7c.pdf"
+  },
+  {
+   "id": "carrion-retainers",
+   "faction": "Flesh-eater Courts",
+   "name": "Carrion Retainers",
+   "general": {
+    "models": 1,
+    "name": "Abhorrant Archregent"
+   },
+   "units": [
+    {
+     "models": 10,
+     "name": "Cryptguard"
+    },
+    {
+     "models": 3,
+     "name": "Morbheg Knights"
+    },
+    {
+     "models": 1,
+     "name": "Varghulf Courtier"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_12-11_aos_spearhead_flesh_eater_courts_carrion_retainers-p8mhioxip3-ugpcbnaxvq.pdf"
+  },
+  {
+   "id": "charnel-watch",
+   "faction": "Flesh-eater Courts",
+   "name": "Charnel Watch",
+   "general": {
+    "models": 1,
+    "name": "Abhorrant Gorewarden"
+   },
+   "units": [
+    {
+     "models": 10,
+     "name": "Royal Beastflayers"
+    },
+    {
+     "models": 3,
+     "name": "Crypt Horrors"
+    },
+    {
+     "models": 3,
+     "name": "Crypt Flayers"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_aug25_aos_spearhead_rules_fec-2e0llsv3kw-gnsahcoz34.pdf"
+  },
+  {
+   "id": "bad-moon-madmob",
+   "faction": "Gloomspite Gitz",
+   "name": "Bad Moon Madmob",
+   "general": {
+    "models": 1,
+    "name": "Loonboss"
+   },
+   "units": [
+    {
+     "models": 10,
+     "name": "Moonclan Stabbas"
+    },
+    {
+     "models": 10,
+     "name": "Moonclan Stabbas"
+    },
+    {
+     "models": 5,
+     "name": "Squig Hoppers"
+    },
+    {
+     "models": 5,
+     "name": "Squig Hoppers"
+    },
+    {
+     "models": 3,
+     "name": "Rockgut Troggoths"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_gloomspite_gitz_bad_moon_madmob-x8uml0kiyo-xpyifmywuh.pdf"
+  },
+  {
+   "id": "snarlpack-huntaz",
+   "faction": "Gloomspite Gitz",
+   "name": "Snarlpack Huntaz",
+   "general": {
+    "models": 1,
+    "name": "Snarlboss"
+   },
+   "units": [
+    {
+     "models": 2,
+     "name": "Wolfgit Retinue"
+    },
+    {
+     "models": 3,
+     "name": "Snarlpack Cavalry"
+    },
+    {
+     "models": 3,
+     "name": "Snarlpack Cavalry"
+    },
+    {
+     "models": 1,
+     "name": "Sunsteala Wheela"
+    },
+    {
+     "models": 1,
+     "name": "Sunsteala Wheela"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_gloomspite_gitz_snarlpack_hunters-dk3amzdenf-1dhez0axxu.pdf"
+  },
+  {
+   "id": "blades-of-the-lurid-dream",
+   "faction": "Hedonites of Slaanesh",
+   "name": "Blades of the Lurid Dream",
+   "general": {
+    "models": 1,
+    "name": "Shardspeaker of Slaanesh"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Blissbarb Archers with 1 Blissbrew Homonculus"
+    },
+    {
+     "models": 5,
+     "name": "Blissbarb Archers"
+    },
+    {
+     "models": 5,
+     "name": "Slickblade Seekers"
+    },
+    {
+     "models": 3,
+     "name": "Slaangor Fiendbloods"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_29-06_aos_spearhead_hedonites_of_slaanesh_blades_of_the_lurid_dream-pz0rmwhqem-kdikh1iuy5.pdf"
+  },
+  {
+   "id": "epicurean-revellers",
+   "faction": "Hedonites of Slaanesh",
+   "name": "Epicurean Revellers",
+   "general": {
+    "models": 1,
+    "name": "Thricefold Discord"
+   },
+   "units": [
+    {
+     "models": 3,
+     "name": "Fiends"
+    },
+    {
+     "models": 10,
+     "name": "Daemonettes"
+    },
+    {
+     "models": 10,
+     "name": "Daemonettes"
+    },
+    {
+     "models": 5,
+     "name": "Seekers"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_17-06_aos_spearhead_hedonites_of_slaanesh_epicurean_revellers-h8enq2lijh-3uxfyepywh.pdf"
+  },
+  {
+   "id": "helforge-host",
+   "faction": "Helsmiths of Hashut",
+   "name": "Helforge Host",
+   "general": {
+    "models": 1,
+    "name": "War Despot"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Dominator Engine"
+    },
+    {
+     "models": 1,
+     "name": "Tormentor Bombard"
+    },
+    {
+     "models": 5,
+     "name": "Infernal Cohort with Hashutite Spears"
+    },
+    {
+     "models": 5,
+     "name": "Infernal Cohort with Hashutite Spears"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_helsmiths_of_hashut_helforge_host-f9jrp14new-ugnb0veptj.pdf"
+  },
+  {
+   "id": "akhelian-tide-guard",
+   "faction": "Idoneth Deepkin",
+   "name": "Akhelian Tide Guard",
+   "general": {
+    "models": 1,
+    "name": "Akhelian King"
+   },
+   "units": [
+    {
+     "models": 3,
+     "name": "Akhelian Morrsarr Guard"
+    },
+    {
+     "models": 3,
+     "name": "Akhelian Ishlaen Guard"
+    },
+    {
+     "models": 10,
+     "name": "Namarti Reavers"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_aos4_idoneth_deepkin_spearhead_rules-wa1tiv6csl-bndmddnja9.pdf"
+  },
+  {
+   "id": "soulraid-hunt",
+   "faction": "Idoneth Deepkin",
+   "name": "Soulraid Hunt",
+   "general": {
+    "models": 1,
+    "name": "Isharann Soulscryer"
+   },
+   "units": [
+    {
+     "models": 3,
+     "name": "Akhelian Morrsarr Guard"
+    },
+    {
+     "models": 1,
+     "name": "Akhelian Allopex"
+    },
+    {
+     "models": 5,
+     "name": "Namarti Thralls"
+    },
+    {
+     "models": 5,
+     "name": "Namarti Thralls"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_idoneth_deepkin_soulraid_hunt-ymkq3pu04e-aymk0cvmbn.pdf"
+  },
+  {
+   "id": "ironjawz-bigmob",
+   "faction": "Ironjawz",
+   "name": "Ironjawz Bigmob",
+   "general": {
+    "models": 1,
+    "name": "Megaboss"
+   },
+   "units": [
+    {
+     "models": 3,
+     "name": "Brute Ragerz"
+    },
+    {
+     "models": 5,
+     "name": "Ardboyz"
+    },
+    {
+     "models": 5,
+     "name": "Ardboyz"
+    },
+    {
+     "models": 5,
+     "name": "Brutes"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_orruk_warclans_ironjawz_bigmob-ihpwqzmdpv-nkwwjlzs0m.pdf"
+  },
+  {
+   "id": "grundstok-trailblazers",
+   "faction": "Kharadron Overlords",
+   "name": "Grundstok Trailblazers",
+   "general": {
+    "models": 1,
+    "name": "Endrinmaster with Dirigible Suit"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Grundstok Thunderers"
+    },
+    {
+     "models": 1,
+     "name": "Grundstok Gunhauler"
+    },
+    {
+     "models": 3,
+     "name": "Endrinriggers"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_kharadron_overlords_grundstok_trailblazers-sthwiusou1-9tilsswcap.pdf"
+  },
+  {
+   "id": "skyhammer-task-force",
+   "faction": "Kharadron Overlords",
+   "name": "Skyhammer Task Force",
+   "general": {
+    "models": 1,
+    "name": "Arkanaut Admiral"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Arkanaut Company"
+    },
+    {
+     "models": 5,
+     "name": "Arkanaut Company"
+    },
+    {
+     "models": 3,
+     "name": "Skywardens"
+    },
+    {
+     "models": 1,
+     "name": "Arkanaut Frigate"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_12-11_aos_spearhead_kharadron_overlords_skyhammer_task_force-juxkvk8zj2-scpnhbxwwv.pdf"
+  },
+  {
+   "id": "swampskulka-gang",
+   "faction": "Kruleboyz",
+   "name": "Swampskulka Gang",
+   "general": {
+    "models": 1,
+    "name": "Killaboss on Great Gnashtoof"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Murknob with Belcha-banna"
+    },
+    {
+     "models": 3,
+     "name": "Man-skewer Boltboyz"
+    },
+    {
+     "models": 5,
+     "name": "Gutrippaz"
+    },
+    {
+     "models": 5,
+     "name": "Gutrippaz"
+    },
+    {
+     "models": 1,
+     "name": "Beast-skewer Killbow"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_28-10_aos_spearhead_orruk_warclans_swampskulka_gang-shxetp9fds-2hkkpb8ssh.pdf"
+  },
+  {
+   "id": "glittering-phalanx",
+   "faction": "Lumineth Realm-lords",
+   "name": "Glittering Phalanx",
+   "general": {
+    "models": 1,
+    "name": "Scinari Cathallar"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Vanari Auralan Sentinels"
+    },
+    {
+     "models": 5,
+     "name": "Vanari Auralan Sentinels"
+    },
+    {
+     "models": 10,
+     "name": "Vanari Auralan Wardens"
+    },
+    {
+     "models": 5,
+     "name": "Vanari Bladelords"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_lumineth_realmlords_glittering_phalanx-vc5h4mvert-lcmzbvmqq9.pdf"
+  },
+  {
+   "id": "hurakan-vanguard",
+   "faction": "Lumineth Realm-lords",
+   "name": "Hurakan Vanguard",
+   "general": {
+    "models": 1,
+    "name": "Hurakan Windmage"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Hurakan Windchargers"
+    },
+    {
+     "models": 10,
+     "name": "Vanari Auralan Wardens"
+    },
+    {
+     "models": 1,
+     "name": "Hurakan Spirit of the Wind"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_04-02_aos_spearhead_lumineth_realmlords-5ruf50utef-0atmxv5lpx.pdf"
+  },
+  {
+   "id": "bleak-host",
+   "faction": "Maggotkin of Nurgle",
+   "name": "Bleak Host",
+   "general": {
+    "models": 1,
+    "name": "Spoilpox Scrivener"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Pusgoyle Blightlord"
+    },
+    {
+     "models": 1,
+     "name": "Pusgoyle Blightlord"
+    },
+    {
+     "models": 5,
+     "name": "Putrid Blightkings"
+    },
+    {
+     "models": 5,
+     "name": "Plaguebearers"
+    },
+    {
+     "models": 5,
+     "name": "Plaguebearers"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_maggotkin_of_nurgle_bleak_host-anonar5akg-es9llpugle.pdf"
+  },
+  {
+   "id": "bubonic-cell",
+   "faction": "Maggotkin of Nurgle",
+   "name": "Bubonic Cell",
+   "general": {
+    "models": 1,
+    "name": "Rotbringer Sorcerer"
+   },
+   "units": [
+    {
+     "models": 3,
+     "name": "Nurglings"
+    },
+    {
+     "models": 3,
+     "name": "Nurglings"
+    },
+    {
+     "models": 1,
+     "name": "Beast of Nurgle"
+    },
+    {
+     "models": 10,
+     "name": "Rotmire Creed"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_23-09_aos_spearhead_maggotkin_of_nurgle_bubonic_cell-i5dbcdp8vl-aaeheqk1x1.pdf"
+  },
+  {
+   "id": "cursed-shacklehorde",
+   "faction": "Nighthaunt",
+   "name": "Cursed Shacklehorde",
+   "general": {
+    "models": 1,
+    "name": "Spirit Torment"
+   },
+   "units": [
+    {
+     "models": 2,
+     "name": "Chainghasts"
+    },
+    {
+     "models": 5,
+     "name": "Bladegheist Revenants"
+    },
+    {
+     "models": 5,
+     "name": "Bladegheist Revenants"
+    },
+    {
+     "models": 5,
+     "name": "Dreadscythe Harridans"
+    },
+    {
+     "models": 5,
+     "name": "Dreadscythe Harridans"
+    },
+    {
+     "models": 2,
+     "name": "Dreadblade Harrows"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_29-04_aos_spearhead_nighthaunt_cursed_shacklehorde-br9d6bfwzt-4k0qp3is9x.pdf"
+  },
+  {
+   "id": "slasher-host",
+   "faction": "Nighthaunt",
+   "name": "Slasher Host",
+   "general": {
+    "models": 1,
+    "name": "Knight of Shrouds"
+   },
+   "units": [
+    {
+     "models": 3,
+     "name": "Spirit Hosts"
+    },
+    {
+     "models": 5,
+     "name": "Grimghast Reapers"
+    },
+    {
+     "models": 5,
+     "name": "Grimghast Reapers"
+    },
+    {
+     "models": 10,
+     "name": "Chainrasps"
+    },
+    {
+     "models": 10,
+     "name": "Chainrasps"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_28-10_aos_spearhead_nighthaunt_slasher_host-mppoj82i9m-j3gforgl2c.pdf"
+  },
+  {
+   "id": "scrapglutt",
+   "faction": "Ogor Mawtribes",
+   "name": "Scrapglutt",
+   "general": {
+    "models": 1,
+    "name": "Mantrappers"
+   },
+   "units": [
+    {
+     "models": 2,
+     "name": "Ironguts"
+    },
+    {
+     "models": 2,
+     "name": "Ironguts"
+    },
+    {
+     "models": 4,
+     "name": "Ironguts"
+    },
+    {
+     "models": 12,
+     "name": "Gnoblars"
+    },
+    {
+     "models": 1,
+     "name": "Gnoblar Scraplauncher"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_ogor_mawtribes_scrapglutt-rscn8zyfsn-ersmm4yxe3.pdf"
+  },
+  {
+   "id": "tyrant-s-bellow",
+   "faction": "Ogor Mawtribes",
+   "name": "Tyrant’s Bellow",
+   "general": {
+    "models": 1,
+    "name": "Tyrant"
+   },
+   "units": [
+    {
+     "models": 2,
+     "name": "Mournfang Pack"
+    },
+    {
+     "models": 3,
+     "name": "Ogor Gluttons"
+    },
+    {
+     "models": 3,
+     "name": "Ogor Gluttons"
+    },
+    {
+     "models": 4,
+     "name": "Leadbelchers"
+    },
+    {
+     "models": 1,
+     "name": "Ironblaster"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_aos_spearhead_ogor_tyrant-s_bellow-2x4dua4hul-ybq3296fth.pdf"
+  },
+  {
+   "id": "warglutt-marauders",
+   "faction": "Ogor Mawtribes",
+   "name": "Warglutt Marauders",
+   "general": {
+    "models": 1,
+    "name": "Tyrant"
+   },
+   "units": [
+    {
+     "models": 2,
+     "name": "Gluttons"
+    },
+    {
+     "models": 3,
+     "name": "Gluttons"
+    },
+    {
+     "models": 3,
+     "name": "Ironguts"
+    },
+    {
+     "models": 1,
+     "name": "Maulbeast Cavalry"
+    },
+    {
+     "models": 1,
+     "name": "Maulbeast Cavalry"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_15-07_aos_spearhead_ogor_mawtribes_warglutt_marauders-l0ewnuqqj7-sqi5tjabsr.pdf"
+  },
+  {
+   "id": "kavalos-vanguard",
+   "faction": "Ossiarch Bonereapers",
+   "name": "Kavalos Vanguard",
+   "general": {
+    "models": 1,
+    "name": "Liege-Kavalos"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Kavalos Deathriders"
+    },
+    {
+     "models": 5,
+     "name": "Kavalos Deathriders"
+    },
+    {
+     "models": 8,
+     "name": "Teratic Cohort"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_18-02_aos_spearhead_ossiarch_bonereapers_kavalos_vanguard-jbqptot5r8-wv7o91pzot.pdf"
+  },
+  {
+   "id": "mortisan-elite",
+   "faction": "Ossiarch Bonereapers",
+   "name": "Mortisan Elite",
+   "general": {
+    "models": 1,
+    "name": "Mortisan Ossifector"
+   },
+   "units": [
+    {
+     "models": 3,
+     "name": "Immortis Guard"
+    },
+    {
+     "models": 3,
+     "name": "Necropolis Stalkers"
+    },
+    {
+     "models": 2,
+     "name": "Morghast Archai"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_jun25_aos_spearhead_ossiarchbr_rules-oyqrmemltw-ba87liamqd.pdf"
+  },
+  {
+   "id": "tithe-reaper-echelon",
+   "faction": "Ossiarch Bonereapers",
+   "name": "Tithe-Reaper Echelon",
+   "general": {
+    "models": 1,
+    "name": "Mortisan Soulreaper"
+   },
+   "units": [
+    {
+     "models": 10,
+     "name": "Mortek Guard"
+    },
+    {
+     "models": 10,
+     "name": "Mortek Guard"
+    },
+    {
+     "models": 5,
+     "name": "Kavalos Deathriders"
+    },
+    {
+     "models": 1,
+     "name": "Gothizzar Harvester"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_aos_spearhead_fire_and_jade_obr-x8j1lrc6kr-slfvyoftwm.pdf"
+  },
+  {
+   "id": "starscale-warhost",
+   "faction": "Seraphon",
+   "name": "Starscale Warhost",
+   "general": {
+    "models": 1,
+    "name": "Saurus Oldblood on Carnosaur"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Saurus Warriors"
+    },
+    {
+     "models": 5,
+     "name": "Saurus Warriors"
+    },
+    {
+     "models": 3,
+     "name": "Kroxigor"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_aos_spearhead_seraphon_starscale_warhost-4ipgg8d3kx-kpmzdbylav.pdf"
+  },
+  {
+   "id": "sunblooded-prowlers",
+   "faction": "Seraphon",
+   "name": "Sunblooded Prowlers",
+   "general": {
+    "models": 3,
+    "name": "Sunblood Pack"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Saurus Warriors"
+    },
+    {
+     "models": 5,
+     "name": "Saurus Warriors"
+    },
+    {
+     "models": 5,
+     "name": "Hunters of Huanchi"
+    },
+    {
+     "models": 5,
+     "name": "Hunters of Huanchi"
+    },
+    {
+     "models": 3,
+     "name": "Terrawings"
+    },
+    {
+     "models": 1,
+     "name": "Spawn of Chotec"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_28-10_aos_spearhead_seraphon_sunblooded_prowlers-2tmuxx6dbn-v5adn2jsz2.pdf"
+  },
+  {
+   "id": "gnawfeast-clawpack",
+   "faction": "Skaven",
+   "name": "Gnawfeast Clawpack",
+   "general": {
+    "models": 1,
+    "name": "Clawlord on Gnaw-beast"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Grey Seer"
+    },
+    {
+     "models": 1,
+     "name": "Warlock Engineer"
+    },
+    {
+     "models": 10,
+     "name": "Clanrats"
+    },
+    {
+     "models": 10,
+     "name": "Clanrats"
+    },
+    {
+     "models": 3,
+     "name": "Rat Ogors"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_skaven_gnawfeast_clawpack-zorddipson-dpnghi1nvc.pdf"
+  },
+  {
+   "id": "bloodwind-legion",
+   "faction": "Slaves to Darkness",
+   "name": "Bloodwind Legion",
+   "general": {
+    "models": 1,
+    "name": "Chaos Lord"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Chaos Chariot"
+    },
+    {
+     "models": 5,
+     "name": "Chaos Warriors"
+    },
+    {
+     "models": 5,
+     "name": "Chaos Warriors"
+    },
+    {
+     "models": 5,
+     "name": "Chaos Knights"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_spearhead_slaves_to_darkness.27-dqd6t0o4ny.pdf"
+  },
+  {
+   "id": "darkoath-raiders",
+   "faction": "Slaves to Darkness",
+   "name": "Darkoath Raiders",
+   "general": {
+    "models": 1,
+    "name": "Darkoath Warqueen"
+   },
+   "units": [
+    {
+     "models": 10,
+     "name": "Darkoath Savagers"
+    },
+    {
+     "models": 5,
+     "name": "Darkoath Fellriders"
+    },
+    {
+     "models": 10,
+     "name": "Darkoath Marauders"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_slaves_to_darkness_darkoath_raiders-mcmbaocpba-1o87y80z16.pdf"
+  },
+  {
+   "id": "stone-lobbas",
+   "faction": "Sons of Behemat",
+   "name": "Stone Lobbas",
+   "general": {
+    "models": 1,
+    "name": "Rock-hurler"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Rock-hurler"
+    },
+    {
+     "models": 1,
+     "name": "Rock-hurler"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_09-09_warhammer_age_of_sigmar_spearhead_sons_of_behemat_stone_lobbas-3xyjzwhip1-qjombu1qss.pdf"
+  },
+  {
+   "id": "wallsmasher-stomp",
+   "faction": "Sons of Behemat",
+   "name": "Wallsmasher Stomp",
+   "general": {
+    "models": 1,
+    "name": "Mancrusher Gargant"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Mancrusher Gargant"
+    },
+    {
+     "models": 1,
+     "name": "Mancrusher Gargant"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_aos_spearhead_sons_of_behemat_wallsmasher_stomp-pixgkvvzk0-hh6q2dgl7y.pdf"
+  },
+  {
+   "id": "bloodcrave-hunt",
+   "faction": "Soulblight Gravelords",
+   "name": "Bloodcrave Hunt",
+   "general": {
+    "models": 1,
+    "name": "Vampire Lord"
+   },
+   "units": [
+    {
+     "models": 10,
+     "name": "Deathrattle Skeletons"
+    },
+    {
+     "models": 10,
+     "name": "Deathrattle Skeletons"
+    },
+    {
+     "models": 5,
+     "name": "Blood Knights"
+    },
+    {
+     "models": 3,
+     "name": "Vargheists"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_soulblight_gravelords_bloodcrave_hunt-vdg57qq6dt-h7hylvvtke.pdf"
+  },
+  {
+   "id": "deathrattle-tomb-host",
+   "faction": "Soulblight Gravelords",
+   "name": "Deathrattle Tomb Host",
+   "general": {
+    "models": 1,
+    "name": "Wight King"
+   },
+   "units": [
+    {
+     "models": 10,
+     "name": "Barrow Guard"
+    },
+    {
+     "models": 5,
+     "name": "Barrow Knights"
+    },
+    {
+     "models": 10,
+     "name": "Deathrattle Skeletons"
+    },
+    {
+     "models": 10,
+     "name": "Deathrattle Skeletons"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_01-04_aos_spearhead_soulblight_gravelords_deathrattle_tomb_host-yfcq06h2aq-h5hdzqs0hi.pdf"
+  },
+  {
+   "id": "yndrasta-s-spearhead",
+   "faction": "Stormcast Eternals",
+   "name": "Yndrasta’s Spearhead",
+   "general": {
+    "models": 1,
+    "name": "Yndrasta, the Celestial Spear"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Knight-Vexillor"
+    },
+    {
+     "models": 3,
+     "name": "Annihilators"
+    },
+    {
+     "models": 5,
+     "name": "Vanquishers"
+    },
+    {
+     "models": 5,
+     "name": "Vanquishers"
+    },
+    {
+     "models": 1,
+     "name": "Stormstrike Chariot"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_aos_spearhead_stormcast_eternals_dec_24-jyo1gqr2pm-0e3gf5ydzh.pdf"
+  },
+  {
+   "id": "bitterbark-copse",
+   "faction": "Sylvaneth",
+   "name": "Bitterbark Copse",
+   "general": {
+    "models": 1,
+    "name": "Branchwych"
+   },
+   "units": [
+    {
+     "models": 1,
+     "name": "Treelord"
+    },
+    {
+     "models": 3,
+     "name": "Kurnoth Hunters"
+    },
+    {
+     "models": 5,
+     "name": "Tree-Revenants"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_aos_spearhead_sylvaneth_bitterbark-copse-jqmpmca0ca-baul2djdaq.pdf"
+  },
+  {
+   "id": "spitewing-flight",
+   "faction": "Sylvaneth",
+   "name": "Spitewing Flight",
+   "general": {
+    "models": 1,
+    "name": "Arch-Revenant"
+   },
+   "units": [
+    {
+     "models": 5,
+     "name": "Gossamid Archers"
+    },
+    {
+     "models": 3,
+     "name": "Spiterider Lancers"
+    },
+    {
+     "models": 3,
+     "name": "Revenant Seekers"
+    }
+   ],
+   "source": "https://assets.warhammer-community.com/eng_25-03_aos_spearhead_spitewing_flight_sylvaneth-rtiguzvyhx-f7di7yhcim.pdf"
+  }
+ ]
+}
