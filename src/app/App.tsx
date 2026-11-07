@@ -299,7 +299,7 @@ export default function App() {
           />
         )}
         <WelcomeResume />
-        <WelcomeTour onGo={(to) => (to === 'guide' || to === 'backup' || to === 'sync' ? undefined : go(to))} />
+        <WelcomeTour onGo={(to) => (to === 'guide' ? undefined : to === 'backup' ? go('settings', 'backup') : go(to))} />
         {ready && shared && <SharedSchemeBanner token={shared} onDone={(id) => { setShared(null); if (id) openScheme(id) }} />}
         {missingCode && <p className="panel mb-3 p-3 text-sm" role="alert">No unit or place with code {missingCode} on this device. Restore a backup from the device where you made the labels. <button className="underline" onClick={() => setMissingCode('')}>Dismiss</button></p>}
         {!ready ? (

@@ -6,13 +6,12 @@ import { AUTO, UI_SCALES, effectiveScale, scaleLabel } from '../../domain/settin
 import { Dialog, ProgressBar } from '../../ui/Dialog'
 import { endDemo, startDemo } from './demo'
 import { Tour } from './Tour'
-import { TOURS } from './tours'
+import { TOURS, type TourName } from './tours'
 import { useWelcome } from './welcome'
 
-type TourName = keyof typeof TOURS
 
-/** Guide steps that are guided tours (5–8): reaching them starts the tour straight away. */
-const STEP_TOURS: Record<number, TourName> = { 4: 'units', 5: 'paints', 6: 'workshop', 7: 'armies' }
+/** Guide steps that are guided tours (5–9): reaching them starts the tour straight away. */
+const STEP_TOURS: Record<number, TourName> = { 4: 'units', 5: 'paints', 6: 'workshop', 7: 'armies', 8: 'more' }
 
 /** Go to a guide step; a tour step starts its tour. */
 export function goToStep(step: number) {
@@ -42,14 +41,14 @@ export function WelcomeTour({ onGo }: { onGo: (to: WelcomeGo) => void }) {
         const { step } = useWelcome.getState()
         useWelcome.setState({ touring: null, paused: false })
         // Finished: on to the next step (the next tour, if it is one). Ended early: back to this step's page.
-        if (completed) goToStep(Math.min(step + 1, STEPS.length - 1))
+        if (completed && step < STEPS.length - 1) goToStep(step + 1)
       }}
     />
   )
 }
 
 /** Where a guide button takes you: an app page, Settings › Backup, or the online user guide. */
-export type WelcomeGo = 'backlog' | 'paints' | 'schemes' | 'tools' | 'supplies' | 'storage' | 'armies' | 'games' | 'stats' | 'sync' | 'backup' | 'guide'
+export type WelcomeGo = 'home' | 'backlog' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'tools' | 'supplies' | 'storage' | 'companion' | 'armies' | 'games' | 'stats' | 'goals' | 'sync' | 'settings' | 'backup' | 'guide'
 
 const STEPS = ['Welcome', 'Your games', 'Look', 'Your data', 'Units', 'Paints', 'Workshop', 'Armies and games', 'Find your way'] as const
 
@@ -133,7 +132,7 @@ export function WelcomeGuide({ onGo }: { onGo: (to: WelcomeGo) => void }) {
               ]} />
             </Topic>
           )}
-          {step === 8 && <FindYourWay onTry={tryIt} />}
+          {step === 8 && <FindYourWay onTry={tryIt} onTour={() => void beginTour('more')} />}
         </section>
 
         <footer className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
@@ -272,7 +271,7 @@ function Data({ onTry, onFresh }: { onTry: (to: WelcomeGo) => void; onFresh: () 
   )
 }
 
-function FindYourWay({ onTry }: { onTry: (to: WelcomeGo) => void }) {
+function FindYourWay({ onTry, onTour }: { onTry: (to: WelcomeGo) => void; onTour: () => void }) {
   return (
     <>
       <h2 className="font-display text-xl text-accent">Find your way</h2>
@@ -283,7 +282,10 @@ function FindYourWay({ onTry }: { onTry: (to: WelcomeGo) => void }) {
         ['Sync', 'keep your phone, browser and computer in step'],
         ['Settings', 'catalogues, appearance, pipelines, backups'],
       ]} />
-      <button className="btn w-fit" onClick={() => onTry('guide')}>📖 Open the full user guide</button>
+      <div className="flex flex-wrap gap-2">
+        <button className="btn btn-primary" onClick={onTour}>▶ Show me again</button>
+        <button className="btn" onClick={() => onTry('guide')}>📖 Open the full user guide</button>
+      </div>
     </>
   )
 }

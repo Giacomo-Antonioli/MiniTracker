@@ -1,17 +1,21 @@
 import { driver, type Driver } from 'driver.js'
 import 'driver.js/dist/driver.css'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useStore } from '../../app/store'
 import type { WelcomeGo } from './WelcomeGuide'
-import { findTarget, type TourStep } from './tourTarget'
+import { findTarget, runActions, waitForTarget, type TourStep } from './tourTarget'
 
-/** Waits until a step's element is on the page (pages render after navigation), up to about two seconds. */
-async function waitFor(step: TourStep): Promise<Element | undefined> {
-  for (let i = 0; i < 20; i++) {
-    const el = findTarget(step.target)
-    if (el || !step.target) return el ?? undefined
-    await new Promise((r) => setTimeout(r, 100))
+/** A 1-pixel element in the middle of the screen, for steps whose element isn't on the page. */
+function anchor(): Element {
+  let a = document.getElementById('tour-anchor')
+  if (!a) {
+    a = document.createElement('div')
+    a.id = 'tour-anchor'
+    a.setAttribute('aria-hidden', 'true')
+    a.style.cssText = 'position:fixed;left:50%;top:40%;width:1px;height:1px;pointer-events:none'
+    document.body.appendChild(a)
   }
-  return undefined
+  return a
 }
 
 /**
@@ -20,7 +24,9 @@ async function waitFor(step: TourStep): Promise<Element | undefined> {
  * The highlighted element can't be clicked (disableActiveInteraction) and clicks on the dimmed page do nothing,
  * so the demo data is never changed.
  */
-export function Tour({ name, steps, onGo, onEnd }: { name: string; steps: TourStep[]; onGo: (to: WelcomeGo) => void; onEnd: (completed: boolean) => void }) {
+export function Tour({ name, steps: allSteps, onGo, onEnd }: { name: string; steps: TourStep[]; onGo: (to: WelcomeGo) => void; onEnd: (completed: boolean) => void }) {
+  // Steps for pages built from a catalogue only when one is installed.
+  const [steps] = useState(() => allSteps.filter((s) => !s.needsCatalogue || useStore.getState().catalogues.length > 0))
   const ended = useRef(onEnd)
   ended.current = onEnd
   const go = useRef(onGo)
@@ -37,11 +43,23 @@ export function Tour({ name, steps, onGo, onEnd }: { name: string; steps: TourSt
       d?.destroy()
       if (live) ended.current(completed)
     }
-    /** Open the step's page, wait for its element, then show it. */
+    /** Steps whose mock actions already ran (going Back doesn't redo them). */
+    const acted = new Set<number>()
+    let busy = false
+    /** Open the step's page, act out its mock (once), wait for its element, then show it. */
     const show = async (i: number) => {
+      if (busy) return
+      busy = true
       const s = steps[i]
       go.current(s.page)
-      await waitFor(s)
+      if (s.before && !acted.has(i)) {
+        acted.add(i)
+        // The popover steps aside while the mock acts, so the user sees it happen.
+        if (d?.isActive()) (document.querySelector('.driver-popover') as HTMLElement | null)?.style.setProperty('visibility', 'hidden')
+        await runActions(s.before)
+      }
+      if (s.target && !(await waitForTarget(s))) console.warn(`Tour step without its element: ${name} › ${s.title}`)
+      busy = false
       if (!live || !d) return
       if (d.isActive()) d.moveTo(i)
       else d.drive(i)
@@ -61,7 +79,9 @@ export function Tour({ name, steps, onGo, onEnd }: { name: string; steps: TourSt
       stageRadius: 6,
       steps: steps.map((s) => ({
         // Looked up when the step is shown, on the page the tour just opened.
-        element: s.target ? () => findTarget(s.target) ?? document.body : undefined,
+        // Not found: a centred invisible anchor (never the body: driver.js would make the whole page, popover
+        // included, unclickable).
+        element: s.target ? () => findTarget(s.target) ?? anchor() : undefined,
         popover: { title: s.title, description: `${s.text}<p class="mt-tour-note">Demo data · nothing is saved</p>` },
       })),
       onNextClick: () => {
@@ -81,6 +101,7 @@ export function Tour({ name, steps, onGo, onEnd }: { name: string; steps: TourSt
       live = false
       over = true
       d?.destroy()
+      document.getElementById('tour-anchor')?.remove()
     }
     // The tour runs once per mount; App remounts it for another tour.
     // eslint-disable-next-line react-hooks/exhaustive-deps

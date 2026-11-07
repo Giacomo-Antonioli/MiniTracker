@@ -39,7 +39,22 @@ import { DEFAULT_PIPELINE, firstOwnedStage, moveModels, WISHLISTED, type MoveOpt
 import { createUnit, mergeGroups } from '../domain/collection/ownedUnit'
 import type { Ctx, OwnedUnit, Pipeline, StageId, StatusEvent } from '../domain/collection/types'
 
-const db = new MiniTrackerDb()
+const realDb = new MiniTrackerDb()
+let currentDb = realDb
+/**
+ * The database the app uses. Normally the user's; during a guided tour (#168) a separate demo database, so the
+ * tour can act out real flows (save a unit, start a game…) without ever touching the user's data.
+ */
+const db = new Proxy(realDb, {
+  get(_target, prop) {
+    const v = Reflect.get(currentDb, prop, currentDb) as unknown
+    return typeof v === 'function' ? (v as (...a: unknown[]) => unknown).bind(currentDb) : v
+  },
+}) as MiniTrackerDb
+/** Point the app at a demo database (guided tours), or back at the user's with null. */
+export function switchDatabase(demo: MiniTrackerDb | null): void {
+  currentDb = demo ?? realDb
+}
 /** Exposed for tests only. */
 export const appDb = db
 const unitsRepo = new DexieUnitRepository(db)

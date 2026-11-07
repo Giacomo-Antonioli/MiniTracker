@@ -45,6 +45,8 @@ test('welcome guide on first start: walk through, skip, reopen from Settings', a
   await page.keyboard.press('Escape')
   await expect(guide.getByRole('region', { name: 'Paints' })).toContainText('Colour match')
   await guide.getByRole('button', { name: /9\. Find your way/ }).click()
+  await expect(page.locator('.driver-popover')).toContainText('Home')
+  await page.keyboard.press('Escape')
   await guide.getByRole('button', { name: 'Start using MiniTracker' }).click()
   await expect(guide).toBeHidden()
   await expect(page.getByRole('status', { name: 'Welcome guide paused' })).toBeHidden()
@@ -58,7 +60,7 @@ test('tour steps run a guided tour over a demo collection, chain on, and put you
 
   const pop = page.locator('.driver-popover')
   await expect(pop).toContainText('The Backlog')
-  await expect(pop).toContainText('Your units · 1 / 7')
+  await expect(pop).toContainText('Your units · 1 / 14')
   // The demo collection is on the page.
   await expect(page.getByText('Intercessor Squad').first()).toBeVisible()
   await pop.getByRole('button', { name: 'Next' }).click()
@@ -78,7 +80,7 @@ test('tour steps run a guided tour over a demo collection, chain on, and put you
   await page.keyboard.press('Escape')
   await guide.getByRole('button', { name: 'Next' }).click()
   await expect(pop).toContainText('Your paints')
-  for (let i = 0; i < 4; i++) await pop.getByRole('button', { name: 'Next' }).click()
+  for (let i = 0; i < 7; i++) await pop.getByRole('button', { name: 'Next' }).click()
   await expect(pop).toContainText('Your own scheme')
   await expect(page.getByRole('heading', { name: 'Schemes' })).toBeVisible()
   // Done goes straight into the next tour (Workshop).
