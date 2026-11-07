@@ -10,7 +10,8 @@
   ],
   "permissions": [
     "updater:default",
-    "process:allow-restart"
+    "process:allow-restart",
+    "window-state:default"
   ],
-  "description": "Auto-update (#168): check, download and restart; desktop only"
+  "description": "Desktop only (#168): auto-update (check, download, restart) and remembered window state"
 }

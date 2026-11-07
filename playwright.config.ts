@@ -9,8 +9,9 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4173/MiniTracker/',
     trace: 'retain-on-failure',
-    // The flows start on the Backlog (the app's default start page is Home).
-    storageState: { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: 'startPage', value: 'backlog' }] }] },
+    // The flows start on the Backlog (the app's default start page is Home), with the first-start welcome guide
+    // (#168) already done; e2e/welcome.spec.ts clears it to test the guide.
+    storageState: { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: 'startPage', value: 'backlog' }, { name: 'welcomeDone', value: '1' }] }] },
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } }, testIgnore: /phone\.spec/ },

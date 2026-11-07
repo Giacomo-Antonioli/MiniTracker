@@ -13,7 +13,7 @@ test('two devices sync both ways over a direct connection (private mode)', async
   test.skip(info.project.name !== 'desktop', 'one run is enough')
   // setting up two browsers and a direct connection is slow when the other tests run alongside
   test.setTimeout(90_000)
-  const state = { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: 'startPage', value: 'backlog' }] }] }
+  const state = { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: 'startPage', value: 'backlog' }, { name: 'welcomeDone', value: '1' }] }] }
   const pc = await (await browser.newContext({ storageState: state })).newPage()
   const phone = await (await browser.newContext({ storageState: state })).newPage()
   for (const [p, name] of [[pc, 'Rhino'], [phone, 'Termagants']] as const) {

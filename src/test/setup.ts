@@ -3,6 +3,9 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach, beforeEach } from 'vitest'
 
+// The first-start welcome guide (#168) would cover every screen: tests start with it done (welcome tests reopen it).
+if (typeof localStorage !== 'undefined') localStorage.setItem('welcomeDone', '1')
+
 // Most UI tests start on the Backlog; the Home tests switch this back.
 beforeEach(() => {
   if (typeof localStorage !== 'undefined') localStorage.setItem('startPage', 'backlog')

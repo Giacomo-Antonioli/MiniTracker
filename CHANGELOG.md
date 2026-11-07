@@ -7,6 +7,14 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [0.26.0] - 2026-11-07
 
 ### Added
+- Welcome guide on first start: what MiniTracker does, download your games' catalogues, theme and text size, bring your data (sync, restore a backup or start fresh) and where things are. Skip it at any step; Settings › Appearance › Welcome guide › Show it again opens it later. Not shown to anyone who already has units.
+- Desktop app: Settings › Appearance shows the installed version with *Check for updates*; the update banner has the release notes (*What's new*); the window title shows the version.
+- Desktop app: only one copy runs at a time (opening it again brings the open window to the front), and the window remembers its size, position and maximised state.
+
+### Fixed
+- Desktop installers are built and attached to the release again (0.26.0 shipped without them).
+
+### Added
 - Desktop app (#168, part 1): MiniTracker as an installable app for Windows (.msi/.exe), macOS (.dmg) and Linux (.deb/.AppImage), built with Tauri and attached to each GitHub release. It keeps its own data: on first start Home offers to sync from another device or restore a backup. Web links open in your browser, and share, pairing and QR links point to the web app so other devices can open them. The installers are not code-signed yet (see the release notes for how to open them). Automatic discovery of your other devices comes next.
 - Desktop app updates itself: on start it checks GitHub releases for a newer version and offers *Install and restart*. Updates are signed with the project's update key and checked before installing. On Linux the AppImage updates itself; the .deb updates through apt.
 - Text and interface size (Settings › Appearance): Auto by default, following the window (100% up to 1280 px wide, growing to 150% on big or maximised windows), or a fixed 80–150%, saved on the device; text and the layout grow together. In the desktop app Ctrl + / Ctrl − change it and Ctrl 0 goes back to Auto.
