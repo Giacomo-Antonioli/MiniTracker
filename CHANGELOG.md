@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Fixed
+- The game picker and the active catalogue stay in step: making an edition of another game active in Settings moves the picker to that game, and on start the picked game's catalogue is used.
+
 ## [0.23.0] - 2026-11-07
 
 ### Added
