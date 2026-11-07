@@ -5,7 +5,7 @@ import { readRoster } from '../../data/lists/rosz'
 import { listFromJson, listFromRoster, listFromText, type ImportResult } from '../../domain/lists/io'
 import type { EditionKey } from '../../domain/lists/types'
 import type { Catalogue } from '../../domain/catalogue/types'
-import { useTx, txr } from '../../i18n'
+import { useTx } from '../../i18n'
 
 /** A list from a file: BattleScribe / NewRecruit .rosz/.ros, MiniTracker .json or text. */
 export async function importListFile(f: File, cat: Catalogue, edition: EditionKey): Promise<ImportResult> {
