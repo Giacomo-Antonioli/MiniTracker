@@ -4,6 +4,12 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.26.3] - 2026-11-07
+
+### Fixed
+- Desktop app: Print / PDF buttons do something on Windows again: they open the system print dialog (army and buy-list sheets, recipe cards, labels, storage, missing paints, shopping, Before you start).
+- Desktop releases: the macOS update entry no longer goes missing from the update file.
+
 ## [0.26.2] - 2026-11-07
 
 ### Changed
