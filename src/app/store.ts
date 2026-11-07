@@ -1,3 +1,4 @@
+import { pushLive } from '../data/liveSession'
 import { create } from 'zustand'
 import { useMemo } from 'react'
 import { GAMES, gameOfRepo } from '../domain/catalogue/editions'
@@ -754,6 +755,7 @@ export const useStore = create<State>((set, get) => ({
   async saveGame(g) {
     const list = get().games.some((x) => x.id === g.id) ? get().games.map((x) => (x.id === g.id ? g : x)) : [g, ...get().games]
     set({ games: list })
+    pushLive(g)
     await settingsRepo.setValue('games', list)
   },
   async deleteGame(id) {
