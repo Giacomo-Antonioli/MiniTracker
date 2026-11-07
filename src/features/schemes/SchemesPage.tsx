@@ -10,12 +10,14 @@ import { Guides } from '../guides/GuidesPage'
 import { SchemeView } from './SchemeView'
 import { AddFromLinkDialog } from './AddFromLinkDialog'
 import type { RecipePayload } from './recipeImport'
+import { useTx } from '../../i18n'
 
 const ORDER: SchemeOrigin[] = ['official', 'community', 'personal']
 
 const PAGE = 60
 
 export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { openId?: string; payload?: RecipePayload; onPayloadUsed?: () => void; onOpenUnit?: (id: string) => void }) {
+  const tx = useTx()
   const { schemes: mine, library, loadLibrary, paints, paintStock, units, pipelines, schemeDefaults, loadPaints, saveScheme, importSchemes } = useStore()
   const [showLibrary, setShowLibrary] = useState(true)
   const schemes = useMemo(() => (showLibrary ? [...mine, ...library] : mine), [mine, library, showLibrary])
@@ -50,7 +52,7 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
   const usedBy = (id: string) => units.filter((u) => u.schemeId === id).length
 
   async function create() {
-    const s = createScheme({ name: 'New scheme', stage: pipelines.scheme.stages[0].id, factionName: faction || undefined }, ctx())
+    const s = createScheme({ name: tx('New scheme'), stage: pipelines.scheme.stages[0].id, factionName: faction || undefined }, ctx())
     await saveScheme(s)
     setSelectedId(s.id)
   }
@@ -59,7 +61,7 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
     return (
       <div className="grid gap-4">
         <header className="flex flex-wrap items-center gap-3">
-          <h1 className="font-display text-2xl text-accent" data-tour="schemes-title">Schemes</h1>
+          <h1 className="font-display text-2xl text-accent" data-tour="schemes-title">{tx('Schemes')}</h1>
           <ViewTabs view={view} onChange={setView} />
         </header>
         <Guides />
@@ -71,24 +73,24 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
       <div className={`flex min-w-0 flex-col gap-4 ${selected ? 'w-[380px] shrink-0' : 'flex-1'}`}>
         <header className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display text-2xl text-accent" data-tour="schemes-title">Schemes</h1>
+            <h1 className="font-display text-2xl text-accent" data-tour="schemes-title">{tx('Schemes')}</h1>
             <ViewTabs view={view} onChange={setView} />
           </div>
           <div className="flex gap-2">
             <label className="btn">
-              ⬆ Import
+              {tx('⬆ Import')}
               <input
                 type="file"
                 accept=".json,application/json"
                 className="sr-only"
-                aria-label="Scheme file"
+                aria-label={tx('Scheme file')}
                 onChange={async (e) => {
                   const f = e.target.files?.[0]
                   e.target.value = ''
                   if (!f) return
                   try {
                     const added = await importSchemes(await f.text())
-                    setMessage({ ok: true, text: `Imported ${added.length} scheme${added.length === 1 ? '' : 's'}.` })
+                    setMessage({ ok: true, text: added.length === 1 ? tx('Imported 1 scheme.') : tx('Imported {{n}} schemes.', { n: added.length }) })
                     if (added[0]) setSelectedId(added[0].id)
                   } catch (err) {
                     setMessage({ ok: false, text: (err as Error).message })
@@ -96,32 +98,32 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
                 }}
               />
             </label>
-            <button className="btn" onClick={() => setAdding(true)}>🔗 Add from link</button>
-            <button className="btn btn-primary" data-tour="new-scheme" onClick={() => void create()}>+ New scheme</button>
+            <button className="btn" onClick={() => setAdding(true)}>{tx('🔗 Add from link')}</button>
+            <button className="btn btn-primary" data-tour="new-scheme" onClick={() => void create()}>{tx('+ New scheme')}</button>
           </div>
         </header>
         {message && <p role="status" className={message.ok ? 'text-ok' : 'text-danger'}>{message.text}</p>}
 
-        <section className="flex flex-wrap items-center gap-2" aria-label="Scheme filters" data-tour="scheme-filters">
-          <input className="input w-48" placeholder="🔍 Search" value={text} onChange={(e) => setText(e.target.value)} />
-          <select className="input" aria-label="Faction" value={faction} onChange={(e) => setFaction(e.target.value)}>
-            <option value="">All factions</option>
+        <section className="flex flex-wrap items-center gap-2" aria-label={tx('Scheme filters')} data-tour="scheme-filters">
+          <input className="input w-48" placeholder={tx('🔍 Search')} value={text} onChange={(e) => setText(e.target.value)} />
+          <select className="input" aria-label={tx('Faction')} value={faction} onChange={(e) => setFaction(e.target.value)}>
+            <option value="">{tx('All factions')}</option>
             {factions.map((f) => <option key={f}>{f}</option>)}
           </select>
-          <select className="input" aria-label="Origin" value={origin} onChange={(e) => setOrigin(e.target.value as '' | SchemeOrigin)}>
-            <option value="">Any origin</option>
+          <select className="input" aria-label={tx('Origin')} value={origin} onChange={(e) => setOrigin(e.target.value as '' | SchemeOrigin)}>
+            <option value="">{tx('Any origin')}</option>
             {ORDER.map((o) => <option key={o} value={o}>{ORIGIN_LABEL[o]}</option>)}
           </select>
           <label className="flex items-center gap-1 text-sm">
-            <input type="checkbox" checked={showLibrary} onChange={(e) => setShowLibrary(e.target.checked)} /> Library ({library.length})
+            <input type="checkbox" checked={showLibrary} onChange={(e) => setShowLibrary(e.target.checked)} /> {tx('Library ({{n}})', { n: library.length })}
           </label>
-          <select className="input" aria-label="Status" value={stage} onChange={(e) => setStage(e.target.value)}>
-            <option value="">Any status</option>
+          <select className="input" aria-label={tx('Status')} value={stage} onChange={(e) => setStage(e.target.value)}>
+            <option value="">{tx('Any status')}</option>
             {pipelines.scheme.stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </section>
 
-        <ul className={`grid gap-2 overflow-y-auto pb-4 ${selected ? '' : 'grid-cols-[repeat(auto-fill,minmax(260px,1fr))]'}`} aria-label="Schemes">
+        <ul className={`grid gap-2 overflow-y-auto pb-4 ${selected ? '' : 'grid-cols-[repeat(auto-fill,minmax(260px,1fr))]'}`} aria-label={tx('Schemes')}>
           {shown.slice(0, limit).map((s) => (
             <SchemeCard
               key={s.id}
@@ -139,11 +141,11 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
         </ul>
         {shown.length > limit && (
           <button className="btn mx-auto" onClick={() => setMore({ key: filterKey, n: limit + PAGE })}>
-            Show more ({shown.length - limit} left)
+            {tx('Show more ({{n}} left)', { n: shown.length - limit })}
           </button>
         )}
-        {schemes.length === 0 && <p className="text-center text-muted">No schemes yet. Create one, browse the library, or import a scheme file from a friend.</p>}
-        {schemes.length > 0 && shown.length === 0 && <p className="text-center text-muted">No schemes match these filters.</p>}
+        {schemes.length === 0 && <p className="text-center text-muted">{tx('No schemes yet. Create one, browse the library, or import a scheme file from a friend.')}</p>}
+        {schemes.length > 0 && shown.length === 0 && <p className="text-center text-muted">{tx('No schemes match these filters.')}</p>}
       </div>
 
       {(adding || payload) && (
@@ -177,30 +179,31 @@ function SchemeCard(props: {
   active: boolean
   onOpen: () => void
 }) {
+  const tx = useTx()
   const { s } = props
   const cover = usePhotoUrl(s.coverPhotoId)
   return (
     <li>
-      <button className={`panel grid w-full gap-2 p-3 text-left hover:border-accent ${props.active ? 'border-accent' : ''}`} onClick={props.onOpen} aria-label={`Scheme ${s.name}`}>
+      <button className={`panel grid w-full gap-2 p-3 text-left hover:border-accent ${props.active ? 'border-accent' : ''}`} onClick={props.onOpen} aria-label={tx('Scheme {{name}}', { name: s.name })}>
         {cover && <img src={cover} alt="" className="h-28 w-full rounded object-cover" />}
         <ColourStrip colours={props.strip} />
         <span className="flex items-start justify-between gap-2">
-          <span className="font-semibold">{s.name}{props.isDefault && <span title="Default for this faction"> ⭐</span>}</span>
+          <span className="font-semibold">{s.name}{props.isDefault && <span title={tx('Default for this faction')}> ⭐</span>}</span>
           <span className="flex shrink-0 gap-1">
-            {s.id.startsWith('lib/') && <span className="rounded border border-line px-1.5 text-xs text-muted">Library</span>}
+            {s.id.startsWith('lib/') && <span className="rounded border border-line px-1.5 text-xs text-muted">{tx('Library')}</span>}
             <span className={`rounded border px-1.5 text-xs ${ORIGIN_STYLE[s.origin]}`}>{ORIGIN_LABEL[s.origin]}</span>
           </span>
         </span>
         <span className="text-xs text-muted">
-          {[s.factionName, props.stageName, s.difficulty && `${'●'.repeat(s.difficulty)}${'○'.repeat(5 - s.difficulty)}`, s.minutesPerModel && `${s.minutesPerModel} min/model`]
+          {[s.factionName, props.stageName, s.difficulty && `${'●'.repeat(s.difficulty)}${'○'.repeat(5 - s.difficulty)}`, s.minutesPerModel && tx('{{n}} min/model', { n: s.minutesPerModel })]
             .filter(Boolean)
             .join(' · ')}
         </span>
-        {props.base && <span className="text-xs text-muted">↳ variant of {props.base}</span>}
-        {s.source?.author && <span className="text-xs text-muted">by {s.source.author}</span>}
+        {props.base && <span className="text-xs text-muted">{tx('↳ variant of {{name}}', { name: props.base })}</span>}
+        {s.source?.author && <span className="text-xs text-muted">{tx('by {{name}}', { name: s.source.author })}</span>}
         <span className="flex gap-3 text-xs">
-          {props.used > 0 && <span className="text-ok">{props.used} unit{props.used > 1 ? 's' : ''}</span>}
-          {props.missing > 0 && <span className="text-danger">{props.missing} paint{props.missing > 1 ? 's' : ''} missing</span>}
+          {props.used > 0 && <span className="text-ok">{props.used === 1 ? tx('1 unit') : tx('{{n}} units', { n: props.used })}</span>}
+          {props.missing > 0 && <span className="text-danger">{props.missing === 1 ? tx('1 paint missing') : tx('{{n}} paints missing', { n: props.missing })}</span>}
         </span>
       </button>
     </li>
@@ -208,10 +211,11 @@ function SchemeCard(props: {
 }
 
 function ViewTabs({ view, onChange }: { view: 'schemes' | 'guides'; onChange: (v: 'schemes' | 'guides') => void }) {
+  const tx = useTx()
   return (
-    <div role="tablist" aria-label="Schemes view" className="flex gap-1">
-      <button role="tab" aria-selected={view === 'schemes'} className={`btn ${view === 'schemes' ? 'btn-primary' : ''}`} onClick={() => onChange('schemes')}>Schemes</button>
-      <button role="tab" aria-selected={view === 'guides'} className={`btn ${view === 'guides' ? 'btn-primary' : ''}`} onClick={() => onChange('guides')}>📖 Guides</button>
+    <div role="tablist" aria-label={tx('Schemes view')} className="flex gap-1">
+      <button role="tab" aria-selected={view === 'schemes'} className={`btn ${view === 'schemes' ? 'btn-primary' : ''}`} onClick={() => onChange('schemes')}>{tx('Schemes')}</button>
+      <button role="tab" aria-selected={view === 'guides'} className={`btn ${view === 'guides' ? 'btn-primary' : ''}`} onClick={() => onChange('guides')}>{tx('📖 Guides')}</button>
     </div>
   )
 }

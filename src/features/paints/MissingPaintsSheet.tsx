@@ -2,6 +2,7 @@ import { printPage } from '../../app/platform'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { MissingPaint } from '../../domain/paints/missing'
+import { useTx } from '../../i18n'
 
 /** One printable row per paint: tick box, swatch, brand, name, and what uses it. Shared with the buy list. */
 export function PaintRows({ rows }: { rows: { paintId: string; paint?: { brand: string; name: string; hex: string }; have?: boolean; usedBy?: string }[] }) {
@@ -26,6 +27,7 @@ export function PaintRows({ rows }: { rows: { paintId: string; paint?: { brand: 
 
 /** Printable list of paints to buy for chosen schemes (#86). */
 export function MissingPaintsSheet({ rows, schemes, onDone }: { rows: MissingPaint[]; schemes: string[]; onDone: () => void }) {
+  const tx = useTx()
   const [date] = useState(() => new Date().toLocaleDateString())
   useEffect(() => {
     const done = () => onDone()
@@ -38,10 +40,10 @@ export function MissingPaintsSheet({ rows, schemes, onDone }: { rows: MissingPai
   }, [onDone])
 
   return createPortal(
-    <div className="print-only" aria-label="Missing paints sheet">
-      <h1 className="text-2xl font-bold">Paints to buy ({rows.length})</h1>
-      <p className="text-sm">For: {schemes.join(', ')}</p>
-      {rows.length ? <PaintRows rows={rows.map((r) => ({ ...r, usedBy: r.schemes.join(', ') }))} /> : <p className="mt-4">You own every paint these schemes use.</p>}
+    <div className="print-only" aria-label={tx('Missing paints sheet')}>
+      <h1 className="text-2xl font-bold">{tx('Paints to buy ({{n}})', { n: rows.length })}</h1>
+      <p className="text-sm">{tx('For: {{list}}', { list: schemes.join(', ') })}</p>
+      {rows.length ? <PaintRows rows={rows.map((r) => ({ ...r, usedBy: r.schemes.join(', ') }))} /> : <p className="mt-4">{tx('You own every paint these schemes use.')}</p>}
       <p className="mt-6 text-xs">MiniTracker · {date}</p>
     </div>,
     document.body,

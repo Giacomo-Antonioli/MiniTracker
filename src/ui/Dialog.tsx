@@ -1,7 +1,9 @@
 import { useEffect, useRef, type ReactNode } from 'react'
+import { useTx } from '../i18n'
 
 /** Native <dialog>, opened as modal while mounted. */
 export function Dialog({ title, onClose, children, wide }: { title: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
+  const tx = useTx()
   const ref = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     ref.current?.showModal()
@@ -17,7 +19,7 @@ export function Dialog({ title, onClose, children, wide }: { title: string; onCl
     >
       <div className="flex items-center justify-between border-b border-line px-4 py-3">
         <h2 className="font-display text-lg text-accent">{title}</h2>
-        <button className="text-muted hover:text-fg" onClick={() => ref.current?.close()} aria-label="Close">
+        <button className="text-muted hover:text-fg" onClick={() => ref.current?.close()} aria-label={tx('Close')}>
           ✕
         </button>
       </div>

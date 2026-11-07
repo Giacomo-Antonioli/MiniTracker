@@ -4,9 +4,11 @@ import type { PaintScheme } from '../../domain/schemes/types'
 import { usePhotoUrl } from '../photos/usePhotoUrl'
 import { ColourStrip } from './ColourStrip'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
+import { useTx } from '../../i18n'
 
 /** Compact scheme card shown on a unit; clicking it opens the scheme. */
 export function SchemeCardLink({ scheme, onOpen, large }: { scheme: PaintScheme; onOpen?: () => void; large?: boolean }) {
+  const tx = useTx()
   const { paints, paintStock } = useStore()
   const cover = usePhotoUrl(scheme.coverPhotoId)
   const missing = missingPaints(scheme, paintStock).length
@@ -20,14 +22,14 @@ export function SchemeCardLink({ scheme, onOpen, large }: { scheme: PaintScheme;
           <span className={`rounded border px-1.5 text-xs ${ORIGIN_STYLE[scheme.origin]}`}>{ORIGIN_LABEL[scheme.origin]}</span>
         </span>
         <span className="text-xs">
-          {missing ? <span className="text-danger">{missing} paint{missing > 1 ? 's' : ''} missing</span> : <span className="text-ok">all paints owned</span>}
-          {onOpen && <span className="text-muted"> · open scheme →</span>}
+          {missing ? <span className="text-danger">{missing === 1 ? tx('1 paint missing') : tx('{{n}} paints missing', { n: missing })}</span> : <span className="text-ok">{tx('all paints owned')}</span>}
+          {onOpen && <span className="text-muted"> · {tx('open scheme →')}</span>}
         </span>
       </span>
     </>
   )
   return onOpen ? (
-    <button className="panel flex w-full items-center gap-3 p-2 text-left hover:border-accent" onClick={onOpen} aria-label={`Open scheme ${scheme.name}`}>
+    <button className="panel flex w-full items-center gap-3 p-2 text-left hover:border-accent" onClick={onOpen} aria-label={tx('Open scheme {{name}}', { name: scheme.name })}>
       {body}
     </button>
   ) : (

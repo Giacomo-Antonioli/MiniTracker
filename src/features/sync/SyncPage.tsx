@@ -12,10 +12,11 @@ import { Dialog } from '../../ui/Dialog'
 import { ScanDialog } from '../storage/Labels'
 import { QrReceiver, QrSender } from './QrCarousel'
 import { appUrl } from '../../app/platform'
+import { txr, useTx } from '../../i18n'
 
-const TABLE_NAMES: Record<string, string> = {
-  units: 'Units', statusEvents: 'Painting history', paintStock: 'Paint stock', customPaints: 'Custom paints', photos: 'Photos',
-  schemes: 'Schemes', lists: 'Army lists', shopItems: 'Shopping items', shopLists: 'Shopping lists', settings: 'Settings items',
+const TABLE_NAMES: Record<string, () => string> = {
+  units: () => txr('Units'), statusEvents: () => txr('Painting history'), paintStock: () => txr('Paint stock'), customPaints: () => txr('Custom paints'), photos: () => txr('Photos'),
+  schemes: () => txr('Schemes'), lists: () => txr('Army lists'), shopItems: () => txr('Shopping items'), shopLists: () => txr('Shopping lists'), settings: () => txr('Settings items'),
 }
 
 type Step =
@@ -37,14 +38,15 @@ const appBase = appUrl
 
 /** The changes a sync will make here, per kind of data. */
 export function ChangesTable({ summary }: { summary: Record<string, MergeSummary> }) {
+  const tx = useTx()
   const rows = Object.entries(summary).filter(([, s]) => s.added || s.updated || s.deleted)
-  if (!rows.length) return <p className="text-sm text-muted">Nothing changes on this device: it already has everything.</p>
+  if (!rows.length) return <p className="text-sm text-muted">{tx('Nothing changes on this device: it already has everything.')}</p>
   return (
-    <table className="w-full text-sm" aria-label="Changes">
-      <thead className="text-left text-xs text-muted"><tr><th>Data</th><th>New</th><th>Changed</th><th>Deleted</th></tr></thead>
+    <table className="w-full text-sm" aria-label={tx('Changes')}>
+      <thead className="text-left text-xs text-muted"><tr><th>{tx('Data')}</th><th>{tx('New')}</th><th>{tx('Changed')}</th><th>{tx('Deleted')}</th></tr></thead>
       <tbody>
         {rows.map(([k, s]) => (
-          <tr key={k} className="border-t border-line"><td className="py-1">{TABLE_NAMES[k] ?? k}</td><td>{s.added}</td><td>{s.updated}</td><td className={s.deleted ? 'text-danger' : ''}>{s.deleted}</td></tr>
+          <tr key={k} className="border-t border-line"><td className="py-1">{TABLE_NAMES[k]?.() ?? k}</td><td>{s.added}</td><td>{s.updated}</td><td className={s.deleted ? 'text-danger' : ''}>{s.deleted}</td></tr>
         ))}
       </tbody>
     </table>
@@ -52,30 +54,31 @@ export function ChangesTable({ summary }: { summary: Record<string, MergeSummary
 }
 
 function PlanForm({ plan, setPlan, remember, setRemember }: { plan: SyncPlan; setPlan: (p: SyncPlan) => void; remember: boolean; setRemember: (b: boolean) => void }) {
+  const tx = useTx()
   const set = (p: Partial<SyncPlan>) => {
     const next = { ...plan, ...p }
     if (next.direction === 'both') next.mode = 'merge'
     setPlan(next)
   }
   return (
-    <fieldset className="grid gap-2 text-sm" aria-label="What to sync">
-      <label className="flex flex-wrap items-center gap-2">Direction
-        <select className="input" aria-label="Direction" value={plan.direction} onChange={(e) => set({ direction: e.target.value as Direction })}>
-          <option value="both">Both ways</option>
-          <option value="send">Send from this device</option>
-          <option value="receive">Receive on this device</option>
+    <fieldset className="grid gap-2 text-sm" aria-label={tx('What to sync')}>
+      <label className="flex flex-wrap items-center gap-2">{tx('Direction')}
+        <select className="input" aria-label={tx('Direction')} value={plan.direction} onChange={(e) => set({ direction: e.target.value as Direction })}>
+          <option value="both">{tx('Both ways')}</option>
+          <option value="send">{tx('Send from this device')}</option>
+          <option value="receive">{tx('Receive on this device')}</option>
         </select>
       </label>
-      <label className="flex flex-wrap items-center gap-2">What happens to the data
-        <select className="input" aria-label="Mode" value={plan.mode} disabled={plan.direction === 'both'} onChange={(e) => set({ mode: e.target.value as SyncPlan['mode'] })}>
-          <option value="merge">Merge, newest wins</option>
-          <option value="overwrite">Overwrite the receiver</option>
+      <label className="flex flex-wrap items-center gap-2">{tx('What happens to the data')}
+        <select className="input" aria-label={tx('Mode')} value={plan.mode} disabled={plan.direction === 'both'} onChange={(e) => set({ mode: e.target.value as SyncPlan['mode'] })}>
+          <option value="merge">{tx('Merge, newest wins')}</option>
+          <option value="overwrite">{tx('Overwrite the receiver')}</option>
         </select>
-        {plan.direction === 'both' && <span className="text-xs text-muted">Both ways always merges.</span>}
+        {plan.direction === 'both' && <span className="text-xs text-muted">{tx('Both ways always merges.')}</span>}
       </label>
-      {plan.mode === 'merge' && <label className="flex items-center gap-2"><input type="checkbox" checked={plan.applyDeletions} onChange={(e) => set({ applyDeletions: e.target.checked })} /> Also apply deletions from the other device</label>}
-      <label className="flex items-center gap-2"><input type="checkbox" checked={plan.photos} onChange={(e) => set({ photos: e.target.checked })} /> Include photos (slower; photos already there are skipped)</label>
-      <label className="flex items-center gap-2"><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Remember my choice (change it in Settings › Sync)</label>
+      {plan.mode === 'merge' && <label className="flex items-center gap-2"><input type="checkbox" checked={plan.applyDeletions} onChange={(e) => set({ applyDeletions: e.target.checked })} /> {tx('Also apply deletions from the other device')}</label>}
+      <label className="flex items-center gap-2"><input type="checkbox" checked={plan.photos} onChange={(e) => set({ photos: e.target.checked })} /> {tx('Include photos (slower; photos already there are skipped)')}</label>
+      <label className="flex items-center gap-2"><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> {tx('Remember my choice (change it in Settings › Sync)')}</label>
     </fieldset>
   )
 }
@@ -84,6 +87,7 @@ const planFrom = (p: SyncPrefs): SyncPlan => ({ direction: p.direction ?? 'both'
 
 /** Sync with another device: pair by code, QR, link or (no relay) connection text; or use a sync file. */
 export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; onOpenSettings?: () => void }) {
+  const tx = useTx()
   const load = useStore((s) => s.load)
   const [me, setMe] = useState<Device>()
   const [prefs, setPrefs] = useState<SyncPrefs>({})
@@ -111,23 +115,23 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
     void refresh()
   }, [])
   const turn = prefs.turn?.urls ? { turn: prefs.turn } : {}
-  const fail = (e: unknown) => setStep({ kind: 'error', text: (e as Error).message || 'Sync failed' })
+  const fail = (e: unknown) => setStep({ kind: 'error', text: (e as Error).message || tx('Sync failed') })
 
   /** Run the sync conversation on an open channel. */
   async function talk(ch: Channel, starts: boolean) {
     channel.current = ch
     if (starts && remember) setPrefs(await saveSyncPrefs(appDb, plan))
-    setStep({ kind: 'running', label: 'Connected', have: 0, total: 0 })
+    setStep({ kind: 'running', label: tx('Connected'), have: 0, total: 0 })
     try {
       const res = await runSync(appDb, ch, me!, starts ? { starts: true, plan } : { starts: false }, {
-        onHello: (other, skew) => setWarn(Math.abs(skew) > CLOCK_WARN_SECONDS ? `The clocks of this device and ${other.deviceName} differ by ${Math.abs(skew)} seconds. Merging picks the newest edit by time, so set both clocks right first.` : ''),
+        onHello: (other, skew) => setWarn(Math.abs(skew) > CLOCK_WARN_SECONDS ? tx('The clocks of this device and {{name}} differ by {{n}} seconds. Merging picks the newest edit by time, so set both clocks right first.', { name: other.deviceName, n: Math.abs(skew) }) : ''),
         confirmPlan: (p, other) => new Promise((resolve) => setAsk({ kind: 'plan', plan: p, other, resolve })),
         confirmChanges: (summary) => new Promise((resolve) => setAsk({ kind: 'changes', summary, resolve })),
         onProgress: (label, have, total) => setStep({ kind: 'running', label, have, total }),
       })
       if (res.other) await recordSync(appDb, res.other, new Date().toISOString())
       if (res.applied) await load()
-      setStep({ kind: 'done', text: res.applied ? `Synced with ${res.other?.deviceName}.` : res.summary ? 'Nothing was changed on this device.' : `Sent to ${res.other?.deviceName}.` })
+      setStep({ kind: 'done', text: res.applied ? tx('Synced with {{name}}.', { name: res.other?.deviceName ?? '' }) : res.summary ? tx('Nothing was changed on this device.') : tx('Sent to {{name}}.', { name: res.other?.deviceName ?? '' }) })
       setDevices(await getKnownDevices(appDb))
     } catch (e) {
       fail(e)
@@ -140,7 +144,7 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
   const host = async () => {
     try {
       const code = newPairCode()
-      setStep({ kind: 'connecting', text: 'Getting a pairing code…' })
+      setStep({ kind: 'connecting', text: tx('Getting a pairing code…') })
       const h = await hostByCode(code, turn)
       setStep({ kind: 'hosting', code, qr: (await qrOf(pairLink(appBase(), code))) ?? '', cancel: h.cancel })
       void talk(await h.channel, false)
@@ -150,18 +154,18 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
   }
   const join = async (raw: string, device?: KnownDevice) => {
     const code = parsePairCode(raw)
-    if (!code) return setStep({ kind: 'error', text: 'That is not a pairing code; it looks like K7P-42QX.' })
+    if (!code) return setStep({ kind: 'error', text: tx('That is not a pairing code; it looks like K7P-42QX.') })
     try {
-      setStep({ kind: 'connecting', text: device ? `Connecting to ${device.name}…` : `Connecting to ${formatPairCode(code)}…` })
+      setStep({ kind: 'connecting', text: device ? tx('Connecting to {{name}}…', { name: device.name }) : tx('Connecting to {{name}}…', { name: formatPairCode(code) }) })
       void talk(await joinByCode(code, turn), true)
     } catch (e) {
-      if (device && /No device is waiting/.test((e as Error).message)) setStep({ kind: 'error', text: `${device.name} isn't reachable right now. Open ⇄ Sync on it (both apps open), then try again.` })
+      if (device && /No device is waiting/.test((e as Error).message)) setStep({ kind: 'error', text: tx("{{name}} isn't reachable right now. Open ⇄ Sync on it (both apps open), then try again.", { name: device.name }) })
       else fail(e)
     }
   }
   const startPrivate = async () => {
     try {
-      setStep({ kind: 'connecting', text: 'Making the connection text…' })
+      setStep({ kind: 'connecting', text: tx('Making the connection text…') })
       const o = await privateOffer(turn)
       setStep({ kind: 'offer', text: o.offer, qr: await qrOf(o.offer), accept: o.accept, cancel: o.cancel })
     } catch (e) {
@@ -180,7 +184,7 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
   const finishPrivate = async (answer: string) => {
     if (step.kind !== 'offer') return
     try {
-      setStep({ kind: 'connecting', text: 'Connecting…' })
+      setStep({ kind: 'connecting', text: tx('Connecting…') })
       void talk(await step.accept(answer), true)
     } catch (e) {
       fail(e)
@@ -245,40 +249,40 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
   return (
     <div className="grid max-w-3xl gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-display text-2xl text-accent" data-tour="sync-title">Sync</h1>
-        {me && <span className="text-sm text-muted">This device: <b className="text-fg">{me.deviceName}</b>{onOpenSettings && <> · <button className="underline" onClick={onOpenSettings}>Sync settings</button></>}</span>}
+        <h1 className="font-display text-2xl text-accent" data-tour="sync-title">{tx('Sync')}</h1>
+        {me && <span className="text-sm text-muted">{tx('This device:')} <b className="text-fg">{me.deviceName}</b>{onOpenSettings && <> · <button className="underline" onClick={onOpenSettings}>{tx('Sync settings')}</button></>}</span>}
       </header>
-      {listening && <p className="text-xs text-ok" role="note">📡 Devices you synced with before can sync with this one while this page is open.</p>}
-      <p className="text-sm text-muted">Sync with another device running MiniTracker: phone, tablet or PC. The data goes directly between the two devices, encrypted; only the short pairing messages pass through a relay. Both apps must be open.</p>
+      {listening && <p className="text-xs text-ok" role="note">{tx('📡 Devices you synced with before can sync with this one while this page is open.')}</p>}
+      <p className="text-sm text-muted">{tx('Sync with another device running MiniTracker: phone, tablet or PC. The data goes directly between the two devices, encrypted; only the short pairing messages pass through a relay. Both apps must be open.')}</p>
 
       {!busy && (
-        <section className="panel grid gap-3 p-4" aria-label="Start a sync">
+        <section className="panel grid gap-3 p-4" aria-label={tx('Start a sync')}>
           <PlanForm plan={plan} setPlan={setPlan} remember={remember} setRemember={setRemember} />
-          <p className="text-xs text-muted">These choices apply on the device that enters the code; the other device is asked to accept them.</p>
+          <p className="text-xs text-muted">{tx('These choices apply on the device that enters the code; the other device is asked to accept them.')}</p>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="grid content-start gap-2 rounded border border-line p-3">
-              <h2 className="font-semibold">Show a code here</h2>
-              <button className="btn btn-primary w-fit" onClick={() => void host()}>📱 Show a pairing code</button>
-              <p className="text-xs text-muted">Shows a code, QR and link; enter or scan it on the other device.</p>
+              <h2 className="font-semibold">{tx('Show a code here')}</h2>
+              <button className="btn btn-primary w-fit" onClick={() => void host()}>{tx('📱 Show a pairing code')}</button>
+              <p className="text-xs text-muted">{tx('Shows a code, QR and link; enter or scan it on the other device.')}</p>
             </div>
             <form className="grid content-start gap-2 rounded border border-line p-3" onSubmit={(e) => { e.preventDefault(); void join(typed) }}>
-              <h2 className="font-semibold">Enter a code</h2>
+              <h2 className="font-semibold">{tx('Enter a code')}</h2>
               <div className="flex gap-2">
-                <input className="input w-32 font-mono uppercase" aria-label="Pairing code" placeholder="K7P-42QX" value={typed} onChange={(e) => setTyped(e.target.value)} />
-                <button className="btn btn-primary">Connect</button>
+                <input className="input w-32 font-mono uppercase" aria-label={tx('Pairing code')} placeholder="K7P-42QX" value={typed} onChange={(e) => setTyped(e.target.value)} />
+                <button className="btn btn-primary">{tx('Connect')}</button>
                 <button type="button" className="btn" onClick={() => setScan('code')}>📷</button>
               </div>
-              <p className="text-xs text-muted">Or scan the other device's QR with the phone camera.</p>
+              <p className="text-xs text-muted">{tx("Or scan the other device's QR with the phone camera.")}</p>
             </form>
           </div>
           <details className="text-sm">
-            <summary className="cursor-pointer">Private mode (no relay)</summary>
+            <summary className="cursor-pointer">{tx('Private mode (no relay)')}</summary>
             <div className="mt-2 grid gap-2">
-              <p className="text-xs text-muted">Nothing goes through a relay: copy (or scan) a connection text from one device to the other, then the reply back.</p>
-              <button className="btn w-fit" onClick={() => void startPrivate()}>Start here</button>
+              <p className="text-xs text-muted">{tx('Nothing goes through a relay: copy (or scan) a connection text from one device to the other, then the reply back.')}</p>
+              <button className="btn w-fit" onClick={() => void startPrivate()}>{tx('Start here')}</button>
               <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); void answerPrivate(pasted) }}>
-                <textarea className="input flex-1 font-mono text-xs" rows={2} aria-label="Connection text from the other device" placeholder="…or paste the other device's connection text" value={pasted} onChange={(e) => setPasted(e.target.value)} />
-                <button className="btn" disabled={!pasted.trim()}>Reply</button>
+                <textarea className="input flex-1 font-mono text-xs" rows={2} aria-label={tx('Connection text from the other device')} placeholder={tx("…or paste the other device's connection text")} value={pasted} onChange={(e) => setPasted(e.target.value)} />
+                <button className="btn" disabled={!pasted.trim()}>{tx('Reply')}</button>
                 <button type="button" className="btn" onClick={() => setScan('offer')}>📷</button>
               </form>
             </div>
@@ -288,81 +292,81 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
 
       {step.kind === 'connecting' && <p className="panel p-3 text-sm" role="status">{step.text}</p>}
       {step.kind === 'hosting' && (
-        <section className="panel grid justify-items-center gap-2 p-4 text-center" aria-label="Pairing code">
-          <p className="text-sm">On the other device, open Sync and enter</p>
+        <section className="panel grid justify-items-center gap-2 p-4 text-center" aria-label={tx('Pairing code')}>
+          <p className="text-sm">{tx('On the other device, open Sync and enter')}</p>
           <p className="font-mono text-4xl font-bold tracking-widest">{formatPairCode(step.code)}</p>
           {step.qr && <div className="w-48 rounded bg-white p-2" dangerouslySetInnerHTML={{ __html: step.qr }} />}
-          <p className="text-xs text-muted">or scan the QR with its camera, or open <span className="select-all break-all">{pairLink(appBase(), step.code)}</span></p>
-          <p className="text-sm text-muted">Waiting for the other device…</p>
+          <p className="text-xs text-muted">{tx('or scan the QR with its camera, or open')} <span className="select-all break-all">{pairLink(appBase(), step.code)}</span></p>
+          <p className="text-sm text-muted">{tx('Waiting for the other device…')}</p>
         </section>
       )}
       {(step.kind === 'offer' || step.kind === 'answer') && (
-        <section className="panel grid gap-2 p-4" aria-label="Connection text">
-          <p className="text-sm">{step.kind === 'offer' ? '1. On the other device open Sync › Private mode and paste (or scan) this:' : 'Now paste (or scan) this reply on the first device:'}</p>
+        <section className="panel grid gap-2 p-4" aria-label={tx('Connection text')}>
+          <p className="text-sm">{step.kind === 'offer' ? tx('1. On the other device open Sync › Private mode and paste (or scan) this:') : tx('Now paste (or scan) this reply on the first device:')}</p>
           {step.qr && <div className="w-56 rounded bg-white p-2" dangerouslySetInnerHTML={{ __html: step.qr }} />}
-          <textarea className="input font-mono text-xs" rows={3} readOnly aria-label="This device's connection text" value={step.text} onFocus={(e) => e.target.select()} />
-          <button className="btn w-fit" onClick={() => void navigator.clipboard?.writeText(step.text)}>📋 Copy</button>
+          <textarea className="input font-mono text-xs" rows={3} readOnly aria-label={tx("This device's connection text")} value={step.text} onFocus={(e) => e.target.select()} />
+          <button className="btn w-fit" onClick={() => void navigator.clipboard?.writeText(step.text)}>{tx('📋 Copy')}</button>
           {step.kind === 'offer' && (
             <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); void finishPrivate(pasted) }}>
-              <textarea className="input flex-1 font-mono text-xs" rows={2} aria-label="Reply from the other device" placeholder="2. Paste the reply here" value={pasted} onChange={(e) => setPasted(e.target.value)} />
-              <button className="btn btn-primary" disabled={!pasted.trim()}>Connect</button>
+              <textarea className="input flex-1 font-mono text-xs" rows={2} aria-label={tx('Reply from the other device')} placeholder={tx('2. Paste the reply here')} value={pasted} onChange={(e) => setPasted(e.target.value)} />
+              <button className="btn btn-primary" disabled={!pasted.trim()}>{tx('Connect')}</button>
               <button type="button" className="btn" onClick={() => setScan('answer')}>📷</button>
             </form>
           )}
         </section>
       )}
       {step.kind === 'running' && (
-        <section className="panel grid gap-2 p-4" aria-label="Sync progress">
+        <section className="panel grid gap-2 p-4" aria-label={tx('Sync progress')}>
           <p className="text-sm" role="status">{step.label}{step.total ? ` ${step.have}/${step.total}` : '…'}</p>
-          <progress className="w-full" max={step.total || 1} value={step.total ? step.have : undefined} aria-label="Progress" />
+          <progress className="w-full" max={step.total || 1} value={step.total ? step.have : undefined} aria-label={tx('Progress')} />
         </section>
       )}
       {warn && busy && <p className="panel p-3 text-sm text-danger" role="alert">⚠ {warn}</p>}
-      {busy && <button className="btn w-fit" onClick={cancel}>✕ Cancel</button>}
+      {busy && <button className="btn w-fit" onClick={cancel}>{tx('✕ Cancel')}</button>}
       {step.kind === 'done' && <p className="panel p-3 text-sm text-ok" role="status">✓ {step.text}</p>}
       {step.kind === 'error' && (
         <div className="panel grid gap-1 p-3 text-sm" role="alert">
           <p className="text-danger">✕ {step.text}</p>
           {step.text === NO_DIRECT ? (
             <div className="flex flex-wrap gap-2">
-              {onOpenSettings && <button className="btn" onClick={onOpenSettings}>TURN server settings</button>}
-              <button className="btn" onClick={() => { setStep({ kind: 'idle' }); document.querySelector('[aria-label="QR carousel"]')?.scrollIntoView?.({ behavior: 'smooth' }) }}>Use the QR carousel</button>
-              <button className="btn" onClick={() => { setStep({ kind: 'idle' }); document.querySelector('[aria-label="Sync file"]')?.scrollIntoView?.({ behavior: 'smooth' }) }}>Use a sync file</button>
+              {onOpenSettings && <button className="btn" onClick={onOpenSettings}>{tx('TURN server settings')}</button>}
+              <button className="btn" onClick={() => { setStep({ kind: 'idle' }); document.querySelector('[data-sync="qr"]')?.scrollIntoView?.({ behavior: 'smooth' }) }}>{tx('Use the QR carousel')}</button>
+              <button className="btn" onClick={() => { setStep({ kind: 'idle' }); document.querySelector('[data-sync="file"]')?.scrollIntoView?.({ behavior: 'smooth' }) }}>{tx('Use a sync file')}</button>
             </div>
-          ) : <p className="text-xs text-muted">If the devices can't reach each other (different networks), add a TURN server in Settings › Sync, or use the QR carousel or a sync file below.</p>}
+          ) : <p className="text-xs text-muted">{tx("If the devices can't reach each other (different networks), add a TURN server in Settings › Sync, or use the QR carousel or a sync file below.")}</p>}
         </div>
       )}
 
       {ask?.kind === 'plan' && (
-        <Dialog title="Accept this sync?" onClose={() => { ask.resolve(false); setAsk(undefined) }}>
+        <Dialog title={tx('Accept this sync?')} onClose={() => { ask.resolve(false); setAsk(undefined) }}>
           <div className="grid gap-2 text-sm">
-            <p><b>{ask.other.deviceName}</b> wants to sync:</p>
+            <p><b>{ask.other.deviceName}</b> {tx('wants to sync:')}</p>
             <ul className="list-disc pl-5">
-              <li>{ask.plan.direction === 'both' ? 'Both ways' : ask.plan.direction === 'receive' ? 'This device receives' : 'This device sends'}</li>
-              <li>{ask.plan.mode === 'merge' ? 'Merge, newest wins' : 'Overwrite the receiver'}{ask.plan.mode === 'merge' && ask.plan.applyDeletions ? ', deletions applied' : ''}</li>
-              <li>{ask.plan.photos ? 'With photos' : 'Without photos'}</li>
+              <li>{ask.plan.direction === 'both' ? tx('Both ways') : ask.plan.direction === 'receive' ? tx('This device receives') : tx('This device sends')}</li>
+              <li>{ask.plan.mode === 'merge' ? (ask.plan.applyDeletions ? tx('Merge, newest wins, deletions applied') : tx('Merge, newest wins')) : tx('Overwrite the receiver')}</li>
+              <li>{ask.plan.photos ? tx('With photos') : tx('Without photos')}</li>
             </ul>
-            <p className="text-xs text-muted">You'll see what changes here before anything is saved.</p>
+            <p className="text-xs text-muted">{tx("You'll see what changes here before anything is saved.")}</p>
             <div className="flex gap-2">
-              <button className="btn btn-primary" onClick={() => { ask.resolve(true); setAsk(undefined) }}>Accept</button>
-              <button className="btn" onClick={() => { ask.resolve(false); setAsk(undefined) }}>Decline</button>
+              <button className="btn btn-primary" onClick={() => { ask.resolve(true); setAsk(undefined) }}>{tx('Accept')}</button>
+              <button className="btn" onClick={() => { ask.resolve(false); setAsk(undefined) }}>{tx('Decline')}</button>
             </div>
           </div>
         </Dialog>
       )}
       {ask?.kind === 'changes' && (
-        <Dialog title="Apply these changes?" onClose={() => { ask.resolve(false); setAsk(undefined) }}>
+        <Dialog title={tx('Apply these changes?')} onClose={() => { ask.resolve(false); setAsk(undefined) }}>
           <div className="grid gap-3 text-sm">
             <ChangesTable summary={ask.summary} />
             <div className="flex gap-2">
-              <button className="btn btn-primary" onClick={() => { ask.resolve(true); setAsk(undefined) }}>Apply</button>
-              <button className="btn" onClick={() => { ask.resolve(false); setAsk(undefined) }}>Don't change anything</button>
+              <button className="btn btn-primary" onClick={() => { ask.resolve(true); setAsk(undefined) }}>{tx('Apply')}</button>
+              <button className="btn" onClick={() => { ask.resolve(false); setAsk(undefined) }}>{tx("Don't change anything")}</button>
             </div>
           </div>
         </Dialog>
       )}
 
-      {scan && <ScanDialog title={scan === 'code' ? 'Scan the pairing QR' : 'Scan the connection text'} onClose={() => setScan(undefined)} onText={(t) => {
+      {scan && <ScanDialog title={scan === 'code' ? tx('Scan the pairing QR') : tx('Scan the connection text')} onClose={() => setScan(undefined)} onText={(t) => {
         const which = scan
         setScan(undefined)
         if (which === 'code') void join(t)
@@ -371,35 +375,35 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
       }} />}
 
       {me && (
-        <section className="panel grid gap-2 p-4" aria-label="QR carousel">
-          <h2 className="font-display text-lg">QR carousel (no network)</h2>
-          <p className="text-sm text-muted">No Wi-Fi, no relay: one screen shows a loop of QR codes and the other device reads them with its camera. Data only, no photos. For both ways, do it once in each direction.</p>
+        <section className="panel grid gap-2 p-4" data-sync="qr" aria-label={tx('QR carousel')}>
+          <h2 className="font-display text-lg">{tx('QR carousel (no network)')}</h2>
+          <p className="text-sm text-muted">{tx('No Wi-Fi, no relay: one screen shows a loop of QR codes and the other device reads them with its camera. Data only, no photos. For both ways, do it once in each direction.')}</p>
           <div className="flex flex-wrap gap-2">
-            <button className="btn" disabled={busy} onClick={() => setCarousel('send')}>▶ Show QR carousel</button>
-            <button className="btn" disabled={busy} onClick={() => setCarousel('read')}>📷 Read QR carousel</button>
+            <button className="btn" disabled={busy} onClick={() => setCarousel('send')}>{tx('▶ Show QR carousel')}</button>
+            <button className="btn" disabled={busy} onClick={() => setCarousel('read')}>{tx('📷 Read QR carousel')}</button>
           </div>
           {carousel === 'send' && <QrSender me={me} onClose={() => setCarousel(undefined)} />}
           {carousel === 'read' && <QrReceiver onClose={() => setCarousel(undefined)} onFile={(f) => { setCarousel(undefined); setQrFile(f) }} />}
-          {qrFile && <ApplyFileDialog file={qrFile} mode={plan.direction === 'send' ? 'merge' : plan.mode} applyDeletions={plan.applyDeletions} onClose={() => setQrFile(undefined)} onApplied={async () => { setQrFile(undefined); setStep({ kind: 'done', text: `Applied the data from ${qrFile.device.deviceName}.` }); await load(); setDevices(await getKnownDevices(appDb)) }} />}
+          {qrFile && <ApplyFileDialog file={qrFile} mode={plan.direction === 'send' ? 'merge' : plan.mode} applyDeletions={plan.applyDeletions} onClose={() => setQrFile(undefined)} onApplied={async () => { setQrFile(undefined); setStep({ kind: 'done', text: tx('Applied the data from {{name}}.', { name: qrFile.device.deviceName }) }); await load(); setDevices(await getKnownDevices(appDb)) }} />}
         </section>
       )}
 
       {me && <SyncFileSection me={me} plan={plan} disabled={busy} onApplied={async () => { await load(); setDevices(await getKnownDevices(appDb)) }} />}
 
-      <section className="panel grid gap-2 p-4" aria-label="Devices">
-        <h2 className="font-display text-lg">Devices synced with</h2>
+      <section className="panel grid gap-2 p-4" aria-label={tx('Devices')}>
+        <h2 className="font-display text-lg">{tx('Devices synced with')}</h2>
         {devices.length ? (
           <ul className="grid gap-1 text-sm">
             {devices.map((d) => (
               <li key={d.id} className="flex flex-wrap items-center gap-2">
                 <span>{d.name}</span>
-                <span className="text-xs text-muted">last sync {d.lastSync.slice(0, 10)}</span>
-                <button className="btn px-2 py-0.5 text-xs" disabled={busy} aria-label={`Sync now with ${d.name}`} onClick={() => void join(deviceCodeFor(d.id), d)}>⇄ Sync now</button>
-                {isStale(d, now) && <span className="text-xs text-danger">⚠ Not synced for over 90 days: deletions made since then may come back from it</span>}
+                <span className="text-xs text-muted">{tx('last sync {{date}}', { date: d.lastSync.slice(0, 10) })}</span>
+                <button className="btn px-2 py-0.5 text-xs" disabled={busy} aria-label={tx('Sync now with {{name}}', { name: d.name })} onClick={() => void join(deviceCodeFor(d.id), d)}>{tx('⇄ Sync now')}</button>
+                {isStale(d, now) && <span className="text-xs text-danger">{tx('⚠ Not synced for over 90 days: deletions made since then may come back from it')}</span>}
               </li>
             ))}
           </ul>
-        ) : <p className="text-sm text-muted">None yet.</p>}
+        ) : <p className="text-sm text-muted">{tx('None yet.')}</p>}
       </section>
     </div>
   )
@@ -407,6 +411,7 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
 
 /** Export a sync file, or open one from another device. */
 function SyncFileSection({ me, plan, disabled, onApplied }: { me: Device; plan: SyncPlan; disabled: boolean; onApplied: () => Promise<void> }) {
+  const tx = useTx()
   const [photos, setPhotos] = useState(false)
   const [msg, setMsg] = useState('')
   const [file, setFile] = useState<SyncFile>()
@@ -418,7 +423,7 @@ function SyncFileSection({ me, plan, disabled, onApplied }: { me: Device; plan: 
     a.href = URL.createObjectURL(new Blob([JSON.stringify(f)], { type: 'application/json' }))
     a.download = syncFileName(f)
     a.click()
-    setMsg(`Saved ${a.download}. Open it on the other device in Sync › Sync file.`)
+    setMsg(tx('Saved {{file}}. Open it on the other device in Sync › Sync file.', { file: a.download }))
   }
   const open = async (f: File) => {
     try {
@@ -429,40 +434,41 @@ function SyncFileSection({ me, plan, disabled, onApplied }: { me: Device; plan: 
     }
   }
   return (
-    <section className="panel grid gap-2 p-4" aria-label="Sync file">
-      <h2 className="font-display text-lg">Sync file</h2>
-      <p className="text-sm text-muted">For devices that aren't on at the same time: save a sync file to a shared folder (OneDrive, Google Drive), a USB stick or a chat, and open it on the other device.</p>
+    <section className="panel grid gap-2 p-4" data-sync="file" aria-label={tx('Sync file')}>
+      <h2 className="font-display text-lg">{tx('Sync file')}</h2>
+      <p className="text-sm text-muted">{tx("For devices that aren't on at the same time: save a sync file to a shared folder (OneDrive, Google Drive), a USB stick or a chat, and open it on the other device.")}</p>
       <div className="flex flex-wrap items-center gap-2">
-        <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={photos} onChange={(e) => setPhotos(e.target.checked)} /> With photos</label>
-        <button className="btn" disabled={disabled} onClick={() => void exportFile()}>⬇ Save sync file</button>
-        <label className="btn cursor-pointer">⬆ Open sync file<input type="file" accept=".json,application/json" className="hidden" aria-label="Open sync file" disabled={disabled} onChange={(e) => e.target.files?.[0] && void open(e.target.files[0])} /></label>
+        <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={photos} onChange={(e) => setPhotos(e.target.checked)} /> {tx('With photos')}</label>
+        <button className="btn" disabled={disabled} onClick={() => void exportFile()}>{tx('⬇ Save sync file')}</button>
+        <label className="btn cursor-pointer">{tx('⬆ Open sync file')}<input type="file" accept=".json,application/json" className="hidden" aria-label={tx('Open sync file')} disabled={disabled} onChange={(e) => e.target.files?.[0] && void open(e.target.files[0])} /></label>
       </div>
       {msg && <p className="text-sm" role="status">{msg}</p>}
-      {file && <ApplyFileDialog file={file} mode={mode} applyDeletions={plan.applyDeletions} onClose={() => setFile(undefined)} onApplied={async () => { setFile(undefined); setMsg(`Applied the sync file from ${file.device.deviceName}.`); await onApplied() }} />}
+      {file && <ApplyFileDialog file={file} mode={mode} applyDeletions={plan.applyDeletions} onClose={() => setFile(undefined)} onApplied={async () => { setFile(undefined); setMsg(tx('Applied the sync file from {{name}}.', { name: file.device.deviceName })); await onApplied() }} />}
     </section>
   )
 }
 
 /** Preview what a sync file (or QR carousel) changes here, then apply it. */
 export function ApplyFileDialog({ file, mode, applyDeletions, onClose, onApplied }: { file: SyncFile; mode: SyncPlan['mode']; applyDeletions: boolean; onClose: () => void; onApplied: () => Promise<void> }) {
+  const tx = useTx()
   const [preview, setPreview] = useState<Awaited<ReturnType<typeof previewSyncFile>>>()
   const [err, setErr] = useState('')
   useEffect(() => {
     previewSyncFile(appDb, file, { mode, applyDeletions }).then(setPreview, (e: Error) => setErr(e.message))
   }, [file, mode, applyDeletions])
   return (
-    <Dialog title="Apply the sync file?" onClose={onClose}>
+    <Dialog title={tx('Apply the sync file?')} onClose={onClose}>
       <div className="grid gap-3 text-sm">
-        <p>From <b>{file.device.deviceName}</b>, saved {file.createdAt.slice(0, 16).replace('T', ' ')} · {mode === 'merge' ? 'merge, newest wins' : 'overwrite this device'}{file.photos ? ' · with photos' : ''}</p>
-        {preview ? <ChangesTable summary={preview.result.summary} /> : !err && <p className="text-muted">Working out the changes…</p>}
+        <p>{tx('From')} <b>{file.device.deviceName}</b>, {tx('saved {{date}}', { date: file.createdAt.slice(0, 16).replace('T', ' ') })} · {mode === 'merge' ? tx('merge, newest wins') : tx('overwrite this device')}{file.photos ? ` · ${tx('with photos')}` : ''}</p>
+        {preview ? <ChangesTable summary={preview.result.summary} /> : !err && <p className="text-muted">{tx('Working out the changes…')}</p>}
         {err && <p className="text-danger" role="alert">{err}</p>}
         <div className="flex gap-2">
           <button className="btn btn-primary" disabled={!preview} onClick={async () => {
             await applySyncFile(appDb, file, preview!)
             await recordSync(appDb, file.device, new Date().toISOString())
             await onApplied()
-          }}>Apply</button>
-          <button className="btn" onClick={onClose}>Cancel</button>
+          }}>{tx('Apply')}</button>
+          <button className="btn" onClick={onClose}>{tx('Cancel')}</button>
         </div>
       </div>
     </Dialog>

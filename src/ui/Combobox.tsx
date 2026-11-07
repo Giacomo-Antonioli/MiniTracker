@@ -1,4 +1,5 @@
 import { useId, useRef, useState, type ReactNode } from 'react'
+import { useTx } from '../i18n'
 
 export interface ComboOption {
   value: string
@@ -26,6 +27,7 @@ interface Props {
 
 /** Type-to-search input with a list of suggestions (ARIA combobox pattern). Options are filtered by the caller. */
 export function Combobox({ label, text, onTextChange, options, onSelect, placeholder, footer, autoFocus, tour }: Props) {
+  const tx = useTx()
   const id = useId()
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(0)
@@ -89,7 +91,7 @@ export function Combobox({ label, text, onTextChange, options, onSelect, placeho
           id={`${id}-list`}
           ref={listRef}
           role="listbox"
-          aria-label={`${label} suggestions`}
+          aria-label={tx('{{label}} suggestions', { label })}
           className="panel absolute top-full z-10 mt-1 max-h-72 w-full overflow-y-auto py-1 shadow-xl"
         >
           {options.map((o, i) => (

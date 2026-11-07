@@ -4,11 +4,13 @@ import { boxStatus, isBarcode, isGamesWorkshop, lookupProduct, suggestDatasheets
 import { ownedModels } from '../../domain/collection/ownedUnit'
 import { isGone } from '../../domain/collection/pipeline'
 import { pathLabel, whereIs } from '../../domain/storage/storage'
+import { useTx } from '../../i18n'
 import { Dialog } from '../../ui/Dialog'
 import { ScanDialog } from '../storage/Labels'
 
 /** Teach the app a box: name and the units inside (datasheet + models). */
 function TeachForm({ code, start, onDone }: { code: string; start?: BoxMapping; onDone: () => void }) {
+  const tx = useTx()
   const { catalogue, saveBarcode } = useStore()
   const sheets = catalogue?.datasheets ?? []
   const [name, setName] = useState(start?.name ?? '')
@@ -40,7 +42,7 @@ function TeachForm({ code, start, onDone }: { code: string; start?: BoxMapping; 
   return (
     <form
       className="grid gap-2"
-      aria-label="Teach box"
+      aria-label={tx('Teach box')}
       onSubmit={(e) => {
         e.preventDefault()
         try {
@@ -51,35 +53,35 @@ function TeachForm({ code, start, onDone }: { code: string; start?: BoxMapping; 
       }}
     >
       <p className="text-sm text-muted">
-        {start ? 'Edit this box.' : `New barcode ${code}${isGamesWorkshop(code) ? ' (Games Workshop)' : ''}. Tell the app what is inside; next time it will know.`}
-        {looking ? ' Looking it up…' : found ? ` Open Products Facts says: “${found}”.` : start ? '' : ' Not found in Open Products Facts.'}
+        {start ? tx('Edit this box.') : isGamesWorkshop(code) ? tx('New barcode {{code}} (Games Workshop). Tell the app what is inside; next time it will know.', { code }) : tx('New barcode {{code}}. Tell the app what is inside; next time it will know.', { code })}
+        {looking ? ` ${tx('Looking it up…')}` : found ? ` ${tx('Open Products Facts says: “{{name}}”.', { name: found })}` : start ? '' : ` ${tx('Not found in Open Products Facts.')}`}
       </p>
       {!start && (
         <p className="flex flex-wrap gap-3 text-sm">
-          Look it up:
+          {tx('Look it up:')}
           <a className="text-accent underline" href={`https://www.upcitemdb.com/upc/${encodeURIComponent(code)}`} target="_blank" rel="noreferrer">🔎 UPCitemdb</a>
           <a className="text-accent underline" href={`https://www.barcodespider.com/${encodeURIComponent(code)}`} target="_blank" rel="noreferrer">🔎 Barcode Spider</a>
         </p>
       )}
-      <input className="input" aria-label="Box name" placeholder="Box name, e.g. Combat Patrol: T'au" value={name} onChange={(e) => setName(e.target.value)} />
+      <input className="input" aria-label={tx('Box name')} placeholder={tx("Box name, e.g. Combat Patrol: T'au")} value={name} onChange={(e) => setName(e.target.value)} />
       <ul className="grid gap-2">
         {rows.map((r, i) => (
           <li key={i} className="flex flex-wrap items-center gap-2">
             {sheets.length > 0 && (
-              <select className="input max-w-56" aria-label={`Datasheet ${i + 1}`} value={r.datasheetId ?? ''} onChange={(e) => pick(i, e.target.value)}>
-                <option value="">Datasheet…</option>
-                {suggestions.length > 0 && <optgroup label="Suggested">{suggestions.map((d) => <option key={'s' + d.id} value={d.id}>{d.name}</option>)}</optgroup>}
-                <optgroup label="All">{sheets.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</optgroup>
+              <select className="input max-w-56" aria-label={tx('Datasheet {{n}}', { n: i + 1 })} value={r.datasheetId ?? ''} onChange={(e) => pick(i, e.target.value)}>
+                <option value="">{tx('Datasheet…')}</option>
+                {suggestions.length > 0 && <optgroup label={tx('Suggested')}>{suggestions.map((d) => <option key={'s' + d.id} value={d.id}>{d.name}</option>)}</optgroup>}
+                <optgroup label={tx('All')}>{sheets.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</optgroup>
               </select>
             )}
-            <input className="input flex-1" aria-label={`Unit ${i + 1}`} placeholder="Unit name" value={r.name} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
-            <input className="input w-20" type="number" min={1} aria-label={`Models ${i + 1}`} value={r.models} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, models: Number(e.target.value) } : x)))} />
-            {rows.length > 1 && <button type="button" className="btn px-2 py-0.5" aria-label={`Remove unit ${i + 1}`} onClick={() => setRows(rows.filter((_, j) => j !== i))}>✕</button>}
+            <input className="input flex-1" aria-label={tx('Unit {{n}}', { n: i + 1 })} placeholder={tx('Unit name')} value={r.name} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
+            <input className="input w-20" type="number" min={1} aria-label={tx('Models {{n}}', { n: i + 1 })} value={r.models} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, models: Number(e.target.value) } : x)))} />
+            {rows.length > 1 && <button type="button" className="btn px-2 py-0.5" aria-label={tx('Remove unit {{n}}', { n: i + 1 })} onClick={() => setRows(rows.filter((_, j) => j !== i))}>✕</button>}
           </li>
         ))}
       </ul>
-      <button type="button" className="btn w-fit" onClick={() => setRows([...rows, { name: '', models: 1 }])}>+ Another unit in the box</button>
-      <button className="btn btn-primary w-fit">Save box</button>
+      <button type="button" className="btn w-fit" onClick={() => setRows([...rows, { name: '', models: 1 }])}>{tx('+ Another unit in the box')}</button>
+      <button className="btn btn-primary w-fit">{tx('Save box')}</button>
       {err && <p className="text-sm text-danger" role="alert">{err}</p>}
     </form>
   )
@@ -87,18 +89,19 @@ function TeachForm({ code, start, onDone }: { code: string; start?: BoxMapping; 
 
 /** What a scanned box means for you: owned models, where they are, and open shopping lines to tick off. */
 export function BoxDialog({ code, onClose, onOpenUnit }: { code: string; onClose: () => void; onOpenUnit?: (id: string) => void }) {
+  const tx = useTx()
   const { barcodes, units, shopItems, setBought, storage } = useStore()
   const m = barcodes.find((x) => x.code === code)
   const [editing, setEditing] = useState(false)
   const status = m ? boxStatus(m, units, shopItems, (u) => (isGone(u.lifecycle) ? 0 : ownedModels(u))) : []
   return (
-    <Dialog title={m ? m.name : 'Unknown box'} onClose={onClose} wide>
+    <Dialog title={m ? m.name : tx('Unknown box')} onClose={onClose} wide>
       {!m || editing ? <TeachForm code={code} start={m} onDone={() => setEditing(false)} /> : (
-        <div className="grid gap-3" aria-label="Box status">
+        <div className="grid gap-3" aria-label={tx('Box status')}>
           {status.map(({ content: c, owned, units: mine, shopping }, i) => (
             <section key={i} className="grid gap-1 rounded border border-line p-2">
-              <h3 className="font-semibold">{c.name} <span className="text-sm text-muted">· {c.models} in the box</span></h3>
-              <p className="text-sm">{owned ? `✅ You own ${owned} model${owned === 1 ? '' : 's'}` : '❌ You don’t own any yet'}</p>
+              <h3 className="font-semibold">{c.name} <span className="text-sm text-muted">· {tx('{{n}} in the box', { n: c.models })}</span></h3>
+              <p className="text-sm">{owned ? (owned === 1 ? tx('✅ You own 1 model') : tx('✅ You own {{n}} models', { n: owned })) : tx('❌ You don’t own any yet')}</p>
               {mine.length > 0 && (
                 <ul className="text-sm">
                   {mine.map((u) => {
@@ -109,13 +112,13 @@ export function BoxDialog({ code, onClose, onOpenUnit }: { code: string; onClose
               )}
               {shopping.map((it) => (
                 <div key={it.id} className="flex flex-wrap items-center gap-2 text-sm">
-                  🛒 On the shopping list: {it.qty} × {it.name}
-                  <button className="btn px-2 py-0.5" onClick={() => void setBought(it.id, true)}>✓ Mark bought</button>
+                  {tx('🛒 On the shopping list: {{qty}} × {{name}}', { qty: it.qty, name: it.name })}
+                  <button className="btn px-2 py-0.5" onClick={() => void setBought(it.id, true)}>{tx('✓ Mark bought')}</button>
                 </div>
               ))}
             </section>
           ))}
-          <button className="btn w-fit" onClick={() => setEditing(true)}>Edit box</button>
+          <button className="btn w-fit" onClick={() => setEditing(true)}>{tx('Edit box')}</button>
         </div>
       )}
     </Dialog>
@@ -124,18 +127,19 @@ export function BoxDialog({ code, onClose, onOpenUnit }: { code: string; onClose
 
 /** "Scan box" button: camera or typed barcode → box dialog. */
 export function ScanBoxButton({ onOpenUnit }: { onOpenUnit?: (id: string) => void }) {
+  const tx = useTx()
   const [scanning, setScanning] = useState(false)
   const [code, setCode] = useState<string>()
   const [err, setErr] = useState('')
   return (
     <>
-      <button className="btn" data-tour="scan-box" onClick={() => setScanning(true)}>📷 Scan box</button>
+      <button className="btn" data-tour="scan-box" onClick={() => setScanning(true)}>{tx('📷 Scan box')}</button>
       {scanning && (
         <ScanDialog
-          title="Scan a box barcode"
+          title={tx('Scan a box barcode')}
           onClose={() => setScanning(false)}
           onText={(t) => {
-            if (!isBarcode(t)) return setErr(`"${t}" is not a box barcode.`)
+            if (!isBarcode(t)) return setErr(tx('“{{code}}” is not a box barcode.', { code: t }))
             setErr('')
             setScanning(false)
             setCode(t)

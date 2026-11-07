@@ -5,6 +5,7 @@ import {
   elapsedMs, formatClock, formatMinutes, minutesByFaction, minutesByStage, minutesByUnit, minutesPer, minutesThisWeek, newTimer,
   pauseTimer, resumeTimer, totalMinutes, validateSession, type PaintSession, type PaintTimer, type TimerTarget,
 } from '../../domain/paintTime/paintTime'
+import { useTx, txr } from '../../i18n'
 import { HBars, MonthBars } from '../stats/charts'
 
 /** Re-renders every second while `on`, for running clocks. */
@@ -26,10 +27,10 @@ export function useLabels() {
     const group = (unitId: string, groupId: string) => {
       const u = unit.get(unitId)
       const g = u?.groups.find((x) => x.id === groupId)
-      if (!u) return 'Deleted unit'
+      if (!u) return txr('Deleted unit')
       return u.groups.length > 1 && g ? `${u.customName} (${g.count}× ${stage(g.status)})` : u.customName
     }
-    return { stage, group, unitName: (id: string) => unit.get(id)?.customName ?? 'Deleted unit' }
+    return { stage, group, unitName: (id: string) => unit.get(id)?.customName ?? txr('Deleted unit') }
   }, [units, pipeline])
 }
 
@@ -43,9 +44,10 @@ function groupOptions(units: OwnedUnit[]) {
 
 export function StageSelect({ value, onChange, label }: { value?: string; onChange: (v?: string) => void; label: string }) {
   const { pipeline } = useStore()
+  const tx = useTx()
   return (
     <select className="input" aria-label={label} value={value ?? ''} onChange={(e) => onChange(e.target.value || undefined)}>
-      <option value="">No stage</option>
+      <option value="">{tx('No stage')}</option>
       {pipeline.stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
     </select>
   )
@@ -53,6 +55,7 @@ export function StageSelect({ value, onChange, label }: { value?: string; onChan
 
 /** Picks model groups (several for batch painting) and starts a timer. */
 function StartTimer({ onDone }: { onDone: () => void }) {
+  const tx = useTx()
   const { units, saveTimer } = useStore()
   const { stage } = useLabels()
   const [q, setQ] = useState('')
@@ -66,13 +69,13 @@ function StartTimer({ onDone }: { onDone: () => void }) {
   return (
     <form
       className="grid gap-2 rounded border border-line p-3"
-      aria-label="Start timer"
+      aria-label={tx('Start timer')}
       onSubmit={(e) => {
         e.preventDefault()
         void saveTimer(newTimer(picked, ctx(), st, note.trim())).then(onDone)
       }}
     >
-      <input className="input" placeholder="Search units…" aria-label="Search units" value={q} onChange={(e) => setQ(e.target.value)} />
+      <input className="input" placeholder={tx('Search units…')} aria-label={tx('Search units')} value={q} onChange={(e) => setQ(e.target.value)} />
       <ul className="grid max-h-48 gap-1 overflow-auto text-sm">
         {opts.map(({ unit: u, group: g }) => (
           <li key={g.id}>
@@ -82,16 +85,16 @@ function StartTimer({ onDone }: { onDone: () => void }) {
             </label>
           </li>
         ))}
-        {!opts.length && <li className="text-muted">No units found</li>}
+        {!opts.length && <li className="text-muted">{tx('No units found')}</li>}
       </ul>
-      {picked.length > 1 && <p className="text-xs text-muted">Batch: the time is split by the number of minis in each group.</p>}
+      {picked.length > 1 && <p className="text-xs text-muted">{tx('Batch: the time is split by the number of minis in each group.')}</p>}
       <div className="flex flex-wrap gap-2">
-        <StageSelect label="Timer stage" value={st} onChange={setSt} />
-        <input className="input flex-1" placeholder="Note" aria-label="Timer note" value={note} onChange={(e) => setNote(e.target.value)} />
+        <StageSelect label={tx('Timer stage')} value={st} onChange={setSt} />
+        <input className="input flex-1" placeholder={tx('Note')} aria-label={tx('Timer note')} value={note} onChange={(e) => setNote(e.target.value)} />
       </div>
       <div className="flex gap-2">
-        <button className="btn btn-primary" disabled={!picked.length}>▶ Start</button>
-        <button type="button" className="btn" onClick={onDone}>Cancel</button>
+        <button className="btn btn-primary" disabled={!picked.length}>{tx('▶ Start')}</button>
+        <button type="button" className="btn" onClick={onDone}>{tx('Cancel')}</button>
       </div>
     </form>
   )
@@ -100,25 +103,26 @@ function StartTimer({ onDone }: { onDone: () => void }) {
 export function TimerRow({ t, now, onPaused }: { t: PaintTimer; now: string; onPaused?: () => void }) {
   const { saveTimer, deleteTimer, stopTimer, openCompanion, companion } = useStore()
   const { group, stage } = useLabels()
+  const tx = useTx()
   const running = !!t.runningSince
   const minis = t.targets.reduce((a, x) => a + x.count, 0)
   return (
-    <li className="grid gap-1 rounded border border-line p-2" aria-label="Timer">
+    <li className="grid gap-1 rounded border border-line p-2" aria-label={tx('Timer')}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className={`font-mono text-xl ${running ? 'text-accent' : 'text-muted'}`}>{formatClock(elapsedMs(t, now))}{running ? '' : ' ⏸'}</span>
         <div className="flex gap-1">
           {running
-            ? <button className="btn" onClick={() => void saveTimer(pauseTimer(t, new Date().toISOString())).then(onPaused)}>⏸ Pause</button>
-            : <button className="btn" onClick={() => void saveTimer(resumeTimer(t, new Date().toISOString()))}>▶ Resume</button>}
-          <button className="btn btn-primary" onClick={() => void stopTimer(t.id)}>■ Stop</button>
-          {!companion && <button className="btn" title="Painter companion" aria-label="Open painter companion" onClick={() => openCompanion('paint', t.targets[0].unitId, t.id)}>🎨</button>}
-          {!companion && <button className="btn" title="Builder companion" aria-label="Open builder companion" onClick={() => openCompanion('build', t.targets[0].unitId, t.id)}>🔨</button>}
-          <button className="btn" aria-label="Discard timer" onClick={() => confirm('Discard this timer without logging its time?') && void deleteTimer(t.id)}>✕</button>
+            ? <button className="btn" onClick={() => void saveTimer(pauseTimer(t, new Date().toISOString())).then(onPaused)}>{tx('⏸ Pause')}</button>
+            : <button className="btn" onClick={() => void saveTimer(resumeTimer(t, new Date().toISOString()))}>{tx('▶ Resume')}</button>}
+          <button className="btn btn-primary" onClick={() => void stopTimer(t.id)}>{tx('■ Stop')}</button>
+          {!companion && <button className="btn" title={tx('Painter companion')} aria-label={tx('Open painter companion')} onClick={() => openCompanion('paint', t.targets[0].unitId, t.id)}>🎨</button>}
+          {!companion && <button className="btn" title={tx('Builder companion')} aria-label={tx('Open builder companion')} onClick={() => openCompanion('build', t.targets[0].unitId, t.id)}>🔨</button>}
+          <button className="btn" aria-label={tx('Discard timer')} onClick={() => confirm(tx('Discard this timer without logging its time?')) && void deleteTimer(t.id)}>✕</button>
         </div>
       </div>
       <span className="text-sm">
         {t.targets.map((x) => group(x.unitId, x.groupId)).join(', ')}
-        <span className="text-muted">{t.targets.length > 1 ? ` · ${minis} minis` : ''}{t.stage ? ` · ${stage(t.stage)}` : ''}{t.note ? ` · ${t.note}` : ''}</span>
+        <span className="text-muted">{t.targets.length > 1 ? ` · ${tx('{{n}} minis', { n: minis })}` : ''}{t.stage ? ` · ${stage(t.stage)}` : ''}{t.note ? ` · ${t.note}` : ''}</span>
       </span>
     </li>
   )
@@ -126,14 +130,15 @@ export function TimerRow({ t, now, onPaused }: { t: PaintTimer; now: string; onP
 
 /** Running and paused timers plus this week's total; used by the Home card. */
 export function TimerPanel() {
+  const tx = useTx()
   const { paintTimers, paintSessions } = useStore()
   const [starting, setStarting] = useState(false)
   const now = useTick(paintTimers.some((t) => t.runningSince))
   return (
     <div className="grid gap-2">
       {paintTimers.length > 0 && <ul className="grid gap-2">{paintTimers.map((t) => <TimerRow key={t.id} t={t} now={now} />)}</ul>}
-      {starting ? <StartTimer onDone={() => setStarting(false)} /> : <button className="btn justify-self-start" onClick={() => setStarting(true)}>▶ Start timer</button>}
-      <p className="text-sm text-muted">This week: {formatMinutes(minutesThisWeek(paintSessions, now))}</p>
+      {starting ? <StartTimer onDone={() => setStarting(false)} /> : <button className="btn justify-self-start" onClick={() => setStarting(true)}>{tx('▶ Start timer')}</button>}
+      <p className="text-sm text-muted">{tx('This week: {{time}}', { time: formatMinutes(minutesThisWeek(paintSessions, now)) })}</p>
     </div>
   )
 }
@@ -141,6 +146,7 @@ export function TimerPanel() {
 const today = () => new Date().toISOString().slice(0, 10)
 
 function SessionForm({ start, onDone }: { start?: PaintSession; onDone: () => void }) {
+  const tx = useTx()
   const { units, saveSession } = useStore()
   const { stage } = useLabels()
   const [s, setS] = useState<PaintSession>(start ?? { id: crypto.randomUUID(), unitId: '', groupId: '', minutes: 30, date: today(), note: '' })
@@ -149,7 +155,7 @@ function SessionForm({ start, onDone }: { start?: PaintSession; onDone: () => vo
   return (
     <form
       className="flex flex-wrap items-end gap-2 rounded border border-line p-3"
-      aria-label={start ? 'Edit session' : 'Add session'}
+      aria-label={start ? tx('Edit session') : tx('Add session')}
       onSubmit={(e) => {
         e.preventDefault()
         try {
@@ -160,17 +166,17 @@ function SessionForm({ start, onDone }: { start?: PaintSession; onDone: () => vo
         }
       }}
     >
-      <select className="input" aria-label="Model group" value={s.groupId ? `${s.unitId}/${s.groupId}` : ''} onChange={(e) => { const [unitId, groupId] = e.target.value.split('/'); setS({ ...s, unitId: unitId ?? '', groupId: groupId ?? '' }) }}>
-        <option value="">Model group…</option>
-        {start && !opts.some((o) => o.group.id === start.groupId) && <option value={`${start.unitId}/${start.groupId}`}>(current)</option>}
+      <select className="input" aria-label={tx('Model group')} value={s.groupId ? `${s.unitId}/${s.groupId}` : ''} onChange={(e) => { const [unitId, groupId] = e.target.value.split('/'); setS({ ...s, unitId: unitId ?? '', groupId: groupId ?? '' }) }}>
+        <option value="">{tx('Model group…')}</option>
+        {start && !opts.some((o) => o.group.id === start.groupId) && <option value={`${start.unitId}/${start.groupId}`}>{tx('(current)')}</option>}
         {opts.map(({ unit: u, group: g }) => <option key={g.id} value={`${u.id}/${g.id}`}>{u.customName} · {g.count}× {stage(g.status)}</option>)}
       </select>
-      <input className="input w-24" type="number" min={1} aria-label="Minutes" value={s.minutes} onChange={(e) => setS({ ...s, minutes: Number(e.target.value) })} />
-      <input className="input" type="date" aria-label="Date" value={s.date} onChange={(e) => setS({ ...s, date: e.target.value })} />
-      <StageSelect label="Session stage" value={s.stage} onChange={(v) => setS({ ...s, stage: v })} />
-      <input className="input flex-1" placeholder="Note" aria-label="Session note" value={s.note} onChange={(e) => setS({ ...s, note: e.target.value })} />
-      <button className="btn btn-primary">Save</button>
-      <button type="button" className="btn" onClick={onDone}>Cancel</button>
+      <input className="input w-24" type="number" min={1} aria-label={tx('Minutes')} value={s.minutes} onChange={(e) => setS({ ...s, minutes: Number(e.target.value) })} />
+      <input className="input" type="date" aria-label={tx('Date')} value={s.date} onChange={(e) => setS({ ...s, date: e.target.value })} />
+      <StageSelect label={tx('Session stage')} value={s.stage} onChange={(v) => setS({ ...s, stage: v })} />
+      <input className="input flex-1" placeholder={tx('Note')} aria-label={tx('Session note')} value={s.note} onChange={(e) => setS({ ...s, note: e.target.value })} />
+      <button className="btn btn-primary">{tx('Save')}</button>
+      <button type="button" className="btn" onClick={onDone}>{tx('Cancel')}</button>
       {err && <p className="w-full text-sm text-danger" role="alert">{err}</p>}
     </form>
   )
@@ -178,6 +184,7 @@ function SessionForm({ start, onDone }: { start?: PaintSession; onDone: () => vo
 
 /** Stats ▸ Painting time: totals, charts and the editable session log. */
 export function PaintTimeSection({ months, keyOf = (d) => d.slice(0, 7), faction }: { months: string[]; keyOf?: (date: string) => string; faction?: string }) {
+  const tx = useTx()
   const { paintSessions: allSessions, units, deleteSession } = useStore()
   const factionOf = new Map(units.map((u) => [u.id, u.factionName]))
   const paintSessions = faction ? allSessions.filter((s) => factionOf.get(s.unitId) === faction) : allSessions
@@ -191,30 +198,30 @@ export function PaintTimeSection({ months, keyOf = (d) => d.slice(0, 7), faction
   const shown = all ? log : log.slice(0, 10)
   const fmt = (v: number) => formatMinutes(v)
   return (
-    <section className="panel grid gap-3 p-4" aria-label="Painting time">
+    <section className="panel grid gap-3 p-4" aria-label={tx('Painting time')}>
       <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-display text-lg">Painting time</h2>
-        <span className="text-sm text-muted">{formatMinutes(totalMinutes(list))} in this range · {formatMinutes(totalMinutes(thisMonth))} this month · {formatMinutes(minutesThisWeek(paintSessions, now))} this week</span>
+        <h2 className="font-display text-lg">{tx('Painting time')}</h2>
+        <span className="text-sm text-muted">{tx('{{time}} in this range', { time: formatMinutes(totalMinutes(list)) })} · {tx('{{time}} this month', { time: formatMinutes(totalMinutes(thisMonth)) })} · {tx('{{time}} this week', { time: formatMinutes(minutesThisWeek(paintSessions, now)) })}</span>
       </header>
       {list.length > 0 && (
         <>
-          <MonthBars label="Painting hours per month" months={months} format={(v) => `${v} h`} series={[{ name: 'Hours', values: minutesPer(list, months, keyOf).map((m) => Math.round(m / 6) / 10), fill: 'fill-accent', swatch: 'bg-accent' }]} />
+          <MonthBars label={tx('Painting hours per month')} months={months} format={(v) => `${v} h`} series={[{ name: tx('Hours'), values: minutesPer(list, months, keyOf).map((m) => Math.round(m / 6) / 10), fill: 'fill-accent', swatch: 'bg-accent' }]} />
           <div className="grid gap-4 xl:grid-cols-3">
-            <div><h3 className="text-sm text-muted">By army</h3><HBars label="Painting time by army" format={fmt} rows={minutesByFaction(list, units).map((r) => ({ key: r.key, name: r.key, value: r.minutes }))} /></div>
-            <div><h3 className="text-sm text-muted">By unit</h3><HBars label="Painting time by unit" format={fmt} rows={minutesByUnit(list).slice(0, 10).map((r) => ({ key: r.key, name: unitName(r.key), value: r.minutes }))} /></div>
-            <div><h3 className="text-sm text-muted">By stage</h3><HBars label="Painting time by stage" format={fmt} rows={minutesByStage(list).map((r) => ({ key: r.key || '-', name: stage(r.key) || 'No stage', value: r.minutes }))} /></div>
+            <div><h3 className="text-sm text-muted">{tx('By army')}</h3><HBars label={tx('Painting time by army')} format={fmt} rows={minutesByFaction(list, units).map((r) => ({ key: r.key, name: r.key, value: r.minutes }))} /></div>
+            <div><h3 className="text-sm text-muted">{tx('By unit')}</h3><HBars label={tx('Painting time by unit')} format={fmt} rows={minutesByUnit(list).slice(0, 10).map((r) => ({ key: r.key, name: unitName(r.key), value: r.minutes }))} /></div>
+            <div><h3 className="text-sm text-muted">{tx('By stage')}</h3><HBars label={tx('Painting time by stage')} format={fmt} rows={minutesByStage(list).map((r) => ({ key: r.key || '-', name: stage(r.key) || tx('No stage'), value: r.minutes }))} /></div>
           </div>
         </>
       )}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm text-muted">Sessions</h3>
-        {editing === null && <button className="btn" onClick={() => setEditing('new')}>+ Add session</button>}
+        <h3 className="text-sm text-muted">{tx('Sessions')}</h3>
+        {editing === null && <button className="btn" onClick={() => setEditing('new')}>{tx('+ Add session')}</button>}
       </div>
       {editing !== null && <SessionForm key={editing === 'new' ? 'new' : editing.id} start={editing === 'new' ? undefined : editing} onDone={() => setEditing(null)} />}
-      {log.length === 0 ? <p className="text-sm text-muted">No painting time yet. Start a timer on Home or add a session.</p> : (
-        <table className="w-full text-sm" aria-label="Painting sessions">
+      {log.length === 0 ? <p className="text-sm text-muted">{tx('No painting time yet. Start a timer on Home or add a session.')}</p> : (
+        <table className="w-full text-sm" aria-label={tx('Painting sessions')}>
           <thead className="text-left text-xs uppercase tracking-wider text-muted">
-            <tr><th className="py-1">Date</th><th>Model group</th><th>Time</th><th>Stage</th><th>Note</th><th /></tr>
+            <tr><th className="py-1">{tx('Date')}</th><th>{tx('Model group')}</th><th>{tx('Time')}</th><th>{tx('Stage')}</th><th>{tx('Note')}</th><th /></tr>
           </thead>
           <tbody>
             {shown.map((s) => (
@@ -225,15 +232,15 @@ export function PaintTimeSection({ months, keyOf = (d) => d.slice(0, 7), faction
                 <td>{stage(s.stage)}</td>
                 <td>{s.note}</td>
                 <td className="text-right">
-                  <button className="btn px-2 py-0.5" aria-label="Edit session" onClick={() => setEditing(s)}>✎</button>
-                  <button className="btn px-2 py-0.5" aria-label="Delete session" onClick={() => confirm('Delete this session?') && void deleteSession(s.id)}>✕</button>
+                  <button className="btn px-2 py-0.5" aria-label={tx('Edit session')} onClick={() => setEditing(s)}>✎</button>
+                  <button className="btn px-2 py-0.5" aria-label={tx('Delete session')} onClick={() => confirm(tx('Delete this session?')) && void deleteSession(s.id)}>✕</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
-      {log.length > 10 && <button className="btn justify-self-start" onClick={() => setAll(!all)}>{all ? 'Show fewer' : `Show all ${log.length}`}</button>}
+      {log.length > 10 && <button className="btn justify-self-start" onClick={() => setAll(!all)}>{all ? tx('Show fewer') : tx('Show all {{n}}', { n: log.length })}</button>}
     </section>
   )
 }

@@ -1,13 +1,15 @@
 import { useId } from 'react'
+import { useTx } from '../i18n'
 
 /** Small ⓘ icon that shows an explanation on hover or keyboard focus. */
-export function InfoTip({ text, label = 'More info' }: { text: string; label?: string }) {
+export function InfoTip({ text, label }: { text: string; label?: string }) {
+  const tx = useTx()
   const id = useId()
   return (
     <span className="group relative inline-flex">
       <button
         type="button"
-        aria-label={label}
+        aria-label={label ?? tx('More info')}
         aria-describedby={id}
         className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-muted text-[0.625rem] leading-none text-muted hover:border-accent hover:text-accent focus:border-accent focus:text-accent focus:outline-none"
       >

@@ -12,9 +12,11 @@ import { TechniquePanel } from '../guides/GuidesPage'
 import { BeforeYouStart } from '../guides/BeforeYouStart'
 import { RecipeCard } from './RecipeCard'
 import { ORIGIN_LABEL, ORIGIN_STYLE } from './origin'
+import { useTx } from '../../i18n'
 
 /** Read-only view of a library scheme, with ways to make it your own. */
 export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: PaintScheme; onOpen: (id: string) => void; onClose: () => void; onOpenUnit?: (id: string) => void }) {
+  const tx = useTx()
   const { paints, paintStock, saveScheme, units, photos: allPhotos, loadSchemePhotos } = useStore()
   useEffect(() => {
     void loadSchemePhotos(scheme.id)
@@ -37,7 +39,7 @@ export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: Pa
   }
 
   return (
-    <section className="panel flex min-w-0 flex-1 flex-col overflow-y-auto" aria-label="Library scheme">
+    <section className="panel flex min-w-0 flex-1 flex-col overflow-y-auto" aria-label={tx('Library scheme')}>
       <div className="p-4 pb-0">
         <ColourStrip colours={colourStrip(scheme, paints)} height="h-6" />
       </div>
@@ -45,15 +47,15 @@ export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: Pa
         <div className="grid gap-1">
           <h2 className="font-display text-xl text-accent">{scheme.name}</h2>
           <span className="flex flex-wrap items-center gap-2 text-sm text-muted">
-            <span className="rounded border border-line px-1.5 text-xs">Library</span>
+            <span className="rounded border border-line px-1.5 text-xs">{tx('Library')}</span>
             <span className={`rounded border px-1.5 text-xs ${ORIGIN_STYLE[scheme.origin]}`}>{ORIGIN_LABEL[scheme.origin]}</span>
             {scheme.factionName}
             {scheme.tags.length > 0 && ` · ${scheme.tags.join(', ')}`}
           </span>
-          <span className="text-sm text-muted">{scheme.appliesTo?.length ? `For: ${scheme.appliesTo.join(', ')}` : 'For the whole army'}</span>
+          <span className="text-sm text-muted">{scheme.appliesTo?.length ? tx('For: {{list}}', { list: scheme.appliesTo.join(', ') }) : tx('For the whole army')}</span>
           {usedBy.length > 0 && (
             <span className="text-sm text-ok">
-              used by{' '}
+              {tx('used by')}{' '}
               {usedBy.map((u, i) => (
                 <span key={u.id}>
                   {i > 0 && ', '}
@@ -64,22 +66,22 @@ export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: Pa
           )}
           {scheme.source && (
             <p className="text-sm">
-              Source:{' '}
+              {tx('Source:')}{' '}
               {scheme.source.url ? (
                 <a className="text-accent underline" href={scheme.source.url} target="_blank" rel="noreferrer">{scheme.source.title ?? scheme.source.url} ↗</a>
               ) : (
                 scheme.source.title
               )}
-              {scheme.source.author && <span className="text-muted"> by {scheme.source.author}</span>}
+              {scheme.source.author && <span className="text-muted"> {tx('by {{name}}', { name: scheme.source.author })}</span>}
             </p>
           )}
         </div>
-        <button className="btn" aria-label="Close scheme" onClick={onClose}>✕</button>
+        <button className="btn" aria-label={tx('Close scheme')} onClick={onClose}>✕</button>
       </header>
       <div className="flex flex-wrap gap-2 border-b border-line p-4">
-        <button className="btn btn-primary" onClick={() => void copy(false)}>+ Save a copy</button>
-        <button className="btn" onClick={() => void copy(true)}>⑂ Make my variant</button>
-        <button className="btn" onClick={() => setPrinting(true)}>🖨 Recipe card</button>
+        <button className="btn btn-primary" onClick={() => void copy(false)}>{tx('+ Save a copy')}</button>
+        <button className="btn" onClick={() => void copy(true)}>{tx('⑂ Make my variant')}</button>
+        <button className="btn" onClick={() => setPrinting(true)}>{tx('🖨 Recipe card')}</button>
       </div>
       {missing.length > 0 && (
         <p className="border-b border-line p-4 text-sm">
@@ -88,19 +90,19 @@ export function SchemeView({ scheme, onOpen, onClose, onOpenUnit }: { scheme: Pa
       )}
       <div className="grid gap-4 p-4">
         <p className="text-sm text-muted">{scheme.description}</p>
-        {scheme.tips && <p className="text-sm"><b>Note:</b> {scheme.tips}</p>}
+        {scheme.tips && <p className="text-sm"><b>{tx('Note:')}</b> {scheme.tips}</p>}
         <BeforeYouStart scheme={scheme} paintName={(id) => byId.get(id)?.name ?? id.split('/').pop()!.replace(/-/g, ' ')} onTechnique={setTechnique} />
         {scheme.sections.map((sec) => (
-          <section key={sec.id} id={`area-${sec.id}`} aria-label={`Area ${sec.area}`}>
+          <section key={sec.id} id={`area-${sec.id}`} aria-label={tx('Area {{name}}', { name: sec.area })}>
             <h3 className="mb-1 font-semibold">{sec.area}</h3>
             <ol className="grid gap-1 text-sm">
               {sec.steps.map((st, i) => (
                 <li key={st.id} className="flex flex-wrap items-center gap-2">
                   <span className="w-6 text-right text-muted">{i + 1}.</span>
                   {techniqueFor(st.technique) ? (
-                    <button className="w-28 text-left text-muted underline decoration-dotted hover:text-accent" title="How to do this" onClick={() => setTechnique(techniqueFor(st.technique)!)}>{st.technique}</button>
+                    <button className="w-28 text-left text-muted underline decoration-dotted hover:text-accent" title={tx('How to do this')} onClick={() => setTechnique(techniqueFor(st.technique)!)}>{st.technique}</button>
                   ) : (
-                    <span className="w-28 text-muted">{st.technique || 'step'}</span>
+                    <span className="w-28 text-muted">{st.technique || tx('step')}</span>
                   )}
                   {st.paints.map((sp, j) => {
                     const p = byId.get(sp.paintId)

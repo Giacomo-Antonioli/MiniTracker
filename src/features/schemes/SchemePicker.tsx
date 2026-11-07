@@ -4,6 +4,7 @@ import type { PaintScheme, SchemeOrigin } from '../../domain/schemes/types'
 import type { PaintDef } from '../../domain/paints/types'
 import { ColourStrip } from './ColourStrip'
 import { ORIGIN_LABEL } from './origin'
+import { useTx } from '../../i18n'
 
 /** Scheme dropdown that shows each scheme's colours (a native select can't). */
 export function SchemePicker({ label, value, groups, paints, isDefault, onChange, chosenColours = true }: {
@@ -16,6 +17,7 @@ export function SchemePicker({ label, value, groups, paints, isDefault, onChange
   /** Off when the page already shows the chosen scheme's colours next to the picker. */
   chosenColours?: boolean
 }) {
+  const tx = useTx()
   const [open, setOpen] = useState(false)
   const box = useRef<HTMLDivElement>(null)
   const chosen = groups.flatMap((g) => g.schemes).find((s) => s.id === value)
@@ -45,12 +47,12 @@ export function SchemePicker({ label, value, groups, paints, isDefault, onChange
   return (
     <div className="relative" ref={box}>
       <button type="button" className="input flex w-full flex-col items-stretch gap-1 text-left" aria-label={label} aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(!open)}>
-        <span>{chosen ? `${chosen.name}${isDefault?.(chosen) ? ' ⭐' : ''}` : 'None'} <span className="float-right text-muted">▾</span></span>
+        <span>{chosen ? `${chosen.name}${isDefault?.(chosen) ? ' ⭐' : ''}` : tx('None')} <span className="float-right text-muted">▾</span></span>
         {chosen && chosenColours && <ColourStrip colours={colourStrip(chosen, paints)} height="h-2" />}
       </button>
       {open && (
         <ul role="listbox" aria-label={label} className="panel absolute z-20 mt-1 max-h-80 w-full overflow-y-auto p-1">
-          <li role="option" aria-selected={!value} className="cursor-pointer rounded px-2 py-1 text-sm hover:bg-panel-2" onClick={() => pick(undefined)}>None</li>
+          <li role="option" aria-selected={!value} className="cursor-pointer rounded px-2 py-1 text-sm hover:bg-panel-2" onClick={() => pick(undefined)}>{tx('None')}</li>
           {groups.map((g) => (
             <li key={g.origin} role="presentation">
               <div className="px-2 pt-2 text-xs uppercase tracking-wider text-muted">{ORIGIN_LABEL[g.origin]}</div>
