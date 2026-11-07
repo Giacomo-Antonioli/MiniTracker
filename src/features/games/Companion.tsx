@@ -10,6 +10,8 @@ import type { ListEntry } from '../../domain/lists/types'
 import { GamePhotos } from './GamePhotos'
 import { DiceRoller } from '../dice/DiceRoller'
 import { useTx, txr } from '../../i18n'
+import { LiveStatus, ShareLive } from './LiveShare'
+import { currentLive } from '../../data/liveSession'
 
 const Text = ({ text }: { text: string }) => <>{formatRuleText(text).map((p, i) => (p.bold ? <b key={i}>{p.text}</b> : p.text))}</>
 const time = (msec: number) => {
@@ -38,6 +40,7 @@ export function Companion({ game: g, onExit }: { game: Game; onExit: () => void 
   const [now, setNow] = useState(() => new Date().toISOString())
   const [open, setOpen] = useState<string | null>(null)
   const [dice, setDice] = useState(false)
+  const [sharing, setSharing] = useState(false)
   useEffect(() => {
     if (!g.clock?.since) return
     const t = setInterval(() => setNow(new Date().toISOString()), 1000)
@@ -78,6 +81,7 @@ export function Companion({ game: g, onExit }: { game: Game; onExit: () => void 
           <span className="font-display text-lg">{tx('Round {{n}}', { n: g.round })} · {myTurn ? tx('Your turn') : tx("{{name}}'s turn", { name: g.them.name })}</span>
           <span className="font-display text-2xl tabular-nums text-accent" aria-label={tx('Score')}>{me}–{them}</span>
         </div>
+        <LiveStatus game={g} />
         <ol className="flex gap-1 text-xs" aria-label={tx('Phases')}>
           {PHASES.map((p) => (
             <li key={p} aria-current={p === phase ? 'step' : undefined} className={`flex-1 rounded py-1 text-center ${p === phase ? 'bg-accent text-accent-fg' : 'bg-panel-2 text-muted'}`}>{phaseName(p)}</li>
@@ -162,9 +166,11 @@ export function Companion({ game: g, onExit }: { game: Game; onExit: () => void 
       <div className="panel p-3"><GamePhotos game={g} /></div>
 
       {dice && <DiceRoller onClose={() => setDice(false)} />}
+      {sharing && <ShareLive game={g} onClose={() => setSharing(false)} />}
       <footer className="fixed inset-x-0 bottom-0 z-10 flex justify-center gap-2 border-t border-line bg-panel p-3">
         <button className="btn" onClick={onExit}>{tx('Score board')}</button>
         <button className="btn" onClick={() => setDice(true)}>{tx('🎲 Dice')}</button>
+        {!currentLive()?.game && g.status === 'live' && <button className="btn" onClick={() => setSharing(true)}>{tx('📡 Share live')}</button>}
         <button className="btn btn-primary px-6 text-lg" disabled={g.round === 5 && g.turn !== g.first && phase === 'Fight'} onClick={() => save(nextPhase(g, c()))}>
           {phase === 'Fight' ? tx('Next turn ▶') : `${phaseName(PHASES[(g.phase ?? 0) + 1])} ▶`}
         </button>

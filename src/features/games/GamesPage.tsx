@@ -13,6 +13,7 @@ import type { ArmyList } from '../../domain/lists/types'
 import { importListFile } from '../armies/ImportForm'
 import { advanceTurn } from '../../domain/games/companion'
 import { Companion } from './Companion'
+import { JoinLive, LiveStatus } from './LiveShare'
 import { useTx } from '../../i18n'
 
 const RESULT_CLASS = { win: 'text-ok', loss: 'text-danger', draw: 'text-muted' } as const
@@ -24,13 +25,17 @@ export function GamesPage() {
   const live = games.find((g) => g.status === 'live')
   const [starting, setStarting] = useState(false)
   const [companion, setCompanion] = useState(false)
+  const [joining, setJoining] = useState(false)
   if (live && companion) return <Companion game={live} onExit={() => setCompanion(false)} />
   return (
     <div className="grid gap-4">
       <header className="flex items-center justify-between">
         <h1 className="font-display text-2xl text-accent" data-tour="games-title">{tx('Games')}</h1>
         {!live && !starting && <button className="btn btn-primary" data-tour="new-game" onClick={() => setStarting(true)}>{tx('▶ New game')}</button>}
+        {!live && !starting && <button className="btn" onClick={() => setJoining(true)}>{tx('📡 Join live game')}</button>}
+        {live && <LiveStatus game={live} />}
       </header>
+      {joining && <JoinLive onClose={() => setJoining(false)} onJoined={() => setCompanion(true)} />}
       {live ? <LiveGame game={live} onCompanion={() => setCompanion(true)} /> : starting && <NewGameForm onCancel={() => setStarting(false)} onStarted={() => setStarting(false)} />}
       <History />
     </div>
