@@ -27,8 +27,8 @@ export function GamesPage() {
   return (
     <div className="grid gap-4">
       <header className="flex items-center justify-between">
-        <h1 className="font-display text-2xl text-accent">Games</h1>
-        {!live && !starting && <button className="btn btn-primary" onClick={() => setStarting(true)}>▶ New game</button>}
+        <h1 className="font-display text-2xl text-accent" data-tour="games-title">Games</h1>
+        {!live && !starting && <button className="btn btn-primary" data-tour="new-game" onClick={() => setStarting(true)}>▶ New game</button>}
       </header>
       {live ? <LiveGame game={live} onCompanion={() => setCompanion(true)} /> : starting && <NewGameForm onCancel={() => setStarting(false)} onStarted={() => setStarting(false)} />}
       <History />
@@ -86,6 +86,7 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
     <form
       className="panel grid gap-3 p-4"
       aria-label="New game"
+      data-tour="new-game-form"
       onSubmit={(e) => {
         e.preventDefault()
         void saveGame(newGame({ myListId: mine?.id, myFaction: factionName(catalogue, mine?.factionId), opponent, theirFaction: faction, theirList, mission, theirMission, deployment, twist, battleSize: mine?.battleSize, first }, ctx())).then(onStarted)
@@ -98,7 +99,7 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
             {lists.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
           </select>
         </label>
-        <label className="grid gap-1 text-sm">Opponent<input className="input" value={opponent} onChange={(e) => setOpponent(e.target.value)} placeholder="Name" /></label>
+        <label className="grid gap-1 text-sm" data-tour="opponent">Opponent<input className="input" value={opponent} onChange={(e) => setOpponent(e.target.value)} placeholder="Name" /></label>
         <label className="grid gap-1 text-sm">Their faction
           <input className="input" list="game-factions" value={faction} onChange={(e) => setFaction(e.target.value)} />
           <datalist id="game-factions">{catalogue?.factions.map((f) => <option key={f.id} value={f.name} />)}</datalist>
@@ -181,7 +182,7 @@ function NewGameForm({ onCancel, onStarted }: { onCancel: () => void; onStarted:
       {decide && <WhoGoesFirst mode={decide} opponent={opponent} onClose={() => setDecide(null)} onDone={(w) => { setFirst(w); setDecide(null) }} />}
       {error && <p className="text-sm text-danger" role="alert">{error}</p>}
       <div className="flex gap-2">
-        <button className="btn btn-primary">▶ Start game</button>
+        <button className="btn btn-primary" data-tour="start-game">▶ Start game</button>
         <button type="button" className="btn" onClick={onCancel}>Cancel</button>
       </div>
     </form>
@@ -208,7 +209,7 @@ function Side({ k, g, units }: { k: SideKey; g: Game; units: { id: string; name:
     <section className={`panel grid content-start gap-3 p-4 ${g.turn === k ? 'border-accent' : ''}`} aria-label={k === 'me' ? 'My side' : 'Their side'}>
       <header className="flex items-baseline justify-between gap-2">
         <h2 className="font-display text-lg">{s.name}{s.faction ? <span className="text-sm text-muted"> · {s.faction}</span> : null}</h2>
-        <span className="font-display text-4xl text-accent tabular-nums" aria-label={`${s.name} total`}>{t.total}</span>
+        <span className="font-display text-4xl text-accent tabular-nums" aria-label={`${s.name} total`} data-tour={`${k}-total`}>{t.total}</span>
       </header>
       {(['primary', 'secondary'] as const).map((kind) => (
         <div key={kind} className="flex items-center gap-2">
@@ -216,7 +217,7 @@ function Side({ k, g, units }: { k: SideKey; g: Game; units: { id: string; name:
           <span className="w-10 text-center tabular-nums" aria-label={`${s.name} ${kind} this round`}>{r[kind]}</span>
           <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} ${kind} −1`} onClick={() => apply((g) => addPoints(g, k, kind, -1, c))}>−1</button>
           <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} ${kind} +1`} onClick={() => apply((g) => addPoints(g, k, kind, 1, c))}>+1</button>
-          <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} ${kind} +5`} onClick={() => apply((g) => addPoints(g, k, kind, 5, c))}>+5</button>
+          <button type="button" className="btn px-2 py-0.5" aria-label={`${s.name} ${kind} +5`} data-tour={`${k}-${kind}-5`} onClick={() => apply((g) => addPoints(g, k, kind, 5, c))}>+5</button>
         </div>
       ))}
       <div className="flex items-center gap-2">
@@ -260,20 +261,20 @@ function LiveGame({ game: g, onCompanion }: { game: Game; onCompanion: () => voi
   const myList = lists.find((l) => l.id === g.me.listId)
 
   return (
-    <div className="grid gap-3" aria-label="Live game">
+    <div className="grid gap-3" aria-label="Live game" data-tour="live-game">
       <div className="panel flex flex-wrap items-center gap-3 p-3">
         <span className="font-display text-xl">Round {g.round} / {ROUNDS}</span>
-        <span className="text-sm" role="status">{g.turn === 'me' ? 'Your turn' : `${g.them.name}'s turn`}</span>
+        <span className="text-sm" role="status" data-tour="turn-status">{g.turn === 'me' ? 'Your turn' : `${g.them.name}'s turn`}</span>
         {(g.mission || g.deployment) && <span className="text-sm text-muted" aria-label="Mission">{[g.mission && (g.theirMission ? `${g.mission} vs ${g.theirMission}` : g.mission), g.deployment, g.twist && `Twist: ${g.twist}`].filter(Boolean).join(' · ')}</span>}
-        <button className="btn ml-auto" onClick={() => setDice(true)}>🎲 Dice</button>
+        <button className="btn ml-auto" data-tour="dice" onClick={() => setDice(true)}>🎲 Dice</button>
         <button className="btn" onClick={onCompanion}>📱 Companion</button>
-        <button className="btn btn-primary" disabled={g.round === ROUNDS && g.turn !== g.first} onClick={() => save(advanceTurn(g, c))}>Next turn ▶</button>
-        <button className="btn" onClick={() => setEnding(true)}>End game</button>
+        <button className="btn btn-primary" disabled={g.round === ROUNDS && g.turn !== g.first} data-tour="next-turn" onClick={() => save(advanceTurn(g, c))}>Next turn ▶</button>
+        <button className="btn" data-tour="end-game" onClick={() => setEnding(true)}>End game</button>
         <button className="btn btn-danger" onClick={() => { if (confirm('Delete this game?')) void deleteGame(g.id) }}>Delete</button>
       </div>
       {dice && <DiceRoller onClose={() => setDice(false)} />}
       {ending && (
-        <div className="panel grid gap-2 border-accent/60 p-3" role="dialog" aria-label="End game">
+        <div className="panel grid gap-2 border-accent/60 p-3" role="dialog" aria-label="End game" data-tour="end-game-form">
           <p className="text-sm">Final score {totals(g.me).total}–{totals(g.them).total}: <b>{result(g) === 'win' ? 'win' : result(g) === 'loss' ? 'loss' : 'draw'}</b></p>
           <label className="grid gap-1 text-sm">Notes<textarea className="input" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} /></label>
           <div className="flex gap-2">
@@ -295,7 +296,7 @@ function LiveGame({ game: g, onCompanion }: { game: Game; onCompanion: () => voi
 
 function RoundTable({ game: g }: { game: Game }) {
   return (
-    <table className="w-full text-sm" aria-label="Score by round">
+    <table className="w-full text-sm" aria-label="Score by round" data-tour="score-by-round">
       <thead className="text-xs uppercase tracking-wider text-muted">
         <tr><th className="text-left">Round</th>{g.me.rounds.map((_, i) => <th key={i}>{i + 1}</th>)}<th>Total</th></tr>
       </thead>

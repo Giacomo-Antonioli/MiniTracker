@@ -29,7 +29,7 @@ export function ArmiesPage({ onOpenList, onOpenSettings }: { onOpenList: (id: st
   if (!catalogues.length) {
     return (
       <div className="grid max-w-xl gap-3">
-        <h1 className="font-display text-2xl text-accent">Armies</h1>
+        <h1 className="font-display text-2xl text-accent" data-tour="armies-title">Armies</h1>
         <p className="text-muted">Install a unit catalogue first: lists are built from it.</p>
         <button className="btn btn-primary w-fit" onClick={onOpenSettings}>Go to Settings → Catalogue data</button>
       </div>
@@ -39,10 +39,10 @@ export function ArmiesPage({ onOpenList, onOpenSettings }: { onOpenList: (id: st
   return (
     <div className="grid max-w-4xl gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-display text-2xl text-accent">Armies</h1>
+        <h1 className="font-display text-2xl text-accent" data-tour="armies-title">Armies</h1>
         <div className="flex gap-2">
           <button className="btn" onClick={() => setImporting(true)}>⬆ Import</button>
-          <button className="btn btn-primary" onClick={() => setCreating(true)}>+ New list</button>
+          <button className="btn btn-primary" data-tour="new-list" onClick={() => setCreating(true)}>+ New list</button>
         </div>
       </header>
 
@@ -119,6 +119,7 @@ function NewListForm({ onCancel, onCreated }: { onCancel: () => void; onCreated:
     <form
       className="panel grid gap-3 p-3 sm:grid-cols-2"
       aria-label="New list"
+      data-tour="new-list-form"
       onSubmit={(e) => {
         e.preventDefault()
         void create()
@@ -126,7 +127,7 @@ function NewListForm({ onCancel, onCreated }: { onCancel: () => void; onCreated:
     >
       <label className="grid gap-1 text-sm">
         Name
-        <input className="input" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Tau 1000" autoFocus />
+        <input className="input" required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Tau 1000" data-tour="list-name" autoFocus />
       </label>
       <label className="grid gap-1 text-sm">
         Edition

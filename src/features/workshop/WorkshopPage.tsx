@@ -58,9 +58,9 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
   return (
     <div className="grid gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-display text-2xl text-accent">{title}</h1>
+        <h1 className="font-display text-2xl text-accent" data-tour="workshop-title">{title}</h1>
         {low > 0 && <span className="text-sm text-danger" role="status">⚠ {low} running low</span>}
-        <div className="flex gap-1" role="tablist" aria-label="List">
+        <div className="flex gap-1" role="tablist" aria-label="List" data-tour="workshop-tabs">
           {([['owned', 'Owned'], ['wishlist', 'Wishlist']] as const).map(([id, l]) => (
             <button key={id} role="tab" aria-selected={tab === id} className={`btn ${tab === id ? 'btn-primary' : ''}`} onClick={() => setTab(id)}>
               {l} ({rows.filter((r) => r.item.status === id).length})
@@ -106,11 +106,11 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
             </select>
           </label>
         )}
-        <label className="grid gap-0.5 text-xs text-muted">Name<input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder={addKind === 'tool' ? 'e.g. Sprue cutters' : 'e.g. Plastic glue'} /></label>
+        <label className="grid gap-0.5 text-xs text-muted" data-tour="workshop-name">Name<input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder={addKind === 'tool' ? 'e.g. Sprue cutters' : 'e.g. Plastic glue'} /></label>
         <label className="grid gap-0.5 text-xs text-muted">Category<select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>{catsOf(cats, addKind).map((c) => <option key={c}>{c}</option>)}</select></label>
         <label className="grid gap-0.5 text-xs text-muted">{tab === 'owned' ? 'How many' : 'Want'}<input className="input w-20" type="number" min={0} value={qty} onChange={(e) => setQty(e.target.value)} /></label>
         {tab === 'owned' && <label className="grid gap-0.5 text-xs text-muted">Alert at<input className="input w-20" type="number" min={0} value={lowAt} onChange={(e) => setLowAt(e.target.value)} /></label>}
-        <button className="btn btn-primary">{tab === 'owned' ? '+ Add' : '+ Add to wishlist'}</button>
+        <button className="btn btn-primary" data-tour="workshop-add">{tab === 'owned' ? '+ Add' : '+ Add to wishlist'}</button>
         {error && <span className="text-sm text-danger" role="alert">{error}</span>}
       </form>
 

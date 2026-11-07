@@ -29,7 +29,7 @@ export function GoalsPage() {
   return (
     <div className="grid max-w-4xl gap-4">
       <header className="flex items-center justify-between">
-        <h1 className="font-display text-2xl text-accent">Goals</h1>
+        <h1 className="font-display text-2xl text-accent" data-tour="goals-title">Goals</h1>
         {!editing && <button className="btn btn-primary" onClick={() => setEditing(blank('models'))}>+ Goal</button>}
       </header>
       {editing && <GoalForm goal={editing} onClose={() => setEditing(null)} />}

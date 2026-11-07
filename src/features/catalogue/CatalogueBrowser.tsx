@@ -29,7 +29,7 @@ export function CatalogueBrowser({ onOpenSettings, openId }: { onOpenSettings: (
   if (!catalogue) {
     return (
       <div className="grid max-w-xl gap-3">
-        <h1 className="font-display text-2xl text-accent">Catalogue</h1>
+        <h1 className="font-display text-2xl text-accent" data-tour="catalogue-title">Catalogue</h1>
         <p className="text-muted">No unit catalogue installed yet.</p>
         <button className="btn btn-primary w-fit" onClick={onOpenSettings}>Go to Settings → Catalogue</button>
       </div>
@@ -42,7 +42,7 @@ export function CatalogueBrowser({ onOpenSettings, openId }: { onOpenSettings: (
     <div className="flex h-full gap-4">
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <header className="flex items-baseline justify-between">
-          <h1 className="font-display text-2xl text-accent">Catalogue</h1>
+          <h1 className="font-display text-2xl text-accent" data-tour="catalogue-title">Catalogue</h1>
           <span className="text-sm text-muted">
             {shown.length} of {catalogue.datasheets.length} units · {catalogue.gameName}
           </span>

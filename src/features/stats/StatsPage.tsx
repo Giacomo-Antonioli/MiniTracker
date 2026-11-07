@@ -108,7 +108,7 @@ export function StatsPage() {
   return (
     <div className="grid gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-display text-2xl text-accent">Stats</h1>
+        <h1 className="font-display text-2xl text-accent" data-tour="stats-title">Stats</h1>
         <div className="flex gap-2">
           <button className="btn" onClick={() => setSharing(true)}>🔗 Share</button>
           {sharing && <ShareCollection onClose={() => setSharing(false)} />}

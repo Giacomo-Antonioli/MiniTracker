@@ -129,7 +129,7 @@ export function ScanBoxButton({ onOpenUnit }: { onOpenUnit?: (id: string) => voi
   const [err, setErr] = useState('')
   return (
     <>
-      <button className="btn" onClick={() => setScanning(true)}>📷 Scan box</button>
+      <button className="btn" data-tour="scan-box" onClick={() => setScanning(true)}>📷 Scan box</button>
       {scanning && (
         <ScanDialog
           title="Scan a box barcode"

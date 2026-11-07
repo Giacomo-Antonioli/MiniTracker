@@ -40,7 +40,7 @@ export function ShoppingPage() {
 
       <section className="flex-1" aria-label={title}>
         <header className="flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-bold">{title}</h1>
+          <h1 className="text-xl font-bold" data-tour="shopping-title">{title}</h1>
           <ScanBoxButton />
           {list && (
             <>

@@ -193,7 +193,7 @@ export function BacklogTable({ units, selectedId, onRowClick }: { units: OwnedUn
           )}
         </div>
       </div>
-      <table className="w-full text-left text-sm">
+      <table className="w-full text-left text-sm" data-tour="backlog-units">
         <thead className="border-b border-line text-xs uppercase tracking-wider text-muted">
           <tr>{head('unit', 'Unit')}{show.map((c) => head(c, TITLE[c]))}<th className="p-2"><span className="sr-only">Companion</span></th></tr>
         </thead>
@@ -233,7 +233,7 @@ export function BacklogCards({ units, selectedId, onRowClick }: { units: OwnedUn
   const { pipeline } = useStore()
   const sorted = [...units].sort((a, b) => a.customName.localeCompare(b.customName))
   return (
-    <ul className="grid gap-2" aria-label="Units">
+    <ul className="grid gap-2" aria-label="Units" data-tour="backlog-units">
       {sorted.map((u) => {
         const p = unitProgress(u, pipeline)
         const owned = u.groups.filter((g) => g.status !== WISHLISTED).reduce((n, g) => n + g.count, 0)

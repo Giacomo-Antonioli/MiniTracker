@@ -10,6 +10,8 @@ export interface ComboOption {
 }
 
 interface Props {
+  /** Id for the welcome tours to point at. */
+  tour?: string
   label: string
   /** Text in the input. Controlled so free text is possible. */
   text: string
@@ -23,7 +25,7 @@ interface Props {
 }
 
 /** Type-to-search input with a list of suggestions (ARIA combobox pattern). Options are filtered by the caller. */
-export function Combobox({ label, text, onTextChange, options, onSelect, placeholder, footer, autoFocus }: Props) {
+export function Combobox({ label, text, onTextChange, options, onSelect, placeholder, footer, autoFocus, tour }: Props) {
   const id = useId()
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(0)
@@ -43,7 +45,7 @@ export function Combobox({ label, text, onTextChange, options, onSelect, placeho
   }
 
   return (
-    <div className="relative grid gap-1">
+    <div className="relative grid gap-1" data-tour={tour}>
       <label htmlFor={`${id}-input`} className="text-sm text-muted">{label}</label>
       <input
         id={`${id}-input`}

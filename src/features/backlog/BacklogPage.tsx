@@ -70,10 +70,10 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <header className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-3">
-            <h1 className="font-display text-2xl text-accent">Backlog</h1>
+            <h1 className="font-display text-2xl text-accent" data-tour="backlog-title">Backlog</h1>
             {!phone && <div role="tablist" aria-label="Backlog view" className="flex gap-1">
               {(['table', 'board'] as const).map((v) => (
-                <button key={v} role="tab" aria-selected={view === v} className={`btn text-sm ${view === v ? 'btn-primary' : ''}`} onClick={() => chooseView(v)}>
+                <button key={v} role="tab" data-tour={`view-${v}`} aria-selected={view === v} className={`btn text-sm ${view === v ? 'btn-primary' : ''}`} onClick={() => chooseView(v)}>
                   {v === 'table' ? '☰ Table' : '▦ Board'}
                 </button>
               ))}
@@ -81,12 +81,12 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
           </div>
           <ScanBoxButton onOpenUnit={onOpenUnit} />
           {showSpearhead && <button className="btn" onClick={() => setSpearhead(true)}>⚔ Spearhead box</button>}
-          <button className="btn btn-primary" onClick={() => setEditing('new')}>+ Add unit</button>
+          <button className="btn btn-primary" data-tour="add-unit" onClick={() => setEditing('new')}>+ Add unit</button>
         </header>
 
         <CatalogueBanner />
 
-        <section className="panel grid gap-3 p-4" aria-label="Summary">
+        <section className="panel grid gap-3 p-4" aria-label="Summary" data-tour="backlog-summary">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
               ['Units', live.length],
@@ -100,7 +100,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
           {stats.length ? <StageBar stages={stats} pipeline={pipeline} legend wide /> : <p className="text-sm text-muted">No models yet</p>}
         </section>
 
-        <section className="flex flex-wrap items-center gap-2" aria-label="Filters">
+        <section className="flex flex-wrap items-center gap-2" aria-label="Filters" data-tour="backlog-filters">
           <input className="input w-full sm:w-56" placeholder="🔍 Search name, faction, tag" value={filter.text ?? ''} onChange={(e) => set({ text: e.target.value })} />
           <select className="input" aria-label="Faction" value={filter.faction ?? ''} onChange={(e) => set({ faction: e.target.value || undefined })}>
             <option value="">All factions</option>

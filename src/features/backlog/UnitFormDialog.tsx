@@ -158,6 +158,7 @@ export function UnitFormDialog({
       >
         <Combobox
           label="Faction"
+          tour="unit-faction"
           text={faction}
           onTextChange={(t) => {
             setFaction(t)
@@ -172,6 +173,7 @@ export function UnitFormDialog({
         />
         <Combobox
           label="Name *"
+          tour="unit-name"
           text={name}
           onTextChange={setName}
           options={unitOptions}
@@ -210,9 +212,9 @@ export function UnitFormDialog({
           <legend className="mb-1 text-sm text-muted">Model groups</legend>
           {groups.map((g, i) => (
             <div key={i} className="flex flex-wrap items-center gap-2">
-              <input className="input w-20" type="number" min={1} value={g.count} aria-label="Models" onChange={(e) => patchGroup(i, { count: Number(e.target.value) })} />
+              <input className="input w-20" type="number" min={1} value={g.count} aria-label="Models" data-tour="unit-models" onChange={(e) => patchGroup(i, { count: Number(e.target.value) })} />
               <span className="text-muted">models in</span>
-              <select className="input" value={g.status} aria-label="Stage" onChange={(e) => patchGroup(i, { status: e.target.value })}>
+              <select className="input" value={g.status} aria-label="Stage" data-tour="unit-stage" onChange={(e) => patchGroup(i, { status: e.target.value })}>
                 {pipeline.stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
               <input className="input flex-1" list={datasheet ? 'wargear-options' : undefined} placeholder="loadout, comma separated" value={g.loadout} aria-label="Loadout" onChange={(e) => patchGroup(i, { loadout: e.target.value })} />
@@ -291,7 +293,7 @@ export function UnitFormDialog({
         {error && <p className="text-danger" role="alert">{error}</p>}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn" onClick={(e) => (e.target as HTMLElement).closest('dialog')?.close()}>Cancel</button>
-          <button type="submit" className="btn btn-primary">Save</button>
+          <button type="submit" className="btn btn-primary" data-tour="unit-save">Save</button>
         </div>
       </form>
     </Dialog>

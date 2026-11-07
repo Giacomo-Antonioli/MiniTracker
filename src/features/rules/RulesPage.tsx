@@ -33,7 +33,7 @@ export function RulesPage({ onOpenSettings, onOpenDatasheet }: { onOpenSettings:
   if (!catalogue) {
     return (
       <div className="grid max-w-xl gap-3">
-        <h1 className="font-display text-2xl text-accent">Rules</h1>
+        <h1 className="font-display text-2xl text-accent" data-tour="rules-title">Rules</h1>
         <p className="text-muted">No unit catalogue installed yet. Rules come with it.</p>
         <button className="btn btn-primary w-fit" onClick={onOpenSettings}>Go to Settings → Catalogue data</button>
       </div>
@@ -42,7 +42,7 @@ export function RulesPage({ onOpenSettings, onOpenDatasheet }: { onOpenSettings:
   if (!rules) {
     return (
       <div className="grid max-w-xl gap-3">
-        <h1 className="font-display text-2xl text-accent">Rules</h1>
+        <h1 className="font-display text-2xl text-accent" data-tour="rules-title">Rules</h1>
         <p className="text-muted">Your catalogue was downloaded before rules were supported. Download it again to get every rule and ability explained.</p>
         <button className="btn btn-primary w-fit" disabled={catalogueJob.phase !== 'idle'} onClick={() => void downloadCatalogue(catalogue.source.repo === 'local files' ? undefined : catalogue.source.repo)}>
           {catalogueJob.phase === 'idle' ? '⬇ Download again' : 'Downloading…'}
@@ -55,7 +55,7 @@ export function RulesPage({ onOpenSettings, onOpenDatasheet }: { onOpenSettings:
   return (
     <div className="grid max-w-4xl gap-4">
       <header className="flex items-baseline justify-between">
-        <h1 className="font-display text-2xl text-accent">Rules</h1>
+        <h1 className="font-display text-2xl text-accent" data-tour="rules-title">Rules</h1>
         <span className="text-sm text-muted">{total} of {rules.length} rules · {catalogue.gameName}</span>
       </header>
       <section className="flex flex-wrap gap-2" aria-label="Rule filters">

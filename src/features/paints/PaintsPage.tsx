@@ -46,7 +46,7 @@ export function PaintsPage() {
     <div className="flex h-full gap-4">
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <header className="flex items-center justify-between">
-          <h1 className="font-display text-2xl text-accent">Paints</h1>
+          <h1 className="font-display text-2xl text-accent" data-tour="paints-title">Paints</h1>
           <div className="flex flex-wrap gap-2">
             <button
               className="btn"
@@ -90,7 +90,7 @@ export function PaintsPage() {
         </header>
         {csvMessage && <p role="status" className={csvMessage.ok ? 'text-ok' : 'text-danger'}>{csvMessage.text}</p>}
 
-        <section className="panel flex flex-wrap gap-6 p-4 text-sm" aria-label="Paint stats">
+        <section className="panel flex flex-wrap gap-6 p-4 text-sm" aria-label="Paint stats" data-tour="paint-stats">
           <span><b className="text-lg text-accent">{stats.owned}</b> paints owned</span>
           <span><b className="text-lg">{stats.pots}</b> pots</span>
           <span><b className="text-lg">{stats.value.toFixed(2)}</b> total value</span>
@@ -100,8 +100,8 @@ export function PaintsPage() {
           <span className="text-muted">{Object.entries(stats.byBrand).map(([b, n]) => `${b} ${n}`).join(' · ')}</span>
         </section>
 
-        <section className="flex flex-wrap items-center gap-2" aria-label="Paint filters">
-          <input className="input w-56" placeholder="🔍 Search name or brand" value={filter.text ?? ''} onChange={(e) => set({ text: e.target.value })} />
+        <section className="flex flex-wrap items-center gap-2" aria-label="Paint filters" data-tour="paint-filters">
+          <input className="input w-56" data-tour="paint-search" placeholder="🔍 Search name or brand" value={filter.text ?? ''} onChange={(e) => set({ text: e.target.value })} />
           <select className="input" aria-label="Brand" value={filter.brand ?? ''} onChange={(e) => set({ brand: e.target.value || undefined })}>
             <option value="">All brands</option>
             {brands.map((b) => <option key={b}>{b}</option>)}

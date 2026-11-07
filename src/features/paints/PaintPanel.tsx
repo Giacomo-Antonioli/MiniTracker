@@ -24,7 +24,7 @@ export function PaintPanel({ paint, onClose, onSelect }: { paint: PaintDef; onCl
   const text = (v: string) => (v.trim() === '' ? undefined : v)
 
   return (
-    <aside className="panel flex h-full w-[400px] shrink-0 flex-col overflow-y-auto" aria-label="Paint details">
+    <aside className="panel flex h-full w-[400px] shrink-0 flex-col overflow-y-auto" aria-label="Paint details" data-tour="paint-details">
       <div className="h-24 border-b border-line" style={{ background: paint.hex }} />
       <header className="border-b border-line p-4">
         <div className="flex items-start justify-between gap-2">

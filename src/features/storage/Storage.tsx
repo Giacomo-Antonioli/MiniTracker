@@ -79,7 +79,7 @@ function PlaceForm({ start, siteId, onDone }: { start?: Place; siteId?: string; 
         <select className="input" aria-label="Kind" value={p.kind} onChange={(e) => setP({ ...p, kind: e.target.value })}>
           {storage.kinds.map((k) => <option key={k.id} value={k.id}>{k.icon} {k.name}</option>)}
         </select>
-        <input className="input flex-1" aria-label="Name" placeholder="Name or number, e.g. Box 3, Bag 7" value={p.name} onChange={(e) => setP({ ...p, name: e.target.value })} />
+        <input className="input flex-1" aria-label="Name" data-tour="place-name" placeholder="Name or number, e.g. Box 3, Bag 7" value={p.name} onChange={(e) => setP({ ...p, name: e.target.value })} />
       </div>
       <div className="flex flex-wrap gap-2">
         <PlaceSelect label="Inside" empty="Not inside anything" value={p.parentId} exclude={start ? descendants(storage, start.id) : undefined} onChange={(v) => setP({ ...p, parentId: v })} />
@@ -88,12 +88,12 @@ function PlaceForm({ start, siteId, onDone }: { start?: Place; siteId?: string; 
             {storage.sites.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
           </select>
         )}
-        <input className="input flex-1" aria-label="Location" placeholder="Where, e.g. study, shelf 2" value={p.location} onChange={(e) => setP({ ...p, location: e.target.value })} />
+        <input className="input flex-1" aria-label="Location" data-tour="place-location" placeholder="Where, e.g. study, shelf 2" value={p.location} onChange={(e) => setP({ ...p, location: e.target.value })} />
         <input className="input w-28" type="number" min={1} aria-label="Slots" placeholder="Slots" value={p.capacity ?? ''} onChange={(e) => setP({ ...p, capacity: e.target.value ? Number(e.target.value) : undefined })} />
       </div>
       <input className="input" aria-label="Place note" placeholder="Note (foam layout, magnets…)" value={p.note} onChange={(e) => setP({ ...p, note: e.target.value })} />
       <div className="flex gap-2">
-        <button className="btn btn-primary">Save</button>
+        <button className="btn btn-primary" data-tour="place-save">Save</button>
         <button type="button" className="btn" onClick={() => onDone()}>Cancel</button>
       </div>
       {err && <p className="text-sm text-danger" role="alert">{err}</p>}
@@ -267,7 +267,7 @@ export function StoragePage({ onOpenUnit, onOpenPlace }: { onOpenUnit: (id: stri
   return (
     <div className="grid gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-display text-2xl text-accent">Storage</h1>
+        <h1 className="font-display text-2xl text-accent" data-tour="storage-title">Storage</h1>
         <div className="flex flex-wrap items-start gap-2">
           <FindCode onFound={(t) => (t.kind === 'unit' ? onOpenUnit(t.id) : onOpenPlace(t.id))} onBarcode={setBox} />
           {box && <BoxDialog code={box} onOpenUnit={onOpenUnit} onClose={() => setBox(undefined)} />}
@@ -297,7 +297,7 @@ export function StoragePage({ onOpenUnit, onOpenPlace }: { onOpenUnit: (id: stri
       )}
       <div className="grid gap-4 lg:grid-cols-[minmax(260px,1fr)_2fr]">
         <section className="panel grid content-start gap-2 p-4" aria-label="Places">
-          <button className="btn btn-primary w-fit" onClick={() => setForm('new')}>+ Add place</button>
+          <button className="btn btn-primary w-fit" data-tour="add-place" onClick={() => setForm('new')}>+ Add place</button>
           {form === 'new' && <PlaceForm siteId={site?.id} onDone={(id) => { setForm(null); if (id) setSel(id) }} />}
           {rows.length === 0 && form !== 'new' && <p className="text-sm text-muted">Add your shelves, drawers, boxes, sprue bags and travel cases. Places can sit inside each other.</p>}
           <ul className="grid gap-0.5">

@@ -74,6 +74,7 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
     <Container
       className={page ? 'panel mx-auto flex w-full max-w-4xl flex-col' : 'panel fixed inset-0 z-40 flex flex-col overflow-y-auto rounded-none md:static md:z-auto md:h-full md:w-[420px] md:shrink-0 md:rounded-[inherit]'}
       aria-label={page ? 'Unit page' : 'Unit details'}
+      data-tour="unit-details"
     >
       <header className="border-b border-line p-4">
         {page && (
@@ -154,7 +155,7 @@ export function UnitPanel({ unit, onEdit, onClose, variant = 'panel', onOpenPage
               </div>
               <div className="flex flex-col items-end gap-1">
                 <QuickMove key={`${g.id}-${g.count}-${g.status}`} unit={unit} group={g} />
-                <button className="text-xs text-muted underline" onClick={() => setMoving(g)}>Move with date, note or photo…</button>
+                <button className="text-xs text-muted underline" data-tour="move-with-date" onClick={() => setMoving(g)}>Move with date, note or photo…</button>
               </div>
             </li>
           ))}

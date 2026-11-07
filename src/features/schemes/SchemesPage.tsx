@@ -59,7 +59,7 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
     return (
       <div className="grid gap-4">
         <header className="flex flex-wrap items-center gap-3">
-          <h1 className="font-display text-2xl text-accent">Schemes</h1>
+          <h1 className="font-display text-2xl text-accent" data-tour="schemes-title">Schemes</h1>
           <ViewTabs view={view} onChange={setView} />
         </header>
         <Guides />
@@ -71,7 +71,7 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
       <div className={`flex min-w-0 flex-col gap-4 ${selected ? 'w-[380px] shrink-0' : 'flex-1'}`}>
         <header className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display text-2xl text-accent">Schemes</h1>
+            <h1 className="font-display text-2xl text-accent" data-tour="schemes-title">Schemes</h1>
             <ViewTabs view={view} onChange={setView} />
           </div>
           <div className="flex gap-2">
@@ -97,12 +97,12 @@ export function SchemesPage({ openId, payload, onPayloadUsed, onOpenUnit }: { op
               />
             </label>
             <button className="btn" onClick={() => setAdding(true)}>🔗 Add from link</button>
-            <button className="btn btn-primary" onClick={() => void create()}>+ New scheme</button>
+            <button className="btn btn-primary" data-tour="new-scheme" onClick={() => void create()}>+ New scheme</button>
           </div>
         </header>
         {message && <p role="status" className={message.ok ? 'text-ok' : 'text-danger'}>{message.text}</p>}
 
-        <section className="flex flex-wrap items-center gap-2" aria-label="Scheme filters">
+        <section className="flex flex-wrap items-center gap-2" aria-label="Scheme filters" data-tour="scheme-filters">
           <input className="input w-48" placeholder="🔍 Search" value={text} onChange={(e) => setText(e.target.value)} />
           <select className="input" aria-label="Faction" value={faction} onChange={(e) => setFaction(e.target.value)}>
             <option value="">All factions</option>

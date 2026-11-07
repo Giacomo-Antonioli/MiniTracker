@@ -245,7 +245,7 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
   return (
     <div className="grid max-w-3xl gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-display text-2xl text-accent">Sync</h1>
+        <h1 className="font-display text-2xl text-accent" data-tour="sync-title">Sync</h1>
         {me && <span className="text-sm text-muted">This device: <b className="text-fg">{me.deviceName}</b>{onOpenSettings && <> · <button className="underline" onClick={onOpenSettings}>Sync settings</button></>}</span>}
       </header>
       {listening && <p className="text-xs text-ok" role="note">📡 Devices you synced with before can sync with this one while this page is open.</p>}
