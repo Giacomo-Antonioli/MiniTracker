@@ -1,0 +1,21 @@
+/** Text for "Nearby devices" (#168), kept together for translation. */
+export const LAN_TEXT = {
+  title: 'Nearby devices',
+  intro: 'MiniTracker apps on this network (PC or phone app, Sync page open). No code to type: the first time, check that both screens show the same number.',
+  none: 'None found. Open ⇄ Sync in the MiniTracker app on the other device, on the same Wi-Fi.',
+  pair: (name: string) => `Pair with ${name}`,
+  syncNow: (name: string) => `Sync now with ${name}`,
+  pairLabel: 'Pair',
+  syncLabel: '⇄ Sync now',
+  paired: 'paired',
+  connecting: (name: string) => `Connecting to ${name}…`,
+  unreachable: (name: string) => `Can't reach ${name} on this network. Check both devices are on the same Wi-Fi, or use a pairing code.`,
+  confirmTitle: 'Pair these devices?',
+  confirmBody: (name: string) => `Pairing with ${name}. Check it shows the same number:`,
+  confirmHint: 'Different number? Cancel: another device may be in the middle.',
+  changedTitle: 'This device looks different',
+  changed: (name: string) => `${name} paired with this device before, but its identity has changed (reinstalled, reset, or a different device using its name). Pair again only if you're sure it's yours.`,
+  confirm: 'Same number: pair',
+  cancel: 'Cancel',
+  unavailable: 'Nearby sync is not available on this device.',
+}

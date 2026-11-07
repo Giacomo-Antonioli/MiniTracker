@@ -4,14 +4,15 @@ import { appDb, useStore } from '../../app/store'
 import type { MergeSummary } from '../../domain/sync/merge'
 import { CLOCK_WARN_SECONDS, deviceCodeFor, formatPairCode, newPairCode, pairLink, parsePairCode, type Hello } from '../../domain/sync/protocol'
 import { hostByCode, joinByCode, NO_DIRECT, privateAnswer, privateOffer, type Channel } from '../../data/syncChannel'
-import { getDevice, getKnownDevices, getSyncPrefs, isStale, recordSync, saveSyncPrefs, type Device, type KnownDevice } from '../../data/syncDevice'
+import { getDevice, getKnownDevices, getSyncPrefs, isStale, getLanCert, markLanPaired, recordSync, saveLanCert, saveSyncPrefs, type Device, type KnownDevice } from '../../data/syncDevice'
 import { applySyncFile, makeSyncFile, parseSyncFile, previewSyncFile, syncFileName, type SyncFile } from '../../data/syncFile'
 import { runSync, type Direction, type SyncPlan } from '../../data/syncSession'
 import type { SyncPrefs } from '../../data/syncStamps'
 import { Dialog } from '../../ui/Dialog'
 import { ScanDialog } from '../storage/Labels'
 import { QrReceiver, QrSender } from './QrCarousel'
-import { appUrl } from '../../app/platform'
+import { appUrl, isDesktopApp } from '../../app/platform'
+import { NearbyDevices } from './NearbyDevices'
 
 const TABLE_NAMES: Record<string, string> = {
   units: 'Units', statusEvents: 'Painting history', paintStock: 'Paint stock', customPaints: 'Custom paints', photos: 'Photos',
@@ -251,6 +252,17 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
       {listening && <p className="text-xs text-ok" role="note">📡 Devices you synced with before can sync with this one while this page is open.</p>}
       <p className="text-sm text-muted">Sync with another device running MiniTracker: phone, tablet or PC. The data goes directly between the two devices, encrypted; only the short pairing messages pass through a relay. Both apps must be open.</p>
 
+      {me && isDesktopApp() && (
+        <NearbyDevices me={me} busy={busy} known={devices} turn={prefs.turn?.urls ? prefs.turn : undefined}
+          onStatus={(text) => setStep({ kind: 'connecting', text })}
+          onError={(text) => setStep({ kind: 'error', text })}
+          cert={{ load: () => getLanCert(appDb), save: (c) => saveLanCert(appDb, c) }}
+          onChannel={(ch, starts, other, print) => void (async () => {
+            await markLanPaired(appDb, other, new Date().toISOString(), print)
+            setDevices(await getKnownDevices(appDb))
+            await talk(ch, starts)
+          })()} />
+      )}
       {!busy && (
         <section className="panel grid gap-3 p-4" aria-label="Start a sync">
           <PlanForm plan={plan} setPlan={setPlan} remember={remember} setRemember={setRemember} />

@@ -27,7 +27,7 @@ export interface SyncResult {
 }
 
 // Device-only settings: never copied from the other device.
-const LOCAL_ONLY = new Set(['deviceId', 'deviceName', 'syncDevices', 'syncPrefs'])
+const LOCAL_ONLY = new Set(['deviceId', 'deviceName', 'syncDevices', 'syncPrefs', 'lanCertificate'])
 
 const valueOf = (rows: SettingRow[], key: string) => rows.find((r) => r.key === key)?.value
 const stampAt = (x: object) => (x as { syncAt?: string }).syncAt

@@ -36,7 +36,7 @@ export const SETTINGS_SHAPES: Record<string, Shape> = {
 }
 
 /** Settings entries that hold sync's own data; never stamped or merged. */
-export const SYNC_KEYS = new Set(['syncStamps', 'syncTombstones', 'syncPrefs', 'syncDevices', 'deviceId', 'deviceName'])
+export const SYNC_KEYS = new Set(['syncStamps', 'syncTombstones', 'syncPrefs', 'syncDevices', 'deviceId', 'deviceName', 'lanCertificate'])
 
 export type Stamps = Record<string, string>
 

@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Desktop app: *Nearby devices* on the Sync page lists other MiniTracker apps on the same network, found automatically (no code to type). The first time, both screens show the same 6-digit number to confirm the pairing; after that a paired device syncs with one click (*⇄ Sync now*). The data still goes directly between the devices over the encrypted connection; the browser version keeps pairing codes and QR.
+
 ## [0.26.3] - 2026-11-07
 
 ### Fixed
