@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-11-07
+
 ### Added
 - Middle-earth Strategy Battle Game (2024 edition, #99): download it in Settings › Catalogue data. The data comes from the community MESBG list builder (BSData's Middle-earth data stopped before the 2024 edition): 106 army lists with points, stat lines (including Might/Will/Fate/Wounds), special rules, heroic actions, wargear and options. Heroes are single models, warriors are bought per model, unique heroes are limited to one.
 
@@ -318,7 +320,8 @@ First release: the backlog tracker.
 - Unit and component tests (Vitest, Testing Library), Playwright end-to-end tests on desktop and iPad viewports, all in CI (#6).
 - Coverage gate of 90% on domain and data code.
 
-[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.22.0...HEAD
+[Unreleased]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.23.0...HEAD
+[0.23.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/Giacomo-Antonioli/MiniTracker/compare/v0.19.0...v0.20.0
