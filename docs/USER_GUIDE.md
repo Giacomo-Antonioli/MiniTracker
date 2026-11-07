@@ -65,6 +65,8 @@ Your collection. Each **unit** holds one or more **groups** of models, so "6 bui
 
 **📷 Scan box** reads the barcode on a kit box. If MiniTracker doesn't know the box it looks it up online; tell it once what's inside and it remembers.
 
+**⚔ Spearhead box** (with Age of Sigmar installed) adds a whole Age of Sigmar Spearhead army at once. Pick the faction and the army; the dialog lists the general and units with their model counts, how many you already own, and, where a unit has several builds (e.g. Kurnoth Hunters with greatbows or scythes), which one you made. Choose **Add as** Wishlisted or a painting stage, then add. The units are tagged *Spearhead* and the army name. **Rules (PDF)** opens the army's free rules on Warhammer Community.
+
 ## Armies
 
 Army lists, built from the units in the active catalogue.

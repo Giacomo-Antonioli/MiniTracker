@@ -6,6 +6,8 @@ import { isGone, progress, WISHLISTED } from '../../domain/collection/pipeline'
 import type { OwnedUnit } from '../../domain/collection/types'
 import { CatalogueBanner } from './CatalogueBanner'
 import { UnitFormDialog } from './UnitFormDialog'
+import { SpearheadDialog } from '../spearhead/SpearheadDialog'
+import { gameOfRepo } from '../../domain/catalogue/editions'
 import { UnitPanel } from './UnitPanel'
 import { BacklogCards, BacklogTable, StageBar } from './BacklogTable'
 import { useIsPhone } from '../../ui/useIsPhone'
@@ -23,6 +25,9 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
   const [storing, setStoring] = useState(false)
   const phone = useIsPhone()
   const hasPlaces = useStore((s) => s.storage.places.length > 0)
+  // Spearhead boxes are Age of Sigmar's: shown when Age of Sigmar is installed and not hidden by the game picker.
+  const showSpearhead = useStore((s) => (s.gameFilter === 'all' || s.gameFilter === 'aos') && s.catalogues.some((c) => gameOfRepo(c.source.repo) === 'aos'))
+  const [spearhead, setSpearhead] = useState(false)
   // Table or board; remembered per browser (storage can be blocked, so it is only a convenience).
   const [view, setView] = useState<'table' | 'board'>(() => {
     try {
@@ -75,6 +80,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
             </div>}
           </div>
           <ScanBoxButton onOpenUnit={onOpenUnit} />
+          {showSpearhead && <button className="btn" onClick={() => setSpearhead(true)}>⚔ Spearhead box</button>}
           <button className="btn btn-primary" onClick={() => setEditing('new')}>+ Add unit</button>
         </header>
 
@@ -141,6 +147,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
           onOpenScheme={onOpenScheme}
         />
       )}
+      {spearhead && <SpearheadDialog onClose={() => setSpearhead(false)} />}
       {editing && <UnitFormDialog unit={editing === 'new' ? undefined : editing} factions={factions} onClose={() => setEditing(null)} />}
     </div>
   )

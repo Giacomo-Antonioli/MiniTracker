@@ -64,6 +64,13 @@ Painting steps and paint lists collected from public recipe pages by `tools/sche
 (Paint Pad, Tale of Painters). Only facts are stored (areas, techniques, paints, ratios), with the
 author, title and link of each source; no prose or images. Credit belongs to the original authors.
 
+## Spearhead armies (src/data/spearhead/boxes.json)
+
+The fixed contents of each Age of Sigmar Spearhead army (army name, faction, units and model counts), read by
+`tools/spearhead/build.mts` from the free Spearhead rules PDFs Games Workshop publishes on Warhammer Community,
+found through the faction pages of [Wahapedia](https://wahapedia.ru/aos4/). Only these facts and a link to each PDF
+are stored; no rules text or images. Warhammer, Age of Sigmar and Spearhead are trademarks of Games Workshop.
+
 ## Unit catalogue
 
 Not included. Each user's browser downloads it from [BSData](https://github.com/BSData/wh40k-10e).
