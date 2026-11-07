@@ -19,7 +19,11 @@ class FakeDC extends EventTarget {
 let n = 0
 const answerers: FakePC[] = []
 class FakePC extends EventTarget {
-  fp = `sha-256 AA:${++n}`
+  fp: string
+  constructor(cfg: { certificates?: { fp: string }[] } = {}) {
+    super()
+    this.fp = cfg.certificates?.[0]?.fp ?? `sha-256 AA:${++n}`
+  }
   iceGatheringState = 'complete'
   iceConnectionState = 'new'
   localDescription?: RTCSessionDescriptionInit
@@ -65,9 +69,11 @@ function pipes(): [Pipe, Pipe] {
   return [end(a, b), end(b, a)]
 }
 
-const opts = (id: string, decide: (p: PairPrompt) => Promise<boolean>, known = false): LanOptions => ({
+const cert = (id: string) => ({ fp: `SHA-256 CE:RT:${id}` }) as unknown as RTCCertificate
+const opts = (id: string, decide: (p: PairPrompt) => Promise<boolean>, stored?: string): LanOptions => ({
   me: { deviceId: id, deviceName: `Device ${id}` },
-  isKnown: () => known,
+  certificate: cert(id),
+  knownPrint: () => stored,
   decide,
 })
 
@@ -103,9 +109,20 @@ it('fails on both sides when one person cancels', async () => {
   expect((r[0] as PromiseRejectedResult).reason.message).toBe(NOT_CONFIRMED)
 })
 
-it('skips the question for devices already paired', async () => {
+it('skips the question when the paired device shows the same certificate', async () => {
   const [pa, pb] = pipes()
   const decide = vi.fn(async () => true)
-  await Promise.all([lanStart(pa, opts('A', decide, true)), lanAnswer(pb, opts('B', decide, true))])
+  const [x, y] = await Promise.all([lanStart(pa, opts('A', decide, 'SHA-256 CE:RT:B')), lanAnswer(pb, opts('B', decide, 'SHA-256 CE:RT:A'))])
   expect(decide).not.toHaveBeenCalled()
+  expect(x.theirPrint).toBe('SHA-256 CE:RT:B')
+  expect(y.theirPrint).toBe('SHA-256 CE:RT:A')
+})
+
+it('asks again, with a warning, when a paired device shows a different certificate', async () => {
+  const [pa, pb] = pipes()
+  const seen: PairPrompt[] = []
+  const decide = vi.fn(async (p: PairPrompt) => (seen.push(p), true))
+  await Promise.all([lanStart(pa, opts('A', decide, 'SHA-256 OLD:ONE')), lanAnswer(pb, opts('B', decide, 'SHA-256 CE:RT:A'))])
+  expect(seen).toHaveLength(1)
+  expect(seen[0]).toMatchObject({ known: false, changed: true, theirPrint: 'SHA-256 CE:RT:B' })
 })

@@ -49,8 +49,12 @@ export interface PairPrompt {
   other: Device
   /** The 6-digit code; the same on both screens. */
   code: string
-  /** True when this device already paired with the other one here: no need to ask. */
+  /** True when this device already paired with the other one and its certificate matches: no need to ask. */
   known: boolean
+  /** Paired before, but the other device's certificate is different now: its identity changed. */
+  changed: boolean
+  /** The other device's certificate fingerprint, to store with the pairing. */
+  theirPrint: string
 }
 
 export const NOT_CONFIRMED = 'The pairing was not confirmed on both devices.'
@@ -93,6 +97,9 @@ function inbox(pipe: Pipe) {
 
 const say = (pipe: Pipe, s: Signal) => pipe.send(JSON.stringify(s))
 
+/** The certificate fingerprint in a connection text ("sha-256 AB:CD:…"). */
+export const fingerprintOf = (sdp: string) => (/a=fingerprint:(\S+ \S+)/.exec(sdp)?.[1] ?? '').toUpperCase()
+
 /** The 6-digit code for a pair of connection texts: the same on both devices, different for anyone in the middle. */
 export async function pairingCode(offerSdp: string, answerSdp: string): Promise<string> {
   const prints = [offerSdp, answerSdp].map((s) => (/a=fingerprint:(\S+ \S+)/.exec(s)?.[1] ?? s).toUpperCase()).sort()
@@ -101,13 +108,32 @@ export async function pairingCode(offerSdp: string, answerSdp: string): Promise<
   return String(n).padStart(6, '0')
 }
 
+function promptFor(other: Device, code: string, theirSdp: string, o: LanOptions): PairPrompt {
+  const theirPrint = fingerprintOf(theirSdp)
+  const stored = o.knownPrint(other.deviceId)
+  return { other, code, theirPrint, known: !!stored && !!theirPrint && stored === theirPrint, changed: !!stored && stored !== theirPrint }
+}
+
+/** This device's certificate for LAN pairing: made once, then kept (renewed when it expires). */
+export async function lanCertificate(load: () => Promise<RTCCertificate | undefined>, save: (c: RTCCertificate) => Promise<void>): Promise<RTCCertificate | undefined> {
+  try {
+    const have = await load()
+    if (have && have.expires > Date.now() + 86_400_000) return have
+    const made = await RTCPeerConnection.generateCertificate({ name: 'ECDSA', namedCurve: 'P-256', expires: 365 * 86_400_000 } as EcKeyGenParams)
+    await save(made)
+    return made
+  } catch {
+    return undefined // no stored certificate: every connection gets a new one, so pairing asks each time
+  }
+}
+
 const sdpOf = (text: string) => (JSON.parse(text) as RTCSessionDescriptionInit).sdp ?? ''
 
 /**
  * Both sides after the connection texts were swapped: ask the person (unless known) and wait for the other
  * device's confirmation, then for the encrypted channel.
  */
-async function confirm(pipe: Pipe, next: ReturnType<typeof inbox>, prompt: PairPrompt, decide: (p: PairPrompt) => Promise<boolean>, open: Promise<Channel>): Promise<{ channel: Channel; other: Device }> {
+async function confirm(pipe: Pipe, next: ReturnType<typeof inbox>, prompt: PairPrompt, decide: (p: PairPrompt) => Promise<boolean>, open: Promise<Channel>): Promise<{ channel: Channel; other: Device; theirPrint: string }> {
   open.catch(() => {})
   const theirOk = next('ok')
   theirOk.catch(() => {})
@@ -121,23 +147,25 @@ async function confirm(pipe: Pipe, next: ReturnType<typeof inbox>, prompt: PairP
   await theirOk
   const channel = await open
   pipe.close()
-  return { channel, other: prompt.other }
+  return { channel, other: prompt.other, theirPrint: prompt.theirPrint }
 }
 
 export interface LanOptions {
   me: Device
-  /** Is this device already paired with that one over the LAN? */
-  isKnown(id: string): boolean
+  /** The certificate fingerprint stored when this device paired with that one, if it did. */
+  knownPrint(id: string): string | undefined
+  /** This device's own long-lived certificate, so the other device can recognise it next time. */
+  certificate?: RTCCertificate
   /** Ask the person to compare the code on both screens. */
   decide(p: PairPrompt): Promise<boolean>
   turn?: { urls: string; username?: string; credential?: string }
 }
 
 /** This device starts: send the connection text through the pipe, get the reply, confirm the pairing. */
-export async function lanStart(pipe: Pipe, o: LanOptions): Promise<{ channel: Channel; other: Device }> {
+export async function lanStart(pipe: Pipe, o: LanOptions): Promise<{ channel: Channel; other: Device; theirPrint: string }> {
   const next = inbox(pipe)
   say(pipe, { t: 'hi', id: o.me.deviceId, name: o.me.deviceName })
-  const pc = new RTCPeerConnection({ iceServers: iceServers(o) })
+  const pc = new RTCPeerConnection({ iceServers: iceServers(o), ...(o.certificate ? { certificates: [o.certificate] } : {}) })
   try {
     const dc = pc.createDataChannel('sync', { ordered: true })
     const ch = fromDataChannel(dc, pc)
@@ -151,7 +179,7 @@ export async function lanStart(pipe: Pipe, o: LanOptions): Promise<{ channel: Ch
     await pc.setRemoteDescription(JSON.parse(answer) as RTCSessionDescriptionInit)
     const other = { deviceId: hi.id, deviceName: hi.name }
     const code = await pairingCode(sdpOf(offer), sdpOf(answer))
-    return await confirm(pipe, next, { other, code, known: o.isKnown(hi.id) }, o.decide, guard(isOpen.then(() => ch), () => pc, 5 * 60_000))
+    return await confirm(pipe, next, promptFor(other, code, sdpOf(answer), o), o.decide, guard(isOpen.then(() => ch), () => pc, 5 * 60_000))
   } catch (e) {
     pc.close()
     pipe.close()
@@ -160,10 +188,10 @@ export async function lanStart(pipe: Pipe, o: LanOptions): Promise<{ channel: Ch
 }
 
 /** The other device started: answer through the pipe, confirm the pairing. */
-export async function lanAnswer(pipe: Pipe, o: LanOptions): Promise<{ channel: Channel; other: Device }> {
+export async function lanAnswer(pipe: Pipe, o: LanOptions): Promise<{ channel: Channel; other: Device; theirPrint: string }> {
   const next = inbox(pipe)
   say(pipe, { t: 'hi', id: o.me.deviceId, name: o.me.deviceName })
-  const pc = new RTCPeerConnection({ iceServers: iceServers(o) })
+  const pc = new RTCPeerConnection({ iceServers: iceServers(o), ...(o.certificate ? { certificates: [o.certificate] } : {}) })
   try {
     const open = new Promise<Channel>((resolve, reject) => {
       pc.addEventListener('datachannel', (e) => {
@@ -179,7 +207,7 @@ export async function lanAnswer(pipe: Pipe, o: LanOptions): Promise<{ channel: C
     say(pipe, { t: 'answer', sdp: answer })
     const other = { deviceId: hi.id, deviceName: hi.name }
     const code = await pairingCode(sdpOf(offer), sdpOf(answer))
-    return await confirm(pipe, next, { other, code, known: o.isKnown(hi.id) }, o.decide, guard(open, () => pc, 5 * 60_000))
+    return await confirm(pipe, next, promptFor(other, code, sdpOf(offer), o), o.decide, guard(open, () => pc, 5 * 60_000))
   } catch (e) {
     pc.close()
     pipe.close()

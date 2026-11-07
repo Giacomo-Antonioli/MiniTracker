@@ -13,6 +13,8 @@ export const LAN_TEXT = {
   confirmTitle: 'Pair these devices?',
   confirmBody: (name: string) => `Pairing with ${name}. Check it shows the same number:`,
   confirmHint: 'Different number? Cancel: another device may be in the middle.',
+  changedTitle: 'This device looks different',
+  changed: (name: string) => `${name} paired with this device before, but its identity has changed (reinstalled, reset, or a different device using its name). Pair again only if you're sure it's yours.`,
   confirm: 'Same number: pair',
   cancel: 'Cancel',
   unavailable: 'Nearby sync is not available on this device.',

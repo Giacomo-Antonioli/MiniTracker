@@ -4,7 +4,7 @@ import { appDb, useStore } from '../../app/store'
 import type { MergeSummary } from '../../domain/sync/merge'
 import { CLOCK_WARN_SECONDS, deviceCodeFor, formatPairCode, newPairCode, pairLink, parsePairCode, type Hello } from '../../domain/sync/protocol'
 import { hostByCode, joinByCode, NO_DIRECT, privateAnswer, privateOffer, type Channel } from '../../data/syncChannel'
-import { getDevice, getKnownDevices, getSyncPrefs, isStale, markLanPaired, recordSync, saveSyncPrefs, type Device, type KnownDevice } from '../../data/syncDevice'
+import { getDevice, getKnownDevices, getSyncPrefs, isStale, getLanCert, markLanPaired, recordSync, saveLanCert, saveSyncPrefs, type Device, type KnownDevice } from '../../data/syncDevice'
 import { applySyncFile, makeSyncFile, parseSyncFile, previewSyncFile, syncFileName, type SyncFile } from '../../data/syncFile'
 import { runSync, type Direction, type SyncPlan } from '../../data/syncSession'
 import type { SyncPrefs } from '../../data/syncStamps'
@@ -256,8 +256,9 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
         <NearbyDevices me={me} busy={busy} known={devices} turn={prefs.turn?.urls ? prefs.turn : undefined}
           onStatus={(text) => setStep({ kind: 'connecting', text })}
           onError={(text) => setStep({ kind: 'error', text })}
-          onChannel={(ch, starts, other) => void (async () => {
-            await markLanPaired(appDb, other, new Date().toISOString())
+          cert={{ load: () => getLanCert(appDb), save: (c) => saveLanCert(appDb, c) }}
+          onChannel={(ch, starts, other, print) => void (async () => {
+            await markLanPaired(appDb, other, new Date().toISOString(), print)
             setDevices(await getKnownDevices(appDb))
             await talk(ch, starts)
           })()} />

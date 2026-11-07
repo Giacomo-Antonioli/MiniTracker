@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Channel } from '../../data/syncChannel'
 import type { Device, KnownDevice } from '../../data/syncDevice'
-import { lanAnswer, lanBridge, lanStart, type LanBridge, type LanOptions, type NearbyPeer, type PairPrompt, type Pipe } from '../../data/syncLan'
+import { lanAnswer, lanBridge, lanStart, lanCertificate, type LanBridge, type LanOptions, type NearbyPeer, type PairPrompt, type Pipe } from '../../data/syncLan'
 import { Dialog } from '../../ui/Dialog'
 import { LAN_TEXT as T } from './lanText'
 
@@ -11,24 +11,28 @@ interface Props {
   known: KnownDevice[]
   turn?: LanOptions['turn']
   /** A confirmed, open channel: run the sync on it. */
-  onChannel(ch: Channel, starts: boolean, other: Device): void
+  onChannel(ch: Channel, starts: boolean, other: Device, theirPrint: string): void
+  /** This device's stored certificate, and where to save a new one. */
+  cert?: { load: () => Promise<RTCCertificate | undefined>; save: (c: RTCCertificate) => Promise<void> }
   onStatus(text: string): void
   onError(text: string): void
   bridge?: () => Promise<LanBridge>
 }
 
 /** "Nearby devices" on the Sync page (#168): MiniTracker apps on the same network, paired once by a 6-digit code. */
-export function NearbyDevices({ me, busy, known, turn, onChannel, onStatus, onError, bridge = lanBridge }: Props) {
+export function NearbyDevices({ me, busy, known, turn, onChannel, onStatus, onError, cert, bridge = lanBridge }: Props) {
   const [peers, setPeers] = useState<NearbyPeer[]>()
   const [unavailable, setUnavailable] = useState(false)
   const [prompt, setPrompt] = useState<PairPrompt & { resolve: (ok: boolean) => void }>()
   const ref = useRef({ busy, known, turn, onChannel, onStatus, onError })
   ref.current = { busy, known, turn, onChannel, onStatus, onError }
 
-  const options = (): LanOptions => ({
+  const certificate = useRef<Promise<RTCCertificate | undefined>>(undefined)
+  const options = async (): Promise<LanOptions> => ({
     me,
     turn: ref.current.turn,
-    isKnown: (id) => ref.current.known.some((d) => d.id === id && d.lanPaired),
+    certificate: cert ? await (certificate.current ??= lanCertificate(cert.load, cert.save)) : undefined,
+    knownPrint: (id) => ref.current.known.find((d) => d.id === id && d.lanPaired)?.lanPrint,
     decide: (p) => new Promise((resolve) => setPrompt({ ...p, resolve })),
   })
 
@@ -41,8 +45,8 @@ export function NearbyDevices({ me, busy, known, turn, onChannel, onStatus, onEr
       offs.push(b.onPeers((p) => !dead && setPeers(p)))
       offs.push(b.onIncoming((pipe: Pipe) => {
         if (ref.current.busy) return pipe.close()
-        void lanAnswer(pipe, options()).then(
-          ({ channel, other }) => ref.current.onChannel(channel, false, other),
+        void options().then((o) => lanAnswer(pipe, o)).then(
+          ({ channel, other, theirPrint }) => ref.current.onChannel(channel, false, other, theirPrint),
           (e: Error) => ref.current.onError(e.message),
         ).finally(() => setPrompt(undefined))
       }))
@@ -65,8 +69,8 @@ export function NearbyDevices({ me, busy, known, turn, onChannel, onStatus, onEr
       return ref.current.onError(T.unreachable(peer.name))
     }
     try {
-      const { channel, other } = await lanStart(pipe, options())
-      ref.current.onChannel(channel, true, other)
+      const { channel, other, theirPrint } = await lanStart(pipe, await options())
+      ref.current.onChannel(channel, true, other, theirPrint)
     } catch (e) {
       ref.current.onError((e as Error).message)
     } finally {
@@ -100,8 +104,9 @@ export function NearbyDevices({ me, busy, known, turn, onChannel, onStatus, onEr
         </ul>
       ) : <p className="text-sm text-muted">{T.none}</p>}
       {prompt && (
-        <Dialog title={T.confirmTitle} onClose={() => answer(false)}>
+        <Dialog title={prompt.changed ? T.changedTitle : T.confirmTitle} onClose={() => answer(false)}>
           <div className="grid gap-2 text-sm">
+            {prompt.changed && <p className="text-danger" role="alert">⚠ {T.changed(prompt.other.deviceName)}</p>}
             <p>{T.confirmBody(prompt.other.deviceName)}</p>
             <p className="text-center font-mono text-4xl font-bold tracking-widest" aria-label="Pairing number">{prompt.code.slice(0, 3)} {prompt.code.slice(3)}</p>
             <p className="text-xs text-muted">{T.confirmHint}</p>
