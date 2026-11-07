@@ -23,6 +23,11 @@ describe('BSData fetch', () => {
     await expect(latestCommit('o/r', fakeFetch({}))).rejects.toThrow(/HTTP 404/)
   })
 
+  it('uses the fixed file list of a non-BSData source (#99)', async () => {
+    const files = await listDataFiles('mhollink/mesbg-list-builder-v2024', SHA, fakeFetch({}))
+    expect(files).toEqual(['src/assets/data/mesbg_data.json', 'src/assets/data/profile_data.json', 'src/assets/data/army_list_data.json'])
+  })
+
   it('lists only .gst and .cat files', async () => {
     const f = fakeFetch({ [`/git/trees/${SHA}`]: () => Response.json(tree) })
     expect(await listDataFiles('o/r', SHA, f)).toEqual(['Game.gst', 'Faction A.cat'])

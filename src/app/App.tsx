@@ -22,6 +22,7 @@ import { readStartPage, useStore } from './store'
 import { useIsPhone } from '../ui/useIsPhone'
 import { WorkshopPage, workshopAlerts } from '../features/workshop/WorkshopPage'
 import { HomePage } from '../features/home/HomePage'
+import { GamePicker } from '../features/menu/GamePicker'
 import { codeFromText, findCode } from '../domain/storage/codes'
 import { parsePairCode } from '../domain/sync/protocol'
 import { SyncPage } from '../features/sync/SyncPage'
@@ -160,7 +161,8 @@ export default function App() {
 
   const navItems = (
     <>
-        <div className="mb-4 font-display text-lg tracking-wide text-accent">MiniTracker</div>
+        <div className="mb-2 font-display text-lg tracking-wide text-accent">MiniTracker</div>
+        {!phone && <GamePicker className="mb-2" />}
         {nav('home', 'Home')}
         {nav('backlog', 'Backlog')}
         {nav('armies', 'Armies')}
@@ -227,6 +229,7 @@ export default function App() {
         <header className="panel m-2 mb-0 flex items-center gap-2 px-2 py-1.5">
           <button className="btn px-2 py-1" aria-label="Menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>☰</button>
           <span className="flex-1 font-display text-lg tracking-wide text-accent">MiniTracker</span>
+          <GamePicker className="max-w-[40vw]" />
           <button className="btn px-2 py-1" aria-label="Sync" onClick={() => go('sync')}>⇄</button>
         </header>
       ) : (

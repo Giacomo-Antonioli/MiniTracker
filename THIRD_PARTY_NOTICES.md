@@ -67,3 +67,7 @@ author, title and link of each source; no prose or images. Credit belongs to the
 ## Unit catalogue
 
 Not included. Each user's browser downloads it from [BSData](https://github.com/BSData/wh40k-10e).
+
+Middle-earth Strategy Battle Game data is not included either. Each user's browser downloads it from the community
+[MESBG list builder](https://github.com/mhollink/mesbg-list-builder-v2024) (AGPL-3.0) and MiniTracker converts it on
+the device with its own code; no file or code of that project is part of MiniTracker. Thanks to its maintainers.

@@ -24,6 +24,8 @@ export async function latestCommit(repo: string, f: Fetch = fetch): Promise<stri
 
 /** Data file paths (.gst and .cat) at a commit. */
 export async function listDataFiles(repo: string, commit: string, f: Fetch = fetch): Promise<string[]> {
+  const fixed = (editionOfRepo(repo) as { paths?: readonly string[] } | undefined)?.paths
+  if (fixed) return [...fixed]
   const res = await ok(await f(`https://api.github.com/repos/${repo}/git/trees/${commit}`), 'list the BSData files')
   const tree = (await res.json()) as { tree?: { path: string; type: string }[] }
   // XML repositories use .gst/.cat; newer ones (wh40k-11e) publish the same data as .json.

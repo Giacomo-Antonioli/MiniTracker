@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Middle-earth Strategy Battle Game (2024 edition, #99): download it in Settings › Catalogue data. The data comes from the community MESBG list builder (BSData's Middle-earth data stopped before the 2024 edition): 106 army lists with points, stat lines (including Might/Will/Fate/Wounds), special rules, heroic actions, wargear and options. Heroes are single models, warriors are bought per model, unique heroes are limited to one.
+
 ## [0.22.0] - 2026-11-06
 
 ### Added

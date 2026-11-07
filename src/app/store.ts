@@ -1,4 +1,7 @@
 import { create } from 'zustand'
+import { useMemo } from 'react'
+import { GAMES, gameOfRepo } from '../domain/catalogue/editions'
+import { unitsOfGame, type GameFilter } from '../domain/catalogue/unitGame'
 import { exportBackupZip, importBackupFile } from '../data/backup'
 import { MiniTrackerDb } from '../data/db'
 import { convert } from '../data/catalogue/convert'
@@ -114,6 +117,15 @@ function readRuleDisplay(): RuleDisplay {
   }
 }
 
+function readGameFilter(): GameFilter {
+  try {
+    const v = localStorage.getItem('gameFilter')
+    return v && (v === 'all' || v in GAMES) ? (v as GameFilter) : 'all'
+  } catch {
+    return 'all'
+  }
+}
+
 export const ctx = (): Ctx => ({ now: new Date().toISOString(), newId: () => crypto.randomUUID() })
 
 interface State {
@@ -135,6 +147,10 @@ interface State {
   setTheme(theme: Theme): void
   ruleDisplay: RuleDisplay
   setRuleDisplay(v: RuleDisplay): void
+  /** Game picked in the menu (#99): Home, Backlog, Stats and Armies show only its units and lists. Saved on this device. */
+  gameFilter: GameFilter
+  /** Also makes an installed edition of that game the active catalogue. */
+  setGameFilter(g: GameFilter): Promise<void>
   /** Bundled + custom paints; empty until loadPaints() ran. */
   paints: PaintDef[]
   paintStock: Map<string, PaintStock>
@@ -305,6 +321,19 @@ export const useStore = create<State>((set, get) => ({
   pipelines: DEFAULT_PIPELINES,
   theme: readTheme(),
   ruleDisplay: readRuleDisplay(),
+  gameFilter: readGameFilter(),
+  async setGameFilter(g) {
+    try {
+      localStorage.setItem('gameFilter', g)
+    } catch {
+      // Not saved: this session only.
+    }
+    set({ gameFilter: g })
+    const { catalogue, catalogues } = get()
+    if (g === 'all' || (catalogue && gameOfRepo(catalogue.source.repo) === g)) return
+    const next = catalogues.find((c) => gameOfRepo(c.source.repo) === g)
+    if (next) await get().setActiveCatalogue(next.gameId)
+  },
   setRuleDisplay(v) {
     try {
       localStorage.setItem('ruleDisplay', v)
@@ -998,4 +1027,12 @@ async function syncShopping(unit: OwnedUnit) {
   const items = useStore.getState().shopItems
   useStore.setState({ shopItems: items.some((x) => x.id === item.id) ? items.map((x) => (x.id === item.id ? item : x)) : [...items, item] })
   await shopRepo.saveItems([item])
+}
+
+/** Units of the game picked in the menu (all units when "All games" is picked). */
+export function useShownUnits(): OwnedUnit[] {
+  const units = useStore((s) => s.units)
+  const catalogues = useStore((s) => s.catalogues)
+  const game = useStore((s) => s.gameFilter)
+  return useMemo(() => unitsOfGame(units, catalogues, game), [units, catalogues, game])
 }
