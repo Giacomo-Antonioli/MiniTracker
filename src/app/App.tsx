@@ -29,7 +29,7 @@ import { SyncPage } from '../features/sync/SyncPage'
 import { PlacePage, StoragePage } from '../features/storage/Storage'
 import { CompanionHub, WorkCompanion } from '../features/companion/WorkCompanion'
 import { isDesktopApp } from './platform'
-import { stepScale } from '../domain/settings/uiScale'
+import { AUTO, effectiveScale, stepScale } from '../domain/settings/uiScale'
 
 type Page = 'home' | 'backlog' | 'unit' | 'armies' | 'army' | 'browse' | 'rules' | 'paints' | 'schemes' | 'shopping' | 'workshop' | 'supplies' | 'tools' | 'stats' | 'goals' | 'guides' | 'games' | 'companion' | 'storage' | 'place' | 'sync' | 'settings'
 
@@ -143,20 +143,29 @@ export default function App() {
   }, [theme])
 
   // Text and interface size: the root font size; everything sized in rem follows.
+  // Auto (the default) follows the window: a bigger or maximised window gets bigger text.
   const uiScale = useStore((s) => s.uiScale)
+  const [winWidth, setWinWidth] = useState(() => window.innerWidth)
   useEffect(() => {
-    document.documentElement.style.fontSize = uiScale === 1 ? '' : `${uiScale * 100}%`
-  }, [uiScale])
+    const onResize = () => setWinWidth(window.innerWidth)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  const scale = effectiveScale(uiScale, winWidth)
+  useEffect(() => {
+    document.documentElement.style.fontSize = scale === 1 ? '' : `${scale * 100}%`
+  }, [scale])
 
   // Desktop app: Ctrl/Cmd + and − change the size, 0 resets it (in a browser these keys stay the browser's zoom).
   useEffect(() => {
     if (!isDesktopApp()) return
     const onKey = (e: KeyboardEvent) => {
       if (!(e.ctrlKey || e.metaKey) || e.altKey) return
-      const { uiScale: s, setUiScale } = useStore.getState()
+      const { uiScale, setUiScale } = useStore.getState()
+      const s = effectiveScale(uiScale, window.innerWidth)
       if (e.key === '+' || e.key === '=') setUiScale(stepScale(s, 1))
       else if (e.key === '-') setUiScale(stepScale(s, -1))
-      else if (e.key === '0') setUiScale(1)
+      else if (e.key === '0') setUiScale(AUTO)
       else return
       e.preventDefault()
     }

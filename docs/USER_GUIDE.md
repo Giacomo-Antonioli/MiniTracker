@@ -36,7 +36,7 @@ A good first half hour looks like this:
 2. **Add a few units.** On the **Backlog**, press **+ Add unit**, pick the faction and the unit, and say how many models are at which stage. You can add a unit by hand too, without the catalogue.
 3. **Make a backup.** **Settings › Backup** saves everything in one file. Your data lives in this browser only; clearing the browser's site data deletes it, so keep a backup somewhere else.
 
-The theme (*Grimdark* or *Forum 2005*) and the **Text and interface size** (80–150%, to make everything bigger or smaller) are in **Settings › Appearance**. In the desktop app, Ctrl + / Ctrl − change the size and Ctrl 0 resets it.
+The theme (*Grimdark* or *Forum 2005*) and the **Text and interface size** (Auto follows the window, so a bigger or maximised window gets bigger text; or pick 80–150%) are in **Settings › Appearance**. In the desktop app, Ctrl + / Ctrl − change the size and Ctrl 0 goes back to Auto.
 
 ## Home
 

@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('text and interface size grows the whole UI and is remembered', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 })
   await page.goto('./')
   const rootPx = () => page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))
   expect(await rootPx()).toBe(16)
@@ -16,6 +17,9 @@ test('text and interface size grows the whole UI and is remembered', async ({ pa
   expect(await rootPx()).toBe(20)
   await page.getByRole('button', { name: /Settings/ }).click()
   await page.getByRole('tab', { name: /Appearance/ }).click()
-  await page.getByRole('button', { name: 'Reset' }).click()
+  await page.getByRole('button', { name: 'Auto' }).click()
   expect(await rootPx()).toBe(16)
+  // Auto follows the window: a wide window gets bigger text.
+  await page.setViewportSize({ width: 1920, height: 1000 })
+  await expect.poll(rootPx).toBe(24)
 })
