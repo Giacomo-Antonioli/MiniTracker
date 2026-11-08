@@ -40,6 +40,7 @@ test('Spearhead box: pick an army, choose a build, add its units to the backlog'
   // Wishlisted models are not owned yet.
   await expect(contents).not.toContainText('you own')
   await dialog.getByRole('button', { name: /close/i }).click()
-  await expect(page.getByText('Kurnoth Hunters with Kurnoth Greatbows')).toBeVisible()
-  await expect(page.getByText('Tree-Revenants')).toBeVisible()
+  await expect(dialog).toBeHidden()
+  await expect(page.getByRole('cell', { name: 'Kurnoth Hunters with Kurnoth Greatbows' })).toBeVisible()
+  await expect(page.getByRole('cell', { name: 'Tree-Revenants' })).toBeVisible()
 })
