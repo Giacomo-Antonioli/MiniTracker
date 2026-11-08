@@ -1,21 +1,39 @@
+<div align="center">
+
+<img src="public/favicon.svg" alt="" width="72" height="72">
+
 # MiniTracker
 
-**Track your miniature backlog, from sprue to varnish, and (soon) build armies from the models you actually own.**
+**Track your miniature backlog, from sprue to varnish, then build armies from the models you actually own.**
 
 [![CI](https://github.com/Giacomo-Antonioli/MiniTracker/actions/workflows/ci.yml/badge.svg)](https://github.com/Giacomo-Antonioli/MiniTracker/actions/workflows/ci.yml)
 [![Deploy](https://github.com/Giacomo-Antonioli/MiniTracker/actions/workflows/deploy.yml/badge.svg)](https://github.com/Giacomo-Antonioli/MiniTracker/actions/workflows/deploy.yml)
 [![Release](https://img.shields.io/github/v/release/Giacomo-Antonioli/MiniTracker?sort=semver)](https://github.com/Giacomo-Antonioli/MiniTracker/releases)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE.md)
 
-### ▶ [Open the app](https://giacomo-antonioli.github.io/MiniTracker/) · 📖 [User guide](docs/USER_GUIDE.md)
+[**▶ Open the app**](https://giacomo-antonioli.github.io/MiniTracker/) &nbsp;·&nbsp; [**⬇ Desktop and Android**](https://github.com/Giacomo-Antonioli/MiniTracker/releases/latest) &nbsp;·&nbsp; [**📖 User guide**](docs/USER_GUIDE.md) &nbsp;·&nbsp; [**📝 Changelog**](CHANGELOG.md)
 
-No account, no server: your collection stays in your browser. Install it from the browser menu ("Install app" / "Add to Home Screen") and it works offline on desktop, iPad and phone.
+<img src="docs/screenshots/backlog-grimdark.png" alt="The Backlog in the Grimdark theme" width="880">
 
-![Backlog in the Grimdark theme](docs/screenshots/backlog-grimdark.png)
+</div>
 
-## Features
+No account, no server: your collection stays on your device. Use it in the browser (install it from the menu with "Install app" / "Add to Home Screen" and it works offline), or get the desktop app for Windows, macOS and Linux, or the Android `.apk`, from the [releases](https://github.com/Giacomo-Antonioli/MiniTracker/releases).
 
-**Collection**
+## At a glance
+
+| | |
+|---|---|
+| 🎨 **Paint** | Move models through your own pipeline, with dates, notes and a photo timeline. About 1,500 paints, schemes and a community recipe library. |
+| 📦 **Collect** | Units with model groups and loadouts, wishlists, shopping lists, supplies, storage boxes and QR labels. |
+| ⚔️ **Build** | Army lists checked against BSData rules for 40k, Age of Sigmar, Kill Team and Middle-earth, with PDF export and a buy list. |
+| 🎲 **Play** | Score board, phase-aware match companion, 3D dice, mission cards, and live sync of a game between your phone and PC. |
+| 🔄 **Sync** | Your own devices, by pairing code, QR, sync file or *Nearby devices* on the same network. |
+| 🌍 **Speak** | English, Italiano, Español, Deutsch, Français and 中文. |
+
+<details>
+<summary><b>Everything it does</b></summary>
+
+### Collection
 
 - **Home dashboard.** Pile size, painted this month, streak, finish estimate, the units to continue, a year activity calendar, records, recent moves, games, shopping and running-low items. Reorder, resize, add or remove cards (✎ Customise).
 - **Units with model groups.** "6 built + 4 painted" in one unit, each group with its own loadout and magnetised weapon slots; Wishlisted models you don't own yet.
@@ -24,13 +42,13 @@ No account, no server: your collection stays in your browser. Install it from th
 - **Backlog.** Grouped table with stage bars, sortable and hideable columns, filters, side panel and unit page.
 - **Stats.** Models painted per month or week, pile in vs out, pile size and age, points painted, where the work goes, time per stage, painted by faction and role, spending, paint usage, records and game results.
 
-**Catalogue and rules**
+### Catalogue and rules
 
 - **Unit catalogue.** Every Warhammer 40,000 datasheet (10th and/or 11th edition), Age of Sigmar 4th edition and Kill Team (2024) from BSData, Middle-earth (2024) from the MESBG list builder, and every Age of Sigmar Spearhead box to add in one go, downloaded and converted on your device: sizes, points, stats, weapons, abilities, wargear.
 - **Rules.** Every core and faction rule explained, in the catalogue and on a searchable Rules page.
 - **Stratagems.** Import Wahapedia's stratagem and detachment-rule files once; they show on the army PDF and in the match companion.
 
-**Armies and games**
+### Armies and games
 
 - **Army lists.** Build lists for 10th or 11th edition from legal units of your faction: detachments, enhancements, one Warlord (only Characters), Leaders, wargear loadouts. Owned / partly owned / missing per unit and painted progress.
 - **Rule checks.** Points, unit limits, detachment points, enhancements, Leaders and Warlord, read from BSData for each edition; hover a warning for the rule behind it.
@@ -39,32 +57,40 @@ No account, no server: your collection stays in your browser. Install it from th
 - **Import / export.** BattleScribe and NewRecruit rosters (`.rosz`), GW-app / NewRecruit text lists, and MiniTracker files.
 - **Games.** Live score board (primary and secondary per round, CP, turns, units destroyed on both sides, opponent's list), history and results per list and opponent faction.
 - **Match companion.** Phone-friendly screen for a game: phase bar, stratagems you can use now, abilities for the phase and turn, wounds per model, chess clock, photos.
+- **Live game sync.** *📡 Share live* in the Companion gives a code; *📡 Join live game* on your other device opens the same game, and score, CP, round and destroyed units stay in step.
 - **Game tools.** 3D dice for hits, wounds and saves; roll-off or coin flip for who goes first; 40k mission cards (Force Dispositions, Primary Missions, Deployment, Twist); the opponent's list from a file, your lists or by QR.
 
-**Paints and shopping**
+### Paints and shopping
 
 - **Schemes.** Official, community and personal paint schemes with variants, a credited library of community recipes, and a **Send to MiniTracker** bookmarklet.
 - **Paints.** ~1,500 Citadel, Army Painter, Vallejo and AK paints with swatches; inventory with stages, pots, price, shop and notes; CSV import/export; paints missing for your schemes.
 - **Shopping lists.** One main list plus your own lists; models, paints and anything else, with shop and price; ticking a kit bought moves its models into your collection.
 - **Supplies.** Primer, glue, brushes… with stock and an alert level. Paints marked running low and supplies at their alert level go on the shopping list.
 
-**Everywhere**
+### Everywhere
 
-- **Sync.** Between your own devices by pairing code, QR carousel (no network) or a sync file.
+- **Sync.** Between your own devices by pairing code, QR carousel (no network), a sync file, or *Nearby devices* on the same Wi-Fi (desktop and Android apps).
 - **Share.** A read-only link to your collection and painting progress, with the data inside the link.
 - **Backup.** Everything (photos included) in one file; restore it on any device.
 - **Themes.** *Grimdark* (modern dark) and *Forum 2005* (old-school fantasy forum).
-- **Private.** Your collection, lists and games stay in your browser; there is no account or server.
+- **Languages.** English, Italiano, Español, Deutsch, Français and 中文; BSData game data stays in English.
+- **Private.** Your collection, lists and games stay on your device; there is no account or server.
+
+</details>
+
+<div align="center">
 
 | Forum 2005 theme | Moving models |
-|---|---|
-| ![Forum 2005 theme](docs/screenshots/backlog-forum2005.png) | ![Move models dialog](docs/screenshots/move-models.png) |
+|:---:|:---:|
+| <img src="docs/screenshots/backlog-forum2005.png" alt="Forum 2005 theme" width="430"> | <img src="docs/screenshots/move-models.png" alt="Move models dialog" width="430"> |
+
+</div>
 
 ## Roadmap
 
-Released: collection tracker (v0.1), catalogue (v0.2), paints, schemes and photos (v0.3), army builder (v0.4), loadouts and shopping (v0.5), Home and Stats (v0.6), stratagems, supplies and photo timeline (v0.7), games and match companion (v0.8), colour match, magnets and cost tracking (v0.9), goals, recipe links and share links, bigger scheme library (v0.10), guides: techniques, bases, materials, terrain; more paint brands (v0.11), painting time + companions (v0.12), storage + QR labels (v0.13), barcode scanner (v0.14), tools and per-model labels (v0.15), workshop and mass move (v0.16), liquid levels and settings tabs (v0.17), device sync and phone layout (v0.18), QR carousel sync (v0.19), Sync now with known devices (v0.20), game tools: 3D dice, roll-off, mission cards, opponent list by QR (v0.21), share link, Age of Sigmar and Kill Team, user guide (v0.22), Middle-earth and game picker (v0.23), Spearhead boxes (v0.24), Middle-earth wargear options (v0.25), desktop app for Windows, macOS and Linux with auto-update, text size (v0.26). See the [changelog](CHANGELOG.md).
+**Latest:** desktop app for Windows, macOS and Linux with auto-update (v0.26), then, in v0.27, six languages, nearby devices, live game sync and the Android app. Every version is in the [changelog](CHANGELOG.md).
 
-Next, from the [open issues](https://github.com/Giacomo-Antonioli/MiniTracker/issues): magnet editor ([#32](https://github.com/Giacomo-Antonioli/MiniTracker/issues/32)), closest paint match ([#30](https://github.com/Giacomo-Antonioli/MiniTracker/issues/30)), cost tracking ([#94](https://github.com/Giacomo-Antonioli/MiniTracker/issues/94)), Kanban board ([#91](https://github.com/Giacomo-Antonioli/MiniTracker/issues/91)), painting time ([#89](https://github.com/Giacomo-Antonioli/MiniTracker/issues/89)), storage boxes ([#18](https://github.com/Giacomo-Antonioli/MiniTracker/issues/18)). Later: more paint brands, barcode scan, share links, a buy optimiser, Kill Team / Age of Sigmar, QR/NFC tags, phone layout.
+**Next:** Bluetooth sync (#168), a buy optimiser (#61), cloud-drive sync (#167). See the [open issues](https://github.com/Giacomo-Antonioli/MiniTracker/issues).
 
 ## How it works
 
