@@ -3,6 +3,7 @@ import type { Channel } from '../../data/syncChannel'
 import type { Device, KnownDevice } from '../../data/syncDevice'
 import { lanAnswer, lanBridge, lanStart, lanCertificate, type LanBridge, type LanOptions, type NearbyPeer, type PairPrompt, type Pipe } from '../../data/syncLan'
 import { Dialog } from '../../ui/Dialog'
+import { useTx } from '../../i18n'
 import { LAN_TEXT as T } from './lanText'
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
 
 /** "Nearby devices" on the Sync page (#168): MiniTracker apps on the same network, paired once by a 6-digit code. */
 export function NearbyDevices({ me, busy, known, turn, onChannel, onStatus, onError, cert, bridge = lanBridge }: Props) {
+  const tx = useTx()
   const [peers, setPeers] = useState<NearbyPeer[]>()
   const [unavailable, setUnavailable] = useState(false)
   const [prompt, setPrompt] = useState<PairPrompt & { resolve: (ok: boolean) => void }>()
@@ -108,7 +110,7 @@ export function NearbyDevices({ me, busy, known, turn, onChannel, onStatus, onEr
           <div className="grid gap-2 text-sm">
             {prompt.changed && <p className="text-danger" role="alert">⚠ {T.changed(prompt.other.deviceName)}</p>}
             <p>{T.confirmBody(prompt.other.deviceName)}</p>
-            <p className="text-center font-mono text-4xl font-bold tracking-widest" aria-label="Pairing number">{prompt.code.slice(0, 3)} {prompt.code.slice(3)}</p>
+            <p className="text-center font-mono text-4xl font-bold tracking-widest" aria-label={tx('Pairing number')}>{prompt.code.slice(0, 3)} {prompt.code.slice(3)}</p>
             <p className="text-xs text-muted">{T.confirmHint}</p>
             <div className="flex gap-2">
               <button className="btn btn-primary" onClick={() => answer(true)}>{T.confirm}</button>
