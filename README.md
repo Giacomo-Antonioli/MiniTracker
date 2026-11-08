@@ -88,7 +88,7 @@ No account, no server: your collection stays on your device. Use it in the brows
 
 ## Roadmap
 
-**Latest:** desktop app for Windows, macOS and Linux with auto-update (v0.26), then languages, nearby devices, live game sync and the Android app, coming in the next release. Every version is in the [changelog](CHANGELOG.md).
+**Latest:** desktop app for Windows, macOS and Linux with auto-update (v0.26), then, in v0.27, six languages, nearby devices, live game sync and the Android app. Every version is in the [changelog](CHANGELOG.md).
 
 **Next:** Bluetooth sync (#168), a buy optimiser (#61), cloud-drive sync (#167). See the [open issues](https://github.com/Giacomo-Antonioli/MiniTracker/issues).
 
