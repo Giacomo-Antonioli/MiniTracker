@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-11-08
+
 ### Added
 - Languages: English, Italiano, Español, Deutsch, Français and 中文. Pick one in Settings › Appearance › Language or on the first step of the welcome guide; by default the app follows the device language, and anything not translated yet shows in English. Almost everything is translated; a few texts built inside the app (guide content, goal titles, checklists) are still English. Unit names and rules from the game catalogues stay in English.
 - Desktop app: *Nearby devices* on the Sync page lists other MiniTracker apps on the same network, found automatically (no code to type). The first time, both screens show the same 6-digit number to confirm the pairing; after that a paired device syncs with one click (*⇄ Sync now*). The data still goes directly between the devices over the encrypted connection; the browser version keeps pairing codes and QR.
