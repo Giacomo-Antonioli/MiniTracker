@@ -22,9 +22,8 @@ test('walk every guided tour, mocks included', async ({ page }, info) => {
       break
     }
     titles.push((await pop.locator('.driver-popover-title').textContent()) ?? '')
-    const done = pop.getByRole('button', { name: 'Done' })
-    if (await done.count()) await done.click()
-    else await pop.getByRole('button', { name: 'Next' }).click()
+    // One locator for both, so a re-render between a check and the click cannot leave us waiting for the wrong button.
+    await pop.getByRole('button', { name: /^(Next|Done)$/ }).click()
   }
   expect(problems).toEqual([])
   for (const t of ['There it is', 'Unit details', 'Added', 'Put units in it', 'Playing', 'Score', 'End the game', 'Settings']) expect(titles).toContain(t)
