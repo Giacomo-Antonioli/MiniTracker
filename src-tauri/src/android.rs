@@ -10,7 +10,11 @@ pub fn multicast_lock(on: bool) {
         let vm = unsafe { jni::JavaVM::from_raw(ctx.vm().cast()) }?;
         let mut env = vm.attach_current_thread()?;
         let activity = unsafe { jni::objects::JObject::from_raw(ctx.context().cast()) };
-        let method = if on { "acquireMulticastLock" } else { "releaseMulticastLock" };
+        let method = if on {
+            "acquireMulticastLock"
+        } else {
+            "releaseMulticastLock"
+        };
         env.call_method(&activity, method, "()V", &[])?;
         Ok(())
     };

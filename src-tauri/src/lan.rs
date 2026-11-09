@@ -17,7 +17,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter, State};
 use tokio::net::{TcpListener, TcpStream};
-use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
+use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 use tokio_tungstenite::tungstenite::Message;
 
 const SERVICE: &str = "_minitracker._tcp.local.";
@@ -68,8 +68,13 @@ fn emit_peers(app: &AppHandle, peers: &Mutex<HashMap<String, Peer>>) {
 }
 
 /// Run one WebSocket connection: forward its texts to the web side, send what the web side queues.
-fn serve<S>(app: AppHandle, conns: Arc<Mutex<HashMap<u32, UnboundedSender<String>>>>, conn: u32, incoming: bool, ws: tokio_tungstenite::WebSocketStream<S>)
-where
+fn serve<S>(
+    app: AppHandle,
+    conns: Arc<Mutex<HashMap<u32, UnboundedSender<String>>>>,
+    conn: u32,
+    incoming: bool,
+    ws: tokio_tungstenite::WebSocketStream<S>,
+) where
     S: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin + Send + 'static,
 {
     let (tx, mut rx) = unbounded_channel::<String>();
@@ -97,21 +102,34 @@ where
 
 /// Start advertising this device and looking for others. Returns the port it listens on.
 #[tauri::command]
-pub async fn lan_start(app: AppHandle, lan: State<'_, Lan>, id: String, name: String) -> Result<u16, String> {
+pub async fn lan_start(
+    app: AppHandle,
+    lan: State<'_, Lan>,
+    id: String,
+    name: String,
+) -> Result<u16, String> {
     if let Some(r) = lan.running.lock().unwrap().as_ref() {
         emit_peers(&app, &lan.peers);
         return Ok(r.port);
     }
     crate::android::multicast_lock(true);
-    let listener = TcpListener::bind("0.0.0.0:0").await.map_err(|e| e.to_string())?;
+    let listener = TcpListener::bind("0.0.0.0:0")
+        .await
+        .map_err(|e| e.to_string())?;
     let port = listener.local_addr().map_err(|e| e.to_string())?.port();
 
     let conns = lan.conns.clone();
-    let next = Arc::new(AtomicU32::new(lan.next.fetch_add(1_000_000, Ordering::SeqCst) + 1_000_000));
+    let next = Arc::new(AtomicU32::new(
+        lan.next.fetch_add(1_000_000, Ordering::SeqCst) + 1_000_000,
+    ));
     let app2 = app.clone();
     let server = tauri::async_runtime::spawn(async move {
         while let Ok((stream, _)) = listener.accept().await {
-            let (app, conns, conn) = (app2.clone(), conns.clone(), next.fetch_add(1, Ordering::SeqCst));
+            let (app, conns, conn) = (
+                app2.clone(),
+                conns.clone(),
+                next.fetch_add(1, Ordering::SeqCst),
+            );
             tauri::async_runtime::spawn(async move {
                 if let Ok(ws) = tokio_tungstenite::accept_async(stream).await {
                     serve(app, conns, conn, true, ws);
@@ -121,7 +139,11 @@ pub async fn lan_start(app: AppHandle, lan: State<'_, Lan>, id: String, name: St
     });
 
     let daemon = ServiceDaemon::new().map_err(|e| e.to_string())?;
-    let instance: String = id.chars().filter(|c| c.is_ascii_alphanumeric()).take(32).collect();
+    let instance: String = id
+        .chars()
+        .filter(|c| c.is_ascii_alphanumeric())
+        .take(32)
+        .collect();
     let host = format!("minitracker-{instance}.local.");
     let props = [("id", id.as_str()), ("name", name.as_str())];
     let info = ServiceInfo::new(SERVICE, &instance, &host, "", port, &props[..])
@@ -138,15 +160,21 @@ pub async fn lan_start(app: AppHandle, lan: State<'_, Lan>, id: String, name: St
         while let Ok(ev) = events.recv() {
             match ev {
                 ServiceEvent::ServiceResolved(s) => {
-                    let Some(pid) = s.get_property_val_str("id").map(str::to_string) else { continue };
+                    let Some(pid) = s.get_property_val_str("id").map(str::to_string) else {
+                        continue;
+                    };
                     if pid == me {
                         continue;
                     }
-                    let mut addrs: Vec<_> = s.get_addresses().iter().map(|a| a.to_ip_addr()).collect();
+                    let mut addrs: Vec<_> =
+                        s.get_addresses().iter().map(|a| a.to_ip_addr()).collect();
                     addrs.sort_by_key(|a| !a.is_ipv4()); // IPv4 first: more often reachable
                     let peer = Peer {
                         id: pid.clone(),
-                        name: s.get_property_val_str("name").unwrap_or("MiniTracker").to_string(),
+                        name: s
+                            .get_property_val_str("name")
+                            .unwrap_or("MiniTracker")
+                            .to_string(),
                         addrs: addrs.iter().map(|a| a.to_string()).collect(),
                         port: s.get_port(),
                     };
@@ -166,7 +194,12 @@ pub async fn lan_start(app: AppHandle, lan: State<'_, Lan>, id: String, name: St
         }
     });
 
-    *lan.running.lock().unwrap() = Some(Running { daemon, fullname, port, server });
+    *lan.running.lock().unwrap() = Some(Running {
+        daemon,
+        fullname,
+        port,
+        server,
+    });
     Ok(port)
 }
 
@@ -185,14 +218,23 @@ pub fn lan_stop(app: AppHandle, lan: State<'_, Lan>) {
 
 /// Open a pipe to a nearby device; tries each of its addresses. Returns the pipe's number.
 #[tauri::command]
-pub async fn lan_connect(app: AppHandle, lan: State<'_, Lan>, addrs: Vec<String>, port: u16) -> Result<u32, String> {
+pub async fn lan_connect(
+    app: AppHandle,
+    lan: State<'_, Lan>,
+    addrs: Vec<String>,
+    port: u16,
+) -> Result<u32, String> {
     let mut last = String::from("No address");
     for a in addrs {
         let host = if a.contains(':') { format!("[{a}]") } else { a };
         let target = format!("{host}:{port}");
         let attempt = tokio::time::timeout(std::time::Duration::from_secs(4), async {
-            let tcp = TcpStream::connect(&target).await.map_err(|e| e.to_string())?;
-            tokio_tungstenite::client_async(format!("ws://{target}/"), tcp).await.map_err(|e| e.to_string())
+            let tcp = TcpStream::connect(&target)
+                .await
+                .map_err(|e| e.to_string())?;
+            tokio_tungstenite::client_async(format!("ws://{target}/"), tcp)
+                .await
+                .map_err(|e| e.to_string())
         })
         .await;
         match attempt {
@@ -211,7 +253,11 @@ pub async fn lan_connect(app: AppHandle, lan: State<'_, Lan>, addrs: Vec<String>
 #[tauri::command]
 pub fn lan_send(lan: State<'_, Lan>, conn: u32, text: String) -> Result<(), String> {
     let conns = lan.conns.lock().unwrap();
-    conns.get(&conn).ok_or("Closed")?.send(text).map_err(|e| e.to_string())
+    conns
+        .get(&conn)
+        .ok_or("Closed")?
+        .send(text)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

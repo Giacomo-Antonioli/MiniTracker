@@ -30,7 +30,7 @@ jobs:
         with: { workspaces: src-tauri }
       - name: Linux build dependencies
         if: matrix.name == 'linux'
-        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libdbus-1-dev
       - run: npm ci
       - run: npx tauri build ${{ matrix.args }}
       - uses: actions/upload-artifact@v4

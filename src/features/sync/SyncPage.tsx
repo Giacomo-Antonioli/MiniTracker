@@ -14,6 +14,7 @@ import { QrReceiver, QrSender } from './QrCarousel'
 import { appUrl, isDesktopApp } from '../../app/platform'
 import { txr, useTx } from '../../i18n'
 import { NearbyDevices } from './NearbyDevices'
+import { BluetoothSync } from './BluetoothSync'
 
 const TABLE_NAMES: Record<string, () => string> = {
   units: () => txr('Units'), statusEvents: () => txr('Painting history'), paintStock: () => txr('Paint stock'), customPaints: () => txr('Custom paints'), photos: () => txr('Photos'),
@@ -266,6 +267,12 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
             setDevices(await getKnownDevices(appDb))
             await talk(ch, starts)
           })()} />
+      )}
+      {me && isDesktopApp() && (
+        <BluetoothSync me={me} busy={busy}
+          onStatus={(text) => setStep({ kind: 'connecting', text })}
+          onError={(text) => setStep({ kind: 'error', text })}
+          onChannel={(ch, starts) => void talk(ch, starts)} />
       )}
       {!busy && (
         <section className="panel grid gap-3 p-4" aria-label={tx('Start a sync')}>
