@@ -1,4 +1,5 @@
 mod android;
+mod ble;
 mod lan;
 
 #[cfg(desktop)]
@@ -38,13 +39,17 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_opener::init())
         .manage(lan::Lan::default())
+        .manage(ble::Ble::default())
         .invoke_handler(tauri::generate_handler![
             print_page,
             lan::lan_start,
             lan::lan_stop,
             lan::lan_connect,
             lan::lan_send,
-            lan::lan_close
+            lan::lan_close,
+            ble::ble_connect,
+            ble::ble_send,
+            ble::ble_close
         ])
         .setup(|app| {
             #[cfg(desktop)]
