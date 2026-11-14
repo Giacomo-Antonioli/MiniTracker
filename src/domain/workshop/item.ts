@@ -25,6 +25,8 @@ export interface WorkshopItem {
   status: ItemStatus
   condition: ItemCondition
   quantity: number
+  /** Marked by hand as a liquid (its level is tracked) even if its category is not one; `false` turns a liquid category off for this item. */
+  liquid?: boolean
   /** Liquid supplies: stage id in the level pipeline (Full … Empty); unset = the first stage. */
   level?: string
   /** Alert when the quantity is at or under this. */
@@ -149,7 +151,33 @@ export interface WorkshopCategories {
   liquid: string[]
 }
 
-export const isLiquid = (item: WorkshopItem, kind: WorkshopKind, cats: WorkshopCategories) => kind === 'supply' && cats.liquid.includes(item.category)
+export const isLiquid = (item: WorkshopItem, kind: WorkshopKind, cats: WorkshopCategories) => item.liquid ?? (kind === 'supply' && cats.liquid.includes(item.category))
+
+export type WorkshopSort = 'attention' | 'name' | 'category' | 'stock' | 'recent'
+
+/** Items whose name, brand, category or notes contain every word of the query (case-insensitive). */
+export function searchItems<T extends WorkshopItem>(items: T[], query: string): T[] {
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean)
+  if (!words.length) return items
+  return items.filter((x) => {
+    const hay = [x.name, x.brand, x.category, x.notes, ...(x.copies?.map((c) => c.notes) ?? [])].join(' ').toLowerCase()
+    return words.every((w) => hay.includes(w))
+  })
+}
+
+/** A sorted copy: `attention` puts what is low first, then by category and name. */
+export function sortItems<T extends WorkshopItem>(items: T[], by: WorkshopSort, levels?: Pipeline): T[] {
+  const byName = (a: WorkshopItem, b: WorkshopItem) => a.name.localeCompare(b.name)
+  const byCat = (a: WorkshopItem, b: WorkshopItem) => a.category.localeCompare(b.category) || byName(a, b)
+  const order: Record<WorkshopSort, (a: T, b: T) => number> = {
+    attention: (a, b) => Number(isLow(b, levels)) - Number(isLow(a, levels)) || byCat(a, b),
+    name: byName,
+    category: byCat,
+    stock: (a, b) => a.quantity - b.quantity || byName(a, b),
+    recent: (a, b) => (b.updatedAt || b.createdAt || '').localeCompare(a.updatedAt || a.createdAt || '') || byName(a, b),
+  }
+  return [...items].sort(order[by])
+}
 
 export function parseCategories(raw: unknown, defaults: WorkshopCategories): WorkshopCategories {
   const r = (raw ?? {}) as Partial<WorkshopCategories>

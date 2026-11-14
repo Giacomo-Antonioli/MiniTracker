@@ -4,6 +4,16 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-11-15
+
+### Added
+- Paints: Vallejo's airbrush ranges (Model Air, Game Air, Premium Airbrush Color; type *air*) and the rest of Vallejo's catalogue (Model Color, Game Color, Mecha Color, Xpress Color, Panzer Aces and more): 1,061 more paints, each with its range. Paints you already had keep their ids.
+- Workshop: *+ Airbrush liquids* adds Vallejo's airbrush thinner, flow improver, cleaner and retarder as liquid supplies, and *+ Airbrush…* adds an airbrush tool by feed (gravity or siphon), action (single or dual) and nozzle size.
+- Workshop: a search box (name, brand, category, notes) and a sorter (needs attention first, name, category, least in stock, recently changed).
+- Workshop: *Bulk edit* on the shown items (tick boxes): move them to a storage place, set a category, or mark them as liquids.
+- Storage: a place's card has *+ Add place inside*, a new place already set to be inside it.
+- Workshop: any tool or supply can be marked as a liquid (*Liquid (track its level)*), so its level (Full / Half / Running low / Empty) can be set, not only for the liquid supply categories.
+
 ## [0.28.1] - 2026-11-14
 
 ### Added

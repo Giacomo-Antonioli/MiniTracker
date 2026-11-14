@@ -58,11 +58,11 @@ function useSave() {
   return { run, err }
 }
 
-function PlaceForm({ start, siteId, onDone }: { start?: Place; siteId?: string; onDone: (id?: string) => void }) {
+function PlaceForm({ start, siteId, parentId, onDone }: { start?: Place; siteId?: string; parentId?: string; onDone: (id?: string) => void }) {
   const tx = useTx()
   const { storage } = useStore()
   const { run, err } = useSave()
-  const [p, setP] = useState<Place>(start ?? { id: crypto.randomUUID(), name: '', kind: storage.kinds[0]?.id ?? 'box', siteId, location: '', note: '', createdAt: new Date().toISOString() })
+  const [p, setP] = useState<Place>(start ?? { id: crypto.randomUUID(), name: '', kind: storage.kinds[0]?.id ?? 'box', siteId, parentId, location: '', note: '', createdAt: new Date().toISOString() })
   return (
     <form
       className="grid gap-2 rounded border border-line p-3"
@@ -128,6 +128,8 @@ function PlaceDetail({ id, onOpenUnit, onEdit, onDeleted, onOpenPlace, full }: {
   useEffect(() => { if (!paints.length) void loadPaints() }, [paints.length, loadPaints])
   const { run } = useSave()
   const [moving, setMoving] = useState<'contents' | 'place' | 'scan'>()
+  const [addingInside, setAddingInside] = useState(false)
+  const tc = useT()
   const p = placeById(s, id)!
   const items = itemsIn({ tools, supplies }, id)
   const name = (u: string) => units.find((x) => x.id === u)?.customName ?? tx('Deleted unit')
@@ -157,7 +159,9 @@ function PlaceDetail({ id, onOpenUnit, onEdit, onDeleted, onOpenPlace, full }: {
       <div className="flex flex-wrap gap-2">
         <button className="btn" disabled={!homed.length && !here.length && !items.length} onClick={() => setMoving('contents')}>{tx('📦 Move contents…')}</button>
         <button className="btn" onClick={() => setMoving('scan')}>{tx('📷 Scan into here')}</button>
+        <button className="btn" onClick={() => setAddingInside(true)}>{tc('workshopCopies.addInside')}</button>
       </div>
+      {addingInside && <PlaceForm parentId={id} onDone={() => setAddingInside(false)} />}
       {moving === 'contents' && <MassMoveDialog title={tx('Move from {{name}}', { name: p.name })} unitIds={[...new Set([...homed.map((x) => x.unitId), ...here])]} items={items} fromPlaceId={id} onClose={() => setMoving(undefined)} />}
       {moving === 'place' && <MovePlaceDialog placeId={id} onClose={() => setMoving(undefined)} />}
       {moving === 'scan' && <ScanMoveDialog placeId={id} onClose={() => setMoving(undefined)} />}

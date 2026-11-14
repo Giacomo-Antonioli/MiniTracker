@@ -1,12 +1,19 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { configure, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, expect, it } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import App from '../../app/App'
 import { appDb, ctx, useStore } from '../../app/store'
 import { DEFAULT_PIPELINE } from '../../domain/collection/pipeline'
 import { DEFAULT_LAYOUT } from '../../domain/home/layout'
 import { newItem } from '../../domain/workshop/item'
+
+// These render the whole app; the full suite with coverage runs them slowly.
+vi.setConfig({ testTimeout: 30_000 })
+configure({ asyncUtilTimeout: 8000 })
+
+// Saves go on a moment after the state changes; let them finish before the next test deletes the database.
+afterEach(() => new Promise((resolve) => setTimeout(resolve, 200)))
 
 beforeEach(async () => {
   await appDb.delete()
@@ -44,13 +51,61 @@ it('adds the AK wet palette set once: the tray as a tool, paper and sponges as s
   const user = userEvent.setup()
   render(<App />)
   await user.click(await screen.findByRole('button', { name: 'Workshop' }))
-  await user.click(screen.getByRole('button', { name: '＋ AK wet palette set' }))
+  await user.click(await screen.findByRole('button', { name: '＋ AK wet palette set' }))
   await waitFor(() => expect(useStore.getState().supplies).toHaveLength(2))
   expect(useStore.getState().tools.map((t) => t.name)).toEqual(['AK Interactive Wet Palette'])
   expect(useStore.getState().tools[0].category).toBe('Palette')
   expect(useStore.getState().supplies.map((s) => [s.name, s.quantity, s.lowAt])).toEqual([['Wet palette paper sheets', 40, 10], ['Wet palette sponges', 2, 1]])
   expect(useStore.getState().workshopCategories.tools).toContain('Palette')
-  await user.click(screen.getByRole('button', { name: '＋ AK wet palette set' }))
+  await user.click(await screen.findByRole('button', { name: '＋ AK wet palette set' }))
   expect(await screen.findByText('The wet palette set is already in your workshop.')).toBeInTheDocument()
   expect(useStore.getState().supplies).toHaveLength(2)
+})
+
+it('searches, sorts, and bulk-edits the shown items (category, liquid)', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  await user.click(await screen.findByRole('button', { name: 'Workshop' }))
+  for (const [name, category] of [['Zeta clippers', 'Cutting'], ['Alpha brush', 'Brushes'], ['Beta knife', 'Cutting']] as const) await useStore.getState().saveTool(newItem({ name, category }, ctx()))
+  const names = () => screen.getAllByRole('listitem').map((li) => li.getAttribute('aria-label')).filter((n) => n?.startsWith('Tool'))
+  await waitFor(() => expect(names()).toHaveLength(3))
+  await user.selectOptions(screen.getByLabelText('Sort by'), 'Name')
+  expect(names()).toEqual(['Tool Alpha brush', 'Tool Beta knife', 'Tool Zeta clippers'])
+  await user.type(screen.getByRole('searchbox', { name: 'Search the workshop' }), 'cutting')
+  expect(names()).toEqual(['Tool Beta knife', 'Tool Zeta clippers'])
+  await user.type(screen.getByRole('searchbox', { name: 'Search the workshop' }), 'xyz')
+  expect(await screen.findByText('Nothing matches your search.')).toBeInTheDocument()
+  await user.clear(screen.getByRole('searchbox', { name: 'Search the workshop' }))
+  await user.type(screen.getByRole('searchbox', { name: 'Search the workshop' }), 'cutting')
+
+  await user.click(screen.getByRole('button', { name: /Bulk edit/ }))
+  const dialog = await screen.findByRole('dialog', { name: 'Bulk edit items' })
+  await user.click(within(dialog).getByRole('checkbox', { name: /Zeta/ }))
+  await user.click(within(dialog).getByRole('button', { name: 'Mark as liquid' }))
+  await waitFor(() => expect(within(dialog).getByRole('status')).toHaveTextContent('Changed 1 items.'))
+  const byName = (n: string) => useStore.getState().tools.find((t) => t.name === n)!
+  expect(byName('Beta knife').liquid).toBe(true)
+  expect(byName('Zeta clippers').liquid).toBeUndefined()
+  await user.selectOptions(within(dialog).getByLabelText('Set the category'), 'Other')
+  await user.click(within(dialog).getByRole('button', { name: 'Set category on 1 items' }))
+  await waitFor(() => expect(byName('Beta knife').category).toBe('Other'))
+})
+
+it('adds the Vallejo airbrush liquids as liquid supplies and an airbrush tool by feed, action and nozzle', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  await user.click(await screen.findByRole('button', { name: 'Workshop' }))
+  await user.click(await screen.findByRole('button', { name: '＋ Airbrush liquids' }))
+  await waitFor(() => expect(useStore.getState().supplies).toHaveLength(4))
+  expect(useStore.getState().supplies.every((s) => s.liquid && s.brand === 'Vallejo')).toBe(true)
+  await user.click(screen.getByRole('button', { name: '＋ Airbrush liquids' }))
+  expect(await screen.findByText('The airbrush liquids are already in your workshop.')).toBeInTheDocument()
+  expect(useStore.getState().supplies).toHaveLength(4)
+
+  await user.click(screen.getByRole('button', { name: '＋ Airbrush…' }))
+  const dialog = await screen.findByRole('dialog', { name: 'Add an airbrush' })
+  await user.selectOptions(within(dialog).getByLabelText('Feed'), 'siphon')
+  await user.selectOptions(within(dialog).getByLabelText('Nozzle'), '0.5')
+  await user.click(within(dialog).getByRole('button', { name: 'Add airbrush' }))
+  await waitFor(() => expect(useStore.getState().tools.map((t) => [t.name, t.category])).toEqual([['Airbrush (siphon feed, dual action, 0.5 mm)', 'Airbrush']]))
 })

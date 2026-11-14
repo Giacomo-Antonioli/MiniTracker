@@ -28,6 +28,8 @@ for (const [file, brand] of Object.entries(mp.files)) {
 
 // miniature-paints: Markdown tables (Name | [Code] | Set | R | G | B | Hex); type from the range, family from the colour.
 const md = cfg.miniaturePaints
+const nameKey = (brand, name) => `${brand}|${name.toLowerCase()}`
+const fromMinipainter = new Set(paints.map((p) => nameKey(p.brand, p.name)))
 for (const [file, b] of Object.entries(md.files)) {
   const text = await get(`https://raw.githubusercontent.com/${md.repo}/${md.commit}/paints/${file}.md`)
   const lines = text.split('\n').filter((l) => l.startsWith('|'))
@@ -40,10 +42,16 @@ for (const [file, b] of Object.entries(md.files)) {
     const rgb = { r: +c[col('R')], g: +c[col('G')], b: +c[col('B')] }
     if (!name || [rgb.r, rgb.g, rgb.b].some(Number.isNaN)) continue
     // Metal colours are sold inside normal ranges too ("Cokum Copper").
-    const type = /\b(gold|silver|steel|bronze|brass|copper|metal|chrome|iron|aluminium|titanium|gunmetal|platinum)\b/i.test(name) ? 'metallic' : b.types[set]
+    const ranged = b.types[set]
+    // Airbrush ranges and technical products (primers, weathering) keep their type even when the name sounds metallic.
+    const type = ranged === 'air' || ranged === 'technical' ? ranged : /\b(gold|silver|steel|bronze|brass|copper|metal|chrome|iron|aluminium|titanium|gunmetal|platinum)\b/i.test(name) ? 'metallic' : ranged
     if (!type) throw new Error(`${file}: no type for range "${set}" (add it to sources.json)`)
-    let id = `${b.id}/${slug(name)}`
-    if (seen.has(id)) id = `${b.id}/${slug(name)}-${slug(set.replace(/range/i, ''))}`
+    // Already in the bundled list from the first source (same brand and name): keep that one, so saved stock keeps its id.
+    if (b.skipNamesFrom && !(b.skipExceptTypes ?? []).includes(type) && fromMinipainter.has(nameKey(b.brand, name))) continue
+    const code = b.idByCode ? c[col('Code')] : ''
+    // Names repeat across ranges, so these brands id by range and product code.
+    let id = code ? `${b.id}/${slug(set)}-${slug(code)}` : `${b.id}/${slug(name)}`
+    if (!code && seen.has(id)) id = `${b.id}/${slug(name)}-${slug(set.replace(/range/i, ''))}`
     if (seen.has(id)) continue
     seen.add(id)
     const h = hex(rgb)

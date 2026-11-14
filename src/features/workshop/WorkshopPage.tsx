@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { pathLabel } from '../../domain/storage/storage'
-import { SUGGESTED_TASKS, TOOL_SOURCE, wetPaletteSet } from '../../domain/tools/tools'
+import { AIRBRUSH_NOZZLES, SUGGESTED_TASKS, TOOL_SOURCE, airbrushLiquids, airbrushTool, wetPaletteSet, type AirbrushAction, type AirbrushFeed } from '../../domain/tools/tools'
 import type { Pipeline } from '../../domain/collection/types'
 import {
-  addTask, CONDITIONS, copyCount, copyOf, daysLeft, dueTasks, editCopies, fitCopies, isLiquid, isLow, levelIsLow, markDone, newItem, refPrefix, removeTask, repIndex, setRepresentative, shopItem,
-  type ItemCondition, type ItemCopy, type ItemStatus, type WorkshopCategories, type WorkshopItem, type WorkshopKind,
+  addTask, CONDITIONS, copyCount, copyOf, daysLeft, dueTasks, editCopies, fitCopies, isLiquid, isLow, levelIsLow, markDone, newItem, refPrefix, removeTask, repIndex, searchItems, setRepresentative, shopItem, sortItems,
+  type ItemCondition, type ItemCopy, type WorkshopSort, type ItemStatus, type WorkshopCategories, type WorkshopItem, type WorkshopKind,
 } from '../../domain/workshop/item'
 import { useT, useTx, txr } from '../../i18n'
 import { AddFromFile } from '../collectionFile/AddFromFile'
 import { PlaceSelect } from '../storage/Storage'
+import { Dialog } from '../../ui/Dialog'
+import { WorkshopBulkDialog } from './WorkshopBulkDialog'
 
 const dueText = (d: number) =>
   d < 0 ? (d === -1 ? txr('1 day overdue') : txr('{{n}} days overdue', { n: -d })) : d === 0 ? txr('due today') : d === 1 ? txr('in 1 day') : txr('in {{n}} days', { n: d })
@@ -22,10 +24,12 @@ type Row = { kind: WorkshopKind; item: WorkshopItem }
 /** One click adds the AK wet palette as a tool and its paper and sponges as supplies (what is already there is left alone). */
 function WetPaletteButton() {
   const t = useT()
-  const { tools, supplies, saveTool, saveSupply, workshopCategories: cats, saveWorkshopCategories } = useStore()
+  const { saveTool, saveSupply, workshopCategories: cats, saveWorkshopCategories } = useStore()
   const [message, setMessage] = useState('')
   const add = async () => {
-    const set = wetPaletteSet({ tools, supplies }, ctx())
+    // Current state, not the render's copy: a quick second click must see what the first one added.
+    const now = useStore.getState()
+    const set = wetPaletteSet({ tools: now.tools, supplies: now.supplies }, ctx())
     const n = (set.tool ? 1 : 0) + set.supplies.length
     if (set.tool) {
       if (!cats.tools.includes(set.tool.category)) await saveWorkshopCategories({ ...cats, tools: [...cats.tools, set.tool.category] })
@@ -38,6 +42,60 @@ function WetPaletteButton() {
     <span className="flex items-center gap-2">
       <button className="btn text-sm" title={t('workshopCopies.wetPaletteHelp')} onClick={() => void add()}>{t('workshopCopies.wetPalette')}</button>
       {message && <span className="text-xs text-muted" role="status">{message}</span>}
+    </span>
+  )
+}
+
+/** One click adds Vallejo's airbrush liquids as liquid supplies; "Airbrush…" adds an airbrush tool by feed, action and nozzle. */
+function AirbrushButtons() {
+  const t = useT()
+  const { saveTool, saveSupply } = useStore()
+  const [message, setMessage] = useState('')
+  const [dialog, setDialog] = useState(false)
+  const [feed, setFeed] = useState<AirbrushFeed>('gravity')
+  const [action, setAction] = useState<AirbrushAction>('dual')
+  const [nozzle, setNozzle] = useState(0.3)
+  const addLiquids = async () => {
+    const list = airbrushLiquids({ supplies: useStore.getState().supplies }, ctx())
+    for (const x of list) await saveSupply(x)
+    setMessage(list.length ? t('workshopCopies.liquidsAdded', { n: list.length }) : t('workshopCopies.liquidsHave'))
+  }
+  const addTool = async () => {
+    const tool = airbrushTool({ feed, action, nozzle }, ctx())
+    setDialog(false)
+    if (useStore.getState().tools.some((x) => x.name === tool.name)) return setMessage(t('workshopCopies.airbrushHave'))
+    await saveTool(tool)
+    setMessage(t('workshopCopies.airbrushAdded', { name: tool.name }))
+  }
+  return (
+    <span className="flex flex-wrap items-center gap-2">
+      <button className="btn text-sm" title={t('workshopCopies.liquidsHelp')} onClick={() => void addLiquids()}>{t('workshopCopies.liquids')}</button>
+      <button className="btn text-sm" onClick={() => setDialog(true)}>{t('workshopCopies.airbrush')}</button>
+      {message && <span className="text-xs text-muted" role="status">{message}</span>}
+      {dialog && (
+        <Dialog title={t('workshopCopies.airbrushTitle')} onClose={() => setDialog(false)}>
+          <div className="grid gap-3">
+            <label className="grid gap-0.5 text-xs text-muted">{t('workshopCopies.feed')}
+              <select className="input" value={feed} onChange={(e) => setFeed(e.target.value as AirbrushFeed)}>
+                <option value="gravity">{t('workshopCopies.feedGravity')}</option>
+                <option value="siphon">{t('workshopCopies.feedSiphon')}</option>
+              </select>
+            </label>
+            <label className="grid gap-0.5 text-xs text-muted">{t('workshopCopies.action')}
+              <select className="input" value={action} onChange={(e) => setAction(e.target.value as AirbrushAction)}>
+                <option value="dual">{t('workshopCopies.actionDual')}</option>
+                <option value="single">{t('workshopCopies.actionSingle')}</option>
+              </select>
+            </label>
+            <label className="grid gap-0.5 text-xs text-muted">{t('workshopCopies.nozzle')}
+              <select className="input" value={nozzle} onChange={(e) => setNozzle(Number(e.target.value))}>
+                {AIRBRUSH_NOZZLES.map((n) => <option key={n} value={n}>{n} mm</option>)}
+              </select>
+            </label>
+            <button className="btn btn-primary" onClick={() => void addTool()}>{t('workshopCopies.airbrushAdd')}</button>
+          </div>
+        </Dialog>
+      )}
     </span>
   )
 }
@@ -97,6 +155,7 @@ export function workshopAlerts(s: { tools: WorkshopItem[]; supplies: WorkshopIte
 /** Tools and supplies: stock with alerts, condition, storage place, maintenance jobs and a wishlist. `kind` shows one list only. */
 export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
   const tx = useTx()
+  const tc = useT()
   const { rows: all, save } = useWorkshop()
   const { workshopCategories: cats, pipelines } = useStore()
   const levels = pipelines.level
@@ -112,9 +171,13 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
   const rows = all.filter((r) => !kind || r.kind === kind)
   const due = dueTasks(rows.map((r) => r.item), now).map((d) => ({ ...d, kind: rows.find((r) => r.item === d.item)!.kind }))
   const low = rows.filter((r) => isLow(r.item, levels)).length
-  const shown = rows
-    .filter((r) => r.item.status === tab)
-    .sort((a, b) => Number(isLow(b.item, levels)) - Number(isLow(a.item, levels)) || a.item.category.localeCompare(b.item.category) || a.item.name.localeCompare(b.item.name))
+  const [bulk, setBulk] = useState(false)
+  const [query, setQuery] = useState('')
+  const [sort, setSort] = useState<WorkshopSort>('attention')
+  const inTab = rows.filter((r) => r.item.status === tab)
+  const matching = new Set(searchItems(inTab.map((r) => r.item), query))
+  const rank = new Map(sortItems(inTab.map((r) => r.item), sort, levels).map((x, i) => [x, i]))
+  const shown = inTab.filter((r) => matching.has(r.item)).sort((a, b) => rank.get(a.item)! - rank.get(b.item)!)
   const title = kind === 'tool' ? tx('Tools') : kind === 'supply' ? tx('Supplies') : tx('Workshop')
   const newLabel = kind === 'tool' ? tx('New tool') : kind === 'supply' ? tx('New supply') : tx('New item')
 
@@ -131,6 +194,7 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
           ))}
         </div>
         <WetPaletteButton />
+        <AirbrushButtons />
         <AddFromFile compact />
       </header>
 
@@ -179,7 +243,22 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
         {error && <span className="text-sm text-danger" role="alert">{error}</span>}
       </form>
 
-      {shown.length === 0 ? (
+      {inTab.length > 0 && (
+        <section className="flex flex-wrap items-center gap-2" aria-label={tc('workshopCopies.search')}>
+          <input className="input w-full sm:w-64" type="search" placeholder={`🔍 ${tc('workshopCopies.search')}`} aria-label={tc('workshopCopies.search')} value={query} onChange={(e) => setQuery(e.target.value)} />
+          <label className="flex items-center gap-1 text-sm text-muted">{tc('workshopCopies.sortBy')}
+            <select className="input" value={sort} onChange={(e) => setSort(e.target.value as WorkshopSort)}>
+              {([['attention', 'sortAttention'], ['name', 'sortName'], ['category', 'sortCategory'], ['stock', 'sortStock'], ['recent', 'sortRecent']] as const).map(([id, k]) => <option key={id} value={id}>{tc(`workshopCopies.${k}`)}</option>)}
+            </select>
+          </label>
+          {shown.length > 0 && <button className="btn ml-auto text-sm" onClick={() => setBulk(true)}>{tc('workshopCopies.bulkOpen', { n: shown.length })}</button>}
+        </section>
+      )}
+      {bulk && <WorkshopBulkDialog rows={shown} onClose={() => setBulk(false)} />}
+
+      {shown.length === 0 && inTab.length > 0 ? (
+        <p className="text-muted">{tc('workshopCopies.noMatch')}</p>
+      ) : shown.length === 0 ? (
         <div className="grid justify-items-start gap-2 text-muted">
         <p>
           {tab === 'wishlist' ? tx('Nothing on the wishlist. Add what you want and send it to the shopping list.')
@@ -300,6 +379,7 @@ function ItemCard({ row: { kind, item: t }, now, showKind }: { row: Row; now: st
             <label className="grid gap-0.5 text-xs text-muted">{tx('Category')}<CategorySelect kind={kind} value={t.category} onChange={(c) => save({ category: c })} /></label>
             {owned && (
               <>
+                <label className="flex items-center gap-1 text-xs text-muted"><input type="checkbox" checked={liquid} onChange={(e) => save({ liquid: e.target.checked })} />{tc('workshopCopies.liquid')}</label>
                 <label className="grid gap-0.5 text-xs text-muted">{tx('Alert at')}<input className="input w-16" type="number" min={0} aria-label={tx('Alert level for {{name}}', { name: t.name })} value={t.lowAt} onChange={(e) => save({ lowAt: Math.max(0, Number(e.target.value) || 0) })} /></label>
                 {liquid ? <label className="grid gap-0.5 text-xs text-muted">{tx('Level')}<select className="input" value={view.level ?? levels.stages[0]?.id} onChange={(e) => edit({ level: e.target.value })}>{levels.stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></label> : <label className="grid gap-0.5 text-xs text-muted">{tx('Condition')}<select className="input" value={view.condition} onChange={(e) => edit({ condition: e.target.value as ItemCondition })}>{CONDITIONS.map((c) => <option key={c.id} value={c.id}>{conditionName(c.id)}</option>)}</select></label>}
                 {storage.places.length > 0 && <label className="grid gap-0.5 text-xs text-muted">{tx('Kept in')}<PlaceSelect label={tx('Kept in')} empty={tx('Not set')} value={view.placeId} onChange={(id) => edit({ placeId: id })} /></label>}
