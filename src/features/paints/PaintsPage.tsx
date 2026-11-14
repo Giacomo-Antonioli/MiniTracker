@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useStore } from '../../app/store'
+import { ctx, useStore } from '../../app/store'
 import { inventoryToCsv } from '../../domain/paints/csv'
-import { filterPaints, paintStats, type PaintFilter } from '../../domain/paints/inventory'
+import { adjustQuantity, filterPaints, paintStats, placeStocks, type PaintFilter } from '../../domain/paints/inventory'
 import type { PaintDef } from '../../domain/paints/types'
 import { CustomPaintDialog } from './CustomPaintDialog'
 import { MissingPaintsDialog } from './MissingPaintsDialog'
 import { AddToShoppingButton } from '../shopping/AddToShoppingDialog'
 import { PaintPanel } from './PaintPanel'
 import { HexMatchDialog } from './ColourMatches'
+import { Dialog } from '../../ui/Dialog'
+import { PlaceSelect } from '../storage/Storage'
 import { useTx } from '../../i18n'
 
 const PAGE = 240
@@ -17,7 +19,7 @@ const distinct = (paints: PaintDef[], key: 'brand' | 'type' | 'family') =>
 
 export function PaintsPage() {
   const tx = useTx()
-  const { paints, paintStock, pipelines, loadPaints, importPaintCsv } = useStore()
+  const { paints, paintStock, pipelines, loadPaints, importPaintCsv, saveStock } = useStore()
   const [csvMessage, setCsvMessage] = useState<{ ok: boolean; text: string } | null>(null)
   const [filter, setFilter] = useState<PaintFilter>({})
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -25,6 +27,9 @@ export function PaintsPage() {
   const [matching, setMatching] = useState(false)
   const [buying, setBuying] = useState(false)
   const [limit, setLimit] = useState(PAGE)
+  const [selecting, setSelecting] = useState(false)
+  const [picked, setPicked] = useState<Set<string>>(new Set())
+  const [moving, setMoving] = useState(false)
 
   useEffect(() => {
     if (!paints.length) void loadPaints()
@@ -85,6 +90,7 @@ export function PaintsPage() {
                 }}
               />
             </label>
+            <button className="btn" aria-pressed={selecting} onClick={() => { setSelecting(!selecting); setPicked(new Set()) }}>{selecting ? tx('Done selecting') : tx('☑ Select')}</button>
             <button className="btn" onClick={() => setBuying(true)}>{tx('Paints to buy…')}</button>
             <button className="btn" onClick={() => setMatching(true)}>{tx('🎯 Match a colour')}</button>
             <button className="btn btn-primary" onClick={() => setAdding(true)}>{tx('+ Custom paint')}</button>
@@ -125,15 +131,25 @@ export function PaintsPage() {
           <span className="ml-auto text-sm text-muted">{tx('{{n}} paints', { n: shown.length })}</span>
         </section>
 
+        {selecting && (
+          <section className="panel flex flex-wrap items-center gap-2 p-3 text-sm" aria-label={tx('Selection')}>
+            <b>{tx('{{n}} selected', { n: picked.size })}</b>
+            <button className="btn" onClick={() => setPicked(new Set(shown.map((p) => p.id)))}>{tx('Select all ({{n}})', { n: shown.length })}</button>
+            <button className="btn" disabled={!picked.size} onClick={() => setPicked(new Set())}>{tx('Clear')}</button>
+            <button className="btn btn-primary" disabled={!picked.size} onClick={() => setMoving(true)}>{tx('📦 Put in a box…')}</button>
+          </section>
+        )}
+
         <ul className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 overflow-y-auto pb-4" aria-label={tx('Paints')}>
           {shown.slice(0, limit).map((p) => {
             const s = paintStock.get(p.id)
             return (
-              <li key={p.id}>
+              <li key={p.id} className="relative">
                 <button
-                  className={`panel flex w-full flex-col overflow-hidden text-left hover:border-accent ${p.id === selectedId ? 'border-accent' : ''}`}
-                  onClick={() => setSelectedId(p.id)}
+                  className={`panel flex w-full flex-col overflow-hidden text-left hover:border-accent ${p.id === selectedId || picked.has(p.id) ? 'border-accent' : ''}`}
+                  onClick={() => selecting ? setPicked((x) => { const n = new Set(x); if (!n.delete(p.id)) n.add(p.id); return n }) : setSelectedId(p.id)}
                   aria-label={`${p.name} (${p.brand})`}
+                  aria-pressed={selecting ? picked.has(p.id) : undefined}
                 >
                   <span className="h-12 w-full border-b border-line" style={{ background: p.hex }} />
                   <span className="p-2">
@@ -147,6 +163,13 @@ export function PaintsPage() {
                     )}
                   </span>
                 </button>
+                {selecting && <span className="pointer-events-none absolute left-1 top-1 rounded bg-panel px-1 text-sm" aria-hidden>{picked.has(p.id) ? '☑' : '☐'}</span>}
+                {s && !selecting && (
+                  <span className="absolute right-1 top-1 flex overflow-hidden rounded border border-line bg-panel text-sm">
+                    <button className="px-2" aria-label={tx('One pot less: {{name}}', { name: p.name })} disabled={s.quantity < 1} onClick={() => void saveStock(adjustQuantity(s, -1, ctx()))}>−</button>
+                    <button className="px-2" aria-label={tx('One pot more: {{name}}', { name: p.name })} onClick={() => void saveStock(adjustQuantity(s, 1, ctx()))}>+</button>
+                  </span>
+                )}
               </li>
             )
           })}
@@ -157,10 +180,38 @@ export function PaintsPage() {
         {shown.length === 0 && <p className="p-6 text-center text-muted">{tx('No paints match these filters.')}</p>}
       </div>
 
+      {moving && <PutInBoxDialog ids={[...picked]} onClose={(done) => { setMoving(false); if (done) { setPicked(new Set()); setSelecting(false) } }} />}
       {selected && <PaintPanel paint={selected} onClose={() => setSelectedId(null)} onSelect={setSelectedId} />}
       {buying && <MissingPaintsDialog onClose={() => setBuying(false)} />}
       {matching && <HexMatchDialog onClose={() => setMatching(false)} onPick={(p) => { setSelectedId(p.id); setMatching(false) }} />}
       {adding && <CustomPaintDialog onClose={() => setAdding(false)} onCreated={(id) => setSelectedId(id)} />}
     </div>
+  )
+}
+
+/** Choose a storage place for the picked paints; paints you do not own yet are skipped. */
+function PutInBoxDialog({ ids, onClose }: { ids: string[]; onClose: (done: boolean) => void }) {
+  const tx = useTx()
+  const { paintStock, saveStock } = useStore()
+  const [target, setTarget] = useState<string>()
+  const owned = ids.filter((id) => paintStock.has(id))
+  const skipped = ids.length - owned.length
+  return (
+    <Dialog title={tx('Put {{n}} paints in a box', { n: ids.length })} onClose={() => onClose(false)}>
+      <div className="grid gap-3">
+        <PlaceSelect label={tx('Box or place')} empty={tx('Choose a place…')} value={target} onChange={setTarget} />
+        {skipped > 0 && <p className="text-sm text-muted" role="status">{tx('{{n}} not in your inventory yet will be skipped.', { n: skipped })}</p>}
+        <div className="flex gap-2">
+          <button className="btn btn-primary" disabled={!target || !owned.length} onClick={async () => {
+            for (const st of placeStocks(useStore.getState().paintStock, owned, target, ctx())) await saveStock(st)
+            onClose(true)
+          }}>{tx('Move {{n}}', { n: owned.length })}</button>
+          <button className="btn" disabled={!owned.length} onClick={async () => {
+            for (const st of placeStocks(useStore.getState().paintStock, owned, undefined, ctx())) await saveStock(st)
+            onClose(true)
+          }}>{tx('Take out of any box')}</button>
+        </div>
+      </div>
+    </Dialog>
   )
 }

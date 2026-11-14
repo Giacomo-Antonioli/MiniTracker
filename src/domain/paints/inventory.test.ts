@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { adjustQuantity, createCustomPaint, filterPaints, newStock, paintStats, updateStock } from './inventory'
+import { adjustQuantity, createCustomPaint, filterPaints, newStock, paintStats, placeStocks, updateStock } from './inventory'
 import type { PaintDef, PaintStock } from './types'
 
 const T = '2026-11-02T10:00:00.000Z'
@@ -26,7 +26,7 @@ describe('createCustomPaint', () => {
 
 describe('stock', () => {
   it('starts with one pot in the given stage', () => {
-    expect(newStock('c/nuln', 'sealed', ctx)).toEqual({ paintId: 'c/nuln', stage: 'sealed', quantity: 1, favourite: false, notes: '', updatedAt: T })
+    expect(newStock('c/nuln', 'sealed', ctx)).toEqual({ paintId: 'c/nuln', stage: 'sealed', quantity: 1, purchaseDate: '2026-11-02', favourite: false, notes: '', updatedAt: T })
   })
   it('wishlist entries start with zero pots', () => {
     expect(newStock('c/nuln', 'wishlist', ctx).quantity).toBe(0)
@@ -77,5 +77,18 @@ describe('paintStats', () => {
     expect(paintStats(paints, stocks, 'low')).toEqual({
       owned: 2, pots: 3, value: 16.5, low: 1, wishlist: 1, byBrand: { Citadel: 2 },
     })
+  })
+})
+
+describe('purchase date and boxes', () => {
+  it('a wishlist paint has no purchase date yet', () => {
+    expect(newStock('c/nuln', 'wishlist', ctx).purchaseDate).toBeUndefined()
+  })
+  it('placeStocks only touches owned paints whose box changes', () => {
+    const a = newStock('a', 'sealed', ctx)
+    const b = { ...newStock('b', 'sealed', ctx), placeId: 'box' }
+    const m = new Map([['a', a], ['b', b]])
+    expect(placeStocks(m, ['a', 'b', 'zzz'], 'box', ctx).map((x) => x.paintId)).toEqual(['a'])
+    expect(placeStocks(m, ['b'], undefined, ctx)[0].placeId).toBeUndefined()
   })
 })

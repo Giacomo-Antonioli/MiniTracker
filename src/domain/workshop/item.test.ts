@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { addCategory, becameLow, isLiquid, isLow, levelIsLow, newItem, parseCategories } from './item'
 
 const c = { now: 't', newId: () => 'x' }
@@ -26,4 +26,12 @@ it('liquid categories and editable category lists', () => {
   expect(() => addCategory([], ' ')).toThrow()
   expect(parseCategories(undefined, cats)).toEqual(cats)
   expect(parseCategories({ tools: ['A', 3, ''], liquid: 'x' }, cats)).toEqual({ tools: ['A'], supplies: cats.supplies, liquid: cats.liquid })
+})
+
+describe('newItem purchase date', () => {
+  it('owned items are bought today, wishlist ones are not', () => {
+    const c = { now: '2026-11-14T09:00:00.000Z', newId: () => 'x' }
+    expect(newItem({ name: 'Glue', category: 'Glue' }, c).boughtAt).toBe('2026-11-14')
+    expect(newItem({ name: 'Glue', category: 'Glue', status: 'wishlist' }, c).boughtAt).toBeUndefined()
+  })
 })

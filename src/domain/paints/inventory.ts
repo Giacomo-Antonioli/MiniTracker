@@ -24,7 +24,18 @@ export function createCustomPaint(input: { brand: string; name: string; hex: str
 const NOT_IN_HAND = new Set(['wishlist', 'ordered'])
 
 export function newStock(paintId: string, stage: string, ctx: Pick<Ctx, 'now'>): PaintStock {
-  return { paintId, stage, quantity: NOT_IN_HAND.has(stage) ? 0 : 1, favourite: false, notes: '', updatedAt: ctx.now }
+  const inHand = !NOT_IN_HAND.has(stage)
+  return { paintId, stage, quantity: inHand ? 1 : 0, ...(inHand ? { purchaseDate: ctx.now.slice(0, 10) } : {}), favourite: false, notes: '', updatedAt: ctx.now }
+}
+
+/** Puts these paints in a storage place (undefined = out of any place). Paints not in the inventory are left alone. */
+export function placeStocks(stock: Map<string, PaintStock>, paintIds: string[], placeId: string | undefined, ctx: Pick<Ctx, 'now'>): PaintStock[] {
+  const out: PaintStock[] = []
+  for (const id of paintIds) {
+    const s = stock.get(id)
+    if (s && s.placeId !== placeId) out.push({ ...s, placeId, updatedAt: ctx.now })
+  }
+  return out
 }
 
 export function adjustQuantity(s: PaintStock, delta: number, ctx: Pick<Ctx, 'now'>): PaintStock {

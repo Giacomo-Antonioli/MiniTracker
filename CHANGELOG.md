@@ -5,6 +5,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Added
+- Paints: **☑ Select** lets you pick paints (or *Select all* of the current filter) and put them in a storage box in one go; a paint also has a *Box* field, and the place page lists the paints kept there. Owned paints show **− / +** on their card to change the pot count without opening the sheet.
+- Storage: the *Slots* box is marked optional; a box with no slots just counts what is in it.
+- New paints and new tools or supplies get today as their purchase date.
 - Bluetooth sync (experimental): the Sync page has a *Bluetooth* section. On the phone choose *Wait for a PC*, on the PC choose *Find a phone*; no Wi-Fi or internet needed. Both screens show the same 6-digit number to confirm, then the data goes over an encrypted Bluetooth link (data only, no photos). Not tested on real devices yet.
 
 ## [0.27.0] - 2026-11-08

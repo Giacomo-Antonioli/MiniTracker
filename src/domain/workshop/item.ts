@@ -56,8 +56,9 @@ export interface NewItem {
 export function newItem(input: NewItem, ctx: Ctx, what = 'An item'): WorkshopItem {
   const name = input.name.trim()
   if (!name) throw new Error(`${what} needs a name`)
+  const status = input.status ?? 'owned'
   return {
-    id: ctx.newId(), name, category: input.category, brand: '', status: input.status ?? 'owned', condition: 'good',
+    id: ctx.newId(), name, category: input.category, brand: '', status, condition: 'good', ...(status === 'owned' ? { boughtAt: ctx.now.slice(0, 10) } : {}),
     quantity: input.quantity ?? 1, lowAt: input.lowAt ?? 0, notes: '', tasks: [], createdAt: ctx.now, updatedAt: ctx.now,
   }
 }

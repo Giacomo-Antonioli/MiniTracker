@@ -27,6 +27,8 @@ export interface PaintStock {
   shop?: string
   /** Case, drawer, rack slot… */
   location?: string
+  /** Storage place (box, drawer…) it is kept in. */
+  placeId?: string
   barcode?: string
   /** 1–5 */
   rating?: number
