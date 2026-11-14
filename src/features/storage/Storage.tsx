@@ -8,6 +8,7 @@ import {
   saveSite, setFlow, setHome, siteOf, sitePlaces, unitLog, whereIs, type KindDef, type Place, type Site, type Storage,
 } from '../../domain/storage/storage'
 import { Dialog } from '../../ui/Dialog'
+import { StorageGuide } from './StorageGuide'
 import { CodeBadge, FindCode, LabelsDialog } from './Labels'
 import { itemsIn, MassMoveDialog, MovePlaceDialog, ScanMoveDialog } from './MassMove'
 import { useT, useTx } from '../../i18n'
@@ -334,6 +335,7 @@ export function StoragePage({ onOpenUnit, onOpenPlace }: { onOpenUnit: (id: stri
           form === 'edit' ? <PlaceForm start={placeById(s, sel)} onDone={() => setForm(null)} /> : <PlaceDetail id={sel} onOpenUnit={onOpenUnit} onOpenPlace={onOpenPlace} onEdit={() => setForm('edit')} onDeleted={() => setSel(undefined)} />
         ) : <p className="text-muted">{tx('Pick a place to see what is inside. Double-click to open its page.')}</p>}
       </div>
+      <StorageGuide />
     </div>
   )
 }
