@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { inventoryToCsv } from '../../domain/paints/csv'
-import { adjustQuantity, filterPaints, paintStats, placeStocks, type PaintFilter } from '../../domain/paints/inventory'
+import { adjustQuantity, filterPaints, newStock, paintStats, placeStocks, type PaintFilter } from '../../domain/paints/inventory'
 import type { PaintDef } from '../../domain/paints/types'
 import { CustomPaintDialog } from './CustomPaintDialog'
 import { MissingPaintsDialog } from './MissingPaintsDialog'
@@ -164,10 +164,10 @@ export function PaintsPage() {
                   </span>
                 </button>
                 {selecting && <span className="pointer-events-none absolute left-1 top-1 rounded bg-panel px-1 text-sm" aria-hidden>{picked.has(p.id) ? '☑' : '☐'}</span>}
-                {s && !selecting && (
+                {!selecting && (
                   <span className="absolute right-1 top-1 flex overflow-hidden rounded border border-line bg-panel text-sm">
-                    <button className="px-2" aria-label={tx('One pot less: {{name}}', { name: p.name })} disabled={s.quantity < 1} onClick={() => void saveStock(adjustQuantity(s, -1, ctx()))}>−</button>
-                    <button className="px-2" aria-label={tx('One pot more: {{name}}', { name: p.name })} onClick={() => void saveStock(adjustQuantity(s, 1, ctx()))}>+</button>
+                    <button className="px-2" aria-label={tx('One pot less: {{name}}', { name: p.name })} disabled={!s || s.quantity < 1} onClick={() => s && void saveStock(adjustQuantity(s, -1, ctx()))}>−</button>
+                    <button className="px-2" aria-label={tx('One pot more: {{name}}', { name: p.name })} onClick={() => void saveStock(s ? adjustQuantity(s, 1, ctx()) : newStock(p.id, pipelines.paint.stages.some((x) => x.id === 'sealed') ? 'sealed' : pipelines.paint.stages[0].id, ctx()))}>+</button>
                   </span>
                 )}
               </li>
