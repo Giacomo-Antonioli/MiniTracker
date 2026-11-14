@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Workshop: filters for the type (tools or supplies) and the category next to the search box.
+
 ## [0.29.0] - 2026-11-15
 
 ### Added
