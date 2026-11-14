@@ -80,12 +80,13 @@ function PlanForm({ plan, setPlan, remember, setRemember }: { plan: SyncPlan; se
       </label>
       {plan.mode === 'merge' && <label className="flex items-center gap-2"><input type="checkbox" checked={plan.applyDeletions} onChange={(e) => set({ applyDeletions: e.target.checked })} /> {tx('Also apply deletions from the other device')}</label>}
       <label className="flex items-center gap-2"><input type="checkbox" checked={plan.photos} onChange={(e) => set({ photos: e.target.checked })} /> {tx('Include photos (slower; photos already there are skipped)')}</label>
+      <label className="flex items-center gap-2"><input type="checkbox" checked={!!plan.catalogues} onChange={(e) => set({ catalogues: e.target.checked })} /> {tx('Include game catalogues (large; catalogues already there are skipped)')}</label>
       <label className="flex items-center gap-2"><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> {tx('Remember my choice (change it in Settings › Sync)')}</label>
     </fieldset>
   )
 }
 
-const planFrom = (p: SyncPrefs): SyncPlan => ({ direction: p.direction ?? 'both', mode: p.direction === 'both' || !p.direction ? 'merge' : p.mode ?? 'merge', applyDeletions: p.applyDeletions ?? true, photos: p.photos ?? false })
+const planFrom = (p: SyncPrefs): SyncPlan => ({ direction: p.direction ?? 'both', mode: p.direction === 'both' || !p.direction ? 'merge' : p.mode ?? 'merge', applyDeletions: p.applyDeletions ?? true, photos: p.photos ?? false, catalogues: p.catalogues ?? false })
 
 /** Sync with another device: pair by code, QR, link or (no relay) connection text; or use a sync file. */
 export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; onOpenSettings?: () => void }) {
@@ -364,6 +365,7 @@ export function SyncPage({ code: linkCode, onOpenSettings }: { code?: string; on
               <li>{ask.plan.direction === 'both' ? tx('Both ways') : ask.plan.direction === 'receive' ? tx('This device receives') : tx('This device sends')}</li>
               <li>{ask.plan.mode === 'merge' ? (ask.plan.applyDeletions ? tx('Merge, newest wins, deletions applied') : tx('Merge, newest wins')) : tx('Overwrite the receiver')}</li>
               <li>{ask.plan.photos ? tx('With photos') : tx('Without photos')}</li>
+              {ask.plan.catalogues && <li>{tx('With game catalogues')}</li>}
             </ul>
             <p className="text-xs text-muted">{tx("You'll see what changes here before anything is saved.")}</p>
             <div className="flex gap-2">
