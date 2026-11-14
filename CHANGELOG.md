@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Changed
+- Catalogue: BSData took its repositories off GitHub after a copyright notice (2026-11-12), so the download fails. The app now says so, instead of "HTTP 404", and points to importing catalogue files from your computer; catalogues you already downloaded keep working.
+
 ## [0.27.5] - 2026-11-14
 
 ### Added

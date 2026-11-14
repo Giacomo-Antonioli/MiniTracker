@@ -10,6 +10,10 @@ export const CURRENT_EDITION = EDITIONS[0]
 type Fetch = typeof fetch
 
 async function ok(res: Response, what: string): Promise<Response> {
+  // BSData removed its repositories in November 2026 after a copyright notice (404; 451 is the legal-block status).
+  if (res.status === 404 || res.status === 451) {
+    throw new Error(`Could not ${what}: the BSData catalogue is no longer available online (HTTP ${res.status}). Catalogues you already downloaded keep working; you can also import catalogue files from your computer in the catalogue settings.`)
+  }
   if (!res.ok) throw new Error(`Could not ${what} (HTTP ${res.status})`)
   return res
 }
