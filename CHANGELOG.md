@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Storage: a *cheap cardboard storage* guide at the bottom of the Storage page (build steps for models kept at home) with a hole size calculator: pick the round base size and the tray size, get the hole diameter, the spacing and how many cells fit, to use as the place's slots.
+
 ## [0.27.4] - 2026-11-14
 
 ### Fixed
