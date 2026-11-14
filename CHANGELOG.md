@@ -4,6 +4,12 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Workshop: a search box (name, brand, category, notes) and a sorter (needs attention first, name, category, least in stock, recently changed).
+- Workshop: *Bulk edit* on the shown items (tick boxes): move them to a storage place, set a category, or mark them as liquids.
+- Storage: a place's card has *+ Add place inside*, a new place already set to be inside it.
+- Workshop: any tool or supply can be marked as a liquid (*Liquid (track its level)*), so its level (Full / Half / Running low / Empty) can be set, not only for the liquid supply categories.
+
 ## [0.28.1] - 2026-11-14
 
 ### Added

@@ -4,12 +4,13 @@ import { pathLabel } from '../../domain/storage/storage'
 import { SUGGESTED_TASKS, TOOL_SOURCE, wetPaletteSet } from '../../domain/tools/tools'
 import type { Pipeline } from '../../domain/collection/types'
 import {
-  addTask, CONDITIONS, copyCount, copyOf, daysLeft, dueTasks, editCopies, fitCopies, isLiquid, isLow, levelIsLow, markDone, newItem, refPrefix, removeTask, repIndex, setRepresentative, shopItem,
-  type ItemCondition, type ItemCopy, type ItemStatus, type WorkshopCategories, type WorkshopItem, type WorkshopKind,
+  addTask, CONDITIONS, copyCount, copyOf, daysLeft, dueTasks, editCopies, fitCopies, isLiquid, isLow, levelIsLow, markDone, newItem, refPrefix, removeTask, repIndex, searchItems, setRepresentative, shopItem, sortItems,
+  type ItemCondition, type ItemCopy, type WorkshopSort, type ItemStatus, type WorkshopCategories, type WorkshopItem, type WorkshopKind,
 } from '../../domain/workshop/item'
 import { useT, useTx, txr } from '../../i18n'
 import { AddFromFile } from '../collectionFile/AddFromFile'
 import { PlaceSelect } from '../storage/Storage'
+import { WorkshopBulkDialog } from './WorkshopBulkDialog'
 
 const dueText = (d: number) =>
   d < 0 ? (d === -1 ? txr('1 day overdue') : txr('{{n}} days overdue', { n: -d })) : d === 0 ? txr('due today') : d === 1 ? txr('in 1 day') : txr('in {{n}} days', { n: d })
@@ -22,10 +23,12 @@ type Row = { kind: WorkshopKind; item: WorkshopItem }
 /** One click adds the AK wet palette as a tool and its paper and sponges as supplies (what is already there is left alone). */
 function WetPaletteButton() {
   const t = useT()
-  const { tools, supplies, saveTool, saveSupply, workshopCategories: cats, saveWorkshopCategories } = useStore()
+  const { saveTool, saveSupply, workshopCategories: cats, saveWorkshopCategories } = useStore()
   const [message, setMessage] = useState('')
   const add = async () => {
-    const set = wetPaletteSet({ tools, supplies }, ctx())
+    // Current state, not the render's copy: a quick second click must see what the first one added.
+    const now = useStore.getState()
+    const set = wetPaletteSet({ tools: now.tools, supplies: now.supplies }, ctx())
     const n = (set.tool ? 1 : 0) + set.supplies.length
     if (set.tool) {
       if (!cats.tools.includes(set.tool.category)) await saveWorkshopCategories({ ...cats, tools: [...cats.tools, set.tool.category] })
@@ -97,6 +100,7 @@ export function workshopAlerts(s: { tools: WorkshopItem[]; supplies: WorkshopIte
 /** Tools and supplies: stock with alerts, condition, storage place, maintenance jobs and a wishlist. `kind` shows one list only. */
 export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
   const tx = useTx()
+  const tc = useT()
   const { rows: all, save } = useWorkshop()
   const { workshopCategories: cats, pipelines } = useStore()
   const levels = pipelines.level
@@ -112,9 +116,13 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
   const rows = all.filter((r) => !kind || r.kind === kind)
   const due = dueTasks(rows.map((r) => r.item), now).map((d) => ({ ...d, kind: rows.find((r) => r.item === d.item)!.kind }))
   const low = rows.filter((r) => isLow(r.item, levels)).length
-  const shown = rows
-    .filter((r) => r.item.status === tab)
-    .sort((a, b) => Number(isLow(b.item, levels)) - Number(isLow(a.item, levels)) || a.item.category.localeCompare(b.item.category) || a.item.name.localeCompare(b.item.name))
+  const [bulk, setBulk] = useState(false)
+  const [query, setQuery] = useState('')
+  const [sort, setSort] = useState<WorkshopSort>('attention')
+  const inTab = rows.filter((r) => r.item.status === tab)
+  const matching = new Set(searchItems(inTab.map((r) => r.item), query))
+  const rank = new Map(sortItems(inTab.map((r) => r.item), sort, levels).map((x, i) => [x, i]))
+  const shown = inTab.filter((r) => matching.has(r.item)).sort((a, b) => rank.get(a.item)! - rank.get(b.item)!)
   const title = kind === 'tool' ? tx('Tools') : kind === 'supply' ? tx('Supplies') : tx('Workshop')
   const newLabel = kind === 'tool' ? tx('New tool') : kind === 'supply' ? tx('New supply') : tx('New item')
 
@@ -179,7 +187,22 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
         {error && <span className="text-sm text-danger" role="alert">{error}</span>}
       </form>
 
-      {shown.length === 0 ? (
+      {inTab.length > 0 && (
+        <section className="flex flex-wrap items-center gap-2" aria-label={tc('workshopCopies.search')}>
+          <input className="input w-full sm:w-64" type="search" placeholder={`🔍 ${tc('workshopCopies.search')}`} aria-label={tc('workshopCopies.search')} value={query} onChange={(e) => setQuery(e.target.value)} />
+          <label className="flex items-center gap-1 text-sm text-muted">{tc('workshopCopies.sortBy')}
+            <select className="input" value={sort} onChange={(e) => setSort(e.target.value as WorkshopSort)}>
+              {([['attention', 'sortAttention'], ['name', 'sortName'], ['category', 'sortCategory'], ['stock', 'sortStock'], ['recent', 'sortRecent']] as const).map(([id, k]) => <option key={id} value={id}>{tc(`workshopCopies.${k}`)}</option>)}
+            </select>
+          </label>
+          {shown.length > 0 && <button className="btn ml-auto text-sm" onClick={() => setBulk(true)}>{tc('workshopCopies.bulkOpen', { n: shown.length })}</button>}
+        </section>
+      )}
+      {bulk && <WorkshopBulkDialog rows={shown} onClose={() => setBulk(false)} />}
+
+      {shown.length === 0 && inTab.length > 0 ? (
+        <p className="text-muted">{tc('workshopCopies.noMatch')}</p>
+      ) : shown.length === 0 ? (
         <div className="grid justify-items-start gap-2 text-muted">
         <p>
           {tab === 'wishlist' ? tx('Nothing on the wishlist. Add what you want and send it to the shopping list.')
@@ -300,6 +323,7 @@ function ItemCard({ row: { kind, item: t }, now, showKind }: { row: Row; now: st
             <label className="grid gap-0.5 text-xs text-muted">{tx('Category')}<CategorySelect kind={kind} value={t.category} onChange={(c) => save({ category: c })} /></label>
             {owned && (
               <>
+                <label className="flex items-center gap-1 text-xs text-muted"><input type="checkbox" checked={liquid} onChange={(e) => save({ liquid: e.target.checked })} />{tc('workshopCopies.liquid')}</label>
                 <label className="grid gap-0.5 text-xs text-muted">{tx('Alert at')}<input className="input w-16" type="number" min={0} aria-label={tx('Alert level for {{name}}', { name: t.name })} value={t.lowAt} onChange={(e) => save({ lowAt: Math.max(0, Number(e.target.value) || 0) })} /></label>
                 {liquid ? <label className="grid gap-0.5 text-xs text-muted">{tx('Level')}<select className="input" value={view.level ?? levels.stages[0]?.id} onChange={(e) => edit({ level: e.target.value })}>{levels.stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></label> : <label className="grid gap-0.5 text-xs text-muted">{tx('Condition')}<select className="input" value={view.condition} onChange={(e) => edit({ condition: e.target.value as ItemCondition })}>{CONDITIONS.map((c) => <option key={c.id} value={c.id}>{conditionName(c.id)}</option>)}</select></label>}
                 {storage.places.length > 0 && <label className="grid gap-0.5 text-xs text-muted">{tx('Kept in')}<PlaceSelect label={tx('Kept in')} empty={tx('Not set')} value={view.placeId} onChange={(id) => edit({ placeId: id })} /></label>}

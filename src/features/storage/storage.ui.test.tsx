@@ -166,3 +166,18 @@ it('separate storages with tabs, place page, editable kinds', async () => {
   await user.click(kinds.getByRole('button', { name: 'Save kinds' }))
   expect(kinds.getByRole('alert').textContent).toMatch(/name/)
 })
+
+it('adds a place inside an existing place from its card, already set to be inside it', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  await user.click(await screen.findByRole('button', { name: 'Storage' }))
+  await addPlace(user, 'box', 'Main Tools')
+  await user.click(await screen.findByRole('button', { name: /Main Tools/ }))
+  await user.click(await screen.findByRole('button', { name: '＋ Add place inside' }))
+  const f = within(await screen.findByRole('form', { name: 'Add place' }))
+  expect(f.getByLabelText('Inside')).toHaveDisplayValue(/Main Tools/)
+  await user.type(f.getByLabelText('Name'), 'Work bench')
+  await user.click(f.getByRole('button', { name: 'Save' }))
+  await waitFor(() => expect(useStore.getState().storage.places.map((p) => [p.name, p.parentId ? 'inside' : 'top']).sort()).toEqual([['Main Tools', 'top'], ['Work bench', 'inside']]))
+  expect(await screen.findByText(/Inside:/)).toBeInTheDocument()
+})

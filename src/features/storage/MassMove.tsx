@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { codeFromText, findCode } from '../../domain/storage/codes'
 import { checkOut, descendants, kindOf, moveHomes, movePlace, pathLabel, placeById, planMove, type Storage } from '../../domain/storage/storage'
-import type { WorkshopItem, WorkshopKind } from '../../domain/workshop/item'
+import { editCopies, type WorkshopItem, type WorkshopKind } from '../../domain/workshop/item'
 import { Dialog } from '../../ui/Dialog'
 import { ScanPanel } from './Labels'
 import { PlaceSelect } from './Storage'
@@ -27,7 +27,7 @@ async function moveItems(refs: ItemRef[], placeId: string) {
     const list = r.kind === 'tool' ? st.tools : st.supplies
     const item = list.find((x) => x.id === r.id)
     if (!item) continue
-    const next = { ...item, placeId, updatedAt: ctx().now }
+    const next = { ...editCopies(item, 'all', { placeId }), updatedAt: ctx().now }
     await (r.kind === 'tool' ? st.saveTool(next) : st.saveSupply(next))
   }
 }

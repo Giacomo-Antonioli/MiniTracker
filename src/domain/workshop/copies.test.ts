@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { copyOf, editCopies, fitCopies, isLow, newItem, parseItems, setRepresentative } from './item'
+import { DEFAULT_CATEGORIES } from './categories'
+import { copyOf, editCopies, fitCopies, isLiquid, isLow, newItem, parseItems, searchItems, setRepresentative, sortItems } from './item'
 
 let n = 0
 const ctx = () => ({ now: '2026-11-14T10:00:00.000Z', newId: () => `id${++n}` })
@@ -54,5 +55,28 @@ describe('copies of a tool or supply', () => {
     expect(back.rep).toBe(1)
     expect(back.copies).toHaveLength(3)
     expect(back.copies![2]).toMatchObject({ condition: 'good', notes: '' })
+  })
+
+  it('is a liquid by category unless marked by hand', () => {
+    const tool = newItem({ name: 'Cleaner pot', category: 'Other' }, ctx())
+    expect(isLiquid(tool, 'tool', DEFAULT_CATEGORIES)).toBe(false)
+    expect(isLiquid({ ...tool, liquid: true }, 'tool', DEFAULT_CATEGORIES)).toBe(true)
+    expect(isLiquid(glue(), 'supply', DEFAULT_CATEGORIES)).toBe(true)
+    expect(isLiquid({ ...glue(), liquid: false }, 'supply', DEFAULT_CATEGORIES)).toBe(false)
+  })
+
+  it('searches name, brand, category and notes by every word, and sorts several ways', () => {
+    const a = { ...newItem({ name: 'Brush', category: 'Brushes', quantity: 5 }, ctx()), brand: 'Citadel', updatedAt: '2026-01-01' }
+    const b = { ...newItem({ name: 'Glue', category: 'Glue', quantity: 1 }, ctx()), notes: 'thin cement', updatedAt: '2026-03-01' }
+    const c = { ...newItem({ name: 'Clippers', category: 'Cutting', quantity: 3, lowAt: 3 }, ctx()), updatedAt: '2026-02-01' }
+    expect(searchItems([a, b, c], '')).toHaveLength(3)
+    expect(searchItems([a, b, c], 'CITADEL brush')).toEqual([a])
+    expect(searchItems([a, b, c], 'thin')).toEqual([b])
+    expect(searchItems([a, b, c], 'nothing')).toEqual([])
+    expect(sortItems([a, b, c], 'name').map((x) => x.name)).toEqual(['Brush', 'Clippers', 'Glue'])
+    expect(sortItems([a, b, c], 'category').map((x) => x.name)).toEqual(['Brush', 'Clippers', 'Glue'])
+    expect(sortItems([a, b, c], 'stock').map((x) => x.name)).toEqual(['Glue', 'Clippers', 'Brush'])
+    expect(sortItems([a, b, c], 'recent').map((x) => x.name)).toEqual(['Glue', 'Clippers', 'Brush'])
+    expect(sortItems([a, b, c], 'attention').map((x) => x.name)).toEqual(['Clippers', 'Brush', 'Glue'])
   })
 })
