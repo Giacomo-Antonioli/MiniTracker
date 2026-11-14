@@ -1,0 +1,1007 @@
+{
+ "format": "minitracker-collection",
+ "version": 1,
+ "units": [
+  {
+   "name": "Winged Tyranid Prime",
+   "faction": "Tyranids",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 1"
+  },
+  {
+   "name": "Captain in Terminator Armour",
+   "faction": "Space Marines",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 1"
+  },
+  {
+   "name": "Von Ryan's Leapers",
+   "faction": "Tyranids",
+   "count": 3,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 2"
+  },
+  {
+   "name": "Infernus Marines",
+   "faction": "Space Marines",
+   "count": 5,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 3"
+  },
+  {
+   "name": "Infernus Sergeant",
+   "faction": "Space Marines",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 5"
+  },
+  {
+   "name": "Barbgaunts",
+   "faction": "Tyranids",
+   "count": 5,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 6"
+  },
+  {
+   "name": "Termagants Set 1 Part 1",
+   "faction": "Tyranids",
+   "count": 10,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 7"
+  },
+  {
+   "name": "Termagants Set 1 Part 2",
+   "faction": "Tyranids",
+   "count": 10,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 8"
+  },
+  {
+   "name": "Librarian in Terminator Armour",
+   "faction": "Space Marines",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 10"
+  },
+  {
+   "name": "Terminators Part 1",
+   "faction": "Space Marines",
+   "count": 5,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 12"
+  },
+  {
+   "name": "Terminators Part 2",
+   "faction": "Space Marines",
+   "count": 5,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 13"
+  },
+  {
+   "name": "Psychophage",
+   "faction": "Tyranids",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 15"
+  },
+  {
+   "name": "Termagants Set 2 Part 1",
+   "faction": "Tyranids",
+   "count": 10,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 17"
+  },
+  {
+   "name": "Termagants Set 2 Part 2",
+   "faction": "Tyranids",
+   "count": 10,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 18"
+  },
+  {
+   "name": "Parasite of Mortrex",
+   "faction": "Tyranids",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 19"
+  },
+  {
+   "name": "Chaplain on Bike",
+   "faction": "Space Marines",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 20"
+  },
+  {
+   "name": "Farseer",
+   "faction": "Aeldari",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 21"
+  },
+  {
+   "name": "Guardian Defenders Part 1",
+   "faction": "Aeldari",
+   "count": 10,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 23"
+  },
+  {
+   "name": "Guardian Defenders Part 2",
+   "faction": "Aeldari",
+   "count": 10,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 24"
+  },
+  {
+   "name": "Wraithlord",
+   "faction": "Aeldari",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 26"
+  },
+  {
+   "name": "Windriders Part 1",
+   "faction": "Aeldari",
+   "count": 6,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 27"
+  },
+  {
+   "name": "Windriders Part 2",
+   "faction": "Aeldari",
+   "count": 6,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 28"
+  },
+  {
+   "name": "Windriders Part 3",
+   "faction": "Aeldari",
+   "count": 6,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 29"
+  },
+  {
+   "name": "Dark Apostle",
+   "faction": "Chaos Space Marines",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 31"
+  },
+  {
+   "name": "Chaos Space Marines Part 1",
+   "faction": "Chaos Space Marines",
+   "count": 10,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 33"
+  },
+  {
+   "name": "Chaos Space Marines Part 2",
+   "faction": "Chaos Space Marines",
+   "count": 10,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 34"
+  },
+  {
+   "name": "Havocs Part 1",
+   "faction": "Chaos Space Marines",
+   "count": 5,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 35"
+  },
+  {
+   "name": "Havocs Part 2",
+   "faction": "Chaos Space Marines",
+   "count": 5,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 36"
+  },
+  {
+   "name": "Helbrute Part 1",
+   "faction": "Chaos Space Marines",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 37"
+  },
+  {
+   "name": "Helbrute Part 2",
+   "faction": "Chaos Space Marines",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 38"
+  },
+  {
+   "name": "Wraithguard",
+   "faction": "Aeldari",
+   "count": 5,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 39"
+  },
+  {
+   "name": "Chaos Terminators",
+   "faction": "Chaos Space Marines",
+   "count": 5,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 40"
+  },
+  {
+   "name": "Warboss in Mega Armour",
+   "faction": "Orks",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 41"
+  },
+  {
+   "name": "Ork Boyz Part 1",
+   "faction": "Orks",
+   "count": 10,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 43"
+  },
+  {
+   "name": "Ork Boyz Part 2",
+   "faction": "Orks",
+   "count": 10,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 45"
+  },
+  {
+   "name": "Deffkoptas Part 1",
+   "faction": "Orks",
+   "count": 3,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 47"
+  },
+  {
+   "name": "Deffkoptas Part 2",
+   "faction": "Orks",
+   "count": 3,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 48"
+  },
+  {
+   "name": "Deff Dread Part 1",
+   "faction": "Orks",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 49"
+  },
+  {
+   "name": "Deff Dread Part 2",
+   "faction": "Orks",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 50"
+  },
+  {
+   "name": "Kahl",
+   "faction": "Leagues of Votann",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 52"
+  },
+  {
+   "name": "Hearthkyn Warriors Part 1",
+   "faction": "Leagues of Votann",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 53"
+  },
+  {
+   "name": "Hearthkyn Warriors Part 2",
+   "faction": "Leagues of Votann",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 54"
+  },
+  {
+   "name": "Hernkyn Pioneers Part 1",
+   "faction": "Leagues of Votann",
+   "count": 3,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 55"
+  },
+  {
+   "name": "Hernkyn Pioneers Part 2",
+   "faction": "Leagues of Votann",
+   "count": 3,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 56"
+  },
+  {
+   "name": "Cthonian Beserks Part 1",
+   "faction": "Leagues of Votann",
+   "count": 5,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 57"
+  },
+  {
+   "name": "Cthonian Beserks Part 2",
+   "faction": "Leagues of Votann",
+   "count": 5,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 58"
+  },
+  {
+   "name": "Boomdakka Snazzwagon",
+   "faction": "Orks",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 59"
+  },
+  {
+   "name": "Einhyr Hearthguard",
+   "faction": "Leagues of Votann",
+   "count": 5,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 60"
+  },
+  {
+   "name": "Magus",
+   "faction": "Genestealer Cults",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 61"
+  },
+  {
+   "name": "Acolyte Hybrids",
+   "faction": "Genestealer Cults",
+   "count": 5,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 63"
+  },
+  {
+   "name": "Neophyte Hybrids 1 Part 1",
+   "faction": "Genestealer Cults",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 64"
+  },
+  {
+   "name": "Neophyte Hybrids 1 Part 2",
+   "faction": "Genestealer Cults",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 65"
+  },
+  {
+   "name": "Aberrants",
+   "faction": "Genestealer Cults",
+   "count": 5,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 66"
+  },
+  {
+   "name": "Neophyte Hybrids 2 Part 1",
+   "faction": "Genestealer Cults",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 67"
+  },
+  {
+   "name": "Neophyte Hybrids 2 Part 2",
+   "faction": "Genestealer Cults",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 68"
+  },
+  {
+   "name": "Goliath Rockgrinder Part 1",
+   "faction": "Genestealer Cults",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 69"
+  },
+  {
+   "name": "Goliath Rockgrinder Part 2",
+   "faction": "Genestealer Cults",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 70"
+  },
+  {
+   "name": "Cadian Command Squad",
+   "faction": "Astra Militarum",
+   "count": 5,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 71"
+  },
+  {
+   "name": "Cadian Shock Troops 1 Part 1",
+   "faction": "Astra Militarum",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 73"
+  },
+  {
+   "name": "Cadian Shock Troops 1 Part 2",
+   "faction": "Astra Militarum",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 74"
+  },
+  {
+   "name": "Field Ordnance Battery Part 1",
+   "faction": "Astra Militarum",
+   "count": 2,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 75"
+  },
+  {
+   "name": "Field Ordnance Battery Part 2",
+   "faction": "Astra Militarum",
+   "count": 2,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 76"
+  },
+  {
+   "name": "Heavy Weapons Squad",
+   "faction": "Astra Militarum",
+   "count": 3,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 77"
+  },
+  {
+   "name": "Atalan Jackals",
+   "faction": "Genestealer Cults",
+   "count": 5,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 78"
+  },
+  {
+   "name": "Armoured Sentinel Part 1",
+   "faction": "Astra Militarum",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 79"
+  },
+  {
+   "name": "Armoured Sentinel Part 2",
+   "faction": "Astra Militarum",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 80"
+  },
+  {
+   "name": "Lord on Juggernaut Part 1",
+   "faction": "World Eaters",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 81"
+  },
+  {
+   "name": "Lord on Juggernaut Part 2",
+   "faction": "World Eaters",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 82"
+  },
+  {
+   "name": "Jakhals Part 1",
+   "faction": "World Eaters",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 83"
+  },
+  {
+   "name": "Jakhals Part 2",
+   "faction": "World Eaters",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 84"
+  },
+  {
+   "name": "Khorne Berzerkers 1 Part 1",
+   "faction": "World Eaters",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 85"
+  },
+  {
+   "name": "Khorne Berzerkers 1 Part 2",
+   "faction": "World Eaters",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 86"
+  },
+  {
+   "name": "Khorne Berzerkers 2 Part 1",
+   "faction": "World Eaters",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 87"
+  },
+  {
+   "name": "Khorne Berzerkers 2 Part 2",
+   "faction": "World Eaters",
+   "count": 10,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 88"
+  },
+  {
+   "name": "Forgefiend Part 1",
+   "faction": "Chaos Space Marines",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 89"
+  },
+  {
+   "name": "Forgefiend Part 2",
+   "faction": "Chaos Space Marines",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, issue 90"
+  },
+  {
+   "name": "Brutalis Dreadnought",
+   "faction": "Space Marines",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol",
+    "premium"
+   ],
+   "notes": "Hachette Combat Patrol, premium kit"
+  },
+  {
+   "name": "Hive Tyrant",
+   "faction": "Tyranids",
+   "count": 1,
+   "status": "On sprue",
+   "tags": [
+    "hachette",
+    "combat-patrol",
+    "premium"
+   ],
+   "notes": "Hachette Combat Patrol, premium kit"
+  },
+  {
+   "name": "Daemon Prince",
+   "faction": "Chaos Space Marines",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol",
+    "premium"
+   ],
+   "notes": "Hachette Combat Patrol, premium kit"
+  },
+  {
+   "name": "Howling Banshees",
+   "faction": "Aeldari",
+   "count": 5,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol",
+    "premium"
+   ],
+   "notes": "Hachette Combat Patrol, premium kit"
+  },
+  {
+   "name": "Brôkhyr Thunderkyn",
+   "faction": "Leagues of Votann",
+   "count": 3,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol",
+    "premium"
+   ],
+   "notes": "Hachette Combat Patrol, premium kit"
+  },
+  {
+   "name": "Ork Killa Kanz",
+   "faction": "Orks",
+   "count": 3,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol",
+    "premium"
+   ],
+   "notes": "Hachette Combat Patrol, premium kit"
+  },
+  {
+   "name": "Genestealer Cults Broodcoven",
+   "faction": "Genestealer Cults",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol",
+    "premium"
+   ],
+   "notes": "Hachette Combat Patrol, premium kit"
+  },
+  {
+   "name": "Rogal Dorn Battle Tank",
+   "faction": "Astra Militarum",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol",
+    "premium"
+   ],
+   "notes": "Hachette Combat Patrol, premium kit"
+  },
+  {
+   "name": "Primaris Company Champion",
+   "faction": "Space Marines",
+   "count": 1,
+   "status": "Wishlisted",
+   "tags": [
+    "hachette",
+    "combat-patrol"
+   ],
+   "notes": "Hachette Combat Patrol, gift (issue 19 in Italy)"
+  }
+ ],
+ "tools": [
+  {
+   "name": "Citadel Starter Brush",
+   "category": "Brushes",
+   "status": "owned",
+   "notes": "Hachette Combat Patrol, issue 4"
+  },
+  {
+   "name": "Layer brush (small)",
+   "category": "Brushes",
+   "status": "owned",
+   "notes": "Hachette Combat Patrol, issue 11"
+  },
+  {
+   "name": "Base brush (large)",
+   "category": "Brushes",
+   "status": "owned",
+   "notes": "Hachette Combat Patrol, issue 11"
+  },
+  {
+   "name": "Dry brush (small)",
+   "category": "Brushes",
+   "status": "owned",
+   "notes": "Hachette Combat Patrol, issue 11"
+  },
+  {
+   "name": "Clippers (tronchesine)",
+   "category": "Cutting",
+   "status": "owned",
+   "notes": "Hachette Combat Patrol, issue 7"
+  },
+  {
+   "name": "Mould line cleaning tool",
+   "category": "Cutting",
+   "status": "owned",
+   "notes": "Hachette Combat Patrol, issue 7"
+  },
+  {
+   "name": "Citadel Texture Spreader",
+   "category": "Other",
+   "status": "owned",
+   "notes": "Hachette Combat Patrol, issue 44"
+  }
+ ],
+ "supplies": [
+  {
+   "name": "Binder",
+   "category": "Other",
+   "status": "owned",
+   "notes": "Hachette Combat Patrol, issue 3"
+  },
+  {
+   "name": "Binder dividers",
+   "category": "Other",
+   "status": "owned",
+   "notes": "Hachette Combat Patrol, issue 3"
+  }
+ ]
+}

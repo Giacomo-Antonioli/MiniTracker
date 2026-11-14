@@ -14,18 +14,22 @@ import { useIsPhone } from '../../ui/useIsPhone'
 import { BacklogBoard } from './BacklogBoard'
 import { MassMoveDialog } from '../storage/MassMove'
 import { lifecycleName } from './lifecycle'
-import { useTx } from '../../i18n'
+import { useT, useTx } from '../../i18n'
+import { BulkEditDialog } from './BulkEditDialog'
+import { AddFromFile } from '../collectionFile/AddFromFile'
 
 /** How long a single click waits for a possible second click. */
 const DOUBLE_CLICK_MS = 250
 
 export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onOpenUnit?: (id: string) => void; onOpenDatasheet?: (id: string) => void; onOpenScheme?: (id: string) => void }) {
   const tx = useTx()
+  const t = useT()
   const units = useShownUnits()
   const { pipeline, backlogFilter: filter, setBacklogFilter: setFilter } = useStore()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<OwnedUnit | 'new' | null>(null)
   const [storing, setStoring] = useState(false)
+  const [bulk, setBulk] = useState(false)
   const phone = useIsPhone()
   const hasPlaces = useStore((s) => s.storage.places.length > 0)
   // Spearhead boxes are Age of Sigmar's: shown when Age of Sigmar is installed and not hidden by the game picker.
@@ -84,6 +88,7 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
           </div>
           <ScanBoxButton onOpenUnit={onOpenUnit} />
           {showSpearhead && <button className="btn" onClick={() => setSpearhead(true)}>{tx('⚔ Spearhead box')}</button>}
+          <AddFromFile compact />
           <button className="btn btn-primary" data-tour="add-unit" onClick={() => setEditing('new')}>{tx('+ Add unit')}</button>
         </header>
 
@@ -120,21 +125,24 @@ export function BacklogPage({ onOpenUnit, onOpenDatasheet, onOpenScheme }: { onO
           </select>
           <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={!!filter.nextUpOnly} onChange={(e) => set({ nextUpOnly: e.target.checked })} /> {tx('Next up')}</label>
           <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={!!filter.favouritesOnly} onChange={(e) => set({ favouritesOnly: e.target.checked })} /> {tx('Favourites')}</label>
+          {shown.length > 0 && <button className={`btn text-sm ${hasPlaces ? '' : 'ml-auto'}`} data-tour="bulk-edit" onClick={() => setBulk(true)}>{t('bulk.open', { n: shown.length })}</button>}
           {hasPlaces && shown.length > 0 && <button className="btn ml-auto text-sm" onClick={() => setStoring(true)}>{tx('📦 Store shown units… ({{n}})', { n: shown.length })}</button>}
         </section>
+        {bulk && <BulkEditDialog units={shown} onClose={() => setBulk(false)} />}
         {storing && <MassMoveDialog title={tx('Store the shown units')} unitIds={shown.filter((u) => u.lifecycle === 'active' || u.lifecycle === 'on-hold').map((u) => u.id)} onClose={() => setStoring(false)} />}
 
         {phone ? (
-          shown.length ? <BacklogCards units={shown} selectedId={selectedId} onRowClick={onRowClick} /> : <p className="p-6 text-center text-muted">{units.length === 0 ? tx('Your backlog is empty. Add your first unit!') : tx('No units match these filters.')}</p>
+          shown.length ? <BacklogCards units={shown} selectedId={selectedId} onRowClick={onRowClick} /> : <div className="grid justify-items-center gap-3 p-6 text-center text-muted"><p>{units.length === 0 ? tx('Your backlog is empty. Add your first unit!') : tx('No units match these filters.')}</p>{units.length === 0 && <AddFromFile />}</div>
         ) : view === 'board' ? (
           <BacklogBoard units={shown} selectedId={selectedId} onCardClick={onRowClick} />
         ) : (
         <div className="panel overflow-auto">
           <BacklogTable units={shown} selectedId={selectedId} onRowClick={onRowClick} />
           {shown.length === 0 && (
-            <p className="p-6 text-center text-muted">
-              {units.length === 0 ? tx('Your backlog is empty. Add your first unit!') : tx('No units match these filters.')}
-            </p>
+            <div className="grid justify-items-center gap-3 p-6 text-center text-muted">
+              <p>{units.length === 0 ? tx('Your backlog is empty. Add your first unit!') : tx('No units match these filters.')}</p>
+              {units.length === 0 && <AddFromFile />}
+            </div>
           )}
         </div>
         )}

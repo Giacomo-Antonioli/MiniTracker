@@ -8,6 +8,7 @@ import {
   type ItemCondition, type ItemStatus, type WorkshopCategories, type WorkshopItem, type WorkshopKind,
 } from '../../domain/workshop/item'
 import { useTx, txr } from '../../i18n'
+import { AddFromFile } from '../collectionFile/AddFromFile'
 import { PlaceSelect } from '../storage/Storage'
 
 const dueText = (d: number) =>
@@ -71,6 +72,7 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
             </button>
           ))}
         </div>
+        <AddFromFile compact />
       </header>
 
       {due.length > 0 && (
@@ -119,12 +121,15 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
       </form>
 
       {shown.length === 0 ? (
-        <p className="text-muted">
+        <div className="grid justify-items-start gap-2 text-muted">
+        <p>
           {tab === 'wishlist' ? tx('Nothing on the wishlist. Add what you want and send it to the shopping list.')
             : kind === 'supply' ? tx('No supplies yet. Add primer, glue, brushes… and get an alert (and a shopping list entry) when they run low.')
             : kind === 'tool' ? tx('No tools yet. Add your airbrush, clippers, lamp… and set maintenance reminders like cleaning or replacing blades.')
             : tx('Your workshop is empty. Add tools (airbrush, clippers…) and supplies (glue, primer…): stock alerts, maintenance reminders and a wishlist for both.')}
         </p>
+        <AddFromFile />
+        </div>
       ) : (
         <ul className="grid gap-3">{shown.map((r) => <ItemCard key={`${r.kind}:${r.item.id}`} row={r} now={now} showKind={!kind} />)}</ul>
       )}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useStore } from '../../app/store'
 import { estimateBackupBytes } from '../../data/backup'
 import { useT } from '../../i18n'
+import { AddFromFile } from '../collectionFile/AddFromFile'
 import { formatDate } from '../../i18n/format'
 
 const mb = (b: number) => (b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`)
@@ -93,6 +94,11 @@ export function BackupPage() {
             }}
           />
         </label>
+      </section>
+      <section className="panel grid gap-2 p-4">
+        <h3 className="font-display text-lg">{t('settingsPanels.backup.addTitle')}</h3>
+        <p className="text-sm text-muted">{t('settingsPanels.backup.addHelp')}</p>
+        <AddFromFile />
       </section>
       {busy && <p className="text-muted" role="status">{t('settingsPanels.backup.working')}</p>}
       {message && <p role="status" className={message.ok ? 'text-ok' : 'text-danger'}>{message.text}</p>}

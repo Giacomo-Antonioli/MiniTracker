@@ -4,6 +4,12 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-11-14
+
+### Added
+- Add from a file: load units, tools and supplies from a collection file (`minitracker-collection` JSON) without touching what you already have. A review step lists every entry with a tick box, marks the ones already in your tracker, and ticked duplicates join the existing unit (more models, or a higher tool quantity). The button is on the Backlog, the Workshop (also in their empty states) and in Settings › Backup.
+- Backlog: *Bulk edit* works on the shown units (filter first, untick what you don't want): move all models from one stage to another with one history entry per group, or add or remove a tag.
+
 ## [0.27.6] - 2026-11-14
 
 ### Added

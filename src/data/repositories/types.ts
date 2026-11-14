@@ -10,6 +10,8 @@ export interface UnitRepository {
   delete(id: string): Promise<void>
   /** Saves the updated unit and its history event atomically. */
   recordMove(unit: OwnedUnit, event: StatusEvent): Promise<void>
+  /** One unit change with several history events, in one transaction. */
+  recordMoves(unit: OwnedUnit, events: StatusEvent[]): Promise<void>
 }
 
 export interface EventRepository {
