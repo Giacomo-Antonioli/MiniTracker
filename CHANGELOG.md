@@ -4,6 +4,11 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.27.4] - 2026-11-14
+
+### Fixed
+- Storage: a place counts the paints, tools and supplies kept in it (before, a box full of paints said "0 stored").
+
 ## [0.27.3] - 2026-11-14
 
 ### Changed
