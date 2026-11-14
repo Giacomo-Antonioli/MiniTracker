@@ -4,6 +4,9 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Changed
+- Paints: the − / + pot buttons are on every paint card; + on a paint you do not own adds it to your inventory (1 pot).
+
 ## [0.27.2] - 2026-11-14
 
 ### Fixed
