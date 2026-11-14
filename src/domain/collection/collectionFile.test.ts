@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import hachette from './fixtures/hachette-combat-patrol.json?raw'
 import { DEFAULT_PIPELINE, WISHLISTED } from './pipeline'
-import { parseCollectionFile, planCollection, resolveStage } from './collectionFile'
+import { findDuplicates, parseCollectionFile, planCollection, resolveStage, selectEntries } from './collectionFile'
 
 let n = 0
 const ctx = () => ({ now: '2026-11-14T10:00:00.000Z', newId: () => `id${++n}` })
@@ -63,5 +63,41 @@ describe('collection file', () => {
     // a second load finds everything already there
     const again = planCollection(f, { units: plan.units, tools: plan.tools, supplies: plan.supplies }, DEFAULT_PIPELINE, ctx())
     expect([again.units.length, again.duplicates]).toEqual([0, 94])
+  })
+
+  it('explains what is wrong with a damaged file', () => {
+    expect(() => parseCollectionFile(file({ units: [{ count: 2 }] }))).toThrow('Unit 1 has no name')
+    expect(() => parseCollectionFile(file({ units: [{ name: 'A', count: 0 }] }))).toThrow('invalid model count')
+    expect(() => parseCollectionFile(file({ tools: [{}] }))).toThrow('Tool 1 has no name')
+    expect(() => parseCollectionFile(file({ supplies: [{ name: 'Glue', quantity: -1 }] }))).toThrow('invalid quantity')
+    expect(() => parseCollectionFile(file({ units: 'x' }))).toThrow('damaged')
+    expect(() => parseCollectionFile(file({ units: [null] }))).toThrow('Unit 1 has no name')
+    expect(() => parseCollectionFile(JSON.stringify({ format: 'minitracker-collection' }))).toThrow('newer version')
+    expect(parseCollectionFile(file({}))).toMatchObject({ units: [], tools: [], supplies: [] })
+  })
+
+  it('keeps optional fields, wishlist items and the first owned stage by default', () => {
+    const f = parseCollectionFile(file({ units: [{ name: ' Kahl ', faction: 'Votann', notes: 'n', tags: [' a ', '', 3] }], tools: [{ name: 'Lamp', status: 'Wishlist', category: 'Lighting', quantity: 0, notes: 'x' }] }))
+    expect(f.units[0]).toMatchObject({ name: 'Kahl', faction: 'Votann', notes: 'n', tags: ['a'], count: 1 })
+    expect(f.tools[0]).toMatchObject({ status: 'wishlist', category: 'Lighting', quantity: 0, notes: 'x' })
+    const plan = planCollection(f, none, DEFAULT_PIPELINE, ctx())
+    expect(plan.units[0]).toMatchObject({ factionName: 'Votann', notes: 'n', groups: [{ status: 'sprue' }] })
+    expect(plan.tools[0]).toMatchObject({ status: 'wishlist', notes: 'x', category: 'Lighting' })
+    expect(findDuplicates(f, { units: plan.units, tools: plan.tools, supplies: [] })).toEqual({ units: [true], tools: [true], supplies: [] })
+    expect(selectEntries(f, { units: [false], tools: [true], supplies: [] }).units).toEqual([])
+  })
+
+  it('matches untagged units only with untagged ones, and merges repeats inside one file when asked', () => {
+    const base = planCollection(parseCollectionFile(file({ units: [{ name: 'Farseer', tags: ['x'] }, { name: 'Kahl' }] })), none, DEFAULT_PIPELINE, ctx())
+    const f = parseCollectionFile(file({ units: [{ name: 'Farseer' }, { name: 'Kahl', status: 'wishlist' }, { name: 'New', count: 2 }, { name: 'New', count: 3 }], tools: [{ name: 'Lamp' }, { name: 'lamp', quantity: 2 }], supplies: [{ name: 'Glue' }] }))
+    const have = { units: base.units, tools: [], supplies: [] }
+    expect(findDuplicates(f, have).units).toEqual([false, true, false, false])
+    const plan = planCollection(f, have, DEFAULT_PIPELINE, ctx(), 'add')
+    expect(plan.units.map((u) => [u.customName, u.groups.map((g) => g.count)])).toEqual([['Farseer', [1]], ['New', [5]]])
+    expect(plan.updatedUnits.map((u) => u.customName)).toEqual(['Kahl'])
+    expect(plan.tools.map((t) => t.quantity)).toEqual([3])
+    const raised = planCollection(parseCollectionFile(file({ supplies: [{ name: 'Glue', quantity: 2 }] })), { units: [], tools: [], supplies: [{ ...plan.supplies[0] }] }, DEFAULT_PIPELINE, ctx(), 'add')
+    expect(raised.updatedSupplies[0].quantity).toBe(3)
+    expect(planCollection(f, have, DEFAULT_PIPELINE, ctx(), 'skip').duplicates).toBe(3)
   })
 })
