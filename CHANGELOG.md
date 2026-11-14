@@ -4,6 +4,11 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.27.2] - 2026-11-14
+
+### Fixed
+- Storage: *Scan into…* no longer opens the *Next sticker* scanner on top of itself; the camera and the typed code field now sit inside the same window, so you can type a code and confirm it with OK.
+
 ## [0.27.1] - 2026-11-14
 
 ### Added

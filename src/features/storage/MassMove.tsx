@@ -4,7 +4,7 @@ import { codeFromText, findCode } from '../../domain/storage/codes'
 import { checkOut, descendants, kindOf, moveHomes, movePlace, pathLabel, placeById, planMove, type Storage } from '../../domain/storage/storage'
 import type { WorkshopItem, WorkshopKind } from '../../domain/workshop/item'
 import { Dialog } from '../../ui/Dialog'
-import { ScanDialog } from './Labels'
+import { ScanPanel } from './Labels'
 import { PlaceSelect } from './Storage'
 import { useTx } from '../../i18n'
 
@@ -193,7 +193,12 @@ export function ScanMoveDialog({ placeId, onClose }: { placeId: string; onClose:
       <div className="grid gap-2 text-sm">
         <ModePicker mode={mode} setMode={setMode} />
         <p className="text-xs text-muted">{tx('Scan or type each sticker; every unit or box you scan moves into {{name}}. Close when you are done.', { name: target?.name ?? '' })}</p>
-        {open ? <ScanDialog key={round} title={tx('Next sticker')} onText={onText} onClose={() => setOpen(false)} /> : <button className="btn w-fit" onClick={() => setOpen(true)}>{tx('📷 Scan more')}</button>}
+        {open ? (
+          <div className="grid gap-2 rounded border border-line p-3">
+            <div className="flex items-center justify-between"><b>{tx('Next sticker')}</b><button className="text-muted hover:text-fg" aria-label={tx('Close')} onClick={() => setOpen(false)}>✕</button></div>
+            <ScanPanel key={round} onText={onText} />
+          </div>
+        ) : <button className="btn w-fit" onClick={() => setOpen(true)}>{tx('📷 Scan more')}</button>}
         <ul className="grid gap-0.5" aria-label={tx('Moved')}>
           {done.map((d, i) => <li key={`${d.code}-${done.length - i}`} className={d.ok ? '' : 'text-danger'}>{d.ok ? '✓' : '✕'} {d.text}</li>)}
         </ul>

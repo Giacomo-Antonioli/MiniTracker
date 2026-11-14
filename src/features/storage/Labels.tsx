@@ -191,8 +191,18 @@ export function FindCode({ onFound, onBarcode }: { onFound: (t: CodeTarget) => v
   )
 }
 
-/** Camera scanner for QR labels and box barcodes, with a typed fallback. */
+/** Camera scanner for QR labels and box barcodes, with a typed fallback, in its own dialog. */
 export function ScanDialog({ onText, onClose, title }: { onText: (t: string) => void; onClose: () => void; title?: string }) {
+  const tx = useTx()
+  return (
+    <Dialog title={title ?? tx('Scan a QR or barcode')} onClose={onClose}>
+      <ScanPanel onText={onText} />
+    </Dialog>
+  )
+}
+
+/** The scanner itself, to sit inside another dialog (a dialog nested in a dialog overlaps it). */
+export function ScanPanel({ onText }: { onText: (t: string) => void }) {
   const tx = useTx()
   const [typed, setTyped] = useState('')
   const video = useRef<HTMLVideoElement>(null)
@@ -233,13 +243,13 @@ export function ScanDialog({ onText, onClose, title }: { onText: (t: string) => 
     }
   }, [onText, tx])
   return (
-    <Dialog title={title ?? tx('Scan a QR or barcode')} onClose={onClose}>
+    <div>
       {err ? <p className="text-sm text-danger" role="alert">{err}</p> : <video ref={video} className="w-full rounded" muted playsInline aria-label={tx('Camera')} />}
       <p className="mt-2 text-xs text-muted">{tx('Point the camera at a MiniTracker label or the barcode on a box.')}</p>
       <form className="mt-2 flex gap-2" onSubmit={(e) => { e.preventDefault(); if (typed.trim()) onText(typed.trim()) }}>
         <input className="input flex-1" aria-label={tx('Type a code or barcode')} placeholder={tx('…or type it')} value={typed} onChange={(e) => setTyped(e.target.value)} />
         <button className="btn">OK</button>
       </form>
-    </Dialog>
+    </div>
   )
 }
