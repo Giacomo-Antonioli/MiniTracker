@@ -20,7 +20,7 @@ describe('BSData fetch', () => {
 
   it('rejects odd answers and HTTP errors with readable messages', async () => {
     await expect(latestCommit('o/r', fakeFetch({ '/commits/HEAD': () => new Response('<html>') }))).rejects.toThrow(/Unexpected answer/)
-    await expect(latestCommit('o/r', fakeFetch({}))).rejects.toThrow(/HTTP 404/)
+    await expect(latestCommit('o/r', fakeFetch({}))).rejects.toThrow(/no longer available online \(HTTP 404\)/)
   })
 
   it('uses the fixed file list of a non-BSData source (#99)', async () => {

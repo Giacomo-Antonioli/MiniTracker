@@ -15,16 +15,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      # BSData removed its repositories after a copyright notice (2026-11-12). While the source is gone there is
+      # nothing to check: say so and stop, instead of opening an issue every day. It runs again by itself if it returns.
+      - id: probe
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/repos/BSData/wh40k-10e || true)
+          # Only "not found" / "legally blocked" count as gone; any other failure still runs the check and fails loudly.
+          if [ "$CODE" = "404" ] || [ "$CODE" = "451" ]; then
+            echo "gone=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::BSData/wh40k-10e answers HTTP $CODE (removed from GitHub?). Check skipped."
+          else
+            echo "gone=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.probe.outputs.gone != 'true'
+        uses: actions/setup-node@v7
         with: { node-version: 24, cache: npm }
-      - run: npm ci
+      - if: steps.probe.outputs.gone != 'true'
+        run: npm ci
       - id: live
+        if: steps.probe.outputs.gone != 'true'
         run: npm run check:bsdata
         env:
           # Avoids GitHub API rate limits on shared runners.
           GITHUB_TOKEN: ${{ github.token }}
       - name: Open an issue on failure
-        if: failure() && github.event_name != 'pull_request'
+        if: failure() && steps.probe.outputs.gone != 'true' && github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -39,7 +56,7 @@ jobs:
           The catalogue download in the app may be broken (repo moved or renamed, files changed, or the parser needs updating)."
           fi
       - name: Close the issue when fixed
-        if: success() && github.event_name != 'pull_request'
+        if: success() && steps.probe.outputs.gone != 'true' && github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
