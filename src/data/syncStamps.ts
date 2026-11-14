@@ -11,6 +11,8 @@ export interface SyncPrefs {
   direction?: 'send' | 'receive' | 'both'
   applyDeletions?: boolean
   photos?: boolean
+  /** Also copy game catalogues this device lacks (they are large). */
+  catalogues?: boolean
   /** Optional TURN server for networks where a direct connection fails. */
   turn?: { urls: string; username?: string; credential?: string }
 }

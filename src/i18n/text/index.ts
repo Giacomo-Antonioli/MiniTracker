@@ -1,3 +1,4 @@
+import { catalogueBundle } from './catalogueBundle'
 import { storageGuide } from './storageGuide'
 import { paintBoxes } from './paintBoxes'
 import { ble } from './ble'
@@ -10,4 +11,4 @@ import { live } from './live'
 /** English text → [it, es, de, fr, zh], one dictionary per area of the app. */
 export type Dict = Record<string, [it: string, es: string, de: string, fr: string, zh: string]>
 
-export const TEXT: Record<string, Dict> = { backlog, batchA, batchB, batchC, live, ble, paintBoxes, storageGuide }
+export const TEXT: Record<string, Dict> = { backlog, batchA, batchB, batchC, live, ble, paintBoxes, storageGuide, catalogueBundle }

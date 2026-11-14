@@ -112,3 +112,22 @@ it('stops when the other device disconnects before saying hello', async () => {
   cb.close()
   await expect(p).rejects.toThrow(/disconnected/)
 })
+
+const catalogue = (gameId: string, fetchedAt: string) => ({ gameId, gameName: gameId, source: { repo: 'o/r', commit: 'c', fetchedAt }, factions: [{ id: 'f', name: 'F', fullName: 'F' }], datasheets: [] }) as never
+
+it('catalogues: the missing one is copied, a newer download replaces an older one, an equal one is left alone', async () => {
+  await a.catalogues.bulkPut([catalogue('g1', '2026-11-01T00:00:00Z'), catalogue('g2', '2026-11-10T00:00:00Z'), catalogue('g3', '2026-11-05T00:00:00Z')])
+  await b.catalogues.bulkPut([catalogue('g2', '2026-11-01T00:00:00Z'), catalogue('g3', '2026-11-05T00:00:00Z')])
+  const [ra, rb] = await run({ mode: 'merge', direction: 'both', applyDeletions: true, photos: false, catalogues: true })
+  expect(ra.applied && rb.applied).toBe(true)
+  expect((await b.catalogues.toArray()).map((c) => c.gameId).sort()).toEqual(['g1', 'g2', 'g3'])
+  expect((await b.catalogues.get('g2'))!.source.fetchedAt).toBe('2026-11-10T00:00:00Z')
+})
+
+it('catalogues are left out unless asked for, and when the changes are declined', async () => {
+  await a.catalogues.put(catalogue('g1', '2026-11-01T00:00:00Z'))
+  await run({ mode: 'merge', direction: 'both', applyDeletions: true, photos: false })
+  expect(await b.catalogues.count()).toBe(0)
+  await run({ mode: 'merge', direction: 'send', applyDeletions: true, photos: false, catalogues: true }, { ...yes, confirmChanges: async () => false })
+  expect(await b.catalogues.count()).toBe(0)
+})

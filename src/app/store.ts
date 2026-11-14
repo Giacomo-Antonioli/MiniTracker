@@ -7,6 +7,7 @@ import { unitsOfGame, type GameFilter } from '../domain/catalogue/unitGame'
 import { exportBackupZip, importBackupFile } from '../data/backup'
 import { MiniTrackerDb } from '../data/db'
 import { convert } from '../data/catalogue/convert'
+import { readBundle } from '../data/catalogue/bundle'
 import { CURRENT_EDITION, downloadDataFiles, editionOfRepo, latestCommit } from '../data/catalogue/fetch'
 import { extensionOf, makeDisplayCopy } from '../data/photos/compress'
 import { DexieCatalogueRepository, DexieEventRepository, DexieListRepository, DexiePaintRepository, DexiePhotoRepository, DexieSchemeRepository, DexieSettingsRepository, DexieShoppingRepository, DexieUnitRepository } from '../data/repositories/dexie'
@@ -549,7 +550,13 @@ export const useStore = create<State>((set, get) => ({
     const job = (j: Partial<CatalogueJob>) => set({ catalogueJob: { ...get().catalogueJob, ...j } })
     try {
       job({ phase: 'converting', error: undefined, repo: 'local files' })
-      const files = await Promise.all(picked.map(async (f) => ({ name: f.name, text: await f.text() })))
+      // A catalogue file exported from MiniTracker (here or on another device) installs as it is.
+      const bundles = await Promise.all(picked.map(async (f) => readBundle(new Uint8Array(await f.arrayBuffer()))))
+      const found = bundles.flatMap((b) => b ?? [])
+      for (const c of found) await installCatalogue(c)
+      const rest = picked.filter((_, i) => !bundles[i])
+      if (!rest.length) return job({ phase: 'idle' })
+      const files = await Promise.all(rest.map(async (f) => ({ name: f.name, text: await f.text() })))
       const catalogue = await convert(files, { repo: 'local files', commit: 'local', fetchedAt: new Date().toISOString() })
       await installCatalogue(catalogue)
       job({ phase: 'idle' })

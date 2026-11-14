@@ -9,6 +9,7 @@ import { syncSnapshots, type Snapshot, type SyncMode } from '../domain/sync/snap
 import type { PhotoFiles } from '../domain/photos/types'
 import type { MiniTrackerDb } from './db'
 import { PIECE_SIZE, type Channel } from './syncChannel'
+import { catalogueFromWire, catalogueInfos, catalogueToWire, wantedCatalogues, type CatalogueInfo } from './syncCatalogues'
 import { applySnapshot, readSnapshot } from './syncSnapshot'
 import { SYNCED_TABLES } from './syncTracking'
 
@@ -23,6 +24,8 @@ export interface SyncPlan {
   direction: Direction
   applyDeletions: boolean
   photos: boolean
+  /** Also copy game catalogues; only used when both devices support it. */
+  catalogues?: boolean
 }
 
 type Msg =
@@ -32,6 +35,8 @@ type Msg =
   | { type: 'decline'; reason: string }
   | { type: 'piece'; piece: Piece }
   | { type: 'want'; ids: string[] }
+  | { type: 'cats'; list: CatalogueInfo[] }
+  | { type: 'wantCats'; ids: string[] }
   | { type: 'done' }
 
 export interface SessionHooks {
@@ -75,7 +80,7 @@ export async function runSync(
   const finished = new Promise<void>((r) => (finish = r))
   const sendHello = () => {
     try {
-      send({ type: 'hello', protocol: PROTOCOL_VERSION, ...me, clock: now(), seen: !!gotTheirs })
+      send({ type: 'hello', protocol: PROTOCOL_VERSION, ...me, clock: now(), features: ['catalogues'], seen: !!gotTheirs })
     } catch {
       // the connection is gone; the close handler ends the sync
     }
@@ -168,14 +173,18 @@ export async function runSync(
   if (plan.direction === 'both' && plan.mode !== 'merge') throw new Error('Syncing both ways needs merge')
 
   // 3. Exchange data.
+  // The catalogue step only happens when both devices know it (an older one never says so in its hello).
+  const cats = !!plan.catalogues && !!other.features?.includes('catalogues')
   const sends = plan.direction !== 'receive'
   const receives = plan.direction !== 'send'
   const mine = await readSnapshot(db)
   if (sends) sendLong('snapshot', JSON.stringify(mine))
+  if (sends && cats) send({ type: 'cats', list: catalogueInfos(await db.catalogues.toArray()) })
   const theirs = receives ? (JSON.parse(await receiveLong('snapshot', 'Receiving data')) as Snapshot) : undefined
 
   // 4. Answer photo requests from the other side while we work.
   const serving = sends && plan.photos ? servePhotos(db, next, sendLong) : Promise.resolve()
+  const servingCats = sends && cats ? serveCatalogues(db, next, sendLong) : Promise.resolve()
 
   let result: SessionResult = { applied: false, other }
   if (theirs) {
@@ -191,9 +200,19 @@ export async function runSync(
     // Without photos, keep only photo records whose files are already here.
     const snapshot = ok && !plan.photos ? withoutMissingPhotos(out.snapshot, mine) : out.snapshot
     if (ok) await applySnapshot(db, snapshot, files)
+    if (cats) {
+      const offered = (await next('cats')).list
+      const want = ok ? wantedCatalogues(offered, catalogueInfos(await db.catalogues.toArray())) : []
+      send({ type: 'wantCats', ids: want })
+      for (const [i, id] of want.entries()) {
+        hooks.onProgress?.('Receiving catalogues', i, want.length)
+        for (const c of await catalogueFromWire(await receiveLong(`catalogue:${id}`, 'Receiving catalogues'))) await db.catalogues.put(c)
+      }
+    }
     result = { applied: ok, summary: out.summary, other }
   }
   await serving
+  await servingCats
   send({ type: 'done' })
   await next('done')
   finish()
@@ -211,6 +230,14 @@ async function servePhotos(db: MiniTrackerDb, next: (t: 'want') => Promise<{ typ
   for (const id of ids) {
     const f = await db.photoFiles.get(id)
     if (f) sendLong(`photo:${id}`, JSON.stringify(await toWire(f)))
+  }
+}
+
+async function serveCatalogues(db: MiniTrackerDb, next: (t: 'wantCats') => Promise<{ type: 'wantCats'; ids: string[] }>, sendLong: (id: string, text: string) => void) {
+  const { ids } = await next('wantCats')
+  for (const id of ids) {
+    const wire = await catalogueToWire(db, id)
+    if (wire) sendLong(`catalogue:${id}`, wire)
   }
 }
 

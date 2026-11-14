@@ -4,11 +4,13 @@ import { EDITIONS, type Edition } from '../../data/catalogue/fetch'
 import { GAMES, type GameId } from '../../domain/catalogue/editions'
 import type { Catalogue } from '../../domain/catalogue/types'
 import { ProgressBar } from '../../ui/Dialog'
-import { useT } from '../../i18n'
+import { buildBundle } from '../../data/catalogue/bundle'
+import { useT, useTx } from '../../i18n'
 import { formatDate } from '../../i18n/format'
 
 export function CataloguePage() {
   const t = useT()
+  const tx = useTx()
   const { catalogues, catalogue: active, catalogueJob: job, importCatalogueFiles } = useStore()
   const busy = job.phase !== 'idle'
   const local = catalogues.filter((c) => c.source.repo === 'local files')
@@ -47,7 +49,7 @@ export function CataloguePage() {
           <input
             type="file"
             multiple
-            accept=".gst,.cat,.json"
+            accept=".gst,.cat,.json,.gz"
             aria-label={t('settingsPanels.catalogue.files')}
             className="sr-only"
             onChange={(e) => {
@@ -57,6 +59,27 @@ export function CataloguePage() {
             }}
           />
         </label>
+        <p className="text-sm text-muted">{tx('You can also pick a catalogue file exported from MiniTracker on another device or browser.')}</p>
+      </section>
+      <section className="panel grid gap-2 p-4">
+        <h3 className="font-display text-lg">{tx('Save your catalogues')}</h3>
+        <p className="text-sm text-muted">{tx('Catalogues live only in this browser or app and are not part of backups or sync. Export them to one file to keep a copy or load them on another device (Import above).')}</p>
+        <button
+          className="btn w-fit"
+          disabled={catalogues.length === 0}
+          onClick={async () => {
+            const bytes = await buildBundle(catalogues, new Date().toISOString())
+            const gz = bytes[0] === 0x1f
+            const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: gz ? 'application/gzip' : 'application/json' }))
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `minitracker-catalogues-${new Date().toISOString().slice(0, 10)}.json${gz ? '.gz' : ''}`
+            a.click()
+            URL.revokeObjectURL(url)
+          }}
+        >
+          {tx('⬇ Export catalogues')}
+        </button>
       </section>
       <StratagemImport />
     </div>

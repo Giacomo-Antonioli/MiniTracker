@@ -46,6 +46,8 @@ export interface Hello {
   deviceName: string
   /** Sender's clock at sending time. */
   clock: string
+  /** Optional steps this device can take part in (missing = none, i.e. an older version). */
+  features?: string[]
 }
 
 /** Seconds the other clock is ahead of ours (negative: behind), allowing for the time the message took. */
