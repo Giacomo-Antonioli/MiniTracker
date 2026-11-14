@@ -54,10 +54,14 @@ export class DexieUnitRepository implements UnitRepository {
   }
 
   async recordMove(unit: OwnedUnit, event: StatusEvent) {
-    if (event.unitId !== unit.id) throw new Error('Event belongs to a different unit')
+    await this.recordMoves(unit, [event])
+  }
+
+  async recordMoves(unit: OwnedUnit, events: StatusEvent[]) {
+    if (events.some((e) => e.unitId !== unit.id)) throw new Error('Event belongs to a different unit')
     await this.db.transaction('rw', this.db.units, this.db.statusEvents, async () => {
       await this.db.units.put(unit)
-      await this.db.statusEvents.put(event)
+      await this.db.statusEvents.bulkPut(events)
     })
   }
 }

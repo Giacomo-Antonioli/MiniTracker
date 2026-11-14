@@ -39,6 +39,8 @@ import type { BacklogFilter } from '../domain/collection/backlog'
 import { DEFAULT_PIPELINES, type PipelineKey } from '../domain/pipelines'
 import { DEFAULT_PIPELINE, firstOwnedStage, moveModels, WISHLISTED, type MoveOptions } from '../domain/collection/pipeline'
 import { createUnit, mergeGroups } from '../domain/collection/ownedUnit'
+import { moveAllAt, withTag } from '../domain/collection/bulk'
+import { findDuplicates, parseCollectionFile, planCollection, type CollectionFile, type Duplicates, type DuplicateFlags } from '../domain/collection/collectionFile'
 import type { Ctx, OwnedUnit, Pipeline, StageId, StatusEvent } from '../domain/collection/types'
 
 const realDb = new MiniTrackerDb()
@@ -213,6 +215,10 @@ interface State {
   allEvents(): Promise<StatusEvent[]>
   /** Move models; an optional photo file is attached to the history step. */
   move(unit: OwnedUnit, groupId: string, count: number, to: StageId, opts: MoveOptions, photo?: File): Promise<void>
+  /** Move all models at stage `from` to stage `to` in each of the units. Returns how many models and units moved. */
+  bulkMove(unitIds: string[], from: StageId, to: StageId, note?: string): Promise<{ models: number; units: number }>
+  /** Add (or remove) a tag on each of the units. Returns how many units changed. */
+  bulkTag(unitIds: string[], tag: string, on: boolean): Promise<number>
   /** Photos per unit id (unit gallery + history photos), loaded on demand. */
   photos: Record<string, Photo[]>
   /** Backlog filters, kept while you visit other pages. */
@@ -306,6 +312,10 @@ interface State {
   exportBackup(includeOriginals: boolean): Promise<Blob>
   /** Replace all data with a backup file (zip or older JSON), then reload. Returns the unit and photo counts. */
   importBackup(file: Blob): Promise<{ units: number; photos: number; exportedAt: string }>
+  /** Add units, tools and supplies from a collection file (JSON text) without touching what exists. Returns the counts added and skipped. */
+  importCollection(file: CollectionFile, duplicates?: Duplicates): Promise<{ units: number; tools: number; supplies: number; duplicates: number }>
+  /** Read a collection file's text and say which entries are already in the tracker; throws a readable message on a bad file. */
+  previewCollection(text: string): { file: CollectionFile; duplicates: DuplicateFlags }
   /** Free space by deleting photo originals. Returns bytes freed. */
   dropOriginals(): Promise<number>
   /** Army lists, most recently changed first. */
@@ -607,6 +617,41 @@ export const useStore = create<State>((set, get) => ({
     set({ units: await unitsRepo.list() })
     await syncShopping(updated)
     await get().loadEvents(unit.id)
+  },
+
+  async bulkMove(unitIds, from, to, note) {
+    let models = 0
+    let moved = 0
+    for (const id of unitIds) {
+      const unit = get().units.find((u) => u.id === id)
+      if (!unit) continue
+      const r = moveAllAt(unit, from, to, get().pipeline, ctx(), { note })
+      if (!r.events.length) continue
+      for (const e of r.events) models += e.count
+      moved++
+      // One write for the unit and all its events, so a failure leaves the unit as it was.
+      await unitsRepo.recordMoves(r.unit, r.events)
+    }
+    set({ units: await unitsRepo.list() })
+    for (const id of unitIds) {
+      const u = get().units.find((x) => x.id === id)
+      if (u) await syncShopping(u)
+      if (get().events[id]) await get().loadEvents(id)
+    }
+    return { models, units: moved }
+  },
+
+  async bulkTag(unitIds, tag, on) {
+    let changed = 0
+    for (const id of unitIds) {
+      const unit = get().units.find((u) => u.id === id)
+      if (!unit) continue
+      const next = withTag(unit, tag, on, ctx())
+      if (next === unit) continue
+      await get().saveUnit(next)
+      changed++
+    }
+    return changed
   },
 
   photos: {},
@@ -968,6 +1013,28 @@ export const useStore = create<State>((set, get) => ({
     set({ events: {}, photos: {} })
     await get().load()
     return { units: b.data.units.length, photos: b.data.photos?.length ?? 0, exportedAt: b.exportedAt }
+  },
+
+  previewCollection(text) {
+    const file = parseCollectionFile(text)
+    return { file, duplicates: findDuplicates(file, { units: get().units, tools: get().tools, supplies: get().supplies }) }
+  },
+
+  async importCollection(file, duplicates = 'skip') {
+    const plan = planCollection(file, { units: get().units, tools: get().tools, supplies: get().supplies }, get().pipeline, ctx(), duplicates)
+    for (const u of [...plan.units, ...plan.updatedUnits]) await get().saveUnit(u)
+    const merge = <T extends { id: string }>(have: T[], added: T[], changed: T[]) => [...have.map((x) => changed.find((c) => c.id === x.id) ?? x), ...added]
+    if (plan.tools.length || plan.updatedTools.length) {
+      const list = merge(get().tools, plan.tools, plan.updatedTools)
+      set({ tools: list })
+      await settingsRepo.setValue('tools', list)
+    }
+    if (plan.supplies.length || plan.updatedSupplies.length) {
+      const list = merge(get().supplies, plan.supplies, plan.updatedSupplies)
+      set({ supplies: list })
+      await settingsRepo.setValue('supplies', list)
+    }
+    return { units: plan.units.length, tools: plan.tools.length, supplies: plan.supplies.length, duplicates: plan.duplicates }
   },
 
   lists: [],
