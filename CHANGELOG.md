@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.27.6] - 2026-11-14
+
 ### Added
 - Catalogues: Settings › Catalogue has *Export catalogues*, one file with every catalogue installed on this device. *Choose files* now also reads that file, so catalogues move to another browser or device (or back after clearing site data). Device sync has a new *Include game catalogues* option that copies the catalogues the other device lacks (or has an older download of); both devices need this version.
 
