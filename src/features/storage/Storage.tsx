@@ -1,5 +1,5 @@
 import { printPage } from '../../app/platform'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BoxDialog } from '../barcodes/BoxScan'
 import { ctx, useStore } from '../../app/store'
 import type { OwnedUnit } from '../../domain/collection/types'
@@ -91,7 +91,7 @@ function PlaceForm({ start, siteId, onDone }: { start?: Place; siteId?: string; 
           </select>
         )}
         <input className="input flex-1" aria-label={tx('Location')} data-tour="place-location" placeholder={tx('Where, e.g. study, shelf 2')} value={p.location} onChange={(e) => setP({ ...p, location: e.target.value })} />
-        <input className="input w-28" type="number" min={1} aria-label={tx('Slots')} placeholder={tx('Slots')} value={p.capacity ?? ''} onChange={(e) => setP({ ...p, capacity: e.target.value ? Number(e.target.value) : undefined })} />
+        <input className="input w-28" type="number" min={1} aria-label={tx('Slots')} placeholder={tx('Slots (optional)')} value={p.capacity ?? ''} onChange={(e) => setP({ ...p, capacity: e.target.value ? Number(e.target.value) : undefined })} />
       </div>
       <input className="input" aria-label={tx('Place note')} placeholder={tx('Note (foam layout, magnets…)')} value={p.note} onChange={(e) => setP({ ...p, note: e.target.value })} />
       <div className="flex gap-2">
@@ -119,13 +119,15 @@ function FillBar({ s, id }: { s: Storage; id: string }) {
 
 function PlaceDetail({ id, onOpenUnit, onEdit, onDeleted, onOpenPlace, full }: { id: string; onOpenUnit: (id: string) => void; onEdit: () => void; onDeleted: () => void; onOpenPlace?: (id: string) => void; full?: boolean }) {
   const tx = useTx()
-  const { storage: s, units, tools, supplies } = useStore()
+  const { storage: s, units, tools, supplies, paints, paintStock, loadPaints } = useStore()
+  useEffect(() => { if (!paints.length) void loadPaints() }, [paints.length, loadPaints])
   const { run } = useSave()
   const [moving, setMoving] = useState<'contents' | 'place' | 'scan'>()
   const p = placeById(s, id)!
   const items = itemsIn({ tools, supplies }, id)
   const name = (u: string) => units.find((x) => x.id === u)?.customName ?? tx('Deleted unit')
   const homed = homedIn(s, id)
+  const paintsHere = paints.filter((x) => paintStock.get(x.id)?.placeId === id)
   const here = checkedOutTo(s, id)
   const back = putBackList(s, id)
   const inside = s.places.filter((x) => x.parentId === id)
@@ -178,6 +180,12 @@ function PlaceDetail({ id, onOpenUnit, onEdit, onDeleted, onOpenPlace, full }: {
         <div>
           <h3 className="text-sm text-muted">{tx('Tools and supplies kept here')}</h3>
           <ul className="text-sm" aria-label={tx('Tools and supplies here')}>{items.map((r) => <li key={`${r.kind}:${r.id}`}>{r.kind === 'tool' ? '🔧' : '🧴'} {r.name}</li>)}</ul>
+        </div>
+      )}
+      {paintsHere.length > 0 && (
+        <div>
+          <h3 className="text-sm text-muted">{tx('Paints kept here ({{n}})', { n: paintsHere.length })}</h3>
+          <ul className="text-sm" aria-label={tx('Paints here')}>{paintsHere.map((x) => <li key={x.id}>🎨 {x.brand} {x.name}{(paintStock.get(x.id)?.quantity ?? 0) > 1 ? ` ×${paintStock.get(x.id)!.quantity}` : ''}</li>)}</ul>
         </div>
       )}
       {here.length > 0 && (

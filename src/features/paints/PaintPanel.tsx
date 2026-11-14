@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { adjustQuantity, newStock, updateStock } from '../../domain/paints/inventory'
 import type { PaintDef, PaintStock } from '../../domain/paints/types'
+import { PlaceSelect } from '../storage/Storage'
 import { useTx } from '../../i18n'
 import { ColourMatches } from './ColourMatches'
 
@@ -80,6 +81,10 @@ export function PaintPanel({ paint, onClose, onSelect }: { paint: PaintDef; onCl
           <Field label={tx('Price / pot')} type="number" value={stock.price?.toString() ?? ''} onSave={(v) => patch({ price: num(v) })} />
           <Field label={tx('Shop')} value={stock.shop ?? ''} onSave={(v) => patch({ shop: text(v) })} />
           <Field label={tx('Location')} placeholder={tx('case, drawer, rack slot')} value={stock.location ?? ''} onSave={(v) => patch({ location: text(v) })} />
+          <label className="flex items-center gap-2">
+            <span className="w-24 text-sm text-muted">{tx('Box')}</span>
+            <PlaceSelect label={tx('Box or place')} empty={tx('Not in a box')} value={stock.placeId} onChange={(id) => void patch({ placeId: id })} />
+          </label>
           <Field label={tx('Barcode')} value={stock.barcode ?? ''} onSave={(v) => patch({ barcode: text(v) })} />
           <label className="flex items-center gap-2">
             <span className="w-24 text-sm text-muted">{tx('Rating')}</span>
