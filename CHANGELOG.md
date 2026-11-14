@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.27.1] - 2026-11-14
+
 ### Added
 - Paints: **☑ Select** lets you pick paints (or *Select all* of the current filter) and put them in a storage box in one go; a paint also has a *Box* field, and the place page lists the paints kept there. Owned paints show **− / +** on their card to change the pot count without opening the sheet.
 - Storage: the *Slots* box is marked optional; a box with no slots just counts what is in it.
