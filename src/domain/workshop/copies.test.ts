@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_CATEGORIES } from './categories'
-import { copyOf, editCopies, fitCopies, isLiquid, isLow, newItem, parseItems, searchItems, setRepresentative, sortItems } from './item'
+import { copiesAt, copyPlaces, moveCopies, copyOf, editCopies, fitCopies, isLiquid, isLow, newItem, parseItems, searchItems, setRepresentative, sortItems } from './item'
 
 let n = 0
 const ctx = () => ({ now: '2026-11-14T10:00:00.000Z', newId: () => `id${++n}` })
@@ -78,5 +78,18 @@ describe('copies of a tool or supply', () => {
     expect(sortItems([a, b, c], 'stock').map((x) => x.name)).toEqual(['Glue', 'Clippers', 'Brush'])
     expect(sortItems([a, b, c], 'recent').map((x) => x.name)).toEqual(['Glue', 'Clippers', 'Brush'])
     expect(sortItems([a, b, c], 'attention').map((x) => x.name)).toEqual(['Clippers', 'Brush', 'Glue'])
+  })
+
+  it('keeps a place per copy, and moves only the copies kept in a place', () => {
+    let t = editCopies(glue(), 1, { placeId: 'boxB' })
+    t = editCopies(t, 0, { placeId: 'boxA' })
+    expect(copyPlaces(t)).toEqual(['boxA', 'boxB'])
+    expect([copiesAt(t, 'boxA'), copiesAt(t, 'boxB'), copiesAt(t, 'none')]).toEqual([1, 1, 0])
+    const moved = moveCopies(t, 'boxB', 'boxC')
+    expect(copyPlaces(moved)).toEqual(['boxA', 'boxC'])
+    expect(moveCopies(t, undefined, 'boxZ').copies!.map((c) => c.placeId)).toEqual(['boxZ', 'boxZ'])
+    // all copies in the one place: the whole item moves, no per-copy records needed
+    const alike = moveCopies({ ...glue(), placeId: 'boxA' }, 'boxA', 'boxB')
+    expect([alike.placeId, alike.copies]).toEqual(['boxB', undefined])
   })
 })

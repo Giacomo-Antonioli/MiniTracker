@@ -4,7 +4,7 @@ import { pathLabel } from '../../domain/storage/storage'
 import { AIRBRUSH_NOZZLES, SUGGESTED_TASKS, TOOL_SOURCE, airbrushLiquids, airbrushTool, wetPaletteSet, type AirbrushAction, type AirbrushFeed } from '../../domain/tools/tools'
 import type { Pipeline } from '../../domain/collection/types'
 import {
-  addTask, CONDITIONS, copyCount, copyOf, daysLeft, dueTasks, editCopies, fitCopies, isLiquid, isLow, levelIsLow, markDone, newItem, refPrefix, removeTask, repIndex, searchItems, setRepresentative, shopItem, sortItems,
+  addTask, CONDITIONS, copyCount, copyOf, copyPlaces, daysLeft, dueTasks, editCopies, fitCopies, isLiquid, isLow, levelIsLow, markDone, newItem, refPrefix, removeTask, repIndex, searchItems, setRepresentative, shopItem, sortItems,
   type ItemCondition, type ItemCopy, type WorkshopSort, type ItemStatus, type WorkshopCategories, type WorkshopItem, type WorkshopKind,
 } from '../../domain/workshop/item'
 import { useT, useTx, txr } from '../../i18n'
@@ -98,6 +98,14 @@ function AirbrushButtons() {
       )}
     </span>
   )
+}
+
+/** Where the item is kept: one place, or each place with its number of copies when the copies are kept apart. */
+function placeSummary(t: WorkshopItem, storage: Parameters<typeof pathLabel>[0]): string {
+  const places = copyPlaces(t)
+  const distinct = [...new Set(places)]
+  if (distinct.length <= 1) return t.placeId ? pathLabel(storage, t.placeId) : ''
+  return distinct.map((p) => `${p ? pathLabel(storage, p) : '—'} ×${places.filter((x) => x === p).length}`).join(', ')
 }
 
 const NEW_CATEGORY = '\u0000new'
@@ -221,6 +229,8 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
           try {
             save(addKind, newItem({ name, category, status: tab, quantity: Math.max(0, Number(qty) || 0), lowAt: Math.max(0, Number(lowAt) || 0) }, ctx(), addKind === 'tool' ? tx('A tool') : tx('A supply')))
             setName('')
+            setQty('1')
+            setLowAt('0')
             setError('')
           } catch (err) {
             setError((err as Error).message)
@@ -315,7 +325,7 @@ function ItemCard({ row: { kind, item: t }, now, showKind }: { row: Row; now: st
     <li className={`panel grid gap-2 p-3 ${t.condition === 'broken' || low ? 'border-danger' : ''}`} aria-label={tx(kind === 'tool' ? 'Tool {{name}}' : 'Supply {{name}}', { name: t.name })}>
       <div className="flex flex-wrap items-center gap-2">
         <button className="text-left font-semibold" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? '▾' : '▸'} {showKind ? `${ICON[kind]} ` : ''}{t.name}</button>
-        <span className="text-xs text-muted">{[t.brand, t.category, t.placeId && pathLabel(storage, t.placeId)].filter(Boolean).join(' · ')}</span>
+        <span className="text-xs text-muted">{[t.brand, t.category, placeSummary(t, storage)].filter(Boolean).join(' · ')}</span>
         {owned && liquid && (
           <select className={`input py-0 text-xs ${levelIsLow(t.level, levels) ? 'text-danger' : ''}`} aria-label={tx('Level of {{name}}', { name: t.name })} value={t.level ?? levels.stages[0]?.id} onChange={(e) => saveAny(kind, { ...editCopies(t, t.copies?.length ? rep : 'all', { level: e.target.value }), updatedAt: ctx().now })}>
             {levels.stages.map((s) => <option key={s.id} value={s.id}>💧 {s.name}</option>)}

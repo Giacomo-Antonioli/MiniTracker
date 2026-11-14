@@ -11,6 +11,7 @@ import { Dialog } from '../../ui/Dialog'
 import { StorageGuide } from './StorageGuide'
 import { CodeBadge, FindCode, LabelsDialog } from './Labels'
 import { itemsIn, MassMoveDialog, MovePlaceDialog, ScanMoveDialog } from './MassMove'
+import { copiesAt } from '../../domain/workshop/item'
 import { useT, useTx } from '../../i18n'
 
 const icon = (k: string) => kindOf(useStore.getState().storage, k).icon
@@ -110,7 +111,7 @@ function FillBar({ s, id }: { s: Storage; id: string }) {
   const { tools, supplies, paints, paintStock, loadPaints } = useStore()
   useEffect(() => { if (!paints.length) void loadPaints() }, [paints.length, loadPaints])
   // paints, tools and supplies kept here count as stored too (they take no slot)
-  const things = [...paintStock.values()].filter((x) => x.placeId === id).length + [...tools, ...supplies].filter((x) => x.placeId === id).length
+  const things = [...paintStock.values()].filter((x) => x.placeId === id).length + [...tools, ...supplies].filter((x) => copiesAt(x, id) > 0).length
   const now = checkedOutTo(s, id).length
   const extra = now ? ` · ${tx('{{n}} in now', { n: now })}` : ''
   if (!f.capacity) return <span className="text-xs text-muted">{tx('{{n}} stored', { n: f.used + things })}{extra}</span>
@@ -188,7 +189,7 @@ function PlaceDetail({ id, onOpenUnit, onEdit, onDeleted, onOpenPlace, full }: {
       {items.length > 0 && (
         <div>
           <h3 className="text-sm text-muted">{tx('Tools and supplies kept here')}</h3>
-          <ul className="text-sm" aria-label={tx('Tools and supplies here')}>{items.map((r) => <li key={`${r.kind}:${r.id}`}>{r.kind === 'tool' ? '🔧' : '🧴'} {r.name}</li>)}</ul>
+          <ul className="text-sm" aria-label={tx('Tools and supplies here')}>{items.map((r) => <li key={`${r.kind}:${r.id}`}>{r.kind === 'tool' ? '🔧' : '🧴'} {r.name}{r.of > 1 && r.here < r.of ? <span className="text-muted"> ({r.here}/{r.of})</span> : null}</li>)}</ul>
         </div>
       )}
       {paintsHere.length > 0 && (

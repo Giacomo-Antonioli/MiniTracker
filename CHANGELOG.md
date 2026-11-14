@@ -4,6 +4,10 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Changed
+- Workshop: copies of a tool or supply can be kept in different places. The card shows each place with its number of copies, a place lists the items with a copy in it (with how many, e.g. 1/2), counts them as stored, and *Move contents* moves only the copies kept in that place.
+- Workshop: after *Add*, the form goes back to 1 item and alert at 0 (before, it kept the last numbers).
+
 ## [0.29.0] - 2026-11-15
 
 ### Added

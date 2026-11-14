@@ -138,6 +138,23 @@ export function editCopies(t: WorkshopItem, scope: 'all' | number, patch: Partia
   return mirror({ ...t, copies })
 }
 
+/** Storage place of each copy, one entry per copy (undefined = no place). */
+export const copyPlaces = (t: WorkshopItem): (string | undefined)[] => Array.from({ length: copyCount(t) }, (_, i) => copyOf(t, i).placeId)
+
+/** How many copies are kept in the place. */
+export const copiesAt = (t: WorkshopItem, placeId: string) => copyPlaces(t).filter((p) => p === placeId).length
+
+/** Put the copies kept in `from` (or every copy, when `from` is left out) into the place `to`. */
+export function moveCopies(t: WorkshopItem, from: string | undefined, to: string): WorkshopItem {
+  if (from === undefined) return editCopies(t, 'all', { placeId: to })
+  const n = copyCount(t)
+  const places = copyPlaces(t)
+  if (places.every((p) => p === from)) return editCopies(t, 'all', { placeId: to })
+  let out = t
+  for (let i = 0; i < n; i++) if (places[i] === from) out = editCopies(out, i, { placeId: to })
+  return out
+}
+
 /** Make copy `i` the one that stands for the group. */
 export const setRepresentative = (t: WorkshopItem, i: number): WorkshopItem => mirror({ ...t, rep: Math.min(Math.max(0, i), copyCount(t) - 1) })
 
