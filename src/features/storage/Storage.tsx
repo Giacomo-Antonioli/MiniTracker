@@ -106,13 +106,17 @@ function PlaceForm({ start, siteId, onDone }: { start?: Place; siteId?: string; 
 function FillBar({ s, id }: { s: Storage; id: string }) {
   const tx = useTx()
   const f = fill(s, id)
+  const { tools, supplies, paints, paintStock, loadPaints } = useStore()
+  useEffect(() => { if (!paints.length) void loadPaints() }, [paints.length, loadPaints])
+  // paints, tools and supplies kept here count as stored too (they take no slot)
+  const things = [...paintStock.values()].filter((x) => x.placeId === id).length + [...tools, ...supplies].filter((x) => x.placeId === id).length
   const now = checkedOutTo(s, id).length
   const extra = now ? ` · ${tx('{{n}} in now', { n: now })}` : ''
-  if (!f.capacity) return <span className="text-xs text-muted">{tx('{{n}} stored', { n: f.used })}{extra}</span>
+  if (!f.capacity) return <span className="text-xs text-muted">{tx('{{n}} stored', { n: f.used + things })}{extra}</span>
   return (
     <span className="flex items-center gap-2 text-xs text-muted">
       <span className="h-1.5 w-16 overflow-hidden rounded-full bg-panel-2"><span className={`block h-full ${f.used >= f.capacity ? 'bg-danger' : 'bg-accent'}`} style={{ width: `${Math.min(1, f.used / f.capacity) * 100}%` }} /></span>
-      {tx('{{used}}/{{total}} slots', { used: f.used, total: f.capacity })}{extra}
+      {tx('{{used}}/{{total}} slots', { used: f.used, total: f.capacity })}{things ? ` · ${tx('{{n}} items', { n: things })}` : ''}{extra}
     </span>
   )
 }
