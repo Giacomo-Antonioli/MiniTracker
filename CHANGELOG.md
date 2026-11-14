@@ -4,6 +4,13 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.28.1] - 2026-11-14
+
+### Added
+- Workshop: a tool or supply you own several of (quantity above 1) can have different properties per copy (level, condition, place, bought date, price, notes). Pick *All copies* or one copy under *Editing*, and choose which copy the card shows. The low-stock alert on liquid level needs every copy low.
+- Workshop: *+ New category…* in the category dropdown adds a tool or supply category on the spot.
+- Workshop: *+ AK wet palette set* adds the AK Interactive wet palette as a tool (with suggested upkeep jobs) and its paper sheets (40) and sponges (2) as supplies with low-stock alerts.
+
 ## [0.28.0] - 2026-11-14
 
 ### Added

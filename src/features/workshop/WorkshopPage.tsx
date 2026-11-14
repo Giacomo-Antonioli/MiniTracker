@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { pathLabel } from '../../domain/storage/storage'
-import { SUGGESTED_TASKS, TOOL_SOURCE } from '../../domain/tools/tools'
+import { SUGGESTED_TASKS, TOOL_SOURCE, wetPaletteSet } from '../../domain/tools/tools'
 import type { Pipeline } from '../../domain/collection/types'
 import {
-  addTask, CONDITIONS, daysLeft, dueTasks, isLiquid, isLow, levelIsLow, markDone, newItem, refPrefix, removeTask, shopItem,
-  type ItemCondition, type ItemStatus, type WorkshopCategories, type WorkshopItem, type WorkshopKind,
+  addTask, CONDITIONS, copyCount, copyOf, daysLeft, dueTasks, editCopies, fitCopies, isLiquid, isLow, levelIsLow, markDone, newItem, refPrefix, removeTask, repIndex, setRepresentative, shopItem,
+  type ItemCondition, type ItemCopy, type ItemStatus, type WorkshopCategories, type WorkshopItem, type WorkshopKind,
 } from '../../domain/workshop/item'
-import { useTx, txr } from '../../i18n'
+import { useT, useTx, txr } from '../../i18n'
 import { AddFromFile } from '../collectionFile/AddFromFile'
 import { PlaceSelect } from '../storage/Storage'
 
@@ -18,6 +18,64 @@ const conditionName = (id: string) => (id === 'good' ? txr('Good') : id === 'wor
 const catsOf = (c: WorkshopCategories, k: WorkshopKind) => (k === 'tool' ? c.tools : c.supplies)
 
 type Row = { kind: WorkshopKind; item: WorkshopItem }
+
+/** One click adds the AK wet palette as a tool and its paper and sponges as supplies (what is already there is left alone). */
+function WetPaletteButton() {
+  const t = useT()
+  const { tools, supplies, saveTool, saveSupply, workshopCategories: cats, saveWorkshopCategories } = useStore()
+  const [message, setMessage] = useState('')
+  const add = async () => {
+    const set = wetPaletteSet({ tools, supplies }, ctx())
+    const n = (set.tool ? 1 : 0) + set.supplies.length
+    if (set.tool) {
+      if (!cats.tools.includes(set.tool.category)) await saveWorkshopCategories({ ...cats, tools: [...cats.tools, set.tool.category] })
+      await saveTool(set.tool)
+    }
+    for (const s of set.supplies) await saveSupply(s)
+    setMessage(n ? t('workshopCopies.wetPaletteAdded', { n }) : t('workshopCopies.wetPaletteHave'))
+  }
+  return (
+    <span className="flex items-center gap-2">
+      <button className="btn text-sm" title={t('workshopCopies.wetPaletteHelp')} onClick={() => void add()}>{t('workshopCopies.wetPalette')}</button>
+      {message && <span className="text-xs text-muted" role="status">{message}</span>}
+    </span>
+  )
+}
+
+const NEW_CATEGORY = '\u0000new'
+
+/** Category dropdown that can also add a category that is not in the list yet (saved to the editable categories). */
+function CategorySelect({ kind, value, onChange, className = 'input' }: { kind: WorkshopKind; value: string; onChange: (c: string) => void; className?: string }) {
+  const t = useT()
+  const tx = useTx()
+  const { workshopCategories: cats, saveWorkshopCategories } = useStore()
+  const [adding, setAdding] = useState(false)
+  const [name, setName] = useState('')
+  const options = [...new Set([...catsOf(cats, kind), value])]
+  const add = () => {
+    const c = name.trim()
+    if (!c) return
+    if (!options.some((o) => o.toLowerCase() === c.toLowerCase())) void saveWorkshopCategories(kind === 'tool' ? { ...cats, tools: [...cats.tools, c] } : { ...cats, supplies: [...cats.supplies, c] })
+    onChange(options.find((o) => o.toLowerCase() === c.toLowerCase()) ?? c)
+    setName('')
+    setAdding(false)
+  }
+  if (adding) {
+    return (
+      <span className="flex items-center gap-1">
+        <input className="input w-32" autoFocus aria-label={t('workshopCopies.categoryName')} value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add() } }} />
+        <button type="button" className="btn px-2 py-0.5 text-xs" onClick={add}>{t('workshopCopies.addCategory')}</button>
+        <button type="button" className="btn px-2 py-0.5 text-xs" onClick={() => setAdding(false)}>{t('workshopCopies.cancel')}</button>
+      </span>
+    )
+  }
+  return (
+    <select className={className} aria-label={tx('Category')} value={value} onChange={(e) => (e.target.value === NEW_CATEGORY ? setAdding(true) : onChange(e.target.value))}>
+      {options.map((c) => <option key={c}>{c}</option>)}
+      <option value={NEW_CATEGORY}>{t('workshopCopies.newCategory')}</option>
+    </select>
+  )
+}
 
 /** Saves and deletes for either list. */
 function useWorkshop() {
@@ -72,6 +130,7 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
             </button>
           ))}
         </div>
+        <WetPaletteButton />
         <AddFromFile compact />
       </header>
 
@@ -113,7 +172,7 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
           </label>
         )}
         <label className="grid gap-0.5 text-xs text-muted" data-tour="workshop-name">{tx('Name')}<input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder={addKind === 'tool' ? tx('e.g. Sprue cutters') : tx('e.g. Plastic glue')} /></label>
-        <label className="grid gap-0.5 text-xs text-muted">{tx('Category')}<select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>{catsOf(cats, addKind).map((c) => <option key={c}>{c}</option>)}</select></label>
+        <label className="grid gap-0.5 text-xs text-muted">{tx('Category')}<CategorySelect kind={addKind} value={category} onChange={setCategory} /></label>
         <label className="grid gap-0.5 text-xs text-muted">{tab === 'owned' ? tx('How many') : tx('Want')}<input className="input w-20" type="number" min={0} value={qty} onChange={(e) => setQty(e.target.value)} /></label>
         {tab === 'owned' && <label className="grid gap-0.5 text-xs text-muted">{tx('Alert at')}<input className="input w-20" type="number" min={0} value={lowAt} onChange={(e) => setLowAt(e.target.value)} /></label>}
         <button className="btn btn-primary" data-tour="workshop-add">{tab === 'owned' ? tx('+ Add') : tx('+ Add to wishlist')}</button>
@@ -147,10 +206,17 @@ function ItemCard({ row: { kind, item: t }, now, showKind }: { row: Row; now: st
   const [taskName, setTaskName] = useState('')
   const [every, setEvery] = useState('7')
   const [err, setErr] = useState('')
-  const save = (patch: Partial<WorkshopItem>) => saveAny(kind, { ...t, ...patch, updatedAt: ctx().now })
+  const tc = useT()
+  const n = copyCount(t)
+  const [scope, setScope] = useState<'all' | number>('all')
+  const at = scope !== 'all' && scope < n ? scope : 'all'
+  const rep = repIndex(t)
+  const view = copyOf(t, at === 'all' ? rep : at)
+  const save = (patch: Partial<WorkshopItem>) => saveAny(kind, fitCopies({ ...t, ...patch, updatedAt: ctx().now }))
+  /** Change properties of the copy being edited (all copies, or the one picked). */
+  const edit = (patch: Partial<ItemCopy>) => saveAny(kind, { ...editCopies(t, at, patch), updatedAt: ctx().now })
   const onList = shopItems.some((x) => !x.bought && x.refId === `${refPrefix(kind)}${t.id}`)
   const low = isLow(t, levels)
-  const levelName = levels.stages.find((s) => s.id === (t.level ?? levels.stages[0]?.id))?.name
   const owned = t.status === 'owned'
   const suggestions = (SUGGESTED_TASKS[t.category] ?? []).filter((s) => !t.tasks.some((x) => x.name.toLowerCase() === s.name.toLowerCase()))
   const add = (input: { name: string; everyDays: number }) => {
@@ -172,7 +238,7 @@ function ItemCard({ row: { kind, item: t }, now, showKind }: { row: Row; now: st
         <button className="text-left font-semibold" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? '▾' : '▸'} {showKind ? `${ICON[kind]} ` : ''}{t.name}</button>
         <span className="text-xs text-muted">{[t.brand, t.category, t.placeId && pathLabel(storage, t.placeId)].filter(Boolean).join(' · ')}</span>
         {owned && liquid && (
-          <select className={`input py-0 text-xs ${levelIsLow(t.level, levels) ? 'text-danger' : ''}`} aria-label={tx('Level of {{name}}', { name: t.name })} value={t.level ?? levels.stages[0]?.id} onChange={(e) => save({ level: e.target.value })}>
+          <select className={`input py-0 text-xs ${levelIsLow(t.level, levels) ? 'text-danger' : ''}`} aria-label={tx('Level of {{name}}', { name: t.name })} value={t.level ?? levels.stages[0]?.id} onChange={(e) => saveAny(kind, { ...editCopies(t, t.copies?.length ? rep : 'all', { level: e.target.value }), updatedAt: ctx().now })}>
             {levels.stages.map((s) => <option key={s.id} value={s.id}>💧 {s.name}</option>)}
           </select>
         )}
@@ -212,21 +278,37 @@ function ItemCard({ row: { kind, item: t }, now, showKind }: { row: Row; now: st
 
       {open && (
         <div className="grid gap-2 border-t border-line pt-2 text-sm">
+          {owned && n > 1 && (
+            <div className="flex flex-wrap items-end gap-2" role="group" aria-label={tc('workshopCopies.editing')}>
+              <label className="grid gap-0.5 text-xs text-muted">{tc('workshopCopies.editing')}
+                <select className="input" value={at} onChange={(e) => setScope(e.target.value === 'all' ? 'all' : Number(e.target.value))}>
+                  <option value="all">{tc('workshopCopies.all')}</option>
+                  {Array.from({ length: n }, (_, i) => <option key={i} value={i}>{tc('workshopCopies.copy', { n: i + 1 })}</option>)}
+                </select>
+              </label>
+              <label className="grid gap-0.5 text-xs text-muted">{tc('workshopCopies.shows')}
+                <select className="input" value={rep} onChange={(e) => saveAny(kind, { ...setRepresentative(t, Number(e.target.value)), updatedAt: ctx().now })}>
+                  {Array.from({ length: n }, (_, i) => <option key={i} value={i}>{tc('workshopCopies.copy', { n: i + 1 })}</option>)}
+                </select>
+              </label>
+              <span className="max-w-md text-xs text-muted">{tc('workshopCopies.differ')}</span>
+            </div>
+          )}
           <div className="flex flex-wrap items-end gap-2">
             <label className="grid gap-0.5 text-xs text-muted">{tx('Name')}<input className="input" value={t.name} onChange={(e) => save({ name: e.target.value })} /></label>
             <label className="grid gap-0.5 text-xs text-muted">{tx('Brand')}<input className="input w-32" value={t.brand} onChange={(e) => save({ brand: e.target.value })} /></label>
-            <label className="grid gap-0.5 text-xs text-muted">{tx('Category')}<select className="input" value={t.category} onChange={(e) => save({ category: e.target.value })}>{[...new Set([...catsOf(cats, kind), t.category])].map((c) => <option key={c}>{c}</option>)}</select></label>
+            <label className="grid gap-0.5 text-xs text-muted">{tx('Category')}<CategorySelect kind={kind} value={t.category} onChange={(c) => save({ category: c })} /></label>
             {owned && (
               <>
                 <label className="grid gap-0.5 text-xs text-muted">{tx('Alert at')}<input className="input w-16" type="number" min={0} aria-label={tx('Alert level for {{name}}', { name: t.name })} value={t.lowAt} onChange={(e) => save({ lowAt: Math.max(0, Number(e.target.value) || 0) })} /></label>
-                {liquid ? <span className="grid gap-0.5 text-xs text-muted">{tx('Level')}<span className="py-1 text-sm text-fg">{levelName}</span></span> : <label className="grid gap-0.5 text-xs text-muted">{tx('Condition')}<select className="input" value={t.condition} onChange={(e) => save({ condition: e.target.value as ItemCondition })}>{CONDITIONS.map((c) => <option key={c.id} value={c.id}>{conditionName(c.id)}</option>)}</select></label>}
-                {storage.places.length > 0 && <label className="grid gap-0.5 text-xs text-muted">{tx('Kept in')}<PlaceSelect label={tx('Kept in')} empty={tx('Not set')} value={t.placeId} onChange={(id) => save({ placeId: id })} /></label>}
-                <label className="grid gap-0.5 text-xs text-muted">{tx('Bought')}<input className="input" type="date" value={t.boughtAt ?? ''} onChange={(e) => save({ boughtAt: e.target.value || undefined })} /></label>
+                {liquid ? <label className="grid gap-0.5 text-xs text-muted">{tx('Level')}<select className="input" value={view.level ?? levels.stages[0]?.id} onChange={(e) => edit({ level: e.target.value })}>{levels.stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></label> : <label className="grid gap-0.5 text-xs text-muted">{tx('Condition')}<select className="input" value={view.condition} onChange={(e) => edit({ condition: e.target.value as ItemCondition })}>{CONDITIONS.map((c) => <option key={c.id} value={c.id}>{conditionName(c.id)}</option>)}</select></label>}
+                {storage.places.length > 0 && <label className="grid gap-0.5 text-xs text-muted">{tx('Kept in')}<PlaceSelect label={tx('Kept in')} empty={tx('Not set')} value={view.placeId} onChange={(id) => edit({ placeId: id })} /></label>}
+                <label className="grid gap-0.5 text-xs text-muted">{tx('Bought')}<input className="input" type="date" value={view.boughtAt ?? ''} onChange={(e) => edit({ boughtAt: e.target.value || undefined })} /></label>
               </>
             )}
-            <label className="grid gap-0.5 text-xs text-muted">{tx('Price')}<input className="input w-20" type="number" min={0} step="0.01" value={t.price ?? ''} onChange={(e) => save({ price: e.target.value === '' ? undefined : Math.max(0, Number(e.target.value)) })} /></label>
+            <label className="grid gap-0.5 text-xs text-muted">{tx('Price')}<input className="input w-20" type="number" min={0} step="0.01" value={view.price ?? ''} onChange={(e) => edit({ price: e.target.value === '' ? undefined : Math.max(0, Number(e.target.value)) })} /></label>
           </div>
-          <label className="grid gap-0.5 text-xs text-muted">{tx('Notes')}<textarea className="input" rows={2} value={t.notes} onChange={(e) => save({ notes: e.target.value })} placeholder={tx('Sizes, spare parts, where you bought it…')} /></label>
+          <label className="grid gap-0.5 text-xs text-muted">{tx('Notes')}<textarea className="input" rows={2} value={view.notes} onChange={(e) => edit({ notes: e.target.value })} placeholder={tx('Sizes, spare parts, where you bought it…')} /></label>
 
           {owned && (
             <form className="flex flex-wrap items-end gap-2" aria-label={tx('New task for {{name}}', { name: t.name })} onSubmit={(e) => { e.preventDefault(); add({ name: taskName, everyDays: Number(every) }) }}>

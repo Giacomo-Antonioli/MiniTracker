@@ -35,8 +35,26 @@ export interface WorkshopItem {
   boughtAt?: string
   notes: string
   tasks: ItemTask[]
+  /**
+   * Per-copy properties when the copies differ (quantity above 1). Absent while all copies are alike. The item's own
+   * level, condition, place, bought date, price and notes always mirror the `rep` copy, so everything that reads an
+   * item (storage, costs, settings) keeps working on one representative copy.
+   */
+  copies?: ItemCopy[]
+  /** Which copy stands for the whole group on the card; the first by default. */
+  rep?: number
   createdAt?: string
   updatedAt: string
+}
+
+/** The properties a single copy of a tool or supply can have of its own. */
+export interface ItemCopy {
+  level?: string
+  condition: ItemCondition
+  placeId?: string
+  boughtAt?: string
+  price?: number
+  notes: string
 }
 
 export const CONDITIONS: { id: ItemCondition; name: string }[] = [
@@ -75,7 +93,51 @@ export function levelIsLow(level: string | undefined, levels: Pipeline = DEFAULT
 }
 
 /** Owned and at or under its alert level, or (liquids) its level is running low. */
-export const isLow = (s: WorkshopItem, levels?: Pipeline) => s.status === 'owned' && (s.quantity <= s.lowAt || levelIsLow(s.level, levels))
+export const isLow = (s: WorkshopItem, levels?: Pipeline) => s.status === 'owned' && (s.quantity <= s.lowAt || levelsLow(s, levels))
+
+/** Liquid level is low: for several copies only when every copy is low (a good one is still on the shelf). */
+function levelsLow(s: WorkshopItem, levels?: Pipeline): boolean {
+  const copies = s.copies?.slice(0, copyCount(s))
+  return copies?.length ? copies.every((c) => levelIsLow(c.level, levels)) : levelIsLow(s.level, levels)
+}
+
+export const copyCount = (t: Pick<WorkshopItem, 'quantity'>) => Math.max(1, t.quantity)
+export const repIndex = (t: WorkshopItem) => Math.min(Math.max(0, Math.floor(t.rep ?? 0)), copyCount(t) - 1)
+const pickCopy = (t: WorkshopItem): ItemCopy => ({ level: t.level, condition: t.condition, placeId: t.placeId, boughtAt: t.boughtAt, price: t.price, notes: t.notes })
+
+/** The properties of copy `i` (the item's own while copies are alike). */
+export const copyOf = (t: WorkshopItem, i: number): ItemCopy => t.copies?.[i] ?? pickCopy(t)
+
+/** Item with its own level/condition/place/date/price/notes set to the representative copy's. */
+function mirror(t: WorkshopItem): WorkshopItem {
+  if (!t.copies?.length) return t
+  const r = t.copies[repIndex(t)] ?? pickCopy(t)
+  return { ...t, level: r.level, condition: r.condition, placeId: r.placeId, boughtAt: r.boughtAt, price: r.price, notes: r.notes }
+}
+
+/** Keep one entry per copy after the quantity changed: new copies start like the representative, extra ones go. */
+export function fitCopies(t: WorkshopItem): WorkshopItem {
+  if (!t.copies?.length) return t
+  const n = copyCount(t)
+  const base = copyOf(t, repIndex(t))
+  const copies = Array.from({ length: n }, (_, i) => t.copies![i] ?? { ...base })
+  return mirror({ ...t, copies, rep: t.rep === undefined ? undefined : Math.min(t.rep, n - 1) })
+}
+
+/**
+ * Change properties of every copy (`all`) or of one copy. The first per-copy edit gives each copy its own record,
+ * all alike; from then on copies can differ.
+ */
+export function editCopies(t: WorkshopItem, scope: 'all' | number, patch: Partial<ItemCopy>): WorkshopItem {
+  if (scope === 'all' && !t.copies?.length) return { ...t, ...patch }
+  const n = copyCount(t)
+  const copies = Array.from({ length: n }, (_, i) => ({ ...copyOf(t, i) }))
+  for (let i = 0; i < n; i++) if (scope === 'all' || scope === i) copies[i] = { ...copies[i], ...patch }
+  return mirror({ ...t, copies })
+}
+
+/** Make copy `i` the one that stands for the group. */
+export const setRepresentative = (t: WorkshopItem, i: number): WorkshopItem => mirror({ ...t, rep: Math.min(Math.max(0, i), copyCount(t) - 1) })
 
 /** True when this change takes the item to its alert level (or it is new and already there). */
 export const becameLow = (before: WorkshopItem | undefined, after: WorkshopItem, levels?: Pipeline) => isLow(after, levels) && (!before || !isLow(before, levels))
@@ -161,6 +223,8 @@ export function parseItems(raw: unknown, defaults: { quantity: number }): Worksh
       lowAt: num(x.lowAt, 0),
       notes: typeof x.notes === 'string' ? x.notes : '',
       tasks: Array.isArray(x.tasks) ? x.tasks.filter(isTask) : [],
+      copies: Array.isArray(x.copies) && x.copies.length ? x.copies.filter((c): c is ItemCopy => !!c && typeof c === 'object').map((c) => ({ ...c, condition: CONDITIONS.some((k) => k.id === c.condition) ? c.condition : 'good', notes: typeof c.notes === 'string' ? c.notes : '' })) : undefined,
+      rep: typeof x.rep === 'number' && Number.isFinite(x.rep) ? x.rep : undefined,
       updatedAt: typeof x.updatedAt === 'string' ? x.updatedAt : '',
     }))
 }
