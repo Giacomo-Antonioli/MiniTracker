@@ -4,6 +4,8 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-11-15
+
 ### Added
 - Paints: Vallejo's airbrush ranges (Model Air, Game Air, Premium Airbrush Color; type *air*) and the rest of Vallejo's catalogue (Model Color, Game Color, Mecha Color, Xpress Color, Panzer Aces and more): 1,061 more paints, each with its range. Paints you already had keep their ids.
 - Workshop: *+ Airbrush liquids* adds Vallejo's airbrush thinner, flow improver, cleaner and retarder as liquid supplies, and *+ Airbrush…* adds an airbrush tool by feed (gravity or siphon), action (single or dual) and nozzle size.
