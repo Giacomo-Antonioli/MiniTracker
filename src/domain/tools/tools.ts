@@ -40,3 +40,30 @@ export function wetPaletteSet(existing: { tools: WorkshopItem[]; supplies: Works
   ].filter((x) => !has(existing.supplies, x.name)).map((x) => ({ ...newItem({ ...x, category: 'Other' }, ctx, 'A supply'), brand: 'AK Interactive' }))
   return { tool, supplies }
 }
+
+/** Vallejo's airbrush liquids as liquid supplies (their level is tracked); what is already there is left alone. */
+export function airbrushLiquids(existing: { supplies: WorkshopItem[] }, ctx: Ctx): WorkshopItem[] {
+  const has = (name: string) => existing.supplies.some((x) => x.name.toLowerCase() === name.toLowerCase())
+  const liquids = [
+    { name: 'Vallejo Airbrush Thinner', category: 'Mediums', notes: 'Thins paint so it atomises: up to 25% of the mix.' },
+    { name: 'Vallejo Airbrush Flow Improver', category: 'Mediums', notes: 'Keeps paint flowing and slows drying on the needle: 1-3 drops per 10 drops of paint. It is also a retarder, so use little.' },
+    { name: 'Vallejo Airbrush Cleaner', category: 'Other', notes: 'To clean the airbrush after use.' },
+    { name: 'Vallejo Retarder Medium', category: 'Mediums', notes: 'Slows drying (water based).' },
+  ]
+  return liquids.filter((x) => !has(x.name)).map((x) => ({ ...newItem({ name: x.name, category: x.category }, ctx, 'A supply'), brand: 'Vallejo', liquid: true, notes: x.notes }))
+}
+
+export type AirbrushFeed = 'gravity' | 'siphon'
+export type AirbrushAction = 'single' | 'dual'
+export const AIRBRUSH_NOZZLES = [0.2, 0.3, 0.35, 0.4, 0.5, 0.7]
+
+/** An airbrush as a tool, named after its feed, action and nozzle (e.g. "Airbrush (gravity feed, dual action, 0.3 mm)"). */
+export function airbrushTool(spec: { feed: AirbrushFeed; action: AirbrushAction; nozzle: number }, ctx: Ctx): Tool {
+  const name = `Airbrush (${spec.feed === 'gravity' ? 'gravity feed' : 'siphon feed'}, ${spec.action === 'dual' ? 'dual action' : 'single action'}, ${spec.nozzle} mm)`
+  const notes = [
+    spec.feed === 'gravity' ? 'Gravity feed: cup on top, fine detail and little paint waste.' : 'Siphon feed: bottle below, holds more paint, good for large areas.',
+    spec.action === 'dual' ? 'Dual action: the trigger controls air and paint separately, for finer control.' : 'Single action: air and paint come out together, simple to use.',
+    spec.nozzle <= 0.3 ? `${spec.nozzle} mm: detail and gradients on small models.` : spec.nozzle <= 0.4 ? `${spec.nozzle} mm: a good all-rounder.` : `${spec.nozzle} mm: base coats and primer on larger areas.`,
+  ].join(' ')
+  return { ...newTool({ name, category: 'Airbrush' }, ctx), notes }
+}

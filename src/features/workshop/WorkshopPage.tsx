@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { pathLabel } from '../../domain/storage/storage'
-import { SUGGESTED_TASKS, TOOL_SOURCE, wetPaletteSet } from '../../domain/tools/tools'
+import { AIRBRUSH_NOZZLES, SUGGESTED_TASKS, TOOL_SOURCE, airbrushLiquids, airbrushTool, wetPaletteSet, type AirbrushAction, type AirbrushFeed } from '../../domain/tools/tools'
 import type { Pipeline } from '../../domain/collection/types'
 import {
   addTask, CONDITIONS, copyCount, copyOf, daysLeft, dueTasks, editCopies, fitCopies, isLiquid, isLow, levelIsLow, markDone, newItem, refPrefix, removeTask, repIndex, searchItems, setRepresentative, shopItem, sortItems,
@@ -10,6 +10,7 @@ import {
 import { useT, useTx, txr } from '../../i18n'
 import { AddFromFile } from '../collectionFile/AddFromFile'
 import { PlaceSelect } from '../storage/Storage'
+import { Dialog } from '../../ui/Dialog'
 import { WorkshopBulkDialog } from './WorkshopBulkDialog'
 
 const dueText = (d: number) =>
@@ -41,6 +42,60 @@ function WetPaletteButton() {
     <span className="flex items-center gap-2">
       <button className="btn text-sm" title={t('workshopCopies.wetPaletteHelp')} onClick={() => void add()}>{t('workshopCopies.wetPalette')}</button>
       {message && <span className="text-xs text-muted" role="status">{message}</span>}
+    </span>
+  )
+}
+
+/** One click adds Vallejo's airbrush liquids as liquid supplies; "Airbrush…" adds an airbrush tool by feed, action and nozzle. */
+function AirbrushButtons() {
+  const t = useT()
+  const { saveTool, saveSupply } = useStore()
+  const [message, setMessage] = useState('')
+  const [dialog, setDialog] = useState(false)
+  const [feed, setFeed] = useState<AirbrushFeed>('gravity')
+  const [action, setAction] = useState<AirbrushAction>('dual')
+  const [nozzle, setNozzle] = useState(0.3)
+  const addLiquids = async () => {
+    const list = airbrushLiquids({ supplies: useStore.getState().supplies }, ctx())
+    for (const x of list) await saveSupply(x)
+    setMessage(list.length ? t('workshopCopies.liquidsAdded', { n: list.length }) : t('workshopCopies.liquidsHave'))
+  }
+  const addTool = async () => {
+    const tool = airbrushTool({ feed, action, nozzle }, ctx())
+    setDialog(false)
+    if (useStore.getState().tools.some((x) => x.name === tool.name)) return setMessage(t('workshopCopies.airbrushHave'))
+    await saveTool(tool)
+    setMessage(t('workshopCopies.airbrushAdded', { name: tool.name }))
+  }
+  return (
+    <span className="flex flex-wrap items-center gap-2">
+      <button className="btn text-sm" title={t('workshopCopies.liquidsHelp')} onClick={() => void addLiquids()}>{t('workshopCopies.liquids')}</button>
+      <button className="btn text-sm" onClick={() => setDialog(true)}>{t('workshopCopies.airbrush')}</button>
+      {message && <span className="text-xs text-muted" role="status">{message}</span>}
+      {dialog && (
+        <Dialog title={t('workshopCopies.airbrushTitle')} onClose={() => setDialog(false)}>
+          <div className="grid gap-3">
+            <label className="grid gap-0.5 text-xs text-muted">{t('workshopCopies.feed')}
+              <select className="input" value={feed} onChange={(e) => setFeed(e.target.value as AirbrushFeed)}>
+                <option value="gravity">{t('workshopCopies.feedGravity')}</option>
+                <option value="siphon">{t('workshopCopies.feedSiphon')}</option>
+              </select>
+            </label>
+            <label className="grid gap-0.5 text-xs text-muted">{t('workshopCopies.action')}
+              <select className="input" value={action} onChange={(e) => setAction(e.target.value as AirbrushAction)}>
+                <option value="dual">{t('workshopCopies.actionDual')}</option>
+                <option value="single">{t('workshopCopies.actionSingle')}</option>
+              </select>
+            </label>
+            <label className="grid gap-0.5 text-xs text-muted">{t('workshopCopies.nozzle')}
+              <select className="input" value={nozzle} onChange={(e) => setNozzle(Number(e.target.value))}>
+                {AIRBRUSH_NOZZLES.map((n) => <option key={n} value={n}>{n} mm</option>)}
+              </select>
+            </label>
+            <button className="btn btn-primary" onClick={() => void addTool()}>{t('workshopCopies.airbrushAdd')}</button>
+          </div>
+        </Dialog>
+      )}
     </span>
   )
 }
@@ -139,6 +194,7 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
           ))}
         </div>
         <WetPaletteButton />
+        <AirbrushButtons />
         <AddFromFile compact />
       </header>
 

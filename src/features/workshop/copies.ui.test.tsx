@@ -1,12 +1,19 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { configure, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, expect, it } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import App from '../../app/App'
 import { appDb, ctx, useStore } from '../../app/store'
 import { DEFAULT_PIPELINE } from '../../domain/collection/pipeline'
 import { DEFAULT_LAYOUT } from '../../domain/home/layout'
 import { newItem } from '../../domain/workshop/item'
+
+// These render the whole app; the full suite with coverage runs them slowly.
+vi.setConfig({ testTimeout: 30_000 })
+configure({ asyncUtilTimeout: 8000 })
+
+// Saves go on a moment after the state changes; let them finish before the next test deletes the database.
+afterEach(() => new Promise((resolve) => setTimeout(resolve, 200)))
 
 beforeEach(async () => {
   await appDb.delete()
@@ -82,4 +89,23 @@ it('searches, sorts, and bulk-edits the shown items (category, liquid)', async (
   await user.selectOptions(within(dialog).getByLabelText('Set the category'), 'Other')
   await user.click(within(dialog).getByRole('button', { name: 'Set category on 1 items' }))
   await waitFor(() => expect(byName('Beta knife').category).toBe('Other'))
+})
+
+it('adds the Vallejo airbrush liquids as liquid supplies and an airbrush tool by feed, action and nozzle', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  await user.click(await screen.findByRole('button', { name: 'Workshop' }))
+  await user.click(await screen.findByRole('button', { name: '＋ Airbrush liquids' }))
+  await waitFor(() => expect(useStore.getState().supplies).toHaveLength(4))
+  expect(useStore.getState().supplies.every((s) => s.liquid && s.brand === 'Vallejo')).toBe(true)
+  await user.click(screen.getByRole('button', { name: '＋ Airbrush liquids' }))
+  expect(await screen.findByText('The airbrush liquids are already in your workshop.')).toBeInTheDocument()
+  expect(useStore.getState().supplies).toHaveLength(4)
+
+  await user.click(screen.getByRole('button', { name: '＋ Airbrush…' }))
+  const dialog = await screen.findByRole('dialog', { name: 'Add an airbrush' })
+  await user.selectOptions(within(dialog).getByLabelText('Feed'), 'siphon')
+  await user.selectOptions(within(dialog).getByLabelText('Nozzle'), '0.5')
+  await user.click(within(dialog).getByRole('button', { name: 'Add airbrush' }))
+  await waitFor(() => expect(useStore.getState().tools.map((t) => [t.name, t.category])).toEqual([['Airbrush (siphon feed, dual action, 0.5 mm)', 'Airbrush']]))
 })

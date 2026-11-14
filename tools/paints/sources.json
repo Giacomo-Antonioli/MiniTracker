@@ -18,7 +18,12 @@
         "Artist Range": "base", "Warfront  Range": "base", "Scale Color Range": "base", "Instant Colors Range": "contrast", "Fantasy & Games Range": "base",
         "Metal N Alchemy Range": "metallic", "Soil Works": "technical", "FX Range": "technical", "Inktensity Range": "ink", "Primers": "technical" } },
       "Monument": { "brand": "Pro Acryl", "id": "pro_acryl", "types": {
-        "Monument Pro Acrylic Paints": "base", "Monument Pro Signature Series": "base", "Monument Pro Acrylic Primer": "technical", "Monument Pro Acrylic Wash": "shade" } }
+        "Monument Pro Acrylic Paints": "base", "Monument Pro Signature Series": "base", "Monument Pro Acrylic Primer": "technical", "Monument Pro Acrylic Wash": "shade" } },
+      "Vallejo": { "brand": "Vallejo", "id": "vallejo", "idByCode": true, "skipNamesFrom": "minipainter", "skipExceptTypes": ["air"], "types": {
+        "Model Air": "air", "Game Air": "air", "Premium Airbrush Color": "air",
+        "Model Color": "base", "Game Color": "base", "Mecha Color": "base", "Panzer Aces": "base", "Arte Deco": "base", "Arte Deco Colores Fluoresecents": "base", "Nocturna Models": "base", "Hobby Paint": "base",
+        "Xpress Color": "speedpaint", "Xpress Color Intense": "speedpaint", "Metal Color": "metallic", "Liquid Gold": "metallic",
+        "Wash FX": "shade", "Game Color Wash": "shade", "Weathering FX": "technical", "Surface Primer": "technical", "Game Color Special FX": "technical" } }
     }
   }
 }

@@ -30,7 +30,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-Green Stuff World, Scale75 and Pro Acryl paints are derived from
+Green Stuff World, Scale75, Pro Acryl and the extra Vallejo ranges (Model Air, Game Air, Premium Airbrush Color, Model Color and others) are derived from
 [miniature-paints](https://github.com/Arcturus5404/miniature-paints) by Rick Fleuren (commit 22791a6),
 converted by the same script (sources in `tools/paints/sources.json`).
 

@@ -32,7 +32,7 @@ describe('Paints page', () => {
     expect(screen.getByRole('button', { name: 'Macragge Blue (Citadel)' })).toBeInTheDocument()
     await user.clear(screen.getByPlaceholderText(/Search name or brand/))
     await user.selectOptions(within(screen.getByRole('region', { name: 'Paint filters' })).getByLabelText('Brand'), 'Vallejo')
-    expect(Number(screen.getByText(/^\d+ paints$/).textContent!.split(' ')[0])).toBeLessThan(400)
+    expect(Number(screen.getByText(/^\d+ paints$/).textContent!.split(' ')[0])).toBeLessThan(1500)
   })
 
   it('shows colour matches in the panel and from a hex colour', async () => {
