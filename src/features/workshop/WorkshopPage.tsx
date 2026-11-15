@@ -182,10 +182,15 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
   const [bulk, setBulk] = useState(false)
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<WorkshopSort>('attention')
+  const [typeFilter, setTypeFilter] = useState<'' | WorkshopKind>('')
+  const [categoryFilter, setCategoryFilter] = useState('')
   const inTab = rows.filter((r) => r.item.status === tab)
-  const matching = new Set(searchItems(inTab.map((r) => r.item), query))
+  const ofType = inTab.filter((r) => !typeFilter || r.kind === typeFilter)
+  const categories = [...new Set(ofType.map((r) => r.item.category))].sort((a, b) => a.localeCompare(b))
+  const scoped = ofType.filter((r) => !categoryFilter || r.item.category === categoryFilter)
+  const matching = new Set(searchItems(scoped.map((r) => r.item), query))
   const rank = new Map(sortItems(inTab.map((r) => r.item), sort, levels).map((x, i) => [x, i]))
-  const shown = inTab.filter((r) => matching.has(r.item)).sort((a, b) => rank.get(a.item)! - rank.get(b.item)!)
+  const shown = scoped.filter((r) => matching.has(r.item)).sort((a, b) => rank.get(a.item)! - rank.get(b.item)!)
   const title = kind === 'tool' ? tx('Tools') : kind === 'supply' ? tx('Supplies') : tx('Workshop')
   const newLabel = kind === 'tool' ? tx('New tool') : kind === 'supply' ? tx('New supply') : tx('New item')
 
@@ -256,6 +261,17 @@ export function WorkshopPage({ kind }: { kind?: WorkshopKind }) {
       {inTab.length > 0 && (
         <section className="flex flex-wrap items-center gap-2" aria-label={tc('workshopCopies.search')}>
           <input className="input w-full sm:w-64" type="search" placeholder={`🔍 ${tc('workshopCopies.search')}`} aria-label={tc('workshopCopies.search')} value={query} onChange={(e) => setQuery(e.target.value)} />
+          {!kind && (
+            <select className="input" aria-label={tc('workshopCopies.filterType')} value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value as '' | WorkshopKind); setCategoryFilter('') }}>
+              <option value="">{tc('workshopCopies.typeAll')}</option>
+              <option value="tool">{tc('workshopCopies.typeTool')}</option>
+              <option value="supply">{tc('workshopCopies.typeSupply')}</option>
+            </select>
+          )}
+          <select className="input" aria-label={tc('workshopCopies.filterCategory')} value={categories.includes(categoryFilter) ? categoryFilter : ''} onChange={(e) => setCategoryFilter(e.target.value)}>
+            <option value="">{tc('workshopCopies.categoryAll')}</option>
+            {categories.map((c) => <option key={c}>{c}</option>)}
+          </select>
           <label className="flex items-center gap-1 text-sm text-muted">{tc('workshopCopies.sortBy')}
             <select className="input" value={sort} onChange={(e) => setSort(e.target.value as WorkshopSort)}>
               {([['attention', 'sortAttention'], ['name', 'sortName'], ['category', 'sortCategory'], ['stock', 'sortStock'], ['recent', 'sortRecent']] as const).map(([id, k]) => <option key={id} value={id}>{tc(`workshopCopies.${k}`)}</option>)}
