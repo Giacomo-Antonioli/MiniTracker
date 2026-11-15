@@ -29,3 +29,18 @@ export const ble: Dict = {
   'The PC disconnected.': ['Il PC si è disconnesso.', 'El PC se desconectó.', 'Der PC hat die Verbindung getrennt.', 'Le PC s’est déconnecté.', '电脑已断开连接。'],
   'No phone found. Open Sync › Bluetooth on the phone first.': ['Nessun telefono trovato. Prima apri Sincronizza › Bluetooth sul telefono.', 'No se encontró ningún teléfono. Primero abre Sincronizar › Bluetooth en el teléfono.', 'Kein Handy gefunden. Öffne zuerst Sync › Bluetooth am Handy.', "Aucun téléphone trouvé. Ouvrez d'abord Synchroniser › Bluetooth sur le téléphone.", '没有找到手机。请先在手机上打开 同步 › 蓝牙。'],
 }
+
+/** Box scanner: add to backlog, delete box. Order: it, es, de, fr, zh. */
+export const boxActions: Dict = {
+  '✓ Added to your backlog': ['✓ Aggiunto al tuo backlog', '✓ Añadido a tu backlog', '✓ Zum Backlog hinzugefügt', '✓ Ajouté à votre backlog', '✓ 已加入待办'],
+  '＋ Add to backlog ({{n}} models)': ['＋ Aggiungi al backlog ({{n}} modelli)', '＋ Añadir al backlog ({{n}} modelos)', '＋ Zum Backlog ({{n}} Modelle)', '＋ Ajouter au backlog ({{n}} figurines)', '＋ 加入待办（{{n}} 个模型）'],
+  'Delete box “{{name}}”? Your units are not touched.': ['Eliminare la scatola “{{name}}”? Le tue unità non vengono toccate.', '¿Eliminar la caja “{{name}}”? Tus unidades no se tocan.', 'Box „{{name}}“ löschen? Deine Einheiten bleiben unverändert.', 'Supprimer la boîte « {{name}} » ? Vos unités ne sont pas modifiées.', '删除盒子“{{name}}”？你的单位不受影响。'],
+  'Stage of {{name}}': ['Fase di {{name}}', 'Etapa de {{name}}', 'Stufe von {{name}}', 'Étape de {{name}}', '{{name}} 的阶段'],
+  'Wishlisted (not owned yet)': ['Lista desideri (non ancora posseduto)', 'Lista de deseos (aún no lo tienes)', 'Wunschliste (noch nicht im Besitz)', 'Liste de souhaits (pas encore possédé)', '愿望清单（尚未拥有）'],
+  'Faction {{n}}': ['Fazione {{n}}', 'Facción {{n}}', 'Fraktion {{n}}', 'Faction {{n}}', '阵营 {{n}}'],
+  'Faction (optional)': ['Fazione (facoltativo)', 'Facción (opcional)', 'Fraktion (optional)', 'Faction (facultatif)', '阵营（可选）'],
+  'custom unit': ['unità personalizzata', 'unidad personalizada', 'eigene Einheit', 'unité personnalisée', '自定义单位'],
+  'Choose camera': ['Scegli la fotocamera', 'Elige la cámara', 'Kamera wählen', 'Choisir la caméra', '选择摄像头'],
+  'Default camera': ['Fotocamera predefinita', 'Cámara predeterminada', 'Standardkamera', 'Caméra par défaut', '默认摄像头'],
+  'Delete box': ['Elimina scatola', 'Eliminar caja', 'Box löschen', 'Supprimer la boîte', '删除盒子'],
+}

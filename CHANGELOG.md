@@ -4,6 +4,13 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-11-15
+
+### Added
+- Box scanner: *Add to backlog* on each unit of a known box (in the stage you pick: wishlisted, on sprue or any other, with the box's model count), and *Delete box* to remove a saved box. Each unit of a box can also have a faction.
+- Scanner: a *Choose camera* menu when the device has more than one camera; the choice is remembered.
+- The unit form offers the T'au drones (shield, missile, gun, marker, sniper, guardian) as custom units when the catalogue has no datasheet for them.
+
 ## [0.29.1] - 2026-11-15
 
 ### Added

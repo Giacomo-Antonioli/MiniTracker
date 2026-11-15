@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useStore } from '../../app/store'
+import { ctx, useStore } from '../../app/store'
 import { boxStatus, isBarcode, isGamesWorkshop, lookupProduct, suggestDatasheets, type BoxContent, type BoxMapping } from '../../domain/barcodes/barcodes'
-import { ownedModels } from '../../domain/collection/ownedUnit'
-import { isGone } from '../../domain/collection/pipeline'
+import { createUnit, ownedModels } from '../../domain/collection/ownedUnit'
+import { WISHLISTED, isGone } from '../../domain/collection/pipeline'
 import { pathLabel, whereIs } from '../../domain/storage/storage'
 import { useTx } from '../../i18n'
 import { Dialog } from '../../ui/Dialog'
@@ -46,7 +46,7 @@ function TeachForm({ code, start, onDone }: { code: string; start?: BoxMapping; 
       onSubmit={(e) => {
         e.preventDefault()
         try {
-          void saveBarcode({ code, name, contents: rows.map((r) => ({ ...r, name: r.name.trim() })), createdAt: start?.createdAt ?? new Date().toISOString() }).then(onDone, (x: Error) => setErr(x.message))
+          void saveBarcode({ code, name, contents: rows.map((r) => ({ ...r, name: r.name.trim(), factionName: r.factionName?.trim() || undefined })), createdAt: start?.createdAt ?? new Date().toISOString() }).then(onDone, (x: Error) => setErr(x.message))
         } catch (x) {
           setErr((x as Error).message)
         }
@@ -75,6 +75,7 @@ function TeachForm({ code, start, onDone }: { code: string; start?: BoxMapping; 
               </select>
             )}
             <input className="input flex-1" aria-label={tx('Unit {{n}}', { n: i + 1 })} placeholder={tx('Unit name')} value={r.name} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
+            <input className="input w-36" aria-label={tx('Faction {{n}}', { n: i + 1 })} placeholder={tx('Faction (optional)')} value={r.factionName ?? ''} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, factionName: e.target.value } : x)))} />
             <input className="input w-20" type="number" min={1} aria-label={tx('Models {{n}}', { n: i + 1 })} value={r.models} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, models: Number(e.target.value) } : x)))} />
             {rows.length > 1 && <button type="button" className="btn px-2 py-0.5" aria-label={tx('Remove unit {{n}}', { n: i + 1 })} onClick={() => setRows(rows.filter((_, j) => j !== i))}>✕</button>}
           </li>
@@ -90,7 +91,9 @@ function TeachForm({ code, start, onDone }: { code: string; start?: BoxMapping; 
 /** What a scanned box means for you: owned models, where they are, and open shopping lines to tick off. */
 export function BoxDialog({ code, onClose, onOpenUnit }: { code: string; onClose: () => void; onOpenUnit?: (id: string) => void }) {
   const tx = useTx()
-  const { barcodes, units, shopItems, setBought, storage } = useStore()
+  const { barcodes, units, shopItems, setBought, storage, catalogue, saveUnit, deleteBarcode, pipeline } = useStore()
+  const [stages, setStages] = useState<Record<number, string>>({})
+  const [added, setAdded] = useState<number[]>([])
   const m = barcodes.find((x) => x.code === code)
   const [editing, setEditing] = useState(false)
   const status = m ? boxStatus(m, units, shopItems, (u) => (isGone(u.lifecycle) ? 0 : ownedModels(u))) : []
@@ -110,6 +113,21 @@ export function BoxDialog({ code, onClose, onOpenUnit }: { code: string; onClose
                   })}
                 </ul>
               )}
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <select className="input py-0.5" aria-label={tx('Stage of {{name}}', { name: c.name })} value={stages[i] ?? WISHLISTED} onChange={(e) => setStages({ ...stages, [i]: e.target.value })}>
+                  {pipeline.stages.map((st) => <option key={st.id} value={st.id}>{st.id === WISHLISTED ? tx('Wishlisted (not owned yet)') : st.name}</option>)}
+                </select>
+                <button
+                  className="btn px-2 py-0.5"
+                  disabled={added.includes(i)}
+                  onClick={() => {
+                    const d = c.datasheetId ? catalogue?.datasheets.find((x) => x.id === c.datasheetId) : undefined
+                    void saveUnit(createUnit({ customName: c.name, datasheetId: c.datasheetId, factionId: d?.factionIds[0], factionName: c.factionName, groups: [{ count: c.models, status: stages[i] ?? WISHLISTED }] }, ctx())).then(() => setAdded((a) => [...a, i]))
+                  }}
+                >
+                  {added.includes(i) ? tx('✓ Added to your backlog') : tx('＋ Add to backlog ({{n}} models)', { n: c.models })}
+                </button>
+              </div>
               {shopping.map((it) => (
                 <div key={it.id} className="flex flex-wrap items-center gap-2 text-sm">
                   {tx('🛒 On the shopping list: {{qty}} × {{name}}', { qty: it.qty, name: it.name })}
@@ -118,7 +136,10 @@ export function BoxDialog({ code, onClose, onOpenUnit }: { code: string; onClose
               ))}
             </section>
           ))}
-          <button className="btn w-fit" onClick={() => setEditing(true)}>{tx('Edit box')}</button>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn w-fit" onClick={() => setEditing(true)}>{tx('Edit box')}</button>
+            <button className="btn w-fit text-danger" onClick={() => { if (confirm(tx('Delete box “{{name}}”? Your units are not touched.', { name: m.name }))) void deleteBarcode(m.code).then(onClose) }}>{tx('Delete box')}</button>
+          </div>
         </div>
       )}
     </Dialog>

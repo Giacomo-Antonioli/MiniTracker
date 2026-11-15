@@ -9,6 +9,7 @@ import { MagnetEditor, fromMagnetDrafts, toMagnetDrafts, type MagnetDraft } from
 import type { Lifecycle, Link, OwnedUnit } from '../../domain/collection/types'
 import { schemesForUnit } from '../../domain/schemes/match'
 import { SchemePicker } from '../schemes/SchemePicker'
+import { EXTRA_UNITS, matchExtraUnits } from '../../domain/catalogue/extraUnits'
 import { Combobox, type ComboOption } from '../../ui/Combobox'
 import { Dialog } from '../../ui/Dialog'
 import { InfoTip } from '../../ui/InfoTip'
@@ -85,17 +86,18 @@ export function UnitFormDialog({
   }, [catalogue, factions, faction])
 
   const unitOptions = useMemo((): ComboOption[] => {
-    if (!catalogue) return []
     const query = datasheet && name === datasheet.name ? '' : name
-    return searchDatasheets(catalogue, query, { factionId, includeLegends: showLegends, limit: 40 }).map((d) => ({
+    const extras = matchExtraUnits(query, faction, catalogue?.datasheets.map((d) => d.name) ?? []).map((e): ComboOption => ({ value: `extra:${e.name}`, label: e.name, hint: `${e.faction} · ${tx('custom unit')}` }))
+    if (!catalogue) return extras
+    return [...searchDatasheets(catalogue, query, { factionId, includeLegends: showLegends, limit: 40 }).map((d) => ({
       value: d.id,
       label: d.legends ? `${d.name} (Legends)` : d.name,
       hint: [d.role, d.minModels === d.maxModels ? `${d.minModels}` : `${d.minModels}–${d.maxModels}`, d.points[0].points ? `${d.points[0].points} pts` : 'pts ?']
         .filter(Boolean)
         .join(' · '),
       group: factionId ? undefined : factionLabel(catalogue, d),
-    }))
-  }, [catalogue, name, factionId, showLegends, datasheet])
+    })), ...extras]
+  }, [catalogue, name, faction, factionId, showLegends, datasheet, tx])
 
   function pickDatasheet(d: Datasheet) {
     setDatasheetId(d.id)
@@ -178,7 +180,15 @@ export function UnitFormDialog({
           text={name}
           onTextChange={setName}
           options={unitOptions}
-          onSelect={(o) => pickDatasheet(catalogue!.datasheets.find((d) => d.id === o.value)!)}
+          onSelect={(o) => {
+            const extra = o.value.startsWith('extra:') ? EXTRA_UNITS.find((e) => e.name === o.value.slice(6)) : undefined
+            if (extra) {
+              setDatasheetId(undefined)
+              setName(extra.name)
+              if (!faction.trim()) setFaction(extra.faction)
+              if (!unit && groups.length === 1 && groups[0].count === 1) setGroups([{ ...groups[0], count: extra.models }])
+            } else pickDatasheet(catalogue!.datasheets.find((d) => d.id === o.value)!)
+          }}
           placeholder={catalogue ? tx('Type to search the catalogue, or enter any name') : tx('e.g. Intercessor Squad')}
           autoFocus
           footer={
