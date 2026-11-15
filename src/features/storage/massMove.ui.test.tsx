@@ -10,6 +10,7 @@ import { DEFAULT_PIPELINES } from '../../domain/pipelines'
 import { DEFAULT_LAYOUT } from '../../domain/home/layout'
 import { EMPTY_STORAGE, placeById, savePlace, setHome } from '../../domain/storage/storage'
 import { newTool } from '../../domain/tools/tools'
+import { editCopies, newItem } from '../../domain/workshop/item'
 
 beforeEach(async () => {
   localStorage.setItem('startPage', 'backlog')
@@ -106,4 +107,21 @@ it('stores the units shown on the Backlog, and scans stickers into a place', asy
   await waitFor(() => expect(placeById(useStore.getState().storage, 'old')!.parentId).toBe('new'))
   await user.type(await screen.findByLabelText('Type a code or barcode'), 'Q-9{enter}')
   expect(await scan.findByText(/Q-9: no unit or place/)).toBeInTheDocument()
+})
+
+it('an item with copies in different places shows in each place, and moving a place moves only its copies', async () => {
+  await seed()
+  const c = ctx()
+  const cement = editCopies({ ...newItem({ name: 'Cement', category: 'Glue', quantity: 2 }, c), placeId: 'old' }, 1, { placeId: 'new' })
+  await appDb.settings.put({ key: 'supplies', value: [cement] } as never)
+  vi.spyOn(window, 'confirm').mockReturnValue(true)
+  const user = userEvent.setup()
+  render(<App />)
+  const old = await openPlace(user, 'B-01', 'Old box')
+  expect(old.getByLabelText('Tools and supplies here')).toHaveTextContent('Cement (1/2)')
+  await user.click(old.getByRole('button', { name: '📦 Move contents…' }))
+  const d = within(await screen.findByRole('dialog', { name: 'Move from Old box' }))
+  await user.selectOptions(d.getByLabelText('Move to'), 'shelf')
+  await user.click(d.getByRole('button', { name: /Move \d+ to Shelf/ }))
+  await waitFor(() => expect(useStore.getState().supplies[0].copies?.map((x) => x.placeId)).toEqual(['shelf', 'new']))
 })

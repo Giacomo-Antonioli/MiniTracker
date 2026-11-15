@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { codeFromText, findCode } from '../../domain/storage/codes'
 import { checkOut, descendants, kindOf, moveHomes, movePlace, pathLabel, placeById, planMove, type Storage } from '../../domain/storage/storage'
-import { editCopies, type WorkshopItem, type WorkshopKind } from '../../domain/workshop/item'
+import { copiesAt, copyCount, moveCopies, type WorkshopItem, type WorkshopKind } from '../../domain/workshop/item'
 import { Dialog } from '../../ui/Dialog'
 import { ScanPanel } from './Labels'
 import { PlaceSelect } from './Storage'
@@ -12,22 +12,22 @@ export type MoveMode = 'home' | 'out'
 type ItemRef = { kind: WorkshopKind; id: string }
 const key = (r: ItemRef) => `${r.kind}:${r.id}`
 
-/** Tools and supplies whose storage place is `placeId`. */
-export function itemsIn(s: { tools: WorkshopItem[]; supplies: WorkshopItem[] }, placeId: string): (ItemRef & { name: string })[] {
-  return [
-    ...s.tools.filter((t) => t.placeId === placeId).map((t) => ({ kind: 'tool' as const, id: t.id, name: t.name })),
-    ...s.supplies.filter((t) => t.placeId === placeId).map((t) => ({ kind: 'supply' as const, id: t.id, name: t.name })),
-  ]
+/** Tools and supplies with at least one copy kept in `placeId`; `here` of `of` copies are there. */
+export function itemsIn(s: { tools: WorkshopItem[]; supplies: WorkshopItem[] }, placeId: string): (ItemRef & { name: string; here: number; of: number })[] {
+  const pick = (kind: WorkshopKind, list: WorkshopItem[]) =>
+    list.filter((t) => copiesAt(t, placeId) > 0).map((t) => ({ kind, id: t.id, name: t.name, here: copiesAt(t, placeId), of: copyCount(t) }))
+  return [...pick('tool', s.tools), ...pick('supply', s.supplies)]
 }
 
 /** Sets the storage place of these tools and supplies. */
-async function moveItems(refs: ItemRef[], placeId: string) {
+/** Sets the storage place of these tools and supplies; with `from`, only the copies kept there move. */
+async function moveItems(refs: ItemRef[], placeId: string, from?: string) {
   const st = useStore.getState()
   for (const r of refs) {
     const list = r.kind === 'tool' ? st.tools : st.supplies
     const item = list.find((x) => x.id === r.id)
     if (!item) continue
-    const next = { ...editCopies(item, 'all', { placeId }), updatedAt: ctx().now }
+    const next = { ...moveCopies(item, from, placeId), updatedAt: ctx().now }
     await (r.kind === 'tool' ? st.saveTool(next) : st.saveSupply(next))
   }
 }
@@ -62,7 +62,7 @@ export function MassMoveDialog({ title, unitIds, items = [], fromPlaceId, onClos
     try {
       const next = mode === 'home' ? moveHomes(s, picked, target, ctx()) : checkOut(s, picked, target, ctx())
       await saveStorage(next)
-      await moveItems(items.filter((r) => pickedItems.includes(key(r))), target)
+      await moveItems(items.filter((r) => pickedItems.includes(key(r))), target, fromPlaceId)
       onClose()
     } catch (e) {
       setErr((e as Error).message)

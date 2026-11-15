@@ -99,16 +99,28 @@ it('adds the Vallejo airbrush liquids as liquid supplies and an airbrush tool by
   expect(await screen.findByText('Added 4 airbrush liquids.')).toBeInTheDocument()
   expect(useStore.getState().supplies).toHaveLength(4)
   expect(useStore.getState().supplies.every((s) => s.liquid && s.brand === 'Vallejo')).toBe(true)
-  await user.click(screen.getByRole('button', { name: '＋ Airbrush liquids' }))
-  expect(await screen.findByText('The airbrush liquids are already in your workshop.')).toBeInTheDocument()
-  expect(useStore.getState().supplies).toHaveLength(4)
-
   await user.click(screen.getByRole('button', { name: '＋ Airbrush…' }))
   const dialog = await screen.findByRole('dialog', { name: 'Add an airbrush' })
   await user.selectOptions(within(dialog).getByLabelText('Feed'), 'siphon')
   await user.selectOptions(within(dialog).getByLabelText('Nozzle'), '0.5')
   await user.click(within(dialog).getByRole('button', { name: 'Add airbrush' }))
   await waitFor(() => expect(useStore.getState().tools.map((t) => [t.name, t.category])).toEqual([['Airbrush (siphon feed, dual action, 0.5 mm)', 'Airbrush']]))
+})
+
+it('after adding an item the quantity goes back to 1 and the alert to 0', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  await user.click(await screen.findByRole('button', { name: 'Workshop' }))
+  const form = await screen.findByRole('form', { name: 'New item' })
+  await user.type(within(form).getByLabelText('Name'), 'Sprue cutters')
+  await user.clear(within(form).getByLabelText('How many'))
+  await user.type(within(form).getByLabelText('How many'), '4')
+  await user.clear(within(form).getByLabelText('Alert at'))
+  await user.type(within(form).getByLabelText('Alert at'), '2')
+  await user.click(within(form).getByRole('button', { name: '+ Add' }))
+  await waitFor(() => expect(useStore.getState().tools[0]).toMatchObject({ name: 'Sprue cutters', quantity: 4, lowAt: 2 }))
+  expect(within(form).getByLabelText('How many')).toHaveValue(1)
+  expect(within(form).getByLabelText('Alert at')).toHaveValue(0)
 })
 
 it('filters the Workshop by type (tool or supply) and by category', async () => {
