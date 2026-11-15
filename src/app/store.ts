@@ -266,6 +266,7 @@ interface State {
   /** Box barcodes the app has learned (#93); saved in the backup. */
   barcodes: BoxMapping[]
   saveBarcode(m: BoxMapping): Promise<void>
+  deleteBarcode(code: string): Promise<void>
   /** Storage places, unit homes and check-outs (#18); saved in the backup. */
   storage: Storage
   saveStorage(s: Storage): Promise<void>
@@ -845,6 +846,11 @@ export const useStore = create<State>((set, get) => ({
   barcodes: [],
   async saveBarcode(m) {
     const list = saveMapping(get().barcodes, m)
+    set({ barcodes: list })
+    await settingsRepo.setValue('barcodes', list)
+  },
+  async deleteBarcode(code) {
+    const list = get().barcodes.filter((x) => x.code !== code)
     set({ barcodes: list })
     await settingsRepo.setValue('barcodes', list)
   },

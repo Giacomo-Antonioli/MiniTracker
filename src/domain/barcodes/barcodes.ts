@@ -9,6 +9,8 @@ export interface BoxContent {
   datasheetId?: string
   name: string
   models: number
+  /** Free-text faction, used when the unit is added to the backlog. */
+  factionName?: string
 }
 
 export interface BoxMapping {

@@ -207,6 +207,10 @@ export function ScanPanel({ onText }: { onText: (t: string) => void }) {
   const [typed, setTyped] = useState('')
   const video = useRef<HTMLVideoElement>(null)
   const [err, setErr] = useState('')
+  const [cams, setCams] = useState<{ id: string; label: string }[]>([])
+  const [camId, setCamId] = useState(() => {
+    try { return localStorage.getItem('scanCamera') ?? '' } catch { return '' }
+  })
   useEffect(() => {
     let stop = false
     let stream: MediaStream | undefined
@@ -229,21 +233,37 @@ export function ScanPanel({ onText }: { onText: (t: string) => void }) {
     }
     if (!navigator.mediaDevices?.getUserMedia) setErr(tx('This browser cannot use the camera here. Type the code instead, or scan with the phone camera app.'))
     else
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((st) => {
+      navigator.mediaDevices.getUserMedia({ video: camId ? { deviceId: { exact: camId } } : { facingMode: 'environment' } }).then((st) => {
+        if (stop) return st.getTracks().forEach((t) => t.stop())
         stream = st
+        void navigator.mediaDevices.enumerateDevices?.().then((all) => {
+          if (!stop) setCams(all.filter((d) => d.kind === 'videoinput').map((d, i) => ({ id: d.deviceId, label: d.label || `${tx('Camera')} ${i + 1}` })))
+        })
         if (video.current) {
           video.current.srcObject = st
           void video.current.play()
         }
         requestAnimationFrame(tick)
-      }, () => setErr(tx('No camera access. Allow the camera, or type the code instead.')))
+      }, () => {
+        if (camId) {
+          // The saved camera is gone: forget it and use the default one.
+          try { localStorage.removeItem('scanCamera') } catch { /* private mode */ }
+          setCamId('')
+        } else setErr(tx('No camera access. Allow the camera, or type the code instead.'))
+      })
     return () => {
       stop = true
       stream?.getTracks().forEach((t) => t.stop())
     }
-  }, [onText, tx])
+  }, [onText, tx, camId])
   return (
     <div>
+      {cams.length > 1 && (
+        <select className="input mb-2 w-full" aria-label={tx('Choose camera')} value={camId} onChange={(e) => { setCamId(e.target.value); try { localStorage.setItem('scanCamera', e.target.value) } catch { /* private mode */ } }}>
+          <option value="">{tx('Default camera')}</option>
+          {cams.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+        </select>
+      )}
       {err ? <p className="text-sm text-danger" role="alert">{err}</p> : <video ref={video} className="w-full rounded" muted playsInline aria-label={tx('Camera')} />}
       <p className="mt-2 text-xs text-muted">{tx('Point the camera at a MiniTracker label or the barcode on a box.')}</p>
       <form className="mt-2 flex gap-2" onSubmit={(e) => { e.preventDefault(); if (typed.trim()) onText(typed.trim()) }}>
