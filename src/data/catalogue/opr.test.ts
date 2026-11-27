@@ -77,3 +77,53 @@ describe('Army Forge download', () => {
     await expect(downloadOprBooks(source.repo)).rejects.toThrow('browser cannot download')
   })
 })
+
+describe('upgrade conversion', () => {
+  const raw = {
+    uid: 'z', name: 'Zeta', gameSystemSlug: 'grimdark-future',
+    units: [
+      { id: 'u', name: 'Rider', cost: 40, size: 1, quality: 4, defense: 4, bases: { square: '50' }, upgrades: ['P', 'gone'],
+        items: [{ name: 'Bike', content: [{ type: 'ArmyBookWeapon', name: 'Bike Gun', range: 18, attacks: 2 }, { type: 'ArmyBookRule', name: 'Fast' }] }] },
+      { id: 'plain', name: 'Walker', cost: 20, size: 1, quality: 4, defense: 4 },
+    ],
+    upgradePackages: [{ uid: 'P', sections: [
+      { uid: 's', label: 'Upgrade up to two', variant: 'upgrade', affects: { type: 'up to', value: 2 }, select: { type: 'any' }, options: [
+        { uid: 'o', label: 'Extras', costs: [{ unitId: 'u', cost: 5 }], gains: [
+          { type: 'ArmyBookRule', name: 'Scout' }, { type: 'ArmyBookItem', name: 'Charm', count: 2 }, { type: 'ArmyBookWeapon', name: 'Lance' }] },
+        { uid: 'other', label: 'Not for this unit', costs: [{ unitId: 'x', cost: 5 }], gains: [] },
+      ] },
+      { uid: 'empty', label: 'Nothing for this unit', variant: 'upgrade', options: [] },
+    ] }],
+  }
+  // Army Forge files can start with a byte-order mark.
+  const cat = parseOpr([file(`﻿${JSON.stringify(raw)}`)], source)
+  const [rider, walker] = cat.datasheets
+
+  it('keeps only the options priced for the unit', () => {
+    expect(rider.upgrades).toHaveLength(1)
+    expect(rider.upgrades![0]).toMatchObject({ targets: [], affects: { type: 'upTo', value: 2 }, select: { type: 'any' } })
+    expect(rider.upgrades![0].options.map((o) => o.id)).toEqual(['o'])
+    expect(walker).toMatchObject({ upgrades: [], gear: [], weapons: [], wargear: [], abilities: [] })
+  })
+
+  it('converts items with their weapons and rules, and every kind of gain', () => {
+    expect(rider.gear![0]).toMatchObject({ name: 'Bike', count: 1, rules: ['Fast'] })
+    expect(rider.weapons!.map((w) => w.name)).toEqual(['Bike Gun'])
+    expect(rider.upgrades![0].options[0].gains).toMatchObject([{ name: 'Scout', count: 1, rules: ['Scout'] }, { name: 'Charm', count: 2 }, { name: 'Lance', weapon: { kind: 'melee' } }])
+    expect(rider.stats![0].values.at(-1)).toEqual(['Base', '50 mm'])
+  })
+
+  it('rejects an unknown game, mixed games and no books', () => {
+    expect(() => parseOpr([file(book('a', 'A', 'warfleets'))], source)).toThrow('Unknown One Page Rules game')
+    expect(() => parseOpr([file(book('a', 'A')), file(book('b', 'B', 'age-of-fantasy'))], source)).toThrow('different games')
+    expect(() => parseOpr([], source)).toThrow('No army books')
+  })
+})
+
+describe('Army Forge download errors', () => {
+  const answer = (res: Response) => (async () => res) as unknown as typeof fetch
+  it('reports HTTP errors and an empty list', async () => {
+    await expect(latestOprVersion(source.repo, answer(new Response('', { status: 503 })))).rejects.toThrow('HTTP 503')
+    await expect(downloadOprBooks(source.repo, undefined, answer(new Response('[]')))).rejects.toThrow('no army books')
+  })
+})
