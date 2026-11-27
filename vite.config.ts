@@ -10,8 +10,12 @@ const tauri = !!process.env.TAURI_ENV_PLATFORM
 // base matches the GitHub Pages path: https://<user>.github.io/MiniTracker/
 export default defineConfig({
   base: tauri ? '/' : '/MiniTracker/',
-  // Tauri's dev window expects a fixed port.
-  server: tauri ? { port: 5173, strictPort: true } : undefined,
+  server: {
+    // Tauri's dev window expects a fixed port.
+    ...(tauri ? { port: 5173, strictPort: true } : {}),
+    // Army Forge sends no CORS headers, so the local dev server forwards the One Page Rules downloads.
+    proxy: { '/opr-api': { target: 'https://army-forge.onepagerules.com', changeOrigin: true, rewrite: (path: string) => path.replace(/^\/opr-api/, '/api/army-books') } },
+  },
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   plugins: [
     react(),

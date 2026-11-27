@@ -3,7 +3,8 @@ import type { SourceFile } from './bsdata'
 
 /**
  * Downloads One Page Rules army books from Army Forge's public (undocumented) API. Army Forge sends no CORS headers,
- * so this only works in the desktop and Android apps, through Tauri's HTTP plugin.
+ * so this works in the desktop and Android apps (Tauri's HTTP plugin) and on the local dev server, which forwards the
+ * requests (see server.proxy in vite.config.ts). A published web build cannot download.
  */
 
 const API = 'https://army-forge.onepagerules.com/api/army-books'
@@ -24,8 +25,16 @@ interface BookSummary {
   modifiedAt: string
 }
 
+/** Only `npm run dev` has the forwarding proxy (tests run in "test" mode, builds in "production"). */
+const hasDevProxy = (): boolean => import.meta.env.MODE === 'development'
+
+export const canDownloadOpr = (): boolean => isDesktopApp() || hasDevProxy()
+
+const viaDevProxy: Fetch = (url, init) => fetch(String(url).replace(API, '/opr-api'), init)
+
 async function appFetch(): Promise<Fetch> {
   if (!isDesktopApp()) {
+    if (hasDevProxy()) return viaDevProxy
     throw new Error('The browser cannot download from Army Forge. Use the desktop or Android app, or import army book files.')
   }
   return (await import('@tauri-apps/plugin-http')).fetch

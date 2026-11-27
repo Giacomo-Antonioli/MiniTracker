@@ -1,3 +1,4 @@
+import { canDownloadOpr } from '../../data/catalogue/oprFetch'
 import { useState } from 'react'
 import { useStore } from '../../app/store'
 import { EDITIONS, type Edition } from '../../data/catalogue/fetch'
@@ -6,7 +7,6 @@ import type { Catalogue } from '../../domain/catalogue/types'
 import { ProgressBar } from '../../ui/Dialog'
 import { buildBundle } from '../../data/catalogue/bundle'
 import { useT, useTx } from '../../i18n'
-import { isDesktopApp } from '../../app/platform'
 import { formatDate } from '../../i18n/format'
 
 export function CataloguePage() {
@@ -188,12 +188,12 @@ function EditionCard({ edition, installed, active }: { edition?: Edition; instal
         {installed && !isActive && (
           <button className="btn btn-primary" onClick={() => void setActiveCatalogue(installed.gameId)}>{t('settingsPanels.catalogue.use')}</button>
         )}
-        {edition && (isDesktopApp() || !isOprRepo(repo)) && (
+        {edition && (canDownloadOpr() || !isOprRepo(repo)) && (
           <button className={`btn ${installed ? '' : 'btn-primary'}`} disabled={busy} onClick={() => void downloadCatalogue(repo).then(() => setUpdate(null))}>
             ⬇ {installed ? t('settingsPanels.catalogue.downloadLatest') : t('settingsPanels.catalogue.download', { title })}
           </button>
         )}
-        {installed && edition && (isDesktopApp() || !isOprRepo(repo)) && (
+        {installed && edition && (canDownloadOpr() || !isOprRepo(repo)) && (
           <button
             className="btn"
             disabled={busy}
