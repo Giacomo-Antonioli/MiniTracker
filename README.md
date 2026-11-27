@@ -91,6 +91,7 @@ No account, no server: your collection stays on your device. Use it in the brows
 **Latest:** v0.31.0 adds the five One Page Rules games, with unit upgrades in army lists and army book download from Army Forge. Every version is in the [changelog](CHANGELOG.md).
 
 **Next:**
+- Painting steps: show, from the unit's colour scheme, the paint applied at each stage (primed, basecoated and so on).
 - One Page Rules: combined units and spells.
 - Paints: equivalent paints between Citadel, Vallejo and Army Painter, and the Vallejo paints missing from the paint list.
 - Cloud-drive sync (#167) and a buy optimiser (#61).
