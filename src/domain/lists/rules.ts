@@ -4,6 +4,7 @@ import { evalCondition, evalLimit, type Counter } from './conditions'
 import { loadoutProblems } from './loadout'
 import type { Ctx } from '../collection/types'
 import { addEntry } from './list'
+import { applyUpgrades } from './upgrades'
 import { listPoints } from './points'
 import type { ArmyList } from './types'
 
@@ -112,6 +113,11 @@ export function checkList(l: ArmyList, cat: Catalogue): ListIssue[] {
     else if (pts.byEntry.get(e.id) === undefined) add('unit-size', `${d.name} must have ${d.minModels}–${d.maxModels} models`, [e.id])
   }
   if (pts.total > l.pointsLimit) add('points', `${pts.total} points, limit ${l.pointsLimit}`)
+  // Upgrades must fit the unit's gear and each section's limits.
+  for (const e of l.entries) {
+    const d = sheets.get(e.datasheetId)
+    if (d?.upgrades && e.upgrades) for (const m of applyUpgrades(d, e.upgrades).problems) add('loadout', m, [e.id])
+  }
   // One Page Rules has no Warlord, detachments or leader attachments: only units and points are checked.
   if (l.battleSize === COMBAT_PATROL.id || l.entries.length === 0 || isOprRepo(cat.source.repo)) return issues
 

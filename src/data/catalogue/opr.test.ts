@@ -32,6 +32,7 @@ describe('parseOpr', () => {
     expect(d).toMatchObject({ minModels: 5, maxModels: 5, points: [{ fromModels: 5, points: 100 }], wargear: ['Rifle', 'Knife', 'Banner'], abilities: ['Tough(3)'] })
     expect(d.stats![0].values).toEqual([['Quality', '4+'], ['Defense', '5+'], ['Base', '32 mm']])
     expect(d.weapons![0]).toEqual({ name: 'Rifle', kind: 'ranged', values: [['Count', '5'], ['Range', '24"'], ['A', '1'], ['Special', 'AP(1)']] })
+    expect(d.gear![0]).toMatchObject({ name: 'Rifle', count: 5 })
     expect(d.weapons![1].kind).toBe('melee')
     expect(cat.datasheets.find((x) => x.id === 'a/u2')!.role).toBe('Hero')
   })

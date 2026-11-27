@@ -39,12 +39,54 @@ export interface Datasheet {
   weapons?: WeaponProfile[]
   /** Model types with their wargear (catalogue format 7). */
   models?: ModelType[]
+  /** Starting weapons and items with their counts, for units with unit-level upgrades (One Page Rules). */
+  gear?: Gear[]
+  /** Unit-level upgrades, priced per unit (One Page Rules). */
+  upgrades?: UpgradeSection[]
   /** For Leaders: the units (datasheet ids) or keywords this unit can lead. */
   leads?: { ids: string[]; keywords: string[] }
   /** Most Leaders this unit can have attached (default 1). */
   maxLeaders?: number
   /** How many of this unit an army may include (e.g. 3, Epic Heroes 1); some battle sizes change it. */
   armyLimit?: ArmyLimit
+}
+
+/** Something a unit carries: a weapon, an item (which may hold weapons and rules) or a bare rule. */
+export interface Gear {
+  name: string
+  count: number
+  /** Set for weapons; the profile has no count. */
+  weapon?: WeaponProfile
+  /** Weapons inside an item, per item. */
+  contains?: { weapon: WeaponProfile; count: number }[]
+  /** Special rules it gives. */
+  rules?: string[]
+}
+
+export interface UpgradeAmount {
+  type: 'all' | 'any' | 'exactly' | 'upTo'
+  value?: number
+}
+
+export interface UpgradeOption {
+  id: string
+  label: string
+  points: number
+  gains: Gear[]
+}
+
+export interface UpgradeSection {
+  id: string
+  /** As published, e.g. "Replace up to two Claws". */
+  label: string
+  variant: 'replace' | 'upgrade' | 'attachment'
+  /** Gear names it replaces or attaches to, possibly plural or counted ("4x Claws"). */
+  targets: string[]
+  /** How many models or weapons it applies to; unset = once. */
+  affects?: UpgradeAmount
+  /** How many of the options can be chosen; unset = no stated limit. */
+  select?: UpgradeAmount
+  options: UpgradeOption[]
 }
 
 /** One weapon or piece of wargear a model can pick. `id` is the data's own id for this option (link or entry). */

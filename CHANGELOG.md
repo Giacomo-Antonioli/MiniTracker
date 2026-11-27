@@ -5,7 +5,7 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 ## [Unreleased]
 
 ### Added
-- One Page Rules games: Grimdark Future, Grimdark Future: Firefight, Age of Fantasy, Age of Fantasy: Skirmish and Age of Fantasy: Regiments, with army books from Army Forge. The desktop and Android apps download them; every version can import saved army book files. Not included yet: unit upgrades, combined units and spells.
+- One Page Rules games: Grimdark Future, Grimdark Future: Firefight, Age of Fantasy, Age of Fantasy: Skirmish and Age of Fantasy: Regiments, with army books from Army Forge. The desktop and Android apps download them; every version can import saved army book files. Army lists include unit upgrades: they count towards the points, change the weapons and rules on printed cards, and are checked against each upgrade's limits. Not included yet: combined units and spells.
 
 ## [0.30.0] - 2026-11-15
 

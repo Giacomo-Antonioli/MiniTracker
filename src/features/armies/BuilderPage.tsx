@@ -11,6 +11,8 @@ import type { OwnedUnit } from '../../domain/collection/types'
 import { removeEntry, updateEntry } from '../../domain/lists/list'
 import { listOwnership } from '../../domain/lists/ownership'
 import { listPoints } from '../../domain/lists/points'
+import { isOprRepo } from '../../domain/catalogue/editions'
+import { UpgradeEditor } from './UpgradeEditor'
 import { buyList, buyListText, type BuyPaint } from '../../domain/lists/buy'
 import { defaultPicks, effectiveLoadout, type LoadoutSource } from '../../domain/lists/loadout'
 import { addFromCollection, collectionPlan } from '../../domain/lists/collection'
@@ -215,7 +217,9 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
   const linkedElsewhere = (entryId: string) => new Set(list.entries.filter((x) => x.id !== entryId && x.ownedUnitId).map((x) => x.ownedUnitId))
   const issues = useMemo(() => (cat.muster ? checkList(list, cat) : []), [list, cat])
   const flagged = new Set(issues.flatMap((i) => i.entryIds))
-  const noWarlord = !list.entries.some((e) => e.warlord)
+  // One Page Rules has no Warlord.
+  const warlords = !isOprRepo(cat.source.repo)
+  const noWarlord = warlords && !list.entries.some((e) => e.warlord)
   const characters = list.entries.filter((e) => sheets.get(e.datasheetId)?.keywords.includes('Character')).length
 
   const edit = (id: string, patch: Partial<Omit<ListEntry, 'id'>>) => onSave(updateEntry(list, id, patch, ctx()))
@@ -276,7 +280,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                 <button className="w-5 text-muted" aria-label={tx('Details: {{name}}', { name: d?.name ?? tx('unit') })} aria-expanded={openRows.has(e.id)} onClick={() => toggleRow(e.id)}>
                   {openRows.has(e.id) ? '▾' : '▸'}
                 </button>
-                {(() => {
+                {warlords && (() => {
                   // Only Characters can be the Warlord; until one is chosen, the candidates are highlighted.
                   const can = !d || d.keywords.includes('Character')
                   const look = e.warlord ? 'text-accent' : !can ? 'cursor-not-allowed text-muted/20' : noWarlord ? 'rounded text-accent ring-1 ring-accent/70' : 'text-muted/50 hover:text-accent'
@@ -356,6 +360,7 @@ function Builder({ list, cat, onSave }: { list: ArmyList; cat: Catalogue; onSave
                       {tx('Scheme')}
                       <UnitSchemeSelect list={list} entry={e} ctx={schemeCtx} onChange={(schemeId) => edit(e.id, { schemeId })} />
                     </label>
+                    {d && <UpgradeEditor d={d} entry={e} onChange={(upgrades) => edit(e.id, { upgrades })} />}
                     {d && (
                       <LoadoutEditor
                         d={d}

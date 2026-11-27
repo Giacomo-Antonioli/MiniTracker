@@ -2,6 +2,7 @@ import type { Catalogue, Datasheet } from '../catalogue/types'
 import type { Ctx } from '../collection/types'
 import { addEntry, createList, validateList } from './list'
 import { listPoints } from './points'
+import { pickKey } from './upgrades'
 import { COMBAT_PATROL, battleSizes } from './rules'
 import type { ArmyList, EditionKey, LoadoutRow } from './types'
 
@@ -253,6 +254,12 @@ export function listToText(l: ArmyList, cat: Catalogue | undefined, editionLabel
       const x = e.enhancementId ? enh.get(e.enhancementId) : undefined
       if (x) out.push(`  • Enhancement: ${x.name} (+${x.points})`)
       out.push(`  • ${e.models}x ${e.models === 1 ? 'model' : 'models'}`)
+      for (const s of d?.upgrades ?? []) {
+        for (const o of s.options) {
+          const n = e.upgrades?.[pickKey(s.id, o.id)] ?? 0
+          if (n > 0) out.push(`  • Upgrade: ${n > 1 ? `${n}x ` : ''}${o.label} (+${n * o.points})`)
+        }
+      }
     }
   }
   return out.join('\n') + '\n'

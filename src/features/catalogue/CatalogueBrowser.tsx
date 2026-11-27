@@ -190,7 +190,7 @@ function DatasheetPanel({
           <ul className="text-sm">{ownedUnits.map((u) => <li key={u.id}>• {u.customName}</li>)}</ul>
         </section>
       )}
-      <p className="mt-auto p-4 text-xs text-muted">{isOprRepo(catalogue.source.repo) ? tx('Data: One Page Rules (Army Forge). Unit upgrades are not included yet.') : tx('Data: BSData ({{repo}}). Full rules text is not included.', { repo: catalogue.source.repo })}</p>
+      <p className="mt-auto p-4 text-xs text-muted">{isOprRepo(catalogue.source.repo) ? tx('Data: One Page Rules (Army Forge). Combined units and spells are not included yet.') : tx('Data: BSData ({{repo}}). Full rules text is not included.', { repo: catalogue.source.repo })}</p>
     </aside>
   )
 }

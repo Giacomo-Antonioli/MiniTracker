@@ -7,6 +7,7 @@ import type { Catalogue } from '../../domain/catalogue/types'
 import { keywordLegend, unitCards } from '../../domain/lists/cards'
 import { listOwnership } from '../../domain/lists/ownership'
 import { listPoints } from '../../domain/lists/points'
+import { pickKey } from '../../domain/lists/upgrades'
 import { battleSizes } from '../../domain/lists/rules'
 import type { ArmyList } from '../../domain/lists/types'
 import { DatasheetCards, KeywordLegend } from './DatasheetCards'
@@ -72,7 +73,7 @@ export function ArmySheet({ list, cat, options, onDone }: { list: ArmyList; cat:
                 <td className="py-1">{d?.name ?? tx('Unknown unit')}</td>
                 <td className="py-1 text-right">{e.models}</td>
                 <td className="py-1 pl-3 text-xs">
-                  {[e.warlord && tx('Warlord'), x && `${x.name} (+${x.points})`, leads && tx('Leads {{name}}', { name: sheets.get(leads.datasheetId)?.name ?? tx('a unit') })].filter(Boolean).join(' · ')}
+                  {[e.warlord && tx('Warlord'), ...(d?.upgrades ?? []).flatMap((s) => s.options.flatMap((o) => { const n = e.upgrades?.[pickKey(s.id, o.id)] ?? 0; return n > 0 ? [`${n > 1 ? `${n}x ` : ''}${o.label}`] : [] })), x && `${x.name} (+${x.points})`, leads && tx('Leads {{name}}', { name: sheets.get(leads.datasheetId)?.name ?? tx('a unit') })].filter(Boolean).join(' · ')}
                 </td>
                 {options.ownership && <td className="py-1 text-right">{o ? `${o.have}/${o.need}` : '–'}</td>}
                 {options.ownership && <td className="py-1 text-right">{o ? o.painted : '–'}</td>}

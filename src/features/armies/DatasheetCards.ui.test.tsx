@@ -11,7 +11,7 @@ describe('DatasheetCards', () => {
       stats: [{ name: 'Sergeant', values: [['M', '6"']] }, { name: 'Trooper', values: [['M', '5"']] }],
     } as unknown as Datasheet
     const w = (name: string, kind: 'ranged' | 'melee') => ({ name, kind, values: [['A', '2'], ['Keywords', 'Assault']] as [string, string][] })
-    render(<DatasheetCards cards={[{ datasheet: d, entries: [{ models: 5, enhancement: { name: 'Charm', points: 15 } }], weapons: [w('Rifle', 'ranged'), w('Knife', 'melee')], rules: ['Deep Strike'], abilities: [{ name: 'Hold', text: 'Stay **put**.' }, { name: 'Odd' }] }]} />)
+    render(<DatasheetCards cards={[{ key: 'k', datasheet: d, entries: [{ models: 5, enhancement: { name: 'Charm', points: 15 } }], weapons: [w('Rifle', 'ranged'), w('Knife', 'melee')], rules: ['Deep Strike'], abilities: [{ name: 'Hold', text: 'Stay **put**.' }, { name: 'Odd' }] }]} />)
     const card = screen.getByLabelText('Squad card')
     expect(card).toHaveTextContent('15 pts')
     expect(card).toHaveTextContent('5 models, Charm (+15)')

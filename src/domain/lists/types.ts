@@ -21,6 +21,8 @@ export interface ListEntry {
   wargear: string[]
   /** Models by type with their wargear choices; unset = default loadout (or your models' loadout when linked). */
   loadout?: LoadoutRow[]
+  /** Unit-level upgrades taken (One Page Rules): "section id/option id" → times. */
+  upgrades?: Record<string, number>
   /** Enhancement given to this unit (#54). */
   enhancementId?: string
   warlord?: boolean

@@ -1,11 +1,13 @@
 import { EDITIONS } from '../../domain/catalogue/editions'
-import type { Catalogue, CatalogueSource, Datasheet, Faction, Rule, WeaponProfile } from '../../domain/catalogue/types'
+import type { Catalogue, CatalogueSource, Datasheet, Faction, Gear, Rule, UpgradeAmount, UpgradeSection, WeaponProfile } from '../../domain/catalogue/types'
+import { gearWeapons } from '../../domain/lists/upgrades'
 import type { SourceFile } from './bsdata'
 
 /**
  * Converts One Page Rules army books, as Army Forge's public API returns them, into a Catalogue: one catalogue per game
  * system, one faction per army book. MiniTracker ships none of this data.
- * Not converted yet: unit upgrades (priced per unit, unlike MiniTracker's per-model loadouts), combined units, spells.
+ * Upgrades are priced per unit, so they are kept as unit-level upgrade sections rather than per-model loadouts.
+ * Not converted yet: combined units and spells.
  */
 
 interface OprRule {
@@ -19,6 +21,26 @@ interface OprWeapon {
   attacks?: number
   specialRules?: OprRule[]
 }
+interface OprItem {
+  name: string
+  count?: number
+  content?: (OprWeapon & { type?: string })[]
+}
+/** What an upgrade option gives: a weapon, an item or a rule. */
+type OprGain = OprWeapon & OprItem & OprRule & { type: string }
+interface OprAmount {
+  type: string
+  value?: number
+}
+interface OprSection {
+  uid: string
+  label: string
+  variant: string
+  targets?: string[] | null
+  affects?: OprAmount | null
+  select?: OprAmount | null
+  options: { uid: string; label: string; costs: { unitId: string; cost: number }[]; gains: OprGain[] }[]
+}
 interface OprUnit {
   id: string
   name: string
@@ -27,9 +49,10 @@ interface OprUnit {
   quality: number
   defense: number
   rules?: OprRule[]
-  items?: { name: string }[]
+  items?: OprItem[]
   weapons?: OprWeapon[]
   bases?: { round?: string; square?: string }
+  upgrades?: string[]
 }
 export interface OprBook {
   uid: string
@@ -37,7 +60,7 @@ export interface OprBook {
   gameSystemSlug: string
   units: OprUnit[]
   specialRules?: { name: string; description: string }[]
-  upgradePackages: unknown[]
+  upgradePackages: { uid: string; sections: OprSection[] }[]
 }
 
 const editionOfSlug = (slug: string) => EDITIONS.find((e) => e.repo === `army-forge/${slug}`)
@@ -57,19 +80,56 @@ export function readOprBook(text: string): OprBook | undefined {
 const label = (r: OprRule) => r.label ?? r.name
 const unique = (list: string[]) => [...new Set(list)]
 
+const profile = (w: OprWeapon): WeaponProfile => ({
+  name: w.name,
+  kind: w.range ? 'ranged' : 'melee',
+  values: [
+    ['Range', w.range ? `${w.range}"` : '-'],
+    ['A', String(w.attacks ?? '-')],
+    ['Special', (w.specialRules ?? []).map(label).join(', ') || '-'],
+  ],
+})
+
+const weaponGear = (w: OprWeapon): Gear => ({ name: w.name, count: w.count ?? 1, weapon: profile(w) })
+
+function itemGear(i: OprItem): Gear {
+  const content = i.content ?? []
+  const contains = content.filter((c) => c.type === 'ArmyBookWeapon').map((c) => ({ weapon: profile(c), count: c.count ?? 1 }))
+  const rules = content.filter((c) => c.type === 'ArmyBookRule').map(label)
+  return { name: i.name, count: i.count ?? 1, ...(contains.length ? { contains } : {}), ...(rules.length ? { rules } : {}) }
+}
+
+function gainGear(g: OprGain): Gear {
+  if (g.type === 'ArmyBookWeapon') return weaponGear(g)
+  if (g.type === 'ArmyBookItem') return itemGear(g)
+  return { name: g.name, count: g.count ?? 1, rules: [label(g)] }
+}
+
+const amount = (a: OprAmount | null | undefined): UpgradeAmount | undefined =>
+  a ? { type: a.type === 'up to' ? 'upTo' : (a.type as UpgradeAmount['type']), ...(a.value !== undefined ? { value: a.value } : {}) } : undefined
+
+/** The unit's upgrade sections, with only the options priced for it. */
+function upgradeSections(book: OprBook, u: OprUnit): UpgradeSection[] {
+  const packages = new Map(book.upgradePackages.map((p) => [p.uid, p]))
+  return (u.upgrades ?? []).flatMap((id) =>
+    (packages.get(id)?.sections ?? []).flatMap((s) => {
+      const options = s.options.flatMap((o) => {
+        const cost = o.costs.find((c) => c.unitId === u.id)
+        return cost ? [{ id: o.uid, label: o.label, points: cost.cost, gains: o.gains.map(gainGear) }] : []
+      })
+      if (!options.length) return []
+      const affects = amount(s.affects)
+      const select = amount(s.select)
+      return [{ id: s.uid, label: s.label, variant: s.variant as UpgradeSection['variant'], targets: s.targets ?? [], ...(affects ? { affects } : {}), ...(select ? { select } : {}), options }]
+    }),
+  )
+}
+
 function datasheet(book: OprBook, u: OprUnit): Datasheet {
   const rules = (u.rules ?? []).map(label)
   const hero = (u.rules ?? []).some((r) => r.name === 'Hero')
-  const weapons: WeaponProfile[] = (u.weapons ?? []).map((w) => ({
-    name: w.name,
-    kind: w.range ? 'ranged' : 'melee',
-    values: [
-      ['Count', String(w.count ?? 1)],
-      ['Range', w.range ? `${w.range}"` : '-'],
-      ['A', String(w.attacks ?? '-')],
-      ['Special', (w.specialRules ?? []).map(label).join(', ') || '-'],
-    ],
-  }))
+  const gear = [...(u.weapons ?? []).map(weaponGear), ...(u.items ?? []).map(itemGear)]
+  const upgrades = upgradeSections(book, u)
   const stats: [string, string][] = [['Quality', `${u.quality}+`], ['Defense', `${u.defense}+`]]
   const base = u.bases?.round ?? u.bases?.square
   if (base) stats.push(['Base', `${base} mm`])
@@ -84,11 +144,13 @@ function datasheet(book: OprBook, u: OprUnit): Datasheet {
     minModels: u.size,
     maxModels: u.size,
     points: [{ fromModels: u.size, points: u.cost }],
-    wargear: unique([...(u.weapons ?? []).map((w) => w.name), ...(u.items ?? []).map((i) => i.name)]),
+    wargear: unique([...gear, ...upgrades.flatMap((s) => s.options.flatMap((o) => o.gains))].map((g) => g.name)),
     abilities: rules,
     legends: false,
     stats: [{ name: u.name, values: stats }],
-    weapons,
+    weapons: gearWeapons(gear),
+    gear,
+    upgrades,
   }
 }
 
@@ -106,6 +168,8 @@ function buildCatalogue(books: OprBook[], source: CatalogueSource): Catalogue {
     gameId: `opr-${edition.game}`,
     gameName: NAMES[slug] ?? slug,
     source,
+    // No muster rules in the data; this turns the list checks on (points and upgrades).
+    muster: { battleSizes: [], keywordMinimums: [] },
     factions: factions.sort((a, b) => a.name.localeCompare(b.name)),
     datasheets: books.flatMap((b) => b.units.map((u) => datasheet(b, u))),
     rules,

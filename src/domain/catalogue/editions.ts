@@ -21,11 +21,11 @@ export const EDITIONS = [
     format: 'mesbg',
     paths: ['src/assets/data/mesbg_data.json', 'src/assets/data/profile_data.json', 'src/assets/data/army_list_data.json'],
   },
-  { key: 'opr-gf', label: 'One Page Rules (Army Forge)', game: 'gf', repo: 'army-forge/grimdark-future', format: 'opr' },
-  { key: 'opr-gff', label: 'One Page Rules (Army Forge)', game: 'gff', repo: 'army-forge/grimdark-future-firefight', format: 'opr' },
-  { key: 'opr-aof', label: 'One Page Rules (Army Forge)', game: 'aof', repo: 'army-forge/age-of-fantasy', format: 'opr' },
-  { key: 'opr-aofs', label: 'One Page Rules (Army Forge)', game: 'aofs', repo: 'army-forge/age-of-fantasy-skirmish', format: 'opr' },
-  { key: 'opr-aofr', label: 'One Page Rules (Army Forge)', game: 'aofr', repo: 'army-forge/age-of-fantasy-regiments', format: 'opr' },
+  { key: 'opr-gf', label: 'Grimdark Future (OPR)', game: 'gf', repo: 'army-forge/grimdark-future', format: 'opr' },
+  { key: 'opr-gff', label: 'Grimdark Future: Firefight (OPR)', game: 'gff', repo: 'army-forge/grimdark-future-firefight', format: 'opr' },
+  { key: 'opr-aof', label: 'Age of Fantasy (OPR)', game: 'aof', repo: 'army-forge/age-of-fantasy', format: 'opr' },
+  { key: 'opr-aofs', label: 'Age of Fantasy: Skirmish (OPR)', game: 'aofs', repo: 'army-forge/age-of-fantasy-skirmish', format: 'opr' },
+  { key: 'opr-aofr', label: 'Age of Fantasy: Regiments (OPR)', game: 'aofr', repo: 'army-forge/age-of-fantasy-regiments', format: 'opr' },
 ] as const satisfies readonly { key: string; label: string; game: GameId; repo: string; files?: RegExp; format?: 'mesbg' | 'opr'; paths?: readonly string[] }[]
 
 export type Edition = (typeof EDITIONS)[number]
