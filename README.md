@@ -88,9 +88,15 @@ No account, no server: your collection stays on your device. Use it in the brows
 
 ## Roadmap
 
-**Latest:** desktop app for Windows, macOS and Linux with auto-update (v0.26), then, in v0.27, six languages, nearby devices, live game sync and the Android app. Every version is in the [changelog](CHANGELOG.md).
+**Latest:** v0.31.0 adds the five One Page Rules games, with unit upgrades in army lists and army book download from Army Forge. Every version is in the [changelog](CHANGELOG.md).
 
-**Next:** Bluetooth sync (#168), a buy optimiser (#61), cloud-drive sync (#167). See the [open issues](https://github.com/Giacomo-Antonioli/MiniTracker/issues).
+**Next:**
+- One Page Rules: combined units and spells.
+- Paints: equivalent paints between Citadel, Vallejo and Army Painter, and the Vallejo paints missing from the paint list.
+- Cloud-drive sync (#167) and a buy optimiser (#61).
+- Nearby devices (#168): Bluetooth sync is in as experimental and needs testing on real devices; USB is left.
+
+See the [open issues](https://github.com/Giacomo-Antonioli/MiniTracker/issues).
 
 ## How it works
 
