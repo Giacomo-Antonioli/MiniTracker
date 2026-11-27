@@ -1,4 +1,3 @@
-import { canDownloadOpr } from '../../data/catalogue/oprFetch'
 import { useState } from 'react'
 import { useStore } from '../../app/store'
 import { EDITIONS, type Edition } from '../../data/catalogue/fetch'
@@ -25,7 +24,7 @@ export function CataloguePage() {
         <a className="text-accent underline" href="https://github.com/mhollink/mesbg-list-builder-v2024" target="_blank" rel="noreferrer">{t('settingsPanels.catalogue.mesbg')}</a>{t('settingsPanels.catalogue.intro3')}
       </p>
 
-      <p className="text-sm text-muted">{tx('One Page Rules games come from Army Forge. The desktop and Android apps download them. In the browser, save army books as files and import them below.')}</p>
+      <p className="text-sm text-muted">{tx('One Page Rules games come from Army Forge. The web version downloads a copy that is refreshed daily. You can also import saved army book files below.')}</p>
 
       {(Object.keys(GAMES) as GameId[]).map((g) => (
         <div key={g} className="grid gap-2">
@@ -188,12 +187,12 @@ function EditionCard({ edition, installed, active }: { edition?: Edition; instal
         {installed && !isActive && (
           <button className="btn btn-primary" onClick={() => void setActiveCatalogue(installed.gameId)}>{t('settingsPanels.catalogue.use')}</button>
         )}
-        {edition && (canDownloadOpr() || !isOprRepo(repo)) && (
+        {edition && (
           <button className={`btn ${installed ? '' : 'btn-primary'}`} disabled={busy} onClick={() => void downloadCatalogue(repo).then(() => setUpdate(null))}>
             ⬇ {installed ? t('settingsPanels.catalogue.downloadLatest') : t('settingsPanels.catalogue.download', { title })}
           </button>
         )}
-        {installed && edition && (canDownloadOpr() || !isOprRepo(repo)) && (
+        {installed && edition && (
           <button
             className="btn"
             disabled={busy}

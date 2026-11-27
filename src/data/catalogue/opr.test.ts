@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { gameOfRepo } from '../../domain/catalogue/editions'
 import { importOprBooks, parseOpr, readOprBook } from './opr'
-import { downloadOprBooks, latestOprVersion } from './oprFetch'
+import { apiSource, downloadOprBooks, latestOprVersion, siteSource } from './oprFetch'
 
 // Made-up data in the shape of Army Forge's API.
 const book = (uid: string, name: string, slug = 'grimdark-future', cost = 100) =>
@@ -67,14 +67,20 @@ describe('Army Forge download', () => {
 
   it('downloads every book in list order and gives a stable version', async () => {
     const progress: number[] = []
-    const files = await downloadOprBooks(source.repo, (done) => progress.push(done), fake)
+    const files = await downloadOprBooks(source.repo, (done) => progress.push(done), apiSource(fake))
     expect(files.map((f) => f.name)).toEqual(['a.json', 'b.json'])
     expect(progress).toEqual([0, 1, 2])
-    expect(await latestOprVersion(source.repo, fake)).toMatch(/^[0-9a-f]{40}$/)
+    expect(await latestOprVersion(source.repo, apiSource(fake))).toMatch(/^[0-9a-f]{40}$/)
   })
 
-  it('explains why the browser cannot download', async () => {
-    await expect(downloadOprBooks(source.repo)).rejects.toThrow('browser cannot download')
+  it('reads the copy next to the site in the published web app', async () => {
+    const asked: string[] = []
+    const site = (async (url: string) => {
+      asked.push(url)
+      return new Response(url.endsWith('index.json') ? JSON.stringify([{ uid: 'a', modifiedAt: '1' }]) : book('a', 'X'))
+    }) as unknown as typeof fetch
+    await downloadOprBooks(source.repo, undefined, siteSource(site, '/MiniTracker/'))
+    expect(asked).toEqual(['/MiniTracker/opr/grimdark-future/index.json', '/MiniTracker/opr/grimdark-future/a.json'])
   })
 })
 
@@ -123,7 +129,7 @@ describe('upgrade conversion', () => {
 describe('Army Forge download errors', () => {
   const answer = (res: Response) => (async () => res) as unknown as typeof fetch
   it('reports HTTP errors and an empty list', async () => {
-    await expect(latestOprVersion(source.repo, answer(new Response('', { status: 503 })))).rejects.toThrow('HTTP 503')
-    await expect(downloadOprBooks(source.repo, undefined, answer(new Response('[]')))).rejects.toThrow('no army books')
+    await expect(latestOprVersion(source.repo, apiSource(answer(new Response('', { status: 503 }))))).rejects.toThrow('HTTP 503')
+    await expect(downloadOprBooks(source.repo, undefined, apiSource(answer(new Response('[]'))))).rejects.toThrow('army books were found')
   })
 })

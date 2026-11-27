@@ -101,8 +101,9 @@ THE SOFTWARE.
 
 ## One Page Rules data
 
-Not included. Army books come from [Army Forge](https://army-forge.onepagerules.com/) (One Page Rules), downloaded or
-imported by each user.
+Army books are the property of One Page Rules and come from [Army Forge](https://army-forge.onepagerules.com/). They are
+not part of this repository. The published web app serves a copy of the official books, refreshed daily by the Pages
+deploy; the desktop and Android apps download them from Army Forge, and every version can import saved files.
 
 ## Unit catalogue
 

@@ -1,8 +1,7 @@
-import { canDownloadOpr } from '../../data/catalogue/oprFetch'
 import type { ReactNode } from 'react'
 import { THEMES, useStore, type Theme } from '../../app/store'
 import { isDesktopApp } from '../../app/platform'
-import { EDITIONS, GAMES, isOprRepo, type GameId } from '../../domain/catalogue/editions'
+import { EDITIONS, GAMES, type GameId } from '../../domain/catalogue/editions'
 import { AUTO, UI_SCALES, effectiveScale, scaleLabel } from '../../domain/settings/uiScale'
 import { Dialog, ProgressBar } from '../../ui/Dialog'
 import { endDemo, startDemo } from './demo'
@@ -207,7 +206,7 @@ function Games() {
           return (
             <li key={g} className="flex flex-wrap items-center gap-2">
               <span className="flex-1">{GAMES[g]} <span className="text-sm text-muted">· {e.label}</span></span>
-              {have ? <span className="text-ok">{t('welcome.games.installed')}</span> : isOprRepo(e.repo) && !canDownloadOpr() ? null : <button className="btn text-sm" disabled={busy} onClick={() => void downloadCatalogue(e.repo)}>{t('welcome.games.download')}</button>}
+              {have ? <span className="text-ok">{t('welcome.games.installed')}</span> : <button className="btn text-sm" disabled={busy} onClick={() => void downloadCatalogue(e.repo)}>{t('welcome.games.download')}</button>}
               {mine && busy && <span className="w-full"><ProgressBar ratio={job.phase === 'downloading' && job.total ? job.done / job.total : job.phase === 'converting' ? 1 : 0} /></span>}
               {mine && job.error && <span className="w-full text-sm text-danger" role="alert">{job.error}</span>}
             </li>
