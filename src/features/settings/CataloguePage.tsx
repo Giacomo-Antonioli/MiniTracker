@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../../app/store'
 import { EDITIONS, type Edition } from '../../data/catalogue/fetch'
-import { GAMES, type GameId } from '../../domain/catalogue/editions'
+import { GAMES, isOprRepo, type GameId } from '../../domain/catalogue/editions'
 import type { Catalogue } from '../../domain/catalogue/types'
 import { ProgressBar } from '../../ui/Dialog'
 import { buildBundle } from '../../data/catalogue/bundle'
@@ -23,6 +23,8 @@ export function CataloguePage() {
         <a className="text-accent underline" href="https://github.com/BSData" target="_blank" rel="noreferrer">BSData</a> {t('settingsPanels.catalogue.intro2')}{' '}
         <a className="text-accent underline" href="https://github.com/mhollink/mesbg-list-builder-v2024" target="_blank" rel="noreferrer">{t('settingsPanels.catalogue.mesbg')}</a>{t('settingsPanels.catalogue.intro3')}
       </p>
+
+      <p className="text-sm text-muted">{tx('One Page Rules games come from Army Forge. The web version downloads a copy that is refreshed daily. You can also import saved army book files below.')}</p>
 
       {(Object.keys(GAMES) as GameId[]).map((g) => (
         <div key={g} className="grid gap-2">
@@ -154,7 +156,7 @@ function EditionCard({ edition, installed, active }: { edition?: Edition; instal
           {title} {isActive && <span className="ml-2 rounded border border-accent px-1.5 text-xs text-accent">{t('settingsPanels.catalogue.active')}</span>}
         </h3>
         {edition && (
-          <a className="text-xs text-muted underline" href={`https://github.com/${repo}`} target="_blank" rel="noreferrer">{repo}</a>
+          <a className="text-xs text-muted underline" href={isOprRepo(repo) ? 'https://army-forge.onepagerules.com/' : `https://github.com/${repo}`} target="_blank" rel="noreferrer">{repo}</a>
         )}
       </div>
       {installed ? (

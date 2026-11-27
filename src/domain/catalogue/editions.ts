@@ -3,9 +3,9 @@
  * the 40k ones still work. `files` keeps only one edition from a repository that holds several. `paths` names the exact
  * files of a non-BSData source; `format` says which converter reads it (BattleScribe data unless set).
  */
-export type GameId = '40k' | 'aos' | 'kt' | 'mesbg'
+export type GameId = '40k' | 'aos' | 'kt' | 'mesbg' | 'gf' | 'gff' | 'aof' | 'aofs' | 'aofr'
 
-export const GAMES: Record<GameId, string> = { '40k': 'Warhammer 40,000', aos: 'Age of Sigmar', kt: 'Kill Team', mesbg: 'Middle-earth Strategy Battle Game' }
+export const GAMES: Record<GameId, string> = { '40k': 'Warhammer 40,000', aos: 'Age of Sigmar', kt: 'Kill Team', mesbg: 'Middle-earth Strategy Battle Game', gf: 'Grimdark Future', gff: 'Grimdark Future: Firefight', aof: 'Age of Fantasy', aofs: 'Age of Fantasy: Skirmish', aofr: 'Age of Fantasy: Regiments' }
 
 export const EDITIONS = [
   { key: '11e', label: '11th edition', game: '40k', repo: 'BSData/wh40k-11e' },
@@ -21,7 +21,12 @@ export const EDITIONS = [
     format: 'mesbg',
     paths: ['src/assets/data/mesbg_data.json', 'src/assets/data/profile_data.json', 'src/assets/data/army_list_data.json'],
   },
-] as const satisfies readonly { key: string; label: string; game: GameId; repo: string; files?: RegExp; format?: 'mesbg'; paths?: readonly string[] }[]
+  { key: 'opr-gf', label: 'Grimdark Future (OPR)', game: 'gf', repo: 'army-forge/grimdark-future', format: 'opr' },
+  { key: 'opr-gff', label: 'Grimdark Future: Firefight (OPR)', game: 'gff', repo: 'army-forge/grimdark-future-firefight', format: 'opr' },
+  { key: 'opr-aof', label: 'Age of Fantasy (OPR)', game: 'aof', repo: 'army-forge/age-of-fantasy', format: 'opr' },
+  { key: 'opr-aofs', label: 'Age of Fantasy: Skirmish (OPR)', game: 'aofs', repo: 'army-forge/age-of-fantasy-skirmish', format: 'opr' },
+  { key: 'opr-aofr', label: 'Age of Fantasy: Regiments (OPR)', game: 'aofr', repo: 'army-forge/age-of-fantasy-regiments', format: 'opr' },
+] as const satisfies readonly { key: string; label: string; game: GameId; repo: string; files?: RegExp; format?: 'mesbg' | 'opr'; paths?: readonly string[] }[]
 
 export type Edition = (typeof EDITIONS)[number]
 export type EditionKey = Edition['key']
@@ -32,4 +37,7 @@ export const editionOfRepo = (repo: string): Edition | undefined => EDITIONS.fin
 export const gameOfRepo = (repo: string): GameId => editionOfRepo(repo)?.game ?? '40k'
 
 /** Points a new list starts with when the data has no battle sizes. Kill Team has no points. */
-export const DEFAULT_POINTS: Record<GameId, number> = { '40k': 2000, aos: 2000, kt: 0, mesbg: 700 }
+export const DEFAULT_POINTS: Record<GameId, number> = { '40k': 2000, aos: 2000, kt: 0, mesbg: 700, gf: 2000, gff: 250, aof: 2000, aofs: 250, aofr: 2000 }
+
+/** One Page Rules data comes from Army Forge, not from a GitHub repository. */
+export const isOprRepo = (repo: string): boolean => repo.startsWith('army-forge/')

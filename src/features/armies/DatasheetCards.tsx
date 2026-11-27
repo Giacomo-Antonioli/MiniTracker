@@ -68,7 +68,7 @@ export function DatasheetCards({ cards }: { cards: UnitCard[] }) {
         const d = c.datasheet
         const pts = c.entries.reduce((n, e) => n + (e.points ?? 0) + (e.enhancement?.points ?? 0), 0)
         return (
-          <article key={d.id} aria-label={txr('{{name}} card', { name: d.name })} className="mt-4 rounded border-2 border-black p-3" style={{ breakInside: 'avoid' }}>
+          <article key={c.key} aria-label={txr('{{name}} card', { name: d.name })} className="mt-4 rounded border-2 border-black p-3" style={{ breakInside: 'avoid' }}>
             <header className="flex items-baseline justify-between gap-2 border-b-2 border-black pb-1">
               <h2 className="text-lg font-bold uppercase tracking-wide">{d.name}{c.entries.length > 1 ? ` ×${c.entries.length}` : ''}</h2>
               <span className="text-sm font-bold">{txr('{{n}} pts', { n: pts })}</span>

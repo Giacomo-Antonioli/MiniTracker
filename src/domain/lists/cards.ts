@@ -1,5 +1,6 @@
 import { pointsFor } from '../catalogue/points'
 import { optionPoints } from './points'
+import { applyUpgrades, gainedRules, gearWeapons, upgradePoints } from './upgrades'
 import { ruleForKeyword } from '../catalogue/rules'
 import type { Catalogue, Datasheet, Rule, WeaponProfile } from '../catalogue/types'
 import type { OwnedUnit } from '../collection/types'
@@ -8,6 +9,8 @@ import type { ArmyList, ListEntry, LoadoutRow } from './types'
 
 /** One printable datasheet card: a unit type with every list entry of it (#98). */
 export interface UnitCard {
+  /** Unique among the cards: units with different upgrades get their own. */
+  key: string
   datasheet: Datasheet
   entries: { models: number; points?: number; warlord?: boolean; enhancement?: { name: string; points: number } }[]
   weapons: WeaponProfile[]
@@ -49,26 +52,32 @@ export function unitCards(list: ArmyList, cat: Catalogue, linkedTo: (e: ListEntr
   for (const e of list.entries) {
     const d = sheets.get(e.datasheetId)
     if (!d) continue
-    const card = cards.get(d.id) ?? {
+    // Units with different upgrades carry different weapons and rules.
+    const picked = Object.entries(e.upgrades ?? {}).filter(([, n]) => n > 0).sort()
+    const key = picked.length ? `${d.id}#${JSON.stringify(picked)}` : d.id
+    const upgraded = d.gear ? applyUpgrades(d, e.upgrades).gear : undefined
+    const card = cards.get(key) ?? {
+      key,
       datasheet: d,
       entries: [],
       weapons: [],
       carried: new Set<WeaponProfile>(),
-      abilities: d.abilities.map((name) => ({ name, text: d.abilityTexts?.[name] })),
+      abilities: [...d.abilities, ...(upgraded ? gainedRules(d, upgraded) : [])].map((name) => ({ name, text: d.abilityTexts?.[name] })),
       rules: (d.ruleIds ?? []).map((id) => rules.get(id)).filter((x): x is string => !!x),
     }
     let points: number | undefined
     try {
-      points = pointsFor(d, e.models) + optionPoints(d, e)
+      points = pointsFor(d, e.models) + optionPoints(d, e) + upgradePoints(d, e)
     } catch {
       points = undefined
     }
     const x = enh.get(e.enhancementId ?? '')
     card.entries.push({ models: e.models, points, ...(e.warlord ? { warlord: true } : {}), ...(x ? { enhancement: { name: x.name, points: x.points } } : {}) })
-    carriedWeapons(d, effectiveLoadout(e, d, linkedTo(e)).rows).forEach((w) => card.carried.add(w))
-    cards.set(d.id, card)
+    if (upgraded) card.weapons = gearWeapons(upgraded)
+    else carriedWeapons(d, effectiveLoadout(e, d, linkedTo(e)).rows).forEach((w) => card.carried.add(w))
+    cards.set(key, card)
   }
-  return [...cards.values()].map(({ carried, ...c }) => ({ ...c, weapons: (c.datasheet.weapons ?? []).filter((w) => carried.has(w)) }))
+  return [...cards.values()].map(({ carried, ...c }) => ({ ...c, weapons: c.datasheet.gear ? c.weapons : (c.datasheet.weapons ?? []).filter((w) => carried.has(w)) }))
 }
 
 /**
