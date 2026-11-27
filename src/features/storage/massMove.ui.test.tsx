@@ -38,6 +38,9 @@ async function seed() {
   return { a, b, z }
 }
 
+/** A dialog closes only after everything is saved; a test that ends earlier leaves a save running on a closed database. */
+const closed = () => waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+
 const openPlace = async (user: ReturnType<typeof userEvent.setup>, code: string, name: string) => {
   await user.click(await screen.findByRole('button', { name: 'Storage' }))
   await user.type(screen.getByLabelText('Find code'), `${code}{enter}`)
@@ -58,6 +61,7 @@ it('moves the contents of a place, with slots, tools, and a warning when full', 
   expect(d.getByText(/→ slot 1/)).toBeInTheDocument()
   await user.click(d.getByRole('button', { name: '📦 Move 3 to New box' }))
   expect(confirm).toHaveBeenCalled()
+  await closed()
   await waitFor(() => expect(useStore.getState().storage.homes).toMatchObject({ [a.id]: { placeId: 'new', slot: 1 }, [b.id]: { placeId: 'new' } }))
   expect(useStore.getState().storage.homes[b.id].slot).toBeUndefined()
   expect(useStore.getState().tools[0].placeId).toBe('new')
@@ -75,6 +79,7 @@ it('takes units for now, and moves a whole place', async () => {
   await user.click(d.getByLabelText('Take for now (check out)'))
   await user.selectOptions(d.getByLabelText('Move to'), 'shelf')
   await user.click(d.getByRole('button', { name: '📦 Move 1 to Shelf' }))
+  await closed()
   await waitFor(() => expect(useStore.getState().storage.out).toEqual({ [a.id]: 'shelf' }))
   expect(useStore.getState().storage.homes[a.id].placeId).toBe('old')
 
@@ -82,6 +87,7 @@ it('takes units for now, and moves a whole place', async () => {
   const m = within(await screen.findByRole('dialog', { name: 'Move Old box' }))
   await user.selectOptions(m.getByLabelText('Put it in'), 'shelf')
   await user.click(m.getByRole('button', { name: 'Move' }))
+  await closed()
   await waitFor(() => expect(placeById(useStore.getState().storage, 'old')!.parentId).toBe('shelf'))
 })
 
@@ -94,6 +100,7 @@ it('stores the units shown on the Backlog, and scans stickers into a place', asy
   const d = within(await screen.findByRole('dialog', { name: 'Store the shown units' }))
   await user.selectOptions(d.getByLabelText('Move to'), 'shelf')
   await user.click(d.getByRole('button', { name: '📦 Move 2 to Shelf' }))
+  await closed()
   await waitFor(() => expect(useStore.getState().storage.homes[a.id].placeId).toBe('shelf'))
   expect(useStore.getState().storage.homes[b.id].placeId).toBe('shelf')
 
@@ -123,5 +130,6 @@ it('an item with copies in different places shows in each place, and moving a pl
   const d = within(await screen.findByRole('dialog', { name: 'Move from Old box' }))
   await user.selectOptions(d.getByLabelText('Move to'), 'shelf')
   await user.click(d.getByRole('button', { name: /Move \d+ to Shelf/ }))
+  await closed()
   await waitFor(() => expect(useStore.getState().supplies[0].copies?.map((x) => x.placeId)).toEqual(['shelf', 'new']))
 })
