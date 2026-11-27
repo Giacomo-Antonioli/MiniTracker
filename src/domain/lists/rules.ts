@@ -1,4 +1,4 @@
-import { DEFAULT_POINTS, gameOfRepo } from '../catalogue/editions'
+import { DEFAULT_POINTS, gameOfRepo, isOprRepo } from '../catalogue/editions'
 import type { BattleSize, Catalogue, Datasheet, Enhancement } from '../catalogue/types'
 import { evalCondition, evalLimit, type Counter } from './conditions'
 import { loadoutProblems } from './loadout'
@@ -112,7 +112,8 @@ export function checkList(l: ArmyList, cat: Catalogue): ListIssue[] {
     else if (pts.byEntry.get(e.id) === undefined) add('unit-size', `${d.name} must have ${d.minModels}–${d.maxModels} models`, [e.id])
   }
   if (pts.total > l.pointsLimit) add('points', `${pts.total} points, limit ${l.pointsLimit}`)
-  if (l.battleSize === COMBAT_PATROL.id || l.entries.length === 0) return issues
+  // One Page Rules has no Warlord, detachments or leader attachments: only units and points are checked.
+  if (l.battleSize === COMBAT_PATROL.id || l.entries.length === 0 || isOprRepo(cat.source.repo)) return issues
 
   const byDatasheet = new Map<string, string[]>()
   for (const e of l.entries) byDatasheet.set(e.datasheetId, [...(byDatasheet.get(e.datasheetId) ?? []), e.id])

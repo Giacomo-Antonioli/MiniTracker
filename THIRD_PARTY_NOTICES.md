@@ -99,6 +99,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
+## One Page Rules data
+
+Not included. Army books come from [Army Forge](https://army-forge.onepagerules.com/) (One Page Rules), downloaded or
+imported by each user.
+
 ## Unit catalogue
 
 Not included. Each user's browser downloads it from [BSData](https://github.com/BSData/wh40k-10e).

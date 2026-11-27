@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useStore } from '../../app/store'
 import { EDITIONS, type Edition } from '../../data/catalogue/fetch'
-import { GAMES, type GameId } from '../../domain/catalogue/editions'
+import { GAMES, isOprRepo, type GameId } from '../../domain/catalogue/editions'
 import type { Catalogue } from '../../domain/catalogue/types'
 import { ProgressBar } from '../../ui/Dialog'
 import { buildBundle } from '../../data/catalogue/bundle'
 import { useT, useTx } from '../../i18n'
+import { isDesktopApp } from '../../app/platform'
 import { formatDate } from '../../i18n/format'
 
 export function CataloguePage() {
@@ -23,6 +24,8 @@ export function CataloguePage() {
         <a className="text-accent underline" href="https://github.com/BSData" target="_blank" rel="noreferrer">BSData</a> {t('settingsPanels.catalogue.intro2')}{' '}
         <a className="text-accent underline" href="https://github.com/mhollink/mesbg-list-builder-v2024" target="_blank" rel="noreferrer">{t('settingsPanels.catalogue.mesbg')}</a>{t('settingsPanels.catalogue.intro3')}
       </p>
+
+      <p className="text-sm text-muted">{tx('One Page Rules games come from Army Forge. The desktop and Android apps download them. In the browser, save army books as files and import them below.')}</p>
 
       {(Object.keys(GAMES) as GameId[]).map((g) => (
         <div key={g} className="grid gap-2">
@@ -154,7 +157,7 @@ function EditionCard({ edition, installed, active }: { edition?: Edition; instal
           {title} {isActive && <span className="ml-2 rounded border border-accent px-1.5 text-xs text-accent">{t('settingsPanels.catalogue.active')}</span>}
         </h3>
         {edition && (
-          <a className="text-xs text-muted underline" href={`https://github.com/${repo}`} target="_blank" rel="noreferrer">{repo}</a>
+          <a className="text-xs text-muted underline" href={isOprRepo(repo) ? 'https://army-forge.onepagerules.com/' : `https://github.com/${repo}`} target="_blank" rel="noreferrer">{repo}</a>
         )}
       </div>
       {installed ? (
@@ -185,12 +188,12 @@ function EditionCard({ edition, installed, active }: { edition?: Edition; instal
         {installed && !isActive && (
           <button className="btn btn-primary" onClick={() => void setActiveCatalogue(installed.gameId)}>{t('settingsPanels.catalogue.use')}</button>
         )}
-        {edition && (
+        {edition && (isDesktopApp() || !isOprRepo(repo)) && (
           <button className={`btn ${installed ? '' : 'btn-primary'}`} disabled={busy} onClick={() => void downloadCatalogue(repo).then(() => setUpdate(null))}>
             ⬇ {installed ? t('settingsPanels.catalogue.downloadLatest') : t('settingsPanels.catalogue.download', { title })}
           </button>
         )}
-        {installed && edition && (
+        {installed && edition && (isDesktopApp() || !isOprRepo(repo)) && (
           <button
             className="btn"
             disabled={busy}

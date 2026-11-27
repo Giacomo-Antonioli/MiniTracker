@@ -38,6 +38,7 @@ pub fn run() {
     builder
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_http::init())
         .manage(lan::Lan::default())
         .manage(ble::Ble::default())
         .invoke_handler(tauri::generate_handler![

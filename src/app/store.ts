@@ -8,6 +8,7 @@ import { exportBackupZip, importBackupFile } from '../data/backup'
 import { MiniTrackerDb } from '../data/db'
 import { convert } from '../data/catalogue/convert'
 import { readBundle } from '../data/catalogue/bundle'
+import { importOprBooks } from '../data/catalogue/opr'
 import { CURRENT_EDITION, downloadDataFiles, editionOfRepo, latestCommit } from '../data/catalogue/fetch'
 import { extensionOf, makeDisplayCopy } from '../data/photos/compress'
 import { DexieCatalogueRepository, DexieEventRepository, DexieListRepository, DexiePaintRepository, DexiePhotoRepository, DexieSchemeRepository, DexieSettingsRepository, DexieShoppingRepository, DexieUnitRepository } from '../data/repositories/dexie'
@@ -567,7 +568,12 @@ export const useStore = create<State>((set, get) => ({
       for (const c of found) await installCatalogue(c)
       const rest = picked.filter((_, i) => !bundles[i])
       if (!rest.length) return job({ phase: 'idle' })
-      const files = await Promise.all(rest.map(async (f) => ({ name: f.name, text: await f.text() })))
+      const texts = await Promise.all(rest.map(async (f) => ({ name: f.name, text: await f.text() })))
+      // Army Forge army books are added to their game's catalogue; anything else is read as BSData.
+      const opr = importOprBooks(texts, get().catalogues, new Date().toISOString())
+      for (const c of opr.catalogues) await installCatalogue(c)
+      const files = opr.rest
+      if (!files.length) return job({ phase: 'idle' })
       const catalogue = await convert(files, { repo: 'local files', commit: 'local', fetchedAt: new Date().toISOString() })
       await installCatalogue(catalogue)
       job({ phase: 'idle' })

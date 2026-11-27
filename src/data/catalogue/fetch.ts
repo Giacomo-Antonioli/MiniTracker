@@ -1,6 +1,7 @@
 import type { SourceFile } from './bsdata'
 
-import { EDITIONS, editionOfRepo, type Edition } from '../../domain/catalogue/editions'
+import { EDITIONS, editionOfRepo, isOprRepo, type Edition } from '../../domain/catalogue/editions'
+import { downloadOprBooks, latestOprVersion } from './oprFetch'
 
 export { EDITIONS, editionOfRepo, type Edition }
 
@@ -20,6 +21,7 @@ async function ok(res: Response, what: string): Promise<Response> {
 
 /** Latest commit SHA of the repo's default branch. */
 export async function latestCommit(repo: string, f: Fetch = fetch): Promise<string> {
+  if (isOprRepo(repo)) return latestOprVersion(repo)
   const res = await ok(await f(`https://api.github.com/repos/${repo}/commits/HEAD`, { headers: { Accept: 'application/vnd.github.sha' } }), 'reach BSData on GitHub')
   const sha = (await res.text()).trim()
   if (!/^[0-9a-f]{40}$/.test(sha)) throw new Error('Unexpected answer from GitHub when checking for updates')
@@ -46,6 +48,7 @@ export async function downloadDataFiles(
   onProgress: (done: number, total: number) => void = () => {},
   f: Fetch = fetch,
 ): Promise<SourceFile[]> {
+  if (isOprRepo(repo)) return downloadOprBooks(repo, onProgress)
   const paths = await listDataFiles(repo, commit, f)
   let done = 0
   onProgress(0, paths.length)
