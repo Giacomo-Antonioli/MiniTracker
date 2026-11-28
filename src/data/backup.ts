@@ -5,13 +5,17 @@ import type { ArmyList } from '../domain/lists/types'
 import type { ShopItem, ShopList } from '../domain/shopping/types'
 import type { PaintScheme } from '../domain/schemes/types'
 import { buildBackupZip, isZip, readBackupZip, type PhotoEntry, type PhotoFileRef } from './backupZip'
+import { buildBundle, readBundle } from './catalogue/bundle'
 import type { MiniTrackerDb, SettingRow } from './db'
+import { catalogueInfos, wantedCatalogues } from './syncCatalogues'
 import { flushSyncStamps } from './syncStamps'
 import { untracked } from './syncTracking'
 
 export const BACKUP_FORMAT = 'minitracker-backup'
 /** Bump when the file layout changes; parseBackup must keep reading older versions. */
 export const BACKUP_VERSION = 5
+/** Zip entry with the game catalogues; older apps ignore it and older backups lack it. */
+const CATALOGUES_FILE = 'catalogues.json.gz'
 
 export interface Backup {
   format: typeof BACKUP_FORMAT
@@ -128,10 +132,13 @@ export function estimateBackupBytes(usage: { displayBytes: number; originalBytes
   return usage.displayBytes + (includeOriginals ? usage.originalBytes : 0) + 50_000
 }
 
-/** Full backup as a zip: data + photos (compressed copies; originals too when asked). */
+/** Backup as a zip: data + game catalogues + photos (compressed copies; originals too when asked). */
 export async function exportBackupZip(db: MiniTrackerDb, now: string, includeOriginals: boolean): Promise<Blob> {
   const backup = await exportBackup(db, now)
   const photos = (await db.photos.toArray()).sort((a, b) => a.id.localeCompare(b.id))
+  const catalogues = await db.catalogues.toArray()
+  // Copy into the typed array fflate expects.
+  const extra: Record<string, Uint8Array> = catalogues.length ? { [CATALOGUES_FILE]: new Uint8Array(await buildBundle(catalogues, now)) } : {}
   async function* entries(): AsyncGenerator<PhotoEntry> {
     // One photo at a time keeps memory low.
     for (const photo of photos) {
@@ -147,12 +154,14 @@ export async function exportBackupZip(db: MiniTrackerDb, now: string, includeOri
       return JSON.stringify({ ...backup, data: { ...backup.data, photos: list, photoFiles: refs } })
     },
     includeOriginals,
+    extra,
   )
 }
 
 /**
  * Restore from a file picked by the user: a zip (v3, with photos) or an older JSON backup (v1/v2, no photos).
  * Replaces all data. Originals missing from a light backup are kept if this device still has them.
+ * Catalogues are only added or updated: none is removed, and a newer download on this device stays.
  */
 export async function importBackupFile(db: MiniTrackerDb, file: Blob): Promise<Backup> {
   if (!(await isZip(file))) {
@@ -168,6 +177,10 @@ export async function importBackupFile(db: MiniTrackerDb, file: Blob): Promise<B
 
   const { json, files } = await readBackupZip(file)
   const backup = parseBackup(json)
+  // Read before replacing anything, so a damaged catalogue entry changes nothing.
+  const bundle = files.get(CATALOGUES_FILE)
+  const catalogues = bundle ? await readBundle(new Uint8Array(await bundle.arrayBuffer())) : []
+  if (!catalogues) throw new Error('This backup file is damaged or incomplete')
   const refs = new Map((backup.data.photoFiles ?? []).map((r) => [r.id, r]))
   const keptOriginals = new Map<string, Blob>()
   for (const p of backup.data.photos ?? []) {
@@ -188,5 +201,7 @@ export async function importBackupFile(db: MiniTrackerDb, file: Blob): Promise<B
   }
 
   await importBackup(db, backup, { photos, files: photoFiles })
+  const wanted = new Set(wantedCatalogues(catalogueInfos(catalogues), catalogueInfos(await db.catalogues.toArray())))
+  await db.catalogues.bulkPut(catalogues.filter((c) => wanted.has(c.gameId)))
   return backup
 }

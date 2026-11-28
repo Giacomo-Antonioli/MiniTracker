@@ -25,6 +25,22 @@ async function openPaints() {
 }
 
 describe('Paints page', () => {
+  it('compares paints side by side against the first one', async () => {
+    const user = await openPaints()
+    await user.click(screen.getByRole('button', { name: /Compare colours/ }))
+    const dialog = screen.getByRole('dialog', { name: 'Compare colours' })
+    for (const name of ['macragge blue citadel', 'abaddon black citadel']) {
+      await user.type(within(dialog).getByRole('combobox', { name: 'Add a paint' }), name)
+      await user.click(within(dialog).getAllByRole('option')[0])
+    }
+    const cols = within(within(dialog).getByRole('list', { name: 'Compared colours' })).getAllByRole('listitem')
+    expect(cols).toHaveLength(2)
+    expect(cols[0]).toHaveTextContent('Reference')
+    expect(cols[1]).toHaveTextContent(/ΔE \d+\.\d/)
+    await user.click(within(cols[0]).getByRole('button', { name: /^Remove/ }))
+    expect(within(dialog).getByRole('list', { name: 'Compared colours' })).toHaveTextContent('Reference')
+  })
+
   it('lists the bundled paints with search and brand filter', async () => {
     const user = await openPaints()
     expect(Number(screen.getByText(/^\d+ paints$/).textContent!.split(' ')[0])).toBeGreaterThan(1500)

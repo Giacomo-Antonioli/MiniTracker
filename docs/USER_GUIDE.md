@@ -100,7 +100,7 @@ About 2,200 paints from Citadel, Army Painter, Vallejo, AK Interactive, Green St
 
 Your **inventory** sits on the same page: stage (wishlist, ordered, sealed, in use, running low, empty), number of pots, price, shop, where it's kept, rating and notes. Marking a paint *Running low* puts it on the shopping list. Custom paints, with your own colour, are allowed, and the inventory imports and exports as CSV.
 
-Each paint shows the closest paints you own and the closest in every brand. **Match a colour** does the same for any colour you pick. **Paints to buy** takes a set of schemes and prints the paints they use that you don't have.
+Each paint shows the closest paints you own and the closest in every brand. **Match a colour** does the same for any colour you pick. A Citadel Base, Layer or Shade paint can also show **Equivalent paints** from a published conversion chart. **Compare colours** puts up to four paints side by side, each measured against the first; with **From a photo** you tap a spot in a picture and compare against that colour instead (light and camera change colours, so it's only a guide). **Paints to buy** takes a set of schemes and prints the paints they use that you don't have.
 
 ## Storage and labels
 
@@ -213,7 +213,7 @@ Settings has tabs:
 - **Storage**: photo and browser storage use, and **Remove originals** to free space (keeps the compressed copies).
 - **Backup**: save or restore everything.
 
-**Backups** are one `.zip` file. *Light* keeps the compressed photos and stays small; *Full* also keeps the original photos. Restoring replaces all data on the device, so restore only onto a device whose data you don't need (or sync instead). Make one regularly and keep it off the device, in a cloud folder or on a USB stick.
+**Backups** are one `.zip` file that includes your game catalogues. *Light* keeps the compressed photos and stays small; *Full* also keeps the original photos. Restoring replaces all data on the device (catalogues are only added or updated), so restore only onto a device whose data you don't need (or sync instead). Make one regularly and keep it off the device, in a cloud folder or on a USB stick.
 
 ## On a phone
 

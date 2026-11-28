@@ -65,7 +65,7 @@ export function CataloguePage() {
       </section>
       <section className="panel grid gap-2 p-4">
         <h3 className="font-display text-lg">{tx('Save your catalogues')}</h3>
-        <p className="text-sm text-muted">{tx('Catalogues live only in this browser or app and are not part of backups or sync. Export them to one file to keep a copy or load them on another device (Import above).')}</p>
+        <p className="text-sm text-muted">{tx('Catalogues live only in this browser or app and are included in backups. You can also export them to one file to keep a separate copy or load them on another device (Import above).')}</p>
         <button
           className="btn w-fit"
           disabled={catalogues.length === 0}

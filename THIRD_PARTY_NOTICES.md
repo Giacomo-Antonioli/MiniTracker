@@ -105,6 +105,13 @@ Army books are the property of One Page Rules and come from [Army Forge](https:/
 not part of this repository. The published web app serves a copy of the official books, refreshed daily by the Pages
 deploy; the desktop and Android apps download them from Army Forge, and every version can import saved files.
 
+## Paint equivalents
+
+The Citadel to Vallejo and Army Painter matches come from the conversion chart published by
+[Warhammer Guild](https://warhammerguild.com/guides/paint-conversion-chart/), itself compiled from The Army Painter's
+chart and community charts. Only the pairings are used (`tools/paints/conversion-source.json`). Please check the
+site's terms before redistributing.
+
 ## Unit catalogue
 
 Not included. Each user's browser downloads it from [BSData](https://github.com/BSData/wh40k-10e).

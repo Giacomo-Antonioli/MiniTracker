@@ -1,0 +1,1334 @@
+[
+ {
+  "citadel": "Abaddon Black",
+  "type": "Base",
+  "vallejo_game": "Black (72.051)",
+  "vallejo_model": "Black (70.950)",
+  "army_painter": "Matt Black",
+  "ak": null,
+  "hex": "#000000"
+ },
+ {
+  "citadel": "Averland Sunset",
+  "type": "Base",
+  "vallejo_game": "Heavy Gold Brown (72.151)",
+  "vallejo_model": "Gold Brown (70.877)",
+  "army_painter": "Fiendish Yellow",
+  "ak": null,
+  "hex": "#fbb81c"
+ },
+ {
+  "citadel": "Balthasar Gold",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "True Copper",
+  "ak": null,
+  "hex": "#a77353"
+ },
+ {
+  "citadel": "Bugman's Glow",
+  "type": "Base",
+  "vallejo_game": "Tan (72.066)",
+  "vallejo_model": "Saddle Brown (70.940)",
+  "army_painter": "Ruddy Umber",
+  "ak": null,
+  "hex": "#804c43"
+ },
+ {
+  "citadel": "Caledor Sky",
+  "type": "Base",
+  "vallejo_game": "Magic Blue (72.021)",
+  "vallejo_model": "Dark Blue (70.930)",
+  "army_painter": "Regal Blue",
+  "ak": null,
+  "hex": "#366699"
+ },
+ {
+  "citadel": "Caliban Green",
+  "type": "Base",
+  "vallejo_game": "Dark Green (72.028)",
+  "vallejo_model": "Deep Green (70.970)",
+  "army_painter": "Angel Green",
+  "ak": null,
+  "hex": "#003d15"
+ },
+ {
+  "citadel": "Castellan Green",
+  "type": "Base",
+  "vallejo_game": "Cayman Green (72.067)",
+  "vallejo_model": "Olive Grey (70.888)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#264715"
+ },
+ {
+  "citadel": "Catachan Fleshtone",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Tree Ancient",
+  "ak": null,
+  "hex": "#442b25"
+ },
+ {
+  "citadel": "Celestra Grey",
+  "type": "Base",
+  "vallejo_game": "Heavy Bluegrey (72.144)",
+  "vallejo_model": "Pale Blue Grey (70.905)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#8ba3a3"
+ },
+ {
+  "citadel": "Ceramite White",
+  "type": "Base",
+  "vallejo_game": "White Primer (72.002)",
+  "vallejo_model": "Foundation White (70.919)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#ffffff"
+ },
+ {
+  "citadel": "Corax White",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Brigade Grey",
+  "ak": null,
+  "hex": "#ffffff"
+ },
+ {
+  "citadel": "Daemonette Hide",
+  "type": "Base",
+  "vallejo_game": "Heavy Violet (72.142)",
+  "vallejo_model": "Violet (70.960)",
+  "army_painter": "Hexed Violet",
+  "ak": null,
+  "hex": "#655f81"
+ },
+ {
+  "citadel": "Death Guard Green",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Camouflage Green",
+  "ak": null,
+  "hex": "#6d774d"
+ },
+ {
+  "citadel": "Deathworld Forest",
+  "type": "Base",
+  "vallejo_game": "Heavy Khaki (72.149)",
+  "vallejo_model": "Russian Uniform WW2 (70.924)",
+  "army_painter": "Tundra Taupe",
+  "ak": null,
+  "hex": "#556229"
+ },
+ {
+  "citadel": "Dryad Bark",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Obsidian Skin",
+  "ak": null,
+  "hex": "#2b2a24"
+ },
+ {
+  "citadel": "Gal Vorbak Red",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Mulled Berry",
+  "ak": null,
+  "hex": "#4b213c"
+ },
+ {
+  "citadel": "Grey Knights Steel",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Cobalt Metal",
+  "ak": null,
+  "hex": "#b0bdc6"
+ },
+ {
+  "citadel": "Grey Seer",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Company Grey",
+  "ak": null,
+  "hex": "#a2a5a7"
+ },
+ {
+  "citadel": "Hobgrot Hide",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Desert Yellow",
+  "ak": null,
+  "hex": "#9c823b"
+ },
+ {
+  "citadel": "Incubi Darkness",
+  "type": "Base",
+  "vallejo_game": "Scurvy Green (72.027)",
+  "vallejo_model": "Dark Sea Blue (70.898)",
+  "army_painter": "Scarab Green",
+  "ak": null,
+  "hex": "#082e32"
+ },
+ {
+  "citadel": "Ionrach Skin",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Gargoyle Grey",
+  "ak": null,
+  "hex": "#97a384"
+ },
+ {
+  "citadel": "Iron Hands Steel",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Plate Mail Metal",
+  "ak": null,
+  "hex": "#b2a79f"
+ },
+ {
+  "citadel": "Jokaero Orange",
+  "type": "Base",
+  "vallejo_game": "Heavy Orange (72.152)",
+  "vallejo_model": "German Orange (70.805)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#ed3814"
+ },
+ {
+  "citadel": "Kantor Blue",
+  "type": "Base",
+  "vallejo_game": "Imperial Blue (72.020)",
+  "vallejo_model": "Dark Prussian Blue (70.899)",
+  "army_painter": "Triumphant Navy",
+  "ak": null,
+  "hex": "#02134e"
+ },
+ {
+  "citadel": "Khorne Red",
+  "type": "Base",
+  "vallejo_game": "Scarlett Red (72.012)",
+  "vallejo_model": "Carmine Red (70.908)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#650001"
+ },
+ {
+  "citadel": "Leadbelcher",
+  "type": "Base",
+  "vallejo_game": "Gunmetal (72.054)",
+  "vallejo_model": "Gunmetal Grey (70.863)",
+  "army_painter": "Gun Metal",
+  "ak": null,
+  "hex": "#969696"
+ },
+ {
+  "citadel": "Macragge Blue",
+  "type": "Base",
+  "vallejo_game": "Heavy Blue (72.143)",
+  "vallejo_model": "Prussian Blue (70.965)",
+  "army_painter": "Gothic Blue",
+  "ak": null,
+  "hex": "#0f3d7c"
+ },
+ {
+  "citadel": "Mechanicus Standard Grey",
+  "type": "Base",
+  "vallejo_game": "Heavy Grey",
+  "vallejo_model": "Russian Unif. (70.924)",
+  "army_painter": "Deep Grey",
+  "ak": null,
+  "hex": "#39484a"
+ },
+ {
+  "citadel": "Mephiston Red",
+  "type": "Base",
+  "vallejo_game": "Heavy Red (72.141)",
+  "vallejo_model": "Red (70.926)",
+  "army_painter": "Dragon Red",
+  "ak": null,
+  "hex": "#960c09"
+ },
+ {
+  "citadel": "Mournfang Brown",
+  "type": "Base",
+  "vallejo_game": "Beasty Brown (72.043)",
+  "vallejo_model": "Flat Brown (70.984)",
+  "army_painter": "Leather Brown",
+  "ak": null,
+  "hex": "#490f06"
+ },
+ {
+  "citadel": "Naggaroth Night",
+  "type": "Base",
+  "vallejo_game": "Royal Purple (72.016)",
+  "vallejo_model": "Royal Purple (70.810)",
+  "army_painter": "Terrestrial Titan",
+  "ak": null,
+  "hex": "#3b2b50"
+ },
+ {
+  "citadel": "Night Lords Blue",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Imperial Navy",
+  "ak": null,
+  "hex": "#002b5c"
+ },
+ {
+  "citadel": "Phoenician Purple",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Diabolic Plum",
+  "ak": null,
+  "hex": "#440052"
+ },
+ {
+  "citadel": "Rakarth Flesh",
+  "type": "Base",
+  "vallejo_game": "Heavy Warmgrey (72.148)",
+  "vallejo_model": null,
+  "army_painter": null,
+  "ak": null,
+  "hex": "#9c998d"
+ },
+ {
+  "citadel": "Ratskin Flesh",
+  "type": "Base",
+  "vallejo_game": "Dwarf Skin (72.041)",
+  "vallejo_model": "Brown Sand (70.876)",
+  "army_painter": "Raging Rouge",
+  "ak": null,
+  "hex": "#a86648"
+ },
+ {
+  "citadel": "Retributor Armour",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Greedy Gold",
+  "ak": null,
+  "hex": "#edc169"
+ },
+ {
+  "citadel": "Rhinox Hide",
+  "type": "Base",
+  "vallejo_game": "Charred Brown (72.045)",
+  "vallejo_model": "Burnt Umber (70.941)",
+  "army_painter": "Brigandine Brown",
+  "ak": null,
+  "hex": "#462f30"
+ },
+ {
+  "citadel": "Runelord Brass",
+  "type": "Base",
+  "vallejo_game": "Brassy Brass (72.058)",
+  "vallejo_model": "Brass (70.801)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#8d806f"
+ },
+ {
+  "citadel": "Screamer Pink",
+  "type": "Base",
+  "vallejo_game": "Warlord Purple (72.014)",
+  "vallejo_model": "Magenta (70.945)",
+  "army_painter": "Moldy Wine",
+  "ak": null,
+  "hex": "#7a0e44"
+ },
+ {
+  "citadel": "Screaming Bell",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Red Copper",
+  "ak": null,
+  "hex": "#d18a5e"
+ },
+ {
+  "citadel": "Steel Legion Drab",
+  "type": "Base",
+  "vallejo_game": "Earth (72.062)",
+  "vallejo_model": "US Field Drab (70.873)",
+  "army_painter": "Mocca Skin",
+  "ak": null,
+  "hex": "#584e2d"
+ },
+ {
+  "citadel": "Stegadon Scale Green",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Deep Ocean Blue",
+  "ak": null,
+  "hex": "#06455d"
+ },
+ {
+  "citadel": "The Fang",
+  "type": "Base",
+  "vallejo_game": "Sombre Grey (72.048)",
+  "vallejo_model": "Oxford Blue (70.807)",
+  "army_painter": "Thunderous Blue",
+  "ak": null,
+  "hex": "#405b71"
+ },
+ {
+  "citadel": "Thousand Sons Blue",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Abyssal Blue",
+  "ak": null,
+  "hex": "#00506f"
+ },
+ {
+  "citadel": "Waaagh! Flesh",
+  "type": "Base",
+  "vallejo_game": "Heavy Black Green (72.147)",
+  "vallejo_model": "Black Green (70.980)",
+  "army_painter": "Woodland Camo",
+  "ak": null,
+  "hex": "#0b3b36"
+ },
+ {
+  "citadel": "Warplock Bronze",
+  "type": "Base",
+  "vallejo_game": "Tinny Tin (72.060)",
+  "vallejo_model": null,
+  "army_painter": "Rough Iron",
+  "ak": null,
+  "hex": "#b36e4f"
+ },
+ {
+  "citadel": "Wraithbone",
+  "type": "Base",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Pale Sand",
+  "ak": null,
+  "hex": "#dbd1b2"
+ },
+ {
+  "citadel": "XV-88",
+  "type": "Base",
+  "vallejo_game": "Terracotta (72.065)",
+  "vallejo_model": "English Uniform (70.921)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#6c4811"
+ },
+ {
+  "citadel": "Zandri Dust",
+  "type": "Base",
+  "vallejo_game": "Khaki (72.061)",
+  "vallejo_model": "G. Cam.Beige (70.821)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#988e56"
+ },
+ {
+  "citadel": "Administratum Grey",
+  "type": "Layer",
+  "vallejo_game": "Stonewall Grey (72.049)",
+  "vallejo_model": "Pale Grey Blue (70.907)",
+  "army_painter": "Ash Grey",
+  "ak": null,
+  "hex": "#989c94"
+ },
+ {
+  "citadel": "Ahriman Blue",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "Turquoise (70.966)",
+  "army_painter": "Tidal Blue",
+  "ak": null,
+  "hex": "#00708a"
+ },
+ {
+  "citadel": "Alaitoc Blue",
+  "type": "Layer",
+  "vallejo_game": "Sombre Grey (72.048)",
+  "vallejo_model": "Royal Blue (70.809)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#2f4f85"
+ },
+ {
+  "citadel": "Altdorf Guard Blue",
+  "type": "Layer",
+  "vallejo_game": "Ultramarine Blue (72.022)",
+  "vallejo_model": "Ultramarine (70.839)",
+  "army_painter": "Ultramarine Blue",
+  "ak": null,
+  "hex": "#2d4696"
+ },
+ {
+  "citadel": "Auric Armour Gold",
+  "type": "Layer",
+  "vallejo_game": "Glorious Gold (72.056)",
+  "vallejo_model": "Gold (70.996)",
+  "army_painter": "Bright Gold",
+  "ak": null,
+  "hex": "#ffc451"
+ },
+ {
+  "citadel": "Baharroth Blue",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Aquamarine",
+  "ak": null,
+  "hex": "#54bdca"
+ },
+ {
+  "citadel": "Balor Brown",
+  "type": "Layer",
+  "vallejo_game": "Leather Brown (72.040)",
+  "vallejo_model": "Brown Sand (70.876)",
+  "army_painter": "Wasteland Clay",
+  "ak": null,
+  "hex": "#875408"
+ },
+ {
+  "citadel": "Baneblade Brown",
+  "type": "Layer",
+  "vallejo_game": "Heavy Brown (72.153)",
+  "vallejo_model": "Green Brown (70.879)",
+  "army_painter": "Paratrooper Tan",
+  "ak": null,
+  "hex": "#8f7c68"
+ },
+ {
+  "citadel": "Bestigor Flesh",
+  "type": "Layer",
+  "vallejo_game": "Elf Skin Tone (72.004)",
+  "vallejo_model": "Flat Flesh (70.955)",
+  "army_painter": "Barbarian Flesh",
+  "ak": null,
+  "hex": "#d08951"
+ },
+ {
+  "citadel": "Bloodreaver Flesh",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Carnelian Skin",
+  "ak": null,
+  "hex": "#6a4848"
+ },
+ {
+  "citadel": "Blue Horror",
+  "type": "Layer",
+  "vallejo_game": "Ghost Grey (72.046)",
+  "vallejo_model": null,
+  "army_painter": "Augur Blue",
+  "ak": null,
+  "hex": "#9eb5ce"
+ },
+ {
+  "citadel": "Brass Scorpion",
+  "type": "Layer",
+  "vallejo_game": "Hammered Copper (72.059)",
+  "vallejo_model": "Copper (70.999)",
+  "army_painter": "Weapon Bronze",
+  "ak": null,
+  "hex": "#a65d2c"
+ },
+ {
+  "citadel": "Cadian Fleshtone",
+  "type": "Layer",
+  "vallejo_game": "Heavy Skin Tone (72.140)",
+  "vallejo_model": "Brown Rose (70.803)",
+  "army_painter": "Agate Skin",
+  "ak": null,
+  "hex": "#c47652"
+ },
+ {
+  "citadel": "Calgar Blue",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "Ultramarine (70.839)",
+  "army_painter": "Alpha Blue",
+  "ak": null,
+  "hex": "#2a497f"
+ },
+ {
+  "citadel": "Canoptek Alloy",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "True Brass",
+  "ak": null,
+  "hex": "#c3b2ac"
+ },
+ {
+  "citadel": "Dark Reaper",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "USA Olive Drab",
+  "army_painter": "Night Sky",
+  "ak": null,
+  "hex": "#354d4c"
+ },
+ {
+  "citadel": "Dawnstone",
+  "type": "Layer",
+  "vallejo_game": "Cold Grey (72.050)",
+  "vallejo_model": "Basalt Grey (70.869)",
+  "army_painter": "Uniform Grey",
+  "ak": null,
+  "hex": "#697068"
+ },
+ {
+  "citadel": "Deathclaw Brown",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "Orange Brown (70.981)",
+  "army_painter": "Buffed Hide",
+  "ak": null,
+  "hex": "#af634f"
+ },
+ {
+  "citadel": "Dechala Lilac",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Violet Coven",
+  "ak": null,
+  "hex": "#b598c9"
+ },
+ {
+  "citadel": "Deepkin Flesh",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Mossy Green",
+  "ak": null,
+  "hex": "#a9b79f"
+ },
+ {
+  "citadel": "Doombull Brown",
+  "type": "Layer",
+  "vallejo_game": "Dark Fleshtone (72.044)",
+  "vallejo_model": "Mahogany Brown (70.846)",
+  "army_painter": "Dryad Brown",
+  "ak": null,
+  "hex": "#570003"
+ },
+ {
+  "citadel": "Dorn Yellow",
+  "type": "Layer",
+  "vallejo_game": "Bad Moon Yellow (72.005)",
+  "vallejo_model": "Lemon Yellow (70.952)",
+  "army_painter": "Ice Yellow",
+  "ak": null,
+  "hex": "#fff55a"
+ },
+ {
+  "citadel": "Elysian Green",
+  "type": "Layer",
+  "vallejo_game": "Camouflage Green (72.031)",
+  "vallejo_model": "Olive Green (70.967)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#6b8c37"
+ },
+ {
+  "citadel": "Emperor's Children",
+  "type": "Layer",
+  "vallejo_game": "Squid Pink (72.013)",
+  "vallejo_model": "Pink (70.958)",
+  "army_painter": "Pixie Pink",
+  "ak": null,
+  "hex": "#b74073"
+ },
+ {
+  "citadel": "Eshin Grey",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "Grey Green (70.866)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#484b4e"
+ },
+ {
+  "citadel": "Evil Sunz Scarlet",
+  "type": "Layer",
+  "vallejo_game": "Bloody Red (72.010)",
+  "vallejo_model": "Vermillion (70.909)",
+  "army_painter": "Resplendent Red",
+  "ak": null,
+  "hex": "#c01411"
+ },
+ {
+  "citadel": "Fenrisian Grey",
+  "type": "Layer",
+  "vallejo_game": "Wolf Grey (72.047)",
+  "vallejo_model": "Pale Grey Blue (70.907)",
+  "army_painter": "Runic Cobalt",
+  "ak": null,
+  "hex": "#6d94b3"
+ },
+ {
+  "citadel": "Fire Dragon Bright",
+  "type": "Layer",
+  "vallejo_game": "Orange Fire (72.008)",
+  "vallejo_model": "Light Orange (70.911)",
+  "army_painter": "Lava Orange",
+  "ak": null,
+  "hex": "#f4874e"
+ },
+ {
+  "citadel": "Flash Gitz Yellow",
+  "type": "Layer",
+  "vallejo_game": "Sunblast Yellow (72.006)",
+  "vallejo_model": "Flat Yellow (70.953)",
+  "army_painter": "Space Dust",
+  "ak": null,
+  "hex": "#fff300"
+ },
+ {
+  "citadel": "Flayed One Flesh",
+  "type": "Layer",
+  "vallejo_game": "Bone White (72.034)",
+  "vallejo_model": "Beige (70.917)",
+  "army_painter": "Dorado Skin",
+  "ak": null,
+  "hex": "#eec483"
+ },
+ {
+  "citadel": "Fulgrim Pink",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Figgy Pink",
+  "ak": null,
+  "hex": "#f3abca"
+ },
+ {
+  "citadel": "Gauss Blaster Green",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Ferocious Green",
+  "ak": null,
+  "hex": "#7fc1a5"
+ },
+ {
+  "citadel": "Gehenna's Gold",
+  "type": "Layer",
+  "vallejo_game": "Polished Gold (72.055)",
+  "vallejo_model": "Old Gold (70.878)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#c96b18"
+ },
+ {
+  "citadel": "Genestealer Purple",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "Blue Violet (70.811)",
+  "army_painter": "Cultist Purple",
+  "ak": null,
+  "hex": "#7658a5"
+ },
+ {
+  "citadel": "Gorthor Brown",
+  "type": "Layer",
+  "vallejo_game": "Heavy Sienna",
+  "vallejo_model": "Burnt Umber (70.941)",
+  "army_painter": "Onyx Skin",
+  "ak": null,
+  "hex": "#5f463f"
+ },
+ {
+  "citadel": "Hashut Copper",
+  "type": "Layer",
+  "vallejo_game": "Bright Bronze (72.057)",
+  "vallejo_model": "Bronze (70.998)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#ba885f"
+ },
+ {
+  "citadel": "Hoeth Blue",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "Azure (70.902)",
+  "army_painter": "Arctic Gem",
+  "ak": null,
+  "hex": "#4c78af"
+ },
+ {
+  "citadel": "Ironbreaker",
+  "type": "Layer",
+  "vallejo_game": "Chainmail (72.053)",
+  "vallejo_model": "Natural Steel (70.864)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#899092"
+ },
+ {
+  "citadel": "Kabalite Green",
+  "type": "Layer",
+  "vallejo_game": "Jade Green (72.026)",
+  "vallejo_model": "Emerald (70.838)",
+  "army_painter": "Temple Gate Teal",
+  "ak": null,
+  "hex": "#008962"
+ },
+ {
+  "citadel": "Kakophoni Purple",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Spellbound Fuchsia",
+  "ak": null,
+  "hex": "#8869ae"
+ },
+ {
+  "citadel": "Karak Stone",
+  "type": "Layer",
+  "vallejo_game": "Khaki (72.061)",
+  "vallejo_model": "German Cam. Beige WWII (70.821)",
+  "army_painter": "Tomb King Tan",
+  "ak": null,
+  "hex": "#b7945c"
+ },
+ {
+  "citadel": "Kislev Flesh",
+  "type": "Layer",
+  "vallejo_game": "Pale Flesh (72.003)",
+  "vallejo_model": "Light Flesh (70.928)",
+  "army_painter": "Amber Skin",
+  "ak": null,
+  "hex": "#d1a570"
+ },
+ {
+  "citadel": "Knight-Questor Flesh",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Command Khaki",
+  "ak": null,
+  "hex": "#996563"
+ },
+ {
+  "citadel": "Krieg Khaki",
+  "type": "Layer",
+  "vallejo_game": "Dead Flesh (72.035)",
+  "vallejo_model": "Pale Sand (70.837)",
+  "army_painter": "Grotesque Green",
+  "ak": null,
+  "hex": "#bcbb7e"
+ },
+ {
+  "citadel": "Loren Forest",
+  "type": "Layer",
+  "vallejo_game": "Heavy Green (72.146)",
+  "vallejo_model": "Luftwaffe Ca. Green (70.823)",
+  "army_painter": "Army Green",
+  "ak": null,
+  "hex": "#486c25"
+ },
+ {
+  "citadel": "Lothern Blue",
+  "type": "Layer",
+  "vallejo_game": "Ice Blue (72.095)",
+  "vallejo_model": "Azure (70.902)",
+  "army_painter": "Shieldwall Blue",
+  "ak": null,
+  "hex": "#2c9bcc"
+ },
+ {
+  "citadel": "Lugganath Orange",
+  "type": "Layer",
+  "vallejo_game": "Rosy Flesh (72.100)",
+  "vallejo_model": "Salmon Rose (70.835)",
+  "army_painter": "Violent Vermillion",
+  "ak": null,
+  "hex": "#f69b82"
+ },
+ {
+  "citadel": "Moot Green",
+  "type": "Layer",
+  "vallejo_game": "Scorpy Green (72.032)",
+  "vallejo_model": "Light Green (70.942)",
+  "army_painter": "Leafy Green",
+  "ak": null,
+  "hex": "#3daf44"
+ },
+ {
+  "citadel": "Nurgling Green",
+  "type": "Layer",
+  "vallejo_game": "Dead Flesh (72.035)",
+  "vallejo_model": "Green Sky (70.974)",
+  "army_painter": "Necrotic Flesh",
+  "ak": null,
+  "hex": "#7e975e"
+ },
+ {
+  "citadel": "Pallid Wych Flesh",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "Silver Grey (70.883)",
+  "army_painter": "Brainmatter Beige",
+  "ak": null,
+  "hex": "#caccbb"
+ },
+ {
+  "citadel": "Phalanx Yellow",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Warped Yellow",
+  "ak": null,
+  "hex": "#ffe200"
+ },
+ {
+  "citadel": "Pink Horror",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "Magenta (70.945)",
+  "army_painter": "Wicked Pink",
+  "ak": null,
+  "hex": "#8e2757"
+ },
+ {
+  "citadel": "Runefang Steel",
+  "type": "Layer",
+  "vallejo_game": "Silver (72.052)",
+  "vallejo_model": "Silver (70.997)",
+  "army_painter": "Shining Silver",
+  "ak": null,
+  "hex": "#c2c8cc"
+ },
+ {
+  "citadel": "Russ Grey",
+  "type": "Layer",
+  "vallejo_game": "Steel Grey (72.102)",
+  "vallejo_model": "Grey Blue (70.943)",
+  "army_painter": "Wolf Grey",
+  "ak": null,
+  "hex": "#507085"
+ },
+ {
+  "citadel": "Screaming Skull",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "Ivory (70.918)",
+  "army_painter": "Bony Spikes",
+  "ak": null,
+  "hex": "#b9c099"
+ },
+ {
+  "citadel": "Skarsnik Green",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Patagon Pine",
+  "ak": null,
+  "hex": "#588f6b"
+ },
+ {
+  "citadel": "Skavenblight Dinge",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "Leather Brown (70.871)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#45413b"
+ },
+ {
+  "citadel": "Skrag Brown",
+  "type": "Layer",
+  "vallejo_game": "Parasite Brown (72.042)",
+  "vallejo_model": "Orange Brown (70.981)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#8b4806"
+ },
+ {
+  "citadel": "Slaanesh Grey",
+  "type": "Layer",
+  "vallejo_game": "Stonewall Grey (72.049)",
+  "vallejo_model": null,
+  "army_painter": null,
+  "ak": null,
+  "hex": "#8b8893"
+ },
+ {
+  "citadel": "Sons of Horus Green",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Evergreen Fog",
+  "ak": null,
+  "hex": "#00545e"
+ },
+ {
+  "citadel": "Sotek Green",
+  "type": "Layer",
+  "vallejo_game": "Falcon Turquoise (72.024)",
+  "vallejo_model": "Light Turquoise (70.840)",
+  "army_painter": "Deep Azure",
+  "ak": null,
+  "hex": "#0b6371"
+ },
+ {
+  "citadel": "Squig Orange",
+  "type": "Layer",
+  "vallejo_game": "Tan (72.066)",
+  "vallejo_model": "Dark Red (70.946)",
+  "army_painter": "Legendary Red",
+  "ak": null,
+  "hex": "#a74d42"
+ },
+ {
+  "citadel": "Stormhost Silver",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Mithril",
+  "ak": null,
+  "hex": "#dadddf"
+ },
+ {
+  "citadel": "Stormvermin Fur",
+  "type": "Layer",
+  "vallejo_game": "Heavy Charcoal (72.155)",
+  "vallejo_model": "German Grey (70.995)",
+  "army_painter": "Dusty Skull",
+  "ak": null,
+  "hex": "#6d655f"
+ },
+ {
+  "citadel": "Straken Green",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "Olive Green (70.967)",
+  "army_painter": "Olive Drab",
+  "ak": null,
+  "hex": "#597f1c"
+ },
+ {
+  "citadel": "Sybarite Green",
+  "type": "Layer",
+  "vallejo_game": "Foul Green (72.025)",
+  "vallejo_model": "Park Green Flat (70.969)",
+  "army_painter": "Eternal Hunt",
+  "ak": null,
+  "hex": "#17a166"
+ },
+ {
+  "citadel": "Sycorax Bronze",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Evil Chrome",
+  "ak": null,
+  "hex": "#bb9f84"
+ },
+ {
+  "citadel": "Tallarn Sand",
+  "type": "Layer",
+  "vallejo_game": "Desert Yellow (72.063)",
+  "vallejo_model": "Dark Yellow (70.978)",
+  "army_painter": "Prairie Ochre",
+  "ak": null,
+  "hex": "#a07409"
+ },
+ {
+  "citadel": "Tau Light Ochre",
+  "type": "Layer",
+  "vallejo_game": "Filthy Brown (72.037)",
+  "vallejo_model": "Beige Red (70.804)",
+  "army_painter": "Demigod Flames",
+  "ak": null,
+  "hex": "#bc6b10"
+ },
+ {
+  "citadel": "Teclis Blue",
+  "type": "Layer",
+  "vallejo_game": "Electric Blue (72.023)",
+  "vallejo_model": "Sky Blue (70.961)",
+  "army_painter": "Crystal Blue",
+  "ak": null,
+  "hex": "#3877bf"
+ },
+ {
+  "citadel": "Temple Guard Blue",
+  "type": "Layer",
+  "vallejo_game": "Foul Green (72.025)",
+  "vallejo_model": "Blue Green (70.808)",
+  "army_painter": "Hydra Turquoise",
+  "ak": null,
+  "hex": "#239489"
+ },
+ {
+  "citadel": "Thunderhawk Blue",
+  "type": "Layer",
+  "vallejo_game": "Turquoise (72.024)",
+  "vallejo_model": "Field Blue (70.964)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#396a70"
+ },
+ {
+  "citadel": "Troll Slayer Orange",
+  "type": "Layer",
+  "vallejo_game": "Hot Orange (72.009)",
+  "vallejo_model": "Scarlet (70.817)",
+  "army_painter": "Burning Ore",
+  "ak": null,
+  "hex": "#f16c23"
+ },
+ {
+  "citadel": "Tuskgor Fur",
+  "type": "Layer",
+  "vallejo_game": "Heavy Red (72.141)",
+  "vallejo_model": "Cavalry Brown (70.982)",
+  "army_painter": "Tiger's Eye Skin",
+  "ak": null,
+  "hex": "#863231"
+ },
+ {
+  "citadel": "Ulthuan Grey",
+  "type": "Layer",
+  "vallejo_game": "Ghost Grey (72.046)",
+  "vallejo_model": "Flat Aluminum (70.993)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#c4ddd5"
+ },
+ {
+  "citadel": "Ungor Flesh",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": "Dark Flesh (70.927)",
+  "army_painter": "Barren Dune",
+  "ak": null,
+  "hex": "#d1a560"
+ },
+ {
+  "citadel": "Ushabti Bone",
+  "type": "Layer",
+  "vallejo_game": "Bone White (72.034)",
+  "vallejo_model": "Buff (70.976)",
+  "army_painter": "Skeleton Bone",
+  "ak": null,
+  "hex": "#aba173"
+ },
+ {
+  "citadel": "Warboss Green",
+  "type": "Layer",
+  "vallejo_game": "Goblin Green (72.030)",
+  "vallejo_model": "Pastel Green (70.885)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#317e57"
+ },
+ {
+  "citadel": "Warpstone Glow",
+  "type": "Layer",
+  "vallejo_game": "Sick Green (72.029)",
+  "vallejo_model": "Intermediate Green (70.891)",
+  "army_painter": "Greenskin",
+  "ak": null,
+  "hex": "#0f702a"
+ },
+ {
+  "citadel": "Wazdakka Red",
+  "type": "Layer",
+  "vallejo_game": "Gory Red (72.011)",
+  "vallejo_model": "Cavalry Brown (70.982)",
+  "army_painter": "Wyvern Fury",
+  "ak": null,
+  "hex": "#880804"
+ },
+ {
+  "citadel": "White Scar",
+  "type": "Layer",
+  "vallejo_game": "Dead White (72.001)",
+  "vallejo_model": "White (70.951)",
+  "army_painter": null,
+  "ak": null,
+  "hex": "#ffffff"
+ },
+ {
+  "citadel": "Wild Rider Red",
+  "type": "Layer",
+  "vallejo_game": "Hot Orange (72.009)",
+  "vallejo_model": "Scarlet (70.817)",
+  "army_painter": "Angelic Red",
+  "ak": null,
+  "hex": "#e82e1b"
+ },
+ {
+  "citadel": "Word Bearers Red",
+  "type": "Layer",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Basilisk Red",
+  "ak": null,
+  "hex": "#620104"
+ },
+ {
+  "citadel": "Xereus Purple",
+  "type": "Layer",
+  "vallejo_game": "Hexed Lichen (72.015)",
+  "vallejo_model": "Royal Purple (70.810)",
+  "army_painter": "Warlock Magenta",
+  "ak": null,
+  "hex": "#47125a"
+ },
+ {
+  "citadel": "Yriel Yellow",
+  "type": "Layer",
+  "vallejo_game": "Gold Yellow (72.007)",
+  "vallejo_model": "Golden Yellow (70.948)",
+  "army_painter": "Glowing Inferno",
+  "ak": null,
+  "hex": "#ffd900"
+ },
+ {
+  "citadel": "Zamesi Desert",
+  "type": "Layer",
+  "vallejo_game": "Plague Brown (72.039)",
+  "vallejo_model": "Yellow Ochre (70.913)",
+  "army_painter": "Burnt Turf",
+  "ak": null,
+  "hex": "#d89d1b"
+ },
+ {
+  "citadel": "Agrax Earthshade",
+  "type": "Shade",
+  "vallejo_game": "Umber Shade Wash (73.203)",
+  "vallejo_model": null,
+  "army_painter": "Strong Tone",
+  "ak": null,
+  "hex": "#393121"
+ },
+ {
+  "citadel": "Athonian Camoshade",
+  "type": "Shade",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Military Shade",
+  "ak": null,
+  "hex": "#8b8b66"
+ },
+ {
+  "citadel": "Berserker Bloodshade",
+  "type": "Shade",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Dark Red Tone",
+  "ak": null,
+  "hex": null
+ },
+ {
+  "citadel": "Biel-Tan Green",
+  "type": "Shade",
+  "vallejo_game": "Green Wash (73.205)",
+  "vallejo_model": null,
+  "army_painter": "Green Tone",
+  "ak": null,
+  "hex": "#547757"
+ },
+ {
+  "citadel": "Carroburg Crimson",
+  "type": "Shade",
+  "vallejo_game": "Red Shade Wash (73.206)",
+  "vallejo_model": null,
+  "army_painter": "Magenta Tone",
+  "ak": null,
+  "hex": "#630808"
+ },
+ {
+  "citadel": "Drakenhof Nightshade",
+  "type": "Shade",
+  "vallejo_game": "Blue Shade Wash (73.207)",
+  "vallejo_model": null,
+  "army_painter": "Dark Blue Tone",
+  "ak": null,
+  "hex": "#273e51"
+ },
+ {
+  "citadel": "Druchii Violet",
+  "type": "Shade",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Purple Tone",
+  "ak": null,
+  "hex": "#842994"
+ },
+ {
+  "citadel": "Fuegan Orange",
+  "type": "Shade",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Orange Tone",
+  "ak": null,
+  "hex": null
+ },
+ {
+  "citadel": "Nuln Oil",
+  "type": "Shade",
+  "vallejo_game": "Black Wash (73.301)",
+  "vallejo_model": null,
+  "army_painter": "Dark Tone",
+  "ak": null,
+  "hex": "#000000"
+ },
+ {
+  "citadel": "Reikland Fleshshade",
+  "type": "Shade",
+  "vallejo_game": "Fleshtone Shade Wash (73.204)",
+  "vallejo_model": null,
+  "army_painter": "Strong Skin Shade",
+  "ak": null,
+  "hex": "#ce8c42"
+ },
+ {
+  "citadel": "Seraphim Sepia",
+  "type": "Shade",
+  "vallejo_game": "Sepia Wash (73.200)",
+  "vallejo_model": null,
+  "army_painter": "Sepia Tone",
+  "ak": null,
+  "hex": "#843910"
+ },
+ {
+  "citadel": "Targor Rageshade",
+  "type": "Shade",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Dark Skin Shade",
+  "ak": null,
+  "hex": null
+ },
+ {
+  "citadel": "Tyran Blue",
+  "type": "Shade",
+  "vallejo_game": null,
+  "vallejo_model": null,
+  "army_painter": "Blue Tone",
+  "ak": null,
+  "hex": null
+ }
+]
