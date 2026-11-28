@@ -18,6 +18,7 @@
     "desktop:dev": "tauri dev",
     "desktop:build": "tauri build",
     "spearhead:build": "node --experimental-strip-types --no-warnings tools/spearhead/build.mts",
+    "paints:conversion": "node --experimental-strip-types --no-warnings tools/paints/build-conversion.mjs",
     "paints:seed": "node --experimental-strip-types --no-warnings tools/paints/build-seed.mjs"
   },
   "dependencies": {

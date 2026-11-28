@@ -6,6 +6,7 @@ import type { Photo } from '../domain/photos/types'
  *   backup.json                      all data + photo list (deflated)
  *   photos/shown/<name>.webp|jpg     compressed copies (always)
  *   photos/original/<fileName>       originals (full backups only)
+ *   catalogues.json.gz               installed game catalogues (the catalogue export format)
  * Images are stored as-is (already compressed), so writing is fast and nothing is wasted.
  */
 
@@ -34,6 +35,7 @@ export async function buildBackupZip(
   entries: AsyncIterable<PhotoEntry> | Iterable<PhotoEntry>,
   makeJson: (refs: PhotoFileRef[]) => string,
   includeOriginals: boolean,
+  extraFiles: Record<string, Uint8Array> = {},
 ): Promise<Blob> {
   const chunks: Uint8Array[] = []
   let failure: Error | null = null
@@ -59,6 +61,12 @@ export async function buildBackupZip(
       await add(ref.original, e.original)
     }
     refs.push(ref)
+  }
+  // Already compressed by the caller, so stored as-is.
+  for (const [path, bytes] of Object.entries(extraFiles)) {
+    const f = new ZipPassThrough(path)
+    zip.add(f)
+    f.push(bytes, true)
   }
   const json = new ZipDeflate('backup.json', { level: 9 })
   zip.add(json)

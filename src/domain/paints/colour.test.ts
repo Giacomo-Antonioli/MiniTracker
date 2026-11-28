@@ -1,3 +1,4 @@
+import { averageHex, hexDistance } from './colour'
 import { describe, expect, it } from 'vitest'
 import { closestOwnedSubstitute, closestPaints, deltaE2000, matchLabel, parseHex, rgbToLab } from './colour'
 import type { PaintDef, PaintStock } from './types'
@@ -76,4 +77,15 @@ describe('closestOwnedSubstitute', () => {
 
 it('matchLabel', () => {
   expect([1, 3, 7, 20].map(matchLabel)).toEqual(['near identical', 'very close', 'close', 'rough'])
+})
+
+describe('comparing colours', () => {
+  it('averages pixels, skipping transparent ones', () => {
+    expect(averageHex([10, 20, 30, 255, 30, 40, 50, 255, 255, 255, 255, 0])).toBe('#141e28')
+    expect(averageHex([1, 2, 3, 0])).toBeUndefined()
+  })
+  it('measures the distance between hex colours', () => {
+    expect(hexDistance('#123456', '#123456')).toBe(0)
+    expect(hexDistance('#123456', 'nope')).toBeUndefined()
+  })
 })

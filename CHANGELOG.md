@@ -4,6 +4,13 @@ All notable changes to MiniTracker. Format based on [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+- Paint panel: *Equivalent paints*. A Citadel Base, Layer or Shade paint shows its closest Vallejo Game Color, Vallejo Model Color and Army Painter matches from the published Warhammer Guild conversion chart (and the other way round, from any of those paints). Click one to open it. Rebuild the data with `npm run paints:conversion`.
+- Paints: *Compare colours*. Put up to four paints side by side with large swatches, see how different each is from the first one (ΔE2000) and which you own. *From a photo* takes a colour from a picture (tap a spot) and compares your paints with it.
+
+### Fixed
+- Backup: the downloaded `.zip` now includes the installed game catalogues, and restoring it installs them (a newer download already on the device is kept).
+
 ## [0.31.0] - 2026-11-27
 
 ### Added

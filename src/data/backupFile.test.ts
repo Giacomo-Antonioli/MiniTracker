@@ -65,6 +65,18 @@ describe('backup files with photos', () => {
     expect((await db.photoFiles.toArray()).map((f) => f.id)).toEqual(['p1'])
   })
 
+  it('zip backup carries the game catalogues and restores them, keeping newer ones', async () => {
+    const cat = (gameId: string, fetchedAt: string) => ({ gameId, factions: [], datasheets: [], source: { fetchedAt } }) as never
+    await db.catalogues.bulkPut([cat('a', '2026-01-01'), cat('b', '2026-01-01')])
+    const zip = await exportBackupZip(db, 'now', false)
+    await db.catalogues.delete('a')
+    await db.catalogues.put(cat('b', '2026-02-01'))
+    await db.catalogues.put(cat('c', '2026-01-01'))
+    await importBackupFile(db, zip)
+    const got = (await db.catalogues.toArray()).map((c) => [c.gameId, c.source.fetchedAt]).sort()
+    expect(got).toEqual([['a', '2026-01-01'], ['b', '2026-02-01'], ['c', '2026-01-01']])
+  })
+
   it('rejects damaged photo lists', async () => {
     const bad = { format: 'minitracker-backup', version: 3, exportedAt: 'x', data: { units: [], statusEvents: [], settings: [], photos: 'x' } }
     await expect(importBackupFile(db, new Blob([JSON.stringify(bad)]))).rejects.toThrow(/damaged/)

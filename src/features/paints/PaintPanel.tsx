@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ctx, useStore } from '../../app/store'
 import { adjustQuantity, newStock, updateStock } from '../../domain/paints/inventory'
 import type { PaintDef, PaintStock } from '../../domain/paints/types'
 import { PlaceSelect } from '../storage/Storage'
 import { useTx } from '../../i18n'
 import { ColourMatches } from './ColourMatches'
+import { equivalentsOf, type EquivalentGroups } from '../../domain/paints/equivalents'
 
 export function PaintPanel({ paint, onClose, onSelect }: { paint: PaintDef; onClose: () => void; onSelect?: (id: string) => void }) {
   const tx = useTx()
@@ -104,6 +105,8 @@ export function PaintPanel({ paint, onClose, onSelect }: { paint: PaintDef; onCl
         </section>
       )}
 
+      <Equivalents key={paint.id} paint={paint} onPick={(id) => onSelect?.(id)} />
+
       <section className="border-t border-line p-4" aria-label={tx('Colour match')}>
         <ColourMatches key={paint.id} hex={paint.hex} exclude={paint.id} onPick={(p) => onSelect?.(p.id)} />
       </section>
@@ -135,5 +138,32 @@ function Field({ label, value, onSave, type = 'text', placeholder }: { label: st
         onBlur={(e) => e.target.value !== value && void onSave(e.target.value)}
       />
     </label>
+  )
+}
+
+/** Close substitutes from a published conversion chart (Citadel, Vallejo, Army Painter). */
+function Equivalents({ paint, onPick }: { paint: PaintDef; onPick: (id: string) => void }) {
+  const tx = useTx()
+  const { paints } = useStore()
+  const [groups, setGroups] = useState<EquivalentGroups>([])
+  useEffect(() => {
+    let live = true
+    void import('../../data/paints/conversion.json').then((m) => live && setGroups(m.default as EquivalentGroups))
+    return () => { live = false }
+  }, [])
+  const byId = new Map(paints.map((p) => [p.id, p]))
+  const others = equivalentsOf(paint.id, groups).map((id) => byId.get(id)).filter((p): p is PaintDef => !!p)
+  if (others.length === 0) return null
+  return (
+    <section className="border-t border-line p-4" aria-label={tx('Equivalent paints')}>
+      <h3 className="mb-1 text-sm font-semibold">{tx('Equivalent paints')}</h3>
+      {others.map((p) => (
+        <button key={p.id} className="flex w-full items-center gap-2 rounded px-1 py-0.5 text-left text-sm hover:bg-line" onClick={() => onPick(p.id)}>
+          <span className="h-4 w-4 shrink-0 rounded border border-line" style={{ background: p.hex }} />
+          <span className="flex-1 truncate">{p.name} <span className="text-muted">· {p.brand}{p.range && ` ${p.range}`}</span></span>
+        </button>
+      ))}
+      <p className="mt-1 text-xs text-muted">{tx('From published conversion charts. Close substitutes, not identical: swatch first.')}</p>
+    </section>
   )
 }

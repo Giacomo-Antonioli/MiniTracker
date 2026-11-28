@@ -20,7 +20,7 @@ export class MiniTrackerDb extends Dexie {
   units!: Table<OwnedUnit, string>
   statusEvents!: Table<StatusEvent, string>
   settings!: Table<SettingRow, string>
-  /** Game catalogues converted from BSData, one row per game system. Not included in backups. */
+  /** Game catalogues converted from BSData, one row per game system. In zip backups as their own entry. */
   catalogues!: Table<Catalogue, string>
   /** What you own of each paint (bundled or custom). */
   paintStock!: Table<PaintStock, string>

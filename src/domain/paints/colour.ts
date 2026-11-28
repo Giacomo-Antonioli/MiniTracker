@@ -10,6 +10,18 @@ export function parseHex(hex: string): [number, number, number] | undefined {
   return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)) as [number, number, number]
 }
 
+/** Average colour of RGBA pixel data as #rrggbb, skipping transparent pixels. Undefined when none are left. */
+export function averageHex(rgba: ArrayLike<number>): string | undefined {
+  const sum = [0, 0, 0]
+  let n = 0
+  for (let i = 0; i + 3 < rgba.length; i += 4) {
+    if (rgba[i + 3] < 128) continue
+    for (let k = 0; k < 3; k++) sum[k] += rgba[i + k]
+    n++
+  }
+  return n ? `#${sum.map((v) => Math.round(v / n).toString(16).padStart(2, '0')).join('')}` : undefined
+}
+
 /** sRGB (0–255) to CIELAB, D65 white. */
 export function rgbToLab([r, g, b]: [number, number, number]): Lab {
   const lin = (c: number) => {
@@ -93,6 +105,12 @@ export function closestOwnedSubstitute(paint: PaintDef, paints: PaintDef[], stoc
   const owned = paints.filter((p) => p.id !== paint.id && owns(stocks, p.id))
   const sameType = paint.type ? owned.filter((p) => p.type === paint.type) : []
   return closestPaints(paint.hex, sameType.length ? sameType : owned, { n: 1 })[0]
+}
+
+/** CIEDE2000 distance between two hex colours; undefined when either is not one. */
+export function hexDistance(a: string, b: string): number | undefined {
+  const [x, y] = [parseHex(a), parseHex(b)]
+  return x && y ? deltaE2000(rgbToLab(x), rgbToLab(y)) : undefined
 }
 
 /** Rough words for a distance, for the UI. */

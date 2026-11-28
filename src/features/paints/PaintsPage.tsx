@@ -7,6 +7,7 @@ import { CustomPaintDialog } from './CustomPaintDialog'
 import { MissingPaintsDialog } from './MissingPaintsDialog'
 import { AddToShoppingButton } from '../shopping/AddToShoppingDialog'
 import { PaintPanel } from './PaintPanel'
+import { CompareDialog } from './CompareDialog'
 import { HexMatchDialog } from './ColourMatches'
 import { Dialog } from '../../ui/Dialog'
 import { PlaceSelect } from '../storage/Storage'
@@ -25,6 +26,7 @@ export function PaintsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
   const [matching, setMatching] = useState(false)
+  const [comparing, setComparing] = useState(false)
   const [buying, setBuying] = useState(false)
   const [limit, setLimit] = useState(PAGE)
   const [selecting, setSelecting] = useState(false)
@@ -93,6 +95,7 @@ export function PaintsPage() {
             <button className="btn" aria-pressed={selecting} onClick={() => { setSelecting(!selecting); setPicked(new Set()) }}>{selecting ? tx('Done selecting') : tx('☑ Select')}</button>
             <button className="btn" onClick={() => setBuying(true)}>{tx('Paints to buy…')}</button>
             <button className="btn" onClick={() => setMatching(true)}>{tx('🎯 Match a colour')}</button>
+            <button className="btn" onClick={() => setComparing(true)}>{tx('⚖ Compare colours')}</button>
             <button className="btn btn-primary" onClick={() => setAdding(true)}>{tx('+ Custom paint')}</button>
           </div>
         </header>
@@ -184,6 +187,7 @@ export function PaintsPage() {
       {selected && <PaintPanel paint={selected} onClose={() => setSelectedId(null)} onSelect={setSelectedId} />}
       {buying && <MissingPaintsDialog onClose={() => setBuying(false)} />}
       {matching && <HexMatchDialog onClose={() => setMatching(false)} onPick={(p) => { setSelectedId(p.id); setMatching(false) }} />}
+      {comparing && <CompareDialog initial={selectedId ?? undefined} onClose={() => setComparing(false)} />}
       {adding && <CustomPaintDialog onClose={() => setAdding(false)} onCreated={(id) => setSelectedId(id)} />}
     </div>
   )
